@@ -1,16 +1,19 @@
 [![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg)
 
 # Simple-Command-Runner ver 0.0.1
-Simple GUI builder to execute commands.
+Simple GUI builder to execute commands.<br>
 
 :warning:<br>
+
 **I released this version for my tools, and most functions are not implemented yet.**<br>
 **So, I don't recommend using it for your scripts.**
 
 ## What can it do?
 Simple Command Runner will give very simple GUI to your scripts.<br>
-All you need is write a .json file.<br>
+All you need is write a `.json` file and run an `.exe` file.<br>
 It can make GUI to run commands of your scripts.<br>
+
+![sampleGUI](https://user-images.githubusercontent.com/69258547/162616706-fa81710e-5bfe-4f86-baea-eb2362a98b0e.png)<br>
 
 ## License
 ### Simple Command Runner
