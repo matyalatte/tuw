@@ -1,0 +1,6 @@
+.vs
+out
+test
+python
+*.py
+*.json
