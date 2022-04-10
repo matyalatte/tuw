@@ -128,7 +128,7 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
         i += 1;
     }
     if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "file"){
-        wxString file2 = this->filePicker->GetPath();
+        wxString file2 = this->filePicker2->GetPath();
         cmd += cmd_ary[i] + file2;
         i += 1;
     }
