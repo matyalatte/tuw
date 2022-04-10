@@ -4,3 +4,6 @@ test
 python
 *.py
 *.json
+!gui_definition.json
+*.exe
+*.zip

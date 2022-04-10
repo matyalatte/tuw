@@ -1,0 +1,27 @@
+{
+    "description": "Sample .json file",
+    "gui": [
+        {
+        "name": "Sample GUI",
+        "command": ["cmd.exe /c echo file: ", "& echo folder: ", "& echo num: "],
+        "button": "Echo!",
+        "components": [
+            {
+                "type": "file",
+                "label": "Some file path",
+                "extension": "any files | *"
+            },
+            {
+                "type": "folder",
+                "label": "Some folder path"
+            },
+            {
+                "type": "choice",
+                "label": "num",
+                "items": ["one", "two", "three"],
+                "default": 1
+            }
+        ]
+        }
+    ]
+}
