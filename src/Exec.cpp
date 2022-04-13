@@ -3,18 +3,64 @@
 #include <iostream>
 #include <wx/process.h>
 
+class wxProcessExecute : public wxProcess {
+public:
+    wxProcessExecute(int flags)
+        : wxProcess(flags)
+    {
+    }
+
+    long Execute(const wxString cmd)
+    {
+        return wxExecute(cmd, wxEXEC_ASYNC, this);
+    }
+
+    virtual void OnTerminate(int pid, int status)
+    {
+        if (wxProcessExecute::Exists(pid)) {
+            wxProcessExecute::Kill(pid);
+        }
+    }
+    static wxProcessExecute* Open(const wxString& cmd, int flags = wxEXEC_ASYNC)
+    {
+        wxASSERT_MSG(!(flags & wxEXEC_SYNC), wxT("wxEXEC_SYNC should not be used."));
+        wxProcessExecute* process = new wxProcessExecute(wxPROCESS_REDIRECT);
+        long pid = wxExecute(cmd, flags, process);
+        if (!pid)
+        {
+            delete process;
+            return NULL;
+        }
+        process->SetPid(pid);
+        return process;
+    }
+};
+
+//get string from stream
+std::string read_stream(wxInputStream* stream, char* buf, size_t size) {
+    if (stream->CanRead()) {
+        size_t read_size;
+        stream->Read(buf, size);
+        read_size = stream->LastRead();
+        return std::string(buf, read_size);
+    }
+    return "";
+}
+
 //run command and return error messages
 std::string exec(const char* cmd) {
 
     //open process
-    wxProcess* process = wxProcess::Open(cmd);
+    wxProcessExecute* process = wxProcessExecute::Open(cmd);
     if (!process) {
         return "__null__";
     }
+
+    //get stream
     wxInputStream* istream = process->GetInputStream();
     wxInputStream* estream = process->GetErrorStream();
-    long pid = process->GetPid();
-
+    
+    //set buffers
     size_t size = 512;
     size_t read_size;
     char ibuf[512]; //buffer for output
@@ -22,21 +68,13 @@ std::string exec(const char* cmd) {
 
     std::string err_msg="";
     std::cout << std::endl;
-
-    while (wxProcess::Exists(pid)) {//while process is running
-        if (istream->CanRead()) {
-            //print outputs
-            istream->Read(ibuf, size);
-            read_size = istream->LastRead();
-            std::cout << std::string(ibuf, read_size);
-        }
-        if (estream->CanRead()) {
-            //store error messages
-            estream->Read(ebuf, size);
-            read_size = estream->LastRead();
-            err_msg += std::string(ebuf, read_size);
-        }
+    while (!istream->Eof() && !estream->Eof()) {//while process is running
+        //print outputs
+        std::cout << read_stream(istream, ibuf, size);
+        //store error messages
+        err_msg += read_stream(estream, ebuf, size);
     }
+
     //print and return error messages
     std::cout << err_msg;
     return err_msg;

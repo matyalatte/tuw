@@ -75,8 +75,13 @@ nlohmann::json default_definition(std::string msg) {
     nlohmann::json def =
         {
             {"name", "Simple Command Runner"},
+#ifdef _WIN32
             {"command", {"cmd.exe /c dir"} },
             {"button", "run 'dir'"},
+#else
+            {"command", {"ls"} },
+            {"button", "run 'ls'"},
+#endif
             {"components",{}}
         };
     return def;
@@ -151,6 +156,7 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
     std::string err_msg = exec(cmd);
 
     if (err_msg == "__null__") {
+        std::cout << "Execution failed. " << std::endl;
         return;
     }
 
@@ -187,8 +193,8 @@ int MainFrame::UpdatePanel(wxPanel* panel)
     int y = 10;
     if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "file") {
         wxStaticText* text = new wxStaticText(panel, wxID_ANY, this->definition["components"][i]["label"], wxPoint(20, y));
-        this->filePicker = new wxFilePickerCtrl(panel, wxID_ANY, "", "", this->definition["components"][i]["extension"], wxPoint(20, y + 15), wxSize(350, 25));
-        this->filePicker->GetTextCtrl()->SetDropTarget(new DropFilePath<wxFilePickerCtrl>(filePicker));
+        this->filePicker = new wxFilePickerCtrl(panel, wxID_ANY, "", "", this->definition["components"][i]["extension"], wxPoint(20, y + 15), wxSize(350, 25), wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
+        this->filePicker->GetTextCtrl()->SetDropTarget(new DropFilePath<wxFilePickerCtrl>(this->filePicker));
         this->filePicker->DragAcceptFiles(true);
         i += 1;
         y += 50;
@@ -197,8 +203,8 @@ int MainFrame::UpdatePanel(wxPanel* panel)
     //file picker2
     if (this->definition["components"].size() > i && this->definition["components"][i]["type"]=="file") {
         wxStaticText* text2 = new wxStaticText(panel, wxID_ANY, this->definition["components"][i]["label"], wxPoint(20, y));
-        this->filePicker2 = new wxFilePickerCtrl(panel, wxID_ANY, "", "", this->definition["components"][i]["extension"], wxPoint(20, y + 15), wxSize(350, 25));
-        this->filePicker2->GetTextCtrl()->SetDropTarget(new DropFilePath<wxFilePickerCtrl>(filePicker2));
+        this->filePicker2 = new wxFilePickerCtrl(panel, wxID_ANY, "", "", this->definition["components"][i]["extension"], wxPoint(20, y + 15), wxSize(350, 25), wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
+        this->filePicker2->GetTextCtrl()->SetDropTarget(new DropFilePath<wxFilePickerCtrl>(this->filePicker2));
         this->filePicker2->DragAcceptFiles(true);
         i += 1;
         y += 50;
@@ -207,8 +213,8 @@ int MainFrame::UpdatePanel(wxPanel* panel)
     //folder picker
     if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "folder") {
         wxStaticText* text3 = new wxStaticText(panel, wxID_ANY, this->definition["components"][i]["label"], wxPoint(20, y));
-        this->folderPicker = new wxDirPickerCtrl(panel, wxID_ANY, "", "", wxPoint(20, y + 15), wxSize(350, 25));
-        this->folderPicker->GetTextCtrl()->SetDropTarget(new DropFilePath<wxDirPickerCtrl>(folderPicker));
+        this->folderPicker = new wxDirPickerCtrl(panel, wxID_ANY, "", "", wxPoint(20, y + 15), wxSize(350, 25), wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
+        this->folderPicker->GetTextCtrl()->SetDropTarget(new DropFilePath<wxDirPickerCtrl>(this->folderPicker));
         this->folderPicker->DragAcceptFiles(true);
         i += 1;
         y += 50;

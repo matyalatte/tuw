@@ -1,4 +1,3 @@
-#pragma once
 #include "MainFrame.h"
 
 //Main
@@ -23,6 +22,9 @@ bool MainApp::OnInit()
 wxDECLARE_APP(MainApp);
 wxIMPLEMENT_APP(MainApp);
 
+#ifdef _WIN32
+//no need for unix
 int main(int argc, char* argv[]) {
     return wxEntry(argc, argv);
 }
+#endif

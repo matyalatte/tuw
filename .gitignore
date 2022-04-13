@@ -7,3 +7,4 @@ python
 !gui_definition.json
 *.exe
 *.zip
+SimpleCommandRunner-v*
