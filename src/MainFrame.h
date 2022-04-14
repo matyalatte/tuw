@@ -1,36 +1,29 @@
 #pragma once
 #include <wx/wx.h>
 #include <wx/filepicker.h>
-#include <wx/dnd.h>
+#pragma once
 #include <nlohmann/json.hpp>
+#include "Component.h"
 
-//Drop target for path picker
-template <typename T>
-class DropFilePath : public wxFileDropTarget
-{
-private:
-    T* frame;
-public:
-    DropFilePath(T* frame);
-    ~DropFilePath();
-    virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) override;
-};
+
 
 //Main window
 class MainFrame : public wxFrame
 {
 private:
     nlohmann::json definition;
+    std::vector<Component> components;
+
     int hasChoice;
     void readDefinition();
     int UpdatePanel(wxPanel* panel);
 
 public:
     //std::array<std::string, 2> names = { "Frame1", "Frame2" };
-    wxFilePickerCtrl* filePicker;
-    wxFilePickerCtrl* filePicker2;
-    wxDirPickerCtrl* folderPicker;
-    wxChoice* choice;
+    //wxFilePickerCtrl* filePicker;
+    //wxFilePickerCtrl* filePicker2;
+    //wxDirPickerCtrl* folderPicker;
+    //wxChoice* choice;
     MainFrame();
     virtual ~MainFrame();
 

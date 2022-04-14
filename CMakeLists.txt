@@ -31,6 +31,8 @@ add_executable(${PROJECT_NAME}
 	"src/MainFrame.cpp"
 	"src/Exec.h"
 	"src/Exec.cpp"
+	"src/Component.cpp"
+	"src/Component.h"
 )
 
 #link libraries

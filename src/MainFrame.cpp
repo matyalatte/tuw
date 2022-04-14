@@ -7,22 +7,6 @@
 #include <string>
 #include <array>
 
-//Drop target for path picker
-template <typename T>
-DropFilePath<T>::DropFilePath(T* frame) : wxFileDropTarget() {
-    this->frame = frame;
-}
-
-template <typename T>
-DropFilePath<T>::~DropFilePath() {
-}
-
-template <typename T>
-bool DropFilePath<T>::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) {
-    std::cout << filenames[0].c_str();
-    this->frame->SetPath(filenames[0]);
-    return 1;
-}
 
 //Main window
 MainFrame::MainFrame()
@@ -64,11 +48,6 @@ MainFrame::MainFrame()
     this->SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
-bool hasKey(nlohmann::json json, std::string key) {
-    auto subjectIdIter = json.find(key);
-    return subjectIdIter != json.end();
-}
-
 //get default definition of gui
 nlohmann::json default_definition(std::string msg) {
     std::cout << msg << std::endl;
@@ -87,12 +66,18 @@ nlohmann::json default_definition(std::string msg) {
     return def;
 }
 
+/*
+bool hasKey(nlohmann::json json, std::string key) {
+    auto subjectIdIter = json.find(key);
+    return subjectIdIter != json.end();
+}
+*/
 //read gui_definition.json
 void MainFrame::readDefinition() {
     std::ifstream istream("gui_definition.json");
 
     if (!istream) {
-        this->definition = default_definition("Fialed to read gui_definition.json");
+        this->definition = default_definition("[readDefinition] Fialed to read gui_definition.json");
         return;
     }
 
@@ -104,19 +89,15 @@ void MainFrame::readDefinition() {
         this->definition = this->definition["gui"][0];
     }
     else {
-        this->definition = default_definition("Json format error ('gui' not found)");
+        this->definition = default_definition("[readDefinition] Json format error ('gui' not found)");
         return;
     }
     std::vector<std::string> keys = { "name", "button", "command", "components" };
     for (std::string key : keys) {
         if (!hasKey(this->definition, key)) {
-            this->definition = default_definition("Json format error ('" + key + "' not found)");
+            this->definition = default_definition("[readDefinition] Json format error ('" + key + "' not found)");
             return;
         }
-    }
-    if (this->definition["command"].size() < this->definition["components"].size()) {
-        this->definition = default_definition("Json format error (size of 'command' should be larger than size of 'components')");
-        return;
     }
 }
 
@@ -127,36 +108,23 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
     std::vector<std::string> cmd_ary = this->definition["command"];
     wxString cmd = "";
     int i = 0;
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "file"){
-        wxString file = this->filePicker->GetPath();
-        cmd += cmd_ary[i] + file;
-        i += 1;
-    }
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "file"){
-        wxString file2 = this->filePicker2->GetPath();
-        cmd += cmd_ary[i] + file2;
-        i += 1;
-    }
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "folder") {
-        wxString folder = this->folderPicker->GetPath();
-        cmd += cmd_ary[i] + folder;
-        i += 1;
-    }
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "choice") {
-        wxString item = this->choice->GetStringSelection();
-        cmd += cmd_ary[i] + item;
-        i += 1;
-    }
-    if (cmd_ary.size() > i) {
+    std::for_each(this->components.begin(), this->components.end(), [&](Component c) {
+        if (c.HasString()) {
+            cmd += cmd_ary[i] + c.GetString();
+            i += 1;
+        }
+        });
+    while (cmd_ary.size() > i) {
         cmd += cmd_ary[i];
+        i += 1;
     }
 
     //run command
-    std::cout << cmd << std::endl;
+    std::cout << "[RunCommand] command: " << cmd << std::endl;
     std::string err_msg = exec(cmd);
 
     if (err_msg == "__null__") {
-        std::cout << "Execution failed. " << std::endl;
+        std::cout << "[RunCommand] Execution failed. " << std::endl;
         return;
     }
 
@@ -172,9 +140,7 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
     delete dialog;
 }
 
-MainFrame::~MainFrame()
-{
-}
+MainFrame::~MainFrame(){}
 
 void MainFrame::UpdateFrame(wxCommandEvent& event)
 {
@@ -187,53 +153,19 @@ void MainFrame::UpdateFrame(wxCommandEvent& event)
 int MainFrame::UpdatePanel(wxPanel* panel)
 {
     this->hasChoice = 0;
-
     //file picker
-    int i = 0;
     int y = 10;
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "file") {
-        wxStaticText* text = new wxStaticText(panel, wxID_ANY, this->definition["components"][i]["label"], wxPoint(20, y));
-        this->filePicker = new wxFilePickerCtrl(panel, wxID_ANY, "", "", this->definition["components"][i]["extension"], wxPoint(20, y + 15), wxSize(350, 25), wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
-        this->filePicker->GetTextCtrl()->SetDropTarget(new DropFilePath<wxFilePickerCtrl>(this->filePicker));
-        this->filePicker->DragAcceptFiles(true);
-        i += 1;
-        y += 50;
-    }
 
-    //file picker2
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"]=="file") {
-        wxStaticText* text2 = new wxStaticText(panel, wxID_ANY, this->definition["components"][i]["label"], wxPoint(20, y));
-        this->filePicker2 = new wxFilePickerCtrl(panel, wxID_ANY, "", "", this->definition["components"][i]["extension"], wxPoint(20, y + 15), wxSize(350, 25), wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
-        this->filePicker2->GetTextCtrl()->SetDropTarget(new DropFilePath<wxFilePickerCtrl>(this->filePicker2));
-        this->filePicker2->DragAcceptFiles(true);
-        i += 1;
-        y += 50;
+    if (this->definition["components"]==nullptr) {
+        this->definition["components"] = std::vector<nlohmann::json>();
+        return y;
     }
+    std::vector<nlohmann::json> comp = this->definition["components"];
 
-    //folder picker
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "folder") {
-        wxStaticText* text3 = new wxStaticText(panel, wxID_ANY, this->definition["components"][i]["label"], wxPoint(20, y));
-        this->folderPicker = new wxDirPickerCtrl(panel, wxID_ANY, "", "", wxPoint(20, y + 15), wxSize(350, 25), wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
-        this->folderPicker->GetTextCtrl()->SetDropTarget(new DropFilePath<wxDirPickerCtrl>(this->folderPicker));
-        this->folderPicker->DragAcceptFiles(true);
-        i += 1;
-        y += 50;
-    }
-    
-    //choice
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "choice") {
-        wxArrayString wxitems;
-        std::vector<std::string> items = this->definition["components"][i]["items"];
-        std::for_each(items.begin(), items.end(), [&](std::string i) {
-            wxitems.Add(i);
-            });
-        wxStaticText* text4 = new wxStaticText(panel, wxID_ANY, this->definition["components"][i]["label"], wxPoint(20, y));
-        this->choice = new wxChoice(panel, wxID_ANY, wxPoint(20, y + 20), wxSize(95, 25), wxitems);
-        this->choice->SetSelection(this->definition["components"][i]["default"]);
-
-        this->hasChoice = 1;
-    }
-    y += 20;
+    //put components
+    std::for_each(comp.begin(), comp.end(), [&](nlohmann::json c) {
+        y += Component::PutComponent(&this->components, panel, c, y);
+        });
     return y;
 }
 

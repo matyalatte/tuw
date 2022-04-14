@@ -62,12 +62,11 @@ std::string exec(const char* cmd) {
     
     //set buffers
     size_t size = 512;
-    size_t read_size;
+    size_t read_size = 0;
     char ibuf[512]; //buffer for output
     char ebuf[512]; //buffer for error messages
 
     std::string err_msg="";
-    std::cout << std::endl;
     while (!istream->Eof() && !estream->Eof()) {//while process is running
         //print outputs
         std::cout << read_stream(istream, ibuf, size);
