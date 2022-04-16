@@ -12,7 +12,9 @@ class MainFrame : public wxFrame
 {
 private:
     nlohmann::json definition;
+    nlohmann::json sub_definition;
     std::vector<Component> components;
+    wxPanel* mainPanel;
 
     int hasChoice;
     void readDefinition();

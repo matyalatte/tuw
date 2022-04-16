@@ -1,6 +1,7 @@
 ver0.0.2
 - Added support for unix
 - Added checkbox and text to GUI components
+- Added support for multiple commands
 
 ver0.0.1
 - Initial release

@@ -2,10 +2,14 @@
     "description": "Sample .json file",
     "gui": [
         {
-        "name": "Sample GUI",
+        "name": "Sample GUI for Windows",
         "command": ["cmd.exe /c echo file: ", "& echo folder: ", "& echo num: "],
         "button": "Echo!",
         "components": [
+            {
+                "type": "text",
+                "label": "This is a sample GUI for Windows. Edit 'gui_definition.json' for your scripts."
+            },
             {
                 "type": "file",
                 "label": "Some file path",
@@ -19,9 +23,37 @@
                 "type": "choice",
                 "label": "num",
                 "items": ["one", "two", "three"],
+                "values": ["1", "2", "3"],
                 "default": 1
             }
         ]
-        }
+        },
+        {
+            "name": "Sample GUI for Unix",
+            "command": ["echo file: ", "& echo folder: ", "& echo num: "],
+            "button": "Echo!",
+            "components": [
+                {
+                    "type": "text",
+                    "label": "This is a sample GUI for Unix. Edit 'gui_definition.json' for your scripts."
+                },
+                {
+                    "type": "file",
+                    "label": "Some file path",
+                    "extension": "any files | *"
+                },
+                {
+                    "type": "folder",
+                    "label": "Some folder path"
+                },
+                {
+                    "type": "choice",
+                    "label": "num",
+                    "items": ["one", "two", "three"],
+                    "values": ["1", "2", "3"],
+                    "default": 1
+                }
+            ]
+            }
     ]
 }

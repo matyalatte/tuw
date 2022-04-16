@@ -8,7 +8,7 @@ project(${PROJECT_NAME})
 
 if (CMAKE_COMPILER_IS_GNUCXX)
 	#settings for unix
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS -no-pie}")
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
 endif()
 
 #fetch json

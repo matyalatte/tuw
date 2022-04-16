@@ -27,6 +27,7 @@ enum comp_type {
 	TYPE_CHECK
 };
 
+//component for GUI
 class Component {
 private:
 	void* widget;

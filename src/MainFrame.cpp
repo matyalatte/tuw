@@ -14,16 +14,16 @@ MainFrame::MainFrame()
 {
     //get gui definition
     this->readDefinition();
-    this->SetLabel(this->definition["name"]);
+    this->SetLabel(this->sub_definition["name"]);
 
     //make menu bar
     wxMenuBar* menuBar = new wxMenuBar;
     wxMenu* menuFile = new wxMenu;
-    /*
-    for (int i = 0; i < this->names.size(); i++) {
-        menuFile->Append(wxID_HIGHEST + i + 1, this->names[i]);
+    
+    for (int i = 0; i < this->definition["gui"].size(); i++) {
+        menuFile->Append(wxID_HIGHEST + i + 1, this->definition["gui"][i]["name"]);
         menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
-    }*/
+    }
     menuFile->Append(wxID_EXIT, "Quit");
     menuBar->Append(menuFile, "Menu");
     SetMenuBar(menuBar);
@@ -33,14 +33,14 @@ MainFrame::MainFrame()
     Bind(wxEVT_MENU, [this](wxCommandEvent&) { Close(true); }, wxID_EXIT);
     
     //put components
-    wxPanel* panel = new wxPanel(this);
-    int y = this->UpdatePanel(panel);
+    mainPanel = new wxPanel(this);
+    int y = this->UpdatePanel(mainPanel);
 
     //run button
-    wxButton* button = new wxButton(panel, wxID_EXECUTE, this->definition["button"], wxPoint(165+this->hasChoice*130, y), wxSize(75, 25));
+    wxButton* button = new wxButton(mainPanel, wxID_EXECUTE, this->sub_definition["button"], wxPoint(165+this->hasChoice*130, y), wxSize(75, 25));
     Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::RunCommand));
     
-    panel->Show();
+    mainPanel->Show();
 
     Layout();
     Centre();
@@ -77,7 +77,8 @@ void MainFrame::readDefinition() {
     std::ifstream istream("gui_definition.json");
 
     if (!istream) {
-        this->definition = default_definition("[readDefinition] Fialed to read gui_definition.json");
+        this->sub_definition = default_definition("[readDefinition] Fialed to read gui_definition.json");
+        this->definition = { "gui", {this->sub_definition} };
         return;
     }
 
@@ -86,16 +87,16 @@ void MainFrame::readDefinition() {
 
     //check format
     if (hasKey(this->definition, "gui")) {
-        this->definition = this->definition["gui"][0];
+        this->sub_definition = this->definition["gui"][0];
     }
     else {
-        this->definition = default_definition("[readDefinition] Json format error ('gui' not found)");
+        this->sub_definition = default_definition("[readDefinition] Json format error ('gui' not found)");
         return;
     }
     std::vector<std::string> keys = { "name", "button", "command", "components" };
     for (std::string key : keys) {
-        if (!hasKey(this->definition, key)) {
-            this->definition = default_definition("[readDefinition] Json format error ('" + key + "' not found)");
+        if (!hasKey(this->sub_definition, key)) {
+            this->sub_definition = default_definition("[readDefinition] Json format error ('" + key + "' not found)");
             return;
         }
     }
@@ -105,7 +106,7 @@ void MainFrame::readDefinition() {
 void MainFrame::RunCommand(wxCommandEvent& event) {
 
     //make command string
-    std::vector<std::string> cmd_ary = this->definition["command"];
+    std::vector<std::string> cmd_ary = this->sub_definition["command"];
     wxString cmd = "";
     int i = 0;
     std::for_each(this->components.begin(), this->components.end(), [&](Component c) {
@@ -144,9 +145,21 @@ MainFrame::~MainFrame(){}
 
 void MainFrame::UpdateFrame(wxCommandEvent& event)
 {
-    //std::string str = this->names[event.GetId()-1- wxID_HIGHEST];
-    //std::cout << str.c_str();
-    //this->SetLabel(str);
+    std::string str = definition["gui"][event.GetId() - 1 - wxID_HIGHEST]["name"];
+    std::cout << str.c_str();
+    SetLabel(str);
+    sub_definition = definition["gui"][event.GetId() - 1 - wxID_HIGHEST];
+    wxPanel* newPanel = new wxPanel(this);
+    components = std::vector<Component>();
+    int y = UpdatePanel(newPanel);
+    wxButton* button = new wxButton(newPanel, wxID_EXECUTE, sub_definition["button"], wxPoint(165 + this->hasChoice * 130, y), wxSize(75, 25));
+    newPanel->Show();
+    delete mainPanel;
+    mainPanel = newPanel;
+
+    Layout();
+    Centre();
+    Refresh();
 }
 
 //put components
@@ -156,11 +169,11 @@ int MainFrame::UpdatePanel(wxPanel* panel)
     //file picker
     int y = 10;
 
-    if (this->definition["components"]==nullptr) {
-        this->definition["components"] = std::vector<nlohmann::json>();
+    if (sub_definition["components"]==nullptr) {
+        sub_definition["components"] = std::vector<nlohmann::json>();
         return y;
     }
-    std::vector<nlohmann::json> comp = this->definition["components"];
+    std::vector<nlohmann::json> comp = sub_definition["components"];
 
     //put components
     std::for_each(comp.begin(), comp.end(), [&](nlohmann::json c) {
