@@ -13,11 +13,16 @@ class MainFrame : public wxFrame
 private:
     nlohmann::json definition;
     nlohmann::json sub_definition;
+    nlohmann::json config;
+
     std::vector<Component> components;
     wxPanel* mainPanel;
 
-    void ReadDefinition();
+    void LoadDefinition();
     int UpdatePanel(wxPanel* panel);
+    void LoadConfig();
+    void UpdateConfig();
+    void SaveConfig();
 
 public:
     //std::array<std::string, 2> names = { "Frame1", "Frame2" };

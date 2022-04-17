@@ -36,24 +36,33 @@ private:
 	std::vector<std::string> values;
 	std::string value;
 	bool hasString;
+	std::string label;
 
-	static int PutText(std::vector<Component>* components, wxPanel* panel, nlohmann::json j, int y);
-	static int PutFilePicker(std::vector<Component>* components, wxPanel* panel, nlohmann::json j, int y);
-	static int PutDirPicker(std::vector<Component>* components, wxPanel* panel, nlohmann::json j, int y);
-	static int PutChoice(std::vector<Component>* components, wxPanel* panel, nlohmann::json j, int y);
-	static int PutCheckBox(std::vector<Component>* components, wxPanel* panel, nlohmann::json j, int y);
+	void SetLabel(std::string str);
+
+	static Component* PutText(wxPanel* panel, nlohmann::json j, int y);
+	static Component* PutFilePicker(wxPanel* panel, nlohmann::json j, int y);
+	static Component* PutDirPicker(wxPanel* panel, nlohmann::json j, int y);
+	static Component* PutChoice(wxPanel* panel, nlohmann::json j, int y);
+	static Component* PutCheckBox(wxPanel* panel, nlohmann::json j, int y);
+
 public:
 	Component(void* wid, int t);
 	~Component();
 	wxString GetString();
+	std::string GetLabel();
 	int GetInt();
 	int GetHeight();
+	int GetType();
+	nlohmann::json GetConfig();
+	void SetConfig(nlohmann::json config);
+
 	void SetHeight(int h);
 	void SetValues(std::vector<std::string> vals);
 	void SetValue(std::string val);
 	bool HasString();
 
-	static int PutComponent(std::vector<Component>* components, wxPanel* panel, nlohmann::json j, int y);
+	static Component* PutComponent(wxPanel* panel, nlohmann::json j, int y);
 };
 
 bool hasKey(nlohmann::json json, std::string key);
