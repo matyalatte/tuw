@@ -46,6 +46,7 @@ public:
 	Component(void* wid, int t);
 	~Component();
 	wxString GetString();
+	int GetInt();
 	int GetHeight();
 	void SetHeight(int h);
 	void SetValues(std::vector<std::string> vals);

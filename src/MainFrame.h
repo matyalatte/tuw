@@ -16,8 +16,7 @@ private:
     std::vector<Component> components;
     wxPanel* mainPanel;
 
-    int hasChoice;
-    void readDefinition();
+    void ReadDefinition();
     int UpdatePanel(wxPanel* panel);
 
 public:
@@ -30,6 +29,7 @@ public:
     virtual ~MainFrame();
 
     void OnClose(wxCloseEvent& event);
+    void OpenURL(wxCommandEvent& event);
     void UpdateFrame(wxCommandEvent& event);
     void RunCommand(wxCommandEvent& event);
 };

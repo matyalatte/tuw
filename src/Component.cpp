@@ -44,6 +44,25 @@ void Component::SetValue(std::string val) {
     value = val;
 }
 
+int Component::GetInt() {
+    int i=0;
+    switch (type) {
+    case comp_type::TYPE_FILE:
+    case comp_type::TYPE_FOLDER:
+        i = 0;
+        break;
+    case comp_type::TYPE_CHOICE:
+        i = ((wxChoice*)widget)->GetSelection();
+        break;
+    case comp_type::TYPE_CHECK:
+        i = ((wxCheckBox*)widget)->IsChecked();
+        break;
+    default:
+        i = 0;
+    }
+    return i;
+}
+
 wxString Component::GetString() {
 	wxString str = "";
 	int sel;
@@ -68,6 +87,7 @@ wxString Component::GetString() {
 	}
 	return str;
 }
+
 void Component::SetHeight(int h) {
     height = h;
 }
