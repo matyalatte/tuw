@@ -1,9 +1,20 @@
-.vs
-out
-test
-python
-*.py
+#general
 *.json
 !gui_definition.json
+
+#for windows
+.vs
+out
+SimpleCommandRunner-v*
 *.exe
 *.zip
+
+#for unix
+*.sh
+!build.sh
+build
+
+#for test scripts
+python
+*.py
+test

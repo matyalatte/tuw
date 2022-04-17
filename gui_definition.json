@@ -2,26 +2,69 @@
     "description": "Sample .json file",
     "gui": [
         {
-        "name": "Sample GUI",
-        "command": ["cmd.exe /c echo file: ", "& echo folder: ", "& echo num: "],
-        "button": "Echo!",
-        "components": [
-            {
-                "type": "file",
-                "label": "Some file path",
-                "extension": "any files | *"
-            },
-            {
-                "type": "folder",
-                "label": "Some folder path"
-            },
-            {
-                "type": "choice",
-                "label": "num",
-                "items": ["one", "two", "three"],
-                "default": 1
-            }
-        ]
+            "name": "Sample GUI",
+            "label": "Simple Command Runner",
+            "command": ["echo file: ", "& echo folder: ", "& echo num: ", "& echo checkbox: "],
+            "button": "Echo!",
+            "components": [
+                {
+                    "type": "text",
+                    "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
+                },
+                {
+                    "type": "file",
+                    "label": "Some file path",
+                    "extension": "any files | *"
+                },
+                {
+                    "type": "folder",
+                    "label": "Some folder path"
+                },
+                {
+                    "type": "choice",
+                    "label": "num",
+                    "items": ["one", "two", "three"],
+                    "values": ["1", "2", "3"],
+                    "default": 1
+                },
+                {
+                    "type": "check",
+                    "label": "checkbox",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "name": "Sample GUI2",
+            "label": "Simple Command Runner",
+            "command": ["echo file: ", "& echo folder: ", "& echo num: ", "& echo Sample message!"],
+            "button": "Echo!",
+            "show_last_line": true,
+            "components": [
+                {
+                    "type": "text",
+                    "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
+                },                
+                {
+                    "type": "choice",
+                    "label": "num",
+                    "items": ["one", "two", "three"],
+                    "values": ["1", "2", "3"],
+                    "default": 1
+                },
+                {
+                    "type": "file",
+                    "label": "Some file path",
+                    "extension": "any files | *"
+                }
+            ]
+        }
+    ],
+    "help": [
+        {
+            "type": "url",
+            "label": "README (git repo)",
+            "url": "https://github.com/matyalatte/Simple-Command-Runner"
         }
     ]
 }

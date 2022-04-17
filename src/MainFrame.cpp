@@ -7,41 +7,40 @@
 #include <string>
 #include <array>
 
-//Drop target for path picker
-template <typename T>
-DropFilePath<T>::DropFilePath(T* frame) : wxFileDropTarget() {
-    this->frame = frame;
-}
-
-template <typename T>
-DropFilePath<T>::~DropFilePath() {
-}
-
-template <typename T>
-bool DropFilePath<T>::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) {
-    std::cout << filenames[0].c_str();
-    this->frame->SetPath(filenames[0]);
-    return 1;
-}
 
 //Main window
 MainFrame::MainFrame()
     : wxFrame(nullptr, wxID_ANY, "Simple Command Runner")
 {
+    std::cout << "Simple Command Runner by matyalatte" << std::endl;
+    
     //get gui definition
-    this->readDefinition();
-    this->SetLabel(this->definition["name"]);
+    LoadDefinition();
+    LoadConfig();
 
     //make menu bar
     wxMenuBar* menuBar = new wxMenuBar;
     wxMenu* menuFile = new wxMenu;
-    /*
-    for (int i = 0; i < this->names.size(); i++) {
-        menuFile->Append(wxID_HIGHEST + i + 1, this->names[i]);
-        menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
-    }*/
+    
+    if (definition["gui"].size() > 1) {
+        for (int i = 0; i < definition["gui"].size(); i++) {
+            menuFile->Append(wxID_HIGHEST + i + 1, definition["gui"][i]["name"]);
+            menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
+        }
+    }
     menuFile->Append(wxID_EXIT, "Quit");
     menuBar->Append(menuFile, "Menu");
+
+    //put help urls to menu bar
+    if (hasKey(definition, "help")) {
+        wxMenu* menuHelp = new wxMenu;
+
+        for (int i = 0; i < definition["help"].size(); i++) {
+            menuHelp->Append(wxID_HIGHEST + i + 1 + definition["gui"].size(), definition["help"][i]["label"]);
+            menuHelp->Bind(wxEVT_MENU, &MainFrame::OpenURL, this, wxID_HIGHEST + i + 1 + definition["gui"].size());
+        }
+        menuBar->Append(menuHelp, "Help");
+    }
     SetMenuBar(menuBar);
 
     //set close event
@@ -49,24 +48,20 @@ MainFrame::MainFrame()
     Bind(wxEVT_MENU, [this](wxCommandEvent&) { Close(true); }, wxID_EXIT);
     
     //put components
-    wxPanel* panel = new wxPanel(this);
-    int y = this->UpdatePanel(panel);
+    mainPanel = new wxPanel(this);
+    components = std::vector<Component>();
+    int y = UpdatePanel(mainPanel);
 
     //run button
-    wxButton* button = new wxButton(panel, wxID_EXECUTE, this->definition["button"], wxPoint(165+this->hasChoice*130, y), wxSize(75, 25));
+    wxButton* button = new wxButton(mainPanel, wxID_EXECUTE, sub_definition["button"], wxPoint(158, y), wxSize(75, 25));
     Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::RunCommand));
     
-    panel->Show();
+    mainPanel->Show();
 
     Layout();
     Centre();
-    this->SetSize(wxSize(405, y+105));
-    this->SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
-}
-
-bool hasKey(nlohmann::json json, std::string key) {
-    auto subjectIdIter = json.find(key);
-    return subjectIdIter != json.end();
+    SetSize(wxSize(405, y+105));
+    SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
 //get default definition of gui
@@ -74,160 +69,199 @@ nlohmann::json default_definition(std::string msg) {
     std::cout << msg << std::endl;
     nlohmann::json def =
         {
-            {"name", "Simple Command Runner"},
-            {"command", {"cmd.exe /c dir"} },
+#ifdef _WIN32
+            {"command", {"dir"} },
             {"button", "run 'dir'"},
+#else
+            {"command", {"ls"} },
+            {"button", "run 'ls'"},
+#endif
             {"components",{}}
         };
     return def;
 }
 
+/*
+bool hasKey(nlohmann::json json, std::string key) {
+    auto subjectIdIter = json.find(key);
+    return subjectIdIter != json.end();
+}
+*/
 //read gui_definition.json
-void MainFrame::readDefinition() {
+void MainFrame::LoadDefinition() {
     std::ifstream istream("gui_definition.json");
 
     if (!istream) {
-        this->definition = default_definition("Fialed to read gui_definition.json");
+        sub_definition = default_definition("[LoadDefinition] Fialed to read gui_definition.json");
+        definition = { { "gui", {sub_definition}} };
         return;
     }
 
     //read json file
-    istream >> this->definition;
+    istream >> definition;
+    istream.close();
 
     //check format
-    if (hasKey(this->definition, "gui")) {
-        this->definition = this->definition["gui"][0];
+    if (hasKey(definition, "gui")) {
+        sub_definition = definition["gui"][0];
     }
     else {
-        this->definition = default_definition("Json format error ('gui' not found)");
+        sub_definition = default_definition("[LoadDefinition] Json format error ('gui' not found)");
         return;
     }
     std::vector<std::string> keys = { "name", "button", "command", "components" };
     for (std::string key : keys) {
-        if (!hasKey(this->definition, key)) {
-            this->definition = default_definition("Json format error ('" + key + "' not found)");
+        if (!hasKey(sub_definition, key)) {
+            sub_definition = default_definition("[LoadDefinition] Json format error ('" + key + "' not found)");
             return;
         }
     }
-    if (this->definition["command"].size() < this->definition["components"].size()) {
-        this->definition = default_definition("Json format error (size of 'command' should be larger than size of 'components')");
-        return;
+    std::cout << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
+}
+
+void MainFrame::UpdateConfig() {
+    for (Component c: components){
+        config[c.GetLabel()] = c.GetConfig();
+    }
+}
+void MainFrame::LoadConfig() {
+    std::ifstream istream("gui_config.json");
+    if (!istream) {
+        std::cout << "[LoadConfig] Fialed to load gui_config.json" << std::endl;
+        config = {};
+    }
+    else {
+        std::cout << "[LoadConfig] Loaded gui_config.json" << std::endl;
+        istream >> config;
+        istream.close();
+    }
+}
+
+void MainFrame::SaveConfig() {
+    UpdateConfig();
+    std::ofstream ostream("gui_config.json");
+
+    if (!ostream) {
+        std::cout << "[SaveConfig] Fialed to write gui_config.json" << std::endl;
+    }
+    else {
+        std::cout << "[SaveConfig] Saved gui_config.json" << std::endl;
+        ostream << std::setw(4) << config << std::endl;
+        ostream.close();
     }
 }
 
 //run command
 void MainFrame::RunCommand(wxCommandEvent& event) {
+    //save config
+    SaveConfig();
 
     //make command string
-    std::vector<std::string> cmd_ary = this->definition["command"];
+    std::vector<std::string> cmd_ary = sub_definition["command"];
     wxString cmd = "";
     int i = 0;
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "file"){
-        wxString file = this->filePicker->GetPath();
-        cmd += cmd_ary[i] + file;
-        i += 1;
+    for (Component c : components) {
+        if (c.HasString()) {
+            cmd += cmd_ary[i] + c.GetString();
+            i += 1;
+        }
     }
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "file"){
-        wxString file2 = this->filePicker2->GetPath();
-        cmd += cmd_ary[i] + file2;
-        i += 1;
-    }
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "folder") {
-        wxString folder = this->folderPicker->GetPath();
-        cmd += cmd_ary[i] + folder;
-        i += 1;
-    }
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "choice") {
-        wxString item = this->choice->GetStringSelection();
-        cmd += cmd_ary[i] + item;
-        i += 1;
-    }
-    if (cmd_ary.size() > i) {
+
+    while (cmd_ary.size() > i) {
         cmd += cmd_ary[i];
+        i += 1;
     }
 
     //run command
-    std::cout << cmd << std::endl;
-    std::string err_msg = exec(cmd);
+    std::cout << "[RunCommand] command: " << cmd << std::endl;
+#ifdef _WIN32
+    cmd = "cmd.exe /c " + cmd;
+#endif
+    std::vector<std::string> msg = exec(cmd);
 
-    if (err_msg == "__null__") {
+    if (msg[0] == "__null__") {
+        std::cout << "[RunCommand] Execution failed. " << std::endl;
         return;
     }
 
     //show result
     wxMessageDialog* dialog;
-    if (err_msg != "") {//if error
-        dialog = new wxMessageDialog(this, err_msg, "Error", wxICON_ERROR | wxOK | wxCENTRE);
+    if (msg[1] != "") {//if error
+        dialog = new wxMessageDialog(this, msg[1], "Error", wxICON_ERROR | wxOK | wxCENTRE);
     }
     else {//if success
-        dialog = new wxMessageDialog(this, "Success!", "Success");
+        if (hasKey(sub_definition, "show_last_line") && sub_definition["show_last_line"]!=0 && msg[0]!="") {
+            dialog = new wxMessageDialog(this, msg[0], "Success");
+        }
+        else {
+            dialog = new wxMessageDialog(this, "Success!", "Success");
+        }
     }
     dialog->ShowModal();
-    delete dialog;
+    dialog->Destroy();
 }
 
-MainFrame::~MainFrame()
-{
+MainFrame::~MainFrame(){}
+
+void MainFrame::OpenURL(wxCommandEvent& event) {
+    std::string url = definition["help"][event.GetId() - 1 - wxID_HIGHEST - definition["gui"].size()]["url"];
+    std::cout << "[OpenURL] " << url << std::endl;
+    bool res = wxLaunchDefaultBrowser(url);
 }
 
 void MainFrame::UpdateFrame(wxCommandEvent& event)
 {
-    //std::string str = this->names[event.GetId()-1- wxID_HIGHEST];
-    //std::cout << str.c_str();
-    //this->SetLabel(str);
+    sub_definition = definition["gui"][event.GetId() - 1 - wxID_HIGHEST];
+    UpdateConfig();
+    
+    wxPanel* newPanel = new wxPanel(this);
+    int y = UpdatePanel(newPanel);
+    wxButton* button = new wxButton(newPanel, wxID_EXECUTE, sub_definition["button"], wxPoint(158, y), wxSize(75, 25));
+    newPanel->Show();
+    wxPanel* unused = mainPanel;
+    mainPanel = newPanel;
+    unused->Destroy();
+
+    Layout();
+    SetSize(wxSize(405, y + 105));
+    Refresh();
 }
 
 //put components
 int MainFrame::UpdatePanel(wxPanel* panel)
 {
-    this->hasChoice = 0;
+    std::string str = "Simple Command Runner";
+    if (hasKey(sub_definition, "name")) {
+        str = sub_definition["name"];
+    }
+    std::cout << "[UpdatePanel] " << str.c_str() << std::endl;
+    if (hasKey(sub_definition, "label")) {
+        str = sub_definition["label"];
+    }
+    SetLabel(str);
 
     //file picker
-    int i = 0;
     int y = 10;
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "file") {
-        wxStaticText* text = new wxStaticText(panel, wxID_ANY, this->definition["components"][i]["label"], wxPoint(20, y));
-        this->filePicker = new wxFilePickerCtrl(panel, wxID_ANY, "", "", this->definition["components"][i]["extension"], wxPoint(20, y + 15), wxSize(350, 25));
-        this->filePicker->GetTextCtrl()->SetDropTarget(new DropFilePath<wxFilePickerCtrl>(filePicker));
-        this->filePicker->DragAcceptFiles(true);
-        i += 1;
-        y += 50;
+    if (sub_definition["components"].is_null()) {
+        sub_definition["components"] = std::vector<nlohmann::json>();
+        return y;
     }
+    std::vector<nlohmann::json> comp = sub_definition["components"];
+    components.clear();
+    components.shrink_to_fit();
+    Component* newComp = nullptr;
 
-    //file picker2
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"]=="file") {
-        wxStaticText* text2 = new wxStaticText(panel, wxID_ANY, this->definition["components"][i]["label"], wxPoint(20, y));
-        this->filePicker2 = new wxFilePickerCtrl(panel, wxID_ANY, "", "", this->definition["components"][i]["extension"], wxPoint(20, y + 15), wxSize(350, 25));
-        this->filePicker2->GetTextCtrl()->SetDropTarget(new DropFilePath<wxFilePickerCtrl>(filePicker2));
-        this->filePicker2->DragAcceptFiles(true);
-        i += 1;
-        y += 50;
+    //put components
+    for (nlohmann::json c : comp) {
+        newComp = Component::PutComponent(panel, c, y);
+        if (newComp != nullptr) {
+            y += newComp->GetHeight();
+            if (hasKey(config, newComp->GetLabel())) {
+                newComp->SetConfig(config[newComp->GetLabel()]);
+            }
+            components.push_back(*newComp);
+        }
     }
-
-    //folder picker
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "folder") {
-        wxStaticText* text3 = new wxStaticText(panel, wxID_ANY, this->definition["components"][i]["label"], wxPoint(20, y));
-        this->folderPicker = new wxDirPickerCtrl(panel, wxID_ANY, "", "", wxPoint(20, y + 15), wxSize(350, 25));
-        this->folderPicker->GetTextCtrl()->SetDropTarget(new DropFilePath<wxDirPickerCtrl>(folderPicker));
-        this->folderPicker->DragAcceptFiles(true);
-        i += 1;
-        y += 50;
-    }
-    
-    //choice
-    if (this->definition["components"].size() > i && this->definition["components"][i]["type"] == "choice") {
-        wxArrayString wxitems;
-        std::vector<std::string> items = this->definition["components"][i]["items"];
-        std::for_each(items.begin(), items.end(), [&](std::string i) {
-            wxitems.Add(i);
-            });
-        wxStaticText* text4 = new wxStaticText(panel, wxID_ANY, this->definition["components"][i]["label"], wxPoint(20, y));
-        this->choice = new wxChoice(panel, wxID_ANY, wxPoint(20, y + 20), wxSize(95, 25), wxitems);
-        this->choice->SetSelection(this->definition["components"][i]["default"]);
-
-        this->hasChoice = 1;
-    }
-    y += 20;
     return y;
 }
 

@@ -1,5 +1,6 @@
 #pragma once
+#include <vector>
 #include <string>
 
 //run command and return error messages
-std::string exec(const char* cmd);
+std::vector<std::string> exec(const char* cmd);
