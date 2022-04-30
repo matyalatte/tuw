@@ -23,6 +23,8 @@ private:
     void LoadConfig();
     void UpdateConfig();
     void SaveConfig();
+    void ShowErrorDialog(std::string msg);
+    void ShowSuccessDialog(std::string msg);
 
 public:
     //std::array<std::string, 2> names = { "Frame1", "Frame2" };

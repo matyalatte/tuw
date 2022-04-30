@@ -2,8 +2,8 @@
     "description": "Sample .json file",
     "gui": [
         {
-            "name": "Sample GUI",
-            "label": "Simple Command Runner",
+            "label": "Sample GUI",
+            "window_name": "Simple Command Runner",
             "command": ["echo file: ", "& echo folder: ", "& echo num: ", "& echo checkbox: "],
             "button": "Echo!",
             "components": [
@@ -35,9 +35,9 @@
             ]
         },
         {
-            "name": "Sample GUI2",
-            "label": "Simple Command Runner",
-            "command": ["echo file: ", "& echo folder: ", "& echo num: ", "& echo Sample message!"],
+            "label": "Sample GUI2",
+            "window_name": "Simple Command Runner",
+            "command": ["echo num: ", "& echo file: ", "& echo Sample message!"],
             "button": "Echo!",
             "show_last_line": true,
             "components": [

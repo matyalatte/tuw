@@ -1,3 +1,8 @@
+ver0.0.3
+- Added checkboxes to GUI components
+- Added width setting to choice
+- Improved error handling
+
 ver0.0.2
 - Added checkbox and text to GUI components
 - Added support for multiple commands

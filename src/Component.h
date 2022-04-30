@@ -24,7 +24,8 @@ enum comp_type {
 	TYPE_FILE,
 	TYPE_FOLDER,
 	TYPE_CHOICE,
-	TYPE_CHECK
+	TYPE_CHECK,
+	TYPE_CHECKS
 };
 
 //component for GUI
@@ -45,6 +46,7 @@ private:
 	static Component* PutDirPicker(wxPanel* panel, nlohmann::json j, int y);
 	static Component* PutChoice(wxPanel* panel, nlohmann::json j, int y);
 	static Component* PutCheckBox(wxPanel* panel, nlohmann::json j, int y);
+	static Component* PutCheckBoxes(wxPanel* panel, nlohmann::json j, int y);
 
 public:
 	Component(void* wid, int t);
@@ -52,6 +54,7 @@ public:
 	wxString GetString();
 	std::string GetLabel();
 	int GetInt();
+	std::vector<int> GetInts();
 	int GetHeight();
 	int GetType();
 	nlohmann::json GetConfig();
