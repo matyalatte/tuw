@@ -1,6 +1,6 @@
 #general
 *.json
-!gui_definition.json
+!samples/*/gui_definition.json
 
 #for windows
 .vs
