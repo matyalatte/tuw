@@ -8,7 +8,7 @@ All you need is write a `.json` file and run an `.exe` file.<br>
 It can make GUI to run commands of your scripts.<br>
 You don't need to use IDE and manage scripts for GUI.<br>
 
-![sampleGUI](https://user-images.githubusercontent.com/69258547/162616706-fa81710e-5bfe-4f86-baea-eb2362a98b0e.png)<br>
+![sample](https://user-images.githubusercontent.com/69258547/166093114-4165e28a-452e-4844-a4d9-19b34bfe001c.png)<br>
 
 ## Features
 - Standalone
@@ -19,6 +19,9 @@ You don't need to use IDE and manage scripts for GUI.<br>
 Simple Command Runner uses cross-platform framework.<br>
 But I only tested with Windows10.<br>
 It may not work for other platforms.
+
+## Samples
+There are some [sample json files](./samples) to understand how to use.<br>
 
 ## License
 ### Simple Command Runner
