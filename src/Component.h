@@ -68,4 +68,8 @@ public:
 	static Component* PutComponent(wxPanel* panel, nlohmann::json j, int y);
 };
 
+#ifdef _WIN32
+std::string wstring_to_utf8(const std::wstring& str);
+#endif
+
 bool hasKey(nlohmann::json json, std::string key);

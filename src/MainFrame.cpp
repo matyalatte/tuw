@@ -7,7 +7,7 @@
 #include <string>
 #include <array>
 
-const char* VERSION = "0.0.3";
+const char* VERSION = "0.0.4";
 
 //Main window
 MainFrame::MainFrame()
@@ -25,7 +25,7 @@ MainFrame::MainFrame()
     
     if (definition["gui"].size() > 1) {
         for (int i = 0; i < definition["gui"].size(); i++) {
-            menuFile->Append(wxID_HIGHEST + i + 1, definition["gui"][i]["label"]);
+            menuFile->Append(wxID_HIGHEST + i + 1, wxString::FromUTF8(definition["gui"][i]["label"]));
             menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
         }
     }
@@ -37,7 +37,7 @@ MainFrame::MainFrame()
         wxMenu* menuHelp = new wxMenu;
 
         for (int i = 0; i < definition["help"].size(); i++) {
-            menuHelp->Append(wxID_HIGHEST + i + 1 + definition["gui"].size(), definition["help"][i]["label"]);
+            menuHelp->Append(wxID_HIGHEST + i + 1 + definition["gui"].size(), wxString::FromUTF8(definition["help"][i]["label"]));
             menuHelp->Bind(wxEVT_MENU, &MainFrame::OpenURL, this, wxID_HIGHEST + i + 1 + definition["gui"].size());
         }
         menuBar->Append(menuHelp, "Help");
@@ -54,7 +54,7 @@ MainFrame::MainFrame()
     int y = UpdatePanel(mainPanel);
 
     //run button
-    wxButton* button = new wxButton(mainPanel, wxID_EXECUTE, sub_definition["button"], wxPoint(143, y), wxSize(105, 25));
+    wxButton* button = new wxButton(mainPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(143, y), wxSize(105, 25));
     Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::RunCommand));
     
     mainPanel->Show();
@@ -272,7 +272,7 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
 MainFrame::~MainFrame(){}
 
 void MainFrame::OpenURL(wxCommandEvent& event) {
-    std::string url = definition["help"][event.GetId() - 1 - wxID_HIGHEST - definition["gui"].size()]["url"];
+    std::string url = wxString::FromUTF8(definition["help"][event.GetId() - 1 - wxID_HIGHEST - definition["gui"].size()]["url"]);
     std::cout << "[OpenURL] " << url << std::endl;
     bool res = wxLaunchDefaultBrowser(url);
 }
@@ -293,7 +293,7 @@ void MainFrame::UpdateFrame(wxCommandEvent& event)
     
     wxPanel* newPanel = new wxPanel(this);
     int y = UpdatePanel(newPanel);
-    wxButton* button = new wxButton(newPanel, wxID_EXECUTE, sub_definition["button"], wxPoint(158, y), wxSize(75, 25));
+    wxButton* button = new wxButton(newPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(158, y), wxSize(75, 25));
     newPanel->Show();
     wxPanel* unused = mainPanel;
     mainPanel = newPanel;
@@ -311,7 +311,7 @@ int MainFrame::UpdatePanel(wxPanel* panel)
     str = sub_definition["label"];
     std::cout << "[UpdatePanel] " << str.c_str() << std::endl;
     if (hasKey(sub_definition, "window_name")) {
-        SetLabel(sub_definition["window_name"]);
+        SetLabel(wxString::FromUTF8(sub_definition["window_name"]));
     }
     else {
         SetLabel("Simple Command Runner");

@@ -1,3 +1,6 @@
+ver0.0.4
+- Added UTF-8 support for Windows
+
 ver0.0.3
 - Added checkboxes to GUI components
 - Added width setting to choice

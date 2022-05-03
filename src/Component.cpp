@@ -1,5 +1,8 @@
 #pragma once
 #include "Component.h"
+#ifdef _WIN32
+#include <codecvt> //char code converter for Windows system
+#endif
 
 //Drop target for path picker
 template <typename T>
@@ -98,11 +101,11 @@ wxString Component::GetString() {
 		break;
 	case comp_type::TYPE_CHOICE:
 		sel = ((wxChoice*)widget)->GetSelection();
-		str = values[sel];
+		str = wxString::FromUTF8(values[sel]);
 		break;
     case comp_type::TYPE_CHECK:
         if (((wxCheckBox*)widget)->GetValue()) {
-            str = value;
+            str = wxString::FromUTF8(value);
         }
         break;
     case comp_type::TYPE_CHECKS:
@@ -110,7 +113,7 @@ wxString Component::GetString() {
         checks = *(std::vector<wxCheckBox*>*)widget;
         for (int i=0; i<checks.size();i++){
             if (checks[i]->GetValue()) {
-                str += values[i];
+                str += wxString::FromUTF8(values[i]);
             }
         }
         break;
@@ -120,12 +123,31 @@ wxString Component::GetString() {
 	return str;
 }
 
+#ifdef _WIN32
+//utf-16 to utf-8 for Windows
+std::string wstring_to_utf8(const std::wstring& str)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+    return conv.to_bytes(str);
+}
+std::wstring utf8_to_wstring(const std::string& str)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
+    return myconv.from_bytes(str);
+}
+#endif
+
 nlohmann::json Component::GetConfig() {
     nlohmann::json config = {};
     switch (type) {
     case comp_type::TYPE_FILE:
     case comp_type::TYPE_FOLDER:
+#ifdef _WIN32
+        //utf-16 to utf-8 for Windows
+        config["str"] = wstring_to_utf8(std::wstring(GetString()));
+#else
         config["str"] = GetString();
+#endif
         break;
     case comp_type::TYPE_CHOICE:
     case comp_type::TYPE_CHECK:
@@ -145,14 +167,14 @@ void Component::SetConfig(nlohmann::json config) {
     switch (type) {
     case comp_type::TYPE_FILE:
         if (hasKey(config, "str")) {
-            ((wxFilePickerCtrl*)widget)->SetPath(config["str"]);
-            ((wxFilePickerCtrl*)widget)->SetInitialDirectory(wxPathOnly(config["str"]));
+            ((wxFilePickerCtrl*)widget)->SetPath(wxString::FromUTF8(config["str"]));
+            ((wxFilePickerCtrl*)widget)->SetInitialDirectory(wxPathOnly(wxString::FromUTF8(config["str"])));
         }
         break;
     case comp_type::TYPE_FOLDER:
         if (hasKey(config, "str")) {
-            ((wxDirPickerCtrl*)widget)->SetPath(config["str"]);
-            ((wxDirPickerCtrl*)widget)->SetInitialDirectory(config["str"]);
+            ((wxDirPickerCtrl*)widget)->SetPath(wxString::FromUTF8(config["str"]));
+            ((wxDirPickerCtrl*)widget)->SetInitialDirectory(wxString::FromUTF8(config["str"]));
         }
         break;
     case comp_type::TYPE_CHOICE:
@@ -201,22 +223,22 @@ bool Component::HasString() {
 }
 
 Component* Component::PutText(wxPanel* panel, nlohmann::json j, int y) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, j["label"], wxPoint(20, y));
+    wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     Component* comp = new Component(nullptr, comp_type::TYPE_TEXT);
     comp->SetHeight(25);
     return comp;
 }
 
 Component* Component::PutFilePicker(wxPanel* panel, nlohmann::json j, int y) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, j["label"], wxPoint(20, y));
-    std::string ext;
+    wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
+    wxString ext;
     if (hasKey(j, "extension")) {
-        ext = j["extension"];
+        ext = wxString::FromUTF8(j["extension"]);
     }
-    else {
+    else{
         ext = "any files | *";
     }
-    wxFilePickerCtrl* picker = new wxFilePickerCtrl(panel, wxID_ANY, "", "", j["extension"], wxPoint(20, y + 15), wxSize(350, 25), wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
+    wxFilePickerCtrl* picker = new wxFilePickerCtrl(panel, wxID_ANY, "", "", ext, wxPoint(20, y + 15), wxSize(350, 25), wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
     picker->GetTextCtrl()->SetDropTarget(new DropFilePath<wxFilePickerCtrl>(picker));
     picker->DragAcceptFiles(true);
     Component* comp = new Component(picker, comp_type::TYPE_FILE);
@@ -225,7 +247,7 @@ Component* Component::PutFilePicker(wxPanel* panel, nlohmann::json j, int y) {
 }
 
 Component* Component::PutDirPicker(wxPanel* panel, nlohmann::json j, int y) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, j["label"], wxPoint(20, y));
+    wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     wxDirPickerCtrl* picker = new wxDirPickerCtrl(panel, wxID_ANY, "", "", wxPoint(20, y + 15), wxSize(350, 25), wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
     picker->GetTextCtrl()->SetDropTarget(new DropFilePath<wxDirPickerCtrl>(picker));
     picker->DragAcceptFiles(true);
@@ -237,16 +259,19 @@ Component* Component::PutChoice(wxPanel* panel, nlohmann::json j, int y) {
     wxArrayString wxitems;
     std::vector<std::string> items = j["items"];
     std::for_each(items.begin(), items.end(), [&](std::string i) {
-        wxitems.Add(i);
+        wxitems.Add(wxString::FromUTF8(i));
         });
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, j["label"], wxPoint(20, y));
+    wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     int width = 95;
     if (hasKey(j, "width")) {
         width = j["width"];
     }
     wxChoice* choice = new wxChoice(panel, wxID_ANY, wxPoint(20, y + 20), wxSize(width, 30), wxitems);
-    if (hasKey(j, "default")) {
+    if (hasKey(j, "default") && j["items"].size()>j["default"]) {
         choice->SetSelection(j["default"]);
+    }
+    else {
+        choice->SetSelection(0);
     }
     Component* comp = new Component(choice, comp_type::TYPE_CHOICE);
     if (hasKey(j, "values") && j["values"].size() == j["items"].size()) {
@@ -260,7 +285,7 @@ Component* Component::PutChoice(wxPanel* panel, nlohmann::json j, int y) {
 }
 
 Component* Component::PutCheckBox(wxPanel* panel, nlohmann::json j, int y) {
-    wxCheckBox* check = new wxCheckBox(panel, wxID_ANY, j["label"], wxPoint(20, y), wxSize(350, 25));
+    wxCheckBox* check = new wxCheckBox(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y), wxSize(350, 25));
     Component* comp = new Component(check, comp_type::TYPE_CHECK);
     if (hasKey(j, "value")) {
         comp->SetValue(j["value"]);
@@ -274,11 +299,11 @@ Component* Component::PutCheckBox(wxPanel* panel, nlohmann::json j, int y) {
 }
 
 Component* Component::PutCheckBoxes(wxPanel* panel, nlohmann::json j, int y) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, j["label"], wxPoint(20, y));
+    wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     std::vector<wxCheckBox*>* checks = new std::vector<wxCheckBox*>();
     wxCheckBox* check;
     for (int i = 0; i < j["items"].size(); i++) {
-        check = new wxCheckBox(panel, wxID_ANY, j["items"][i], wxPoint(20, y + 20 + i * 20), wxSize(350, 15));
+        check = new wxCheckBox(panel, wxID_ANY, wxString::FromUTF8(j["items"][i]), wxPoint(20, y + 20 + i * 20), wxSize(350, 15));
         checks->push_back(check);
     }
     Component* comp = new Component(checks, comp_type::TYPE_CHECKS);
