@@ -1,5 +1,6 @@
 ver0.0.4
 - Added UTF-8 support for Windows
+- Added format check for gui_definition.json
 
 ver0.0.3
 - Added checkboxes to GUI components

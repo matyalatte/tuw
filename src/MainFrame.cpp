@@ -25,13 +25,13 @@ MainFrame::MainFrame()
     
     if (definition["gui"].size() > 1) {
         for (int i = 0; i < definition["gui"].size(); i++) {
-            menuFile->Append(wxID_HIGHEST + i + 1, wxString::FromUTF8(definition["gui"][i]["label"]));
-            menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
+menuFile->Append(wxID_HIGHEST + i + 1, wxString::FromUTF8(definition["gui"][i]["label"]));
+menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
         }
     }
     menuFile->Append(wxID_EXIT, "Quit");
     menuBar->Append(menuFile, "Menu");
-    
+
     //put help urls to menu bar
     if (hasKey(definition, "help")) {
         wxMenu* menuHelp = new wxMenu;
@@ -41,13 +41,14 @@ MainFrame::MainFrame()
             menuHelp->Bind(wxEVT_MENU, &MainFrame::OpenURL, this, wxID_HIGHEST + i + 1 + definition["gui"].size());
         }
         menuBar->Append(menuHelp, "Help");
+
     }
     SetMenuBar(menuBar);
 
     //set close event
     Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
     Bind(wxEVT_MENU, [this](wxCommandEvent&) { Close(true); }, wxID_EXIT);
-    
+
     //put components
     mainPanel = new wxPanel(this);
     components = std::vector<Component>();
@@ -56,19 +57,19 @@ MainFrame::MainFrame()
     //run button
     wxButton* button = new wxButton(mainPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(143, y), wxSize(105, 25));
     Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::RunCommand));
-    
+
     mainPanel->Show();
 
     Layout();
     Centre();
-    SetSize(wxSize(405, y+105));
+    SetSize(wxSize(405, y + 105));
     SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
 //get default definition of gui
 nlohmann::json default_definition() {
     nlohmann::json def =
-        {
+    {
 #ifdef _WIN32
             {"label", "Default GUI"},
             {"command", {"dir"} },
@@ -78,7 +79,7 @@ nlohmann::json default_definition() {
             {"button", "run 'ls'"},
 #endif
             {"components",{}}
-        };
+    };
     return def;
 }
 
@@ -91,17 +92,109 @@ bool hasKey(nlohmann::json json, std::string key) {
 
 
 std::string checkSubDefinition(nlohmann::json sub_definition) {
+    //check if keys exist
     std::vector<std::string> keys = { "label", "button", "command", "components" };
     for (std::string key : keys) {
         if (!hasKey(sub_definition, key)) {
-            return "'" + key + "' not found";
+            return "'" + key + "' not found.";
         }
     }
-    keys = {"type", "label"};
+
+    //check is_string
+    keys = { "label", "button" };
+    if (hasKey(sub_definition, "window_name")) {
+        keys.push_back("window_name");
+    }
+    for (std::string key : keys) {
+        if (!sub_definition[key].is_string()) {
+            return "'" + key + "' should be a string.";
+        }
+    }
+
+    //check is_boolean
+    if (hasKey(sub_definition, "show_last_line") && !sub_definition["show_last_line"].is_boolean()) {
+        return "'show_last_line' should be a boolean.";
+    }
+    
+    //check is_array
+    keys = { "command", "components" };
+    for (std::string key : keys) {
+        if (!sub_definition[key].is_array()) {
+            return "'" + key + "' should be an array.";
+        }
+    }
+
+    //check components
+    keys = { "type", "label" };
+    std::vector<std::string> subkeys = {};
+    std::string label;
     for (nlohmann::json c : sub_definition["components"]) {
+        //check if type and label exist
         for (std::string key : keys) {
             if (!hasKey(c, key)) {
-                return "components['" + key + "'] not found";
+                return "components['" + key + "'] not found.";
+            }
+            if (!c[key].is_string()) {
+                return "components['" + key + "'] should be a string.";
+            }
+        }
+        label = std::string(c["label"]);
+        if (c["type"]=="file"){
+            if (hasKey(c, "extention") && !c["extension"].is_string()) {
+                return label + "['extention'] should be a string.";
+            }
+        }
+        else if(c["type"] == "choice") {
+            subkeys = { "items", "values" };
+            for (std::string key : subkeys) {
+                if (hasKey(c, key) && !c[key].is_array()) {
+                    return label + "['" + key +"'] should be an array.";
+                }
+            }
+            subkeys = { "width", "default" };
+            for (std::string key : subkeys) {
+                if (hasKey(c, key) && !c[key].is_number()) {
+                    return label + "['" + key + "'] should be an int.";
+                }
+            }
+        }
+        else if (c["type"] == "check") {
+            if (hasKey(c, "value") && !c["value"].is_string()) {
+                return label + "['value'] should be a string.";
+            }
+        }
+        else if (c["type"] == "checks") {
+            if (!hasKey(c, "items")) {
+                return label + "['items'] not found.";
+            }
+            if (!c["items"].is_array()) {
+                return label + "['items'] should be an array.";
+            }
+            if (hasKey(c, "values")) {
+                if (!c["values"].is_array()) {
+                    return label + "['values'] should be an array.";
+                }
+                if (c["values"].size()!=c["items"].size()) {
+                    return label + "['values'] and " + label + "['items'] should have the same size.";
+                }
+            }
+        }
+    }
+    return "__null__";
+}
+
+std::string checkHelpURLs(nlohmann::json definition) {
+    if (!definition["help"].is_array()) {
+        return "'help' should be an array.";
+    }
+    std::vector<std::string> keys = { "type", "label", "url" };
+    for (nlohmann::json h : definition["help"]) {
+        for (std::string key : keys) {
+            if (!hasKey(h, key)) {
+                return "'" + key + "' not found.";
+            }
+            if (!h[key].is_string()) {
+                return "'" + key + "' should be a string.";
             }
         }
     }
@@ -114,7 +207,7 @@ void MainFrame::LoadDefinition() {
     std::string msg;
 
     if (!istream) {
-        msg = "Fialed to load gui_definition.json";
+        msg = "Fialed to load gui_definition.json (Not found)";
         std::cout << "[LoadDefinition] " << msg << std::endl;
         ShowErrorDialog(msg);
         sub_definition = default_definition();
@@ -128,7 +221,7 @@ void MainFrame::LoadDefinition() {
         istream.close();
     }
     catch (...) {
-        msg = "Fialed to load gui_definition.json";
+        msg = "Fialed to load gui_definition.json (Can not read)";
         std::cout << "[LoadDefinition] " << msg << std::endl;
         ShowErrorDialog(msg);
         sub_definition = default_definition();
@@ -138,20 +231,35 @@ void MainFrame::LoadDefinition() {
     
 
     //check format
-    if (hasKey(definition, "gui")) {
+    if (hasKey(definition, "gui") && definition["gui"].is_array()) {
         sub_definition = definition["gui"][0];
     }
     else {
-        msg = "Json format error('gui' not found)";
+        msg = "Fialed to load gui_definition.json ('gui' array not found.)";
         std::cout << "[LoadDefinition] " << msg << std::endl;
         ShowErrorDialog(msg);
         sub_definition = default_definition();
+        definition = { { "gui", {sub_definition}} };
         return;
     }
 
+    //check help urls
+    if (hasKey(definition, "help")) {
+        msg = checkHelpURLs(definition);
+        if (msg != "__null__") {
+            msg = "Fialed to load help URLs (" + msg + ")";
+            std::cout << "[LoadDefinition] " << msg << std::endl;
+            ShowErrorDialog(msg);
+            definition.erase("help");
+            return;
+        }
+    }
+
+
+    //check panel definitions
     msg = checkSubDefinition(sub_definition);
     if (msg!="__null__") {
-        msg = "Json format error("+ msg +")";
+        msg = "Fialed to load gui_definition.json ("+ msg +")";
         std::cout << "[LoadDefinition] " << msg << std::endl;
         ShowErrorDialog(msg);
         sub_definition = default_definition();

@@ -166,29 +166,29 @@ void Component::SetConfig(nlohmann::json config) {
     std::vector<wxCheckBox*> checks;
     switch (type) {
     case comp_type::TYPE_FILE:
-        if (hasKey(config, "str")) {
+        if (hasKey(config, "str") && config["str"].is_string()) {
             ((wxFilePickerCtrl*)widget)->SetPath(wxString::FromUTF8(config["str"]));
             ((wxFilePickerCtrl*)widget)->SetInitialDirectory(wxPathOnly(wxString::FromUTF8(config["str"])));
         }
         break;
     case comp_type::TYPE_FOLDER:
-        if (hasKey(config, "str")) {
+        if (hasKey(config, "str") && config["str"].is_string()) {
             ((wxDirPickerCtrl*)widget)->SetPath(wxString::FromUTF8(config["str"]));
             ((wxDirPickerCtrl*)widget)->SetInitialDirectory(wxString::FromUTF8(config["str"]));
         }
         break;
     case comp_type::TYPE_CHOICE:
-        if (hasKey(config, "int") && config["int"] < values.size()) {
+        if (hasKey(config, "int") && config["int"].is_number() && config["int"] < values.size()) {
             ((wxChoice*)widget)->SetSelection(config["int"]);
         }
         break;
     case comp_type::TYPE_CHECK:
-        if (hasKey(config, "int")) {
+        if (hasKey(config, "int") && config["int"].is_number()) {
             ((wxCheckBox*)widget)->SetValue(config["int"]!=0);
         }
         break;
     case comp_type::TYPE_CHECKS:
-        if (hasKey(config, "ints")) {
+        if (hasKey(config, "ints") && config["int"].is_array()) {
             checks = *(std::vector<wxCheckBox*>*)widget;
             for (int i = 0; i < config["ints"].size() && i<checks.size(); i++) {
                 checks[i]->SetValue(config["ints"][i] != 0);
