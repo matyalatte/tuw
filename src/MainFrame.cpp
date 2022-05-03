@@ -72,10 +72,10 @@ nlohmann::json default_definition() {
     {
 #ifdef _WIN32
             {"label", "Default GUI"},
-            {"command", {"dir"} },
+            {"command", "dir" },
             {"button", "run 'dir'"},
 #else
-            {"command", {"ls"} },
+            {"command", "ls" },
             {"button", "run 'ls'"},
 #endif
             {"components",{}}
@@ -101,7 +101,7 @@ std::string checkSubDefinition(nlohmann::json sub_definition) {
     }
 
     //check is_string
-    keys = { "label", "button" };
+    keys = { "label", "button", "command"};
     if (hasKey(sub_definition, "window_name")) {
         keys.push_back("window_name");
     }
@@ -117,7 +117,7 @@ std::string checkSubDefinition(nlohmann::json sub_definition) {
     }
     
     //check is_array
-    keys = { "command", "components" };
+    keys = { "components" };
     for (std::string key : keys) {
         if (!sub_definition[key].is_array()) {
             return "'" + key + "' should be an array.";
@@ -323,15 +323,34 @@ void MainFrame::ShowSuccessDialog(std::string msg) {
     dialog->Destroy();
 }
 
+
+
+std::vector<std::string> split(const std::string& s, const char delimiter)
+{
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(s);
+    bool store = true;
+    while (std::getline(tokenStream, token, delimiter))
+    {
+        if (store) {
+            tokens.push_back(token);
+            store = false;
+        }
+        else {
+            store = true;
+        }
+    }
+    return tokens;
+}
+
 //run command
 void MainFrame::RunCommand(wxCommandEvent& event) {
     //save config
     SaveConfig();
 
-
     //make command string
-    std::vector<std::string> cmd_ary = sub_definition["command"];
-
+    std::vector<std::string> cmd_ary = split(sub_definition["command"], '%');
     wxString cmd = "";
     int i = 0;
     for (Component c : components) {

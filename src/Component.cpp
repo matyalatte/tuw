@@ -88,16 +88,20 @@ std::vector<int> Component::GetInts() {
     return ints;
 }
 
+wxString Quote(wxString str) {
+    return "\"" + str + "\"";
+}
+
 wxString Component::GetString() {
 	wxString str = "";
     std::vector<wxCheckBox*> checks;
 	int sel;
 	switch (type) {
 	case comp_type::TYPE_FILE:
-		str = ((wxFilePickerCtrl*)widget)->GetPath();
+		str = Quote(((wxFilePickerCtrl*)widget)->GetPath());
 		break;
 	case comp_type::TYPE_FOLDER:
-		str = ((wxDirPickerCtrl*)widget)->GetPath();
+		str = Quote(((wxDirPickerCtrl*)widget)->GetPath());
 		break;
 	case comp_type::TYPE_CHOICE:
 		sel = ((wxChoice*)widget)->GetSelection();
