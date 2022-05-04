@@ -3,7 +3,7 @@
         {
             "label": "convert",
             "window_name": "Texconv",
-            "command": ["texconv.exe \"", "\" -o \"", "\" -f"],
+            "command": "texconv.exe %file% -o %output% -f%format%",
             "button": "Convert",
             "show_last_line": true,
             "components": [

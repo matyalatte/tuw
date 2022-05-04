@@ -1,5 +1,5 @@
 [![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg)
-# Simple-Command-Runner ver 0.0.3
+# Simple-Command-Runner ver 0.0.4
 Simple GUI builder to execute commands.<br>
 
 ## About
