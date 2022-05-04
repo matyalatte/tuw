@@ -38,7 +38,7 @@ private:
 	std::string value;
 	bool hasString;
 	std::string label;
-
+	wxString GetRawString();
 	void SetLabel(std::string str);
 
 	static Component* PutText(wxPanel* panel, nlohmann::json j, int y);

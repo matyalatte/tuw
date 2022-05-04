@@ -88,25 +88,21 @@ std::vector<int> Component::GetInts() {
     return ints;
 }
 
-wxString Quote(wxString str) {
-    return "\"" + str + "\"";
-}
-
-wxString Component::GetString() {
-	wxString str = "";
+wxString Component::GetRawString() {
+    wxString str = "";
     std::vector<wxCheckBox*> checks;
-	int sel;
-	switch (type) {
-	case comp_type::TYPE_FILE:
-		str = Quote(((wxFilePickerCtrl*)widget)->GetPath());
-		break;
-	case comp_type::TYPE_FOLDER:
-		str = Quote(((wxDirPickerCtrl*)widget)->GetPath());
-		break;
-	case comp_type::TYPE_CHOICE:
-		sel = ((wxChoice*)widget)->GetSelection();
-		str = wxString::FromUTF8(values[sel]);
-		break;
+    int sel;
+    switch (type) {
+    case comp_type::TYPE_FILE:
+        str = ((wxFilePickerCtrl*)widget)->GetPath();
+        break;
+    case comp_type::TYPE_FOLDER:
+        str = ((wxDirPickerCtrl*)widget)->GetPath();
+        break;
+    case comp_type::TYPE_CHOICE:
+        sel = ((wxChoice*)widget)->GetSelection();
+        str = wxString::FromUTF8(values[sel]);
+        break;
     case comp_type::TYPE_CHECK:
         if (((wxCheckBox*)widget)->GetValue()) {
             str = wxString::FromUTF8(value);
@@ -115,14 +111,34 @@ wxString Component::GetString() {
     case comp_type::TYPE_CHECKS:
         str = "";
         checks = *(std::vector<wxCheckBox*>*)widget;
-        for (int i=0; i<checks.size();i++){
+        for (int i = 0; i < checks.size(); i++) {
             if (checks[i]->GetValue()) {
                 str += wxString::FromUTF8(values[i]);
             }
         }
         break;
-	default:
+    default:
         str = "";
+    }
+    return str;
+}
+
+wxString Quote(wxString str) {
+    return "\"" + str + "\"";
+}
+
+wxString Component::GetString() {
+	wxString str = GetRawString();
+	switch (type) {
+	case comp_type::TYPE_FILE:
+	case comp_type::TYPE_FOLDER:
+		str = Quote(str);
+		break;
+	case comp_type::TYPE_CHOICE:
+    case comp_type::TYPE_CHECK:
+    case comp_type::TYPE_CHECKS:
+	default:
+        break;
 	}
 	return str;
 }
@@ -148,9 +164,9 @@ nlohmann::json Component::GetConfig() {
     case comp_type::TYPE_FOLDER:
 #ifdef _WIN32
         //utf-16 to utf-8 for Windows
-        config["str"] = wstring_to_utf8(std::wstring(GetString()));
+        config["str"] = wstring_to_utf8(std::wstring(GetRawString()));
 #else
-        config["str"] = GetString();
+        config["str"] = GetRawString();
 #endif
         break;
     case comp_type::TYPE_CHOICE:

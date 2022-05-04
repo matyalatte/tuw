@@ -1,0 +1,114 @@
+name: build
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+  
+env:
+  ZIP_NAME: SimpleCommandRunner
+  WX_VERSION: 3.1.5
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+    
+      - name: Check tag
+        run: |
+          if [[ ${{ github.ref }} == refs/tags/v* ]]; then
+            VERSION=-$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
+          else
+            VERSION=""
+          fi
+          echo "REPO_VERSION=$VERSION" >> $GITHUB_ENV
+        shell: bash
+        
+      - uses: actions/checkout@v2
+      
+      - name: Setup msbuild
+        uses: microsoft/setup-msbuild@v1.1
+        
+      # Gets cache
+      - name: Cache wxWidget
+        uses: actions/cache@v2
+        id: cache-wx
+        with:
+            path: "C:/wxWidgets-${{ env.WX_VERSION }}"
+            key: windows-wx${{ env.WX_VERSION }}
+            restore-keys: windows-wx${{ env.WX_VERSION }}-
+        
+      - name: download wxWidget
+        if: steps.cache-wx.outputs.cache-hit != 'true'
+        run: |
+          cd C:/
+          curl -OL https://github.com/wxWidgets/wxWidgets/releases/download/v${{ env.WX_VERSION }}/wxWidgets-${{ env.WX_VERSION }}.zip
+          unzip -d wxWidgets-${{ env.WX_VERSION }} wxWidgets-${{ env.WX_VERSION }}.zip
+          ls
+        shell: bash
+        
+      - name: build wxWidget
+        if: steps.cache-wx.outputs.cache-hit != 'true'
+        run: |
+          cd C:/wxWidgets-${{ env.WX_VERSION }}
+          mkdir release
+          cd release
+          cmake -G "Visual Studio 17 2022" -A x64 -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=install -D wxBUILD_SHARED=OFF ../
+          msbuild INSTALL.vcxproj /t:build /p:configuration=Release /p:platform=x64 -maxcpucount
+          del C:/wxWidgets-${{ env.WX_VERSION }}.zip
+          
+      - name: copy wx to git repo
+        run: |
+          mkdir 3rdparty
+          cp -r C:/wxWidgets-${{ env.WX_VERSION }}/release/install 3rdparty/wxWidgets-${{ env.WX_VERSION }}
+
+      - name: build exe
+        run: |
+          mkdir build
+          cd build
+          cmake -G "Visual Studio 17 2022" -A x64 -D CMAKE_BUILD_TYPE=Release -D CMAKE_BUILD_SHARED=OFF ../
+          msbuild SimpleCommandRunner.vcxproj /t:build /p:configuration=Release /p:platform=x64 -maxcpucount
+
+      - name: Copy files
+        run: |
+          mkdir -p ../release
+          cp build/Release/SimpleCommandRunner.exe ../release/
+          cp samples/advanced/gui_definition.json ../release/
+          cp changelog.txt ../release/
+          cp license.txt ../release/
+        shell: bash
+
+      - name: Archive Release
+        uses: thedoctor0/zip-release@master
+        with:
+          directory: '../release'
+          type: 'zip'
+          filename: '${{ env.ZIP_NAME }}.zip'
+          exclusions: '*.git* .gitignore'
+          
+      - name: Create Release Draft
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body: |
+            Changelog
+            - First Change
+            - Second Change
+          draft: true
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset-python
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ../release/${{ env.ZIP_NAME }}.zip
+          asset_name: ${{ env.ZIP_NAME }}${{ env.REPO_VERSION }}.zip
+          asset_content_type: application/zip
