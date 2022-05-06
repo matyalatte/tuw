@@ -1,5 +1,7 @@
 [![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg)
-# Simple-Command-Runner ver 0.0.4
+[![Linux](https://svgshare.com/i/Zhy.svg)](https://svgshare.com/i/Zhy.svg)
+![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/main.yml/badge.svg)
+# Simple-Command-Runner ver 0.1.0
 Simple GUI builder to execute commands.<br>
 
 ## About
@@ -11,6 +13,7 @@ You don't need to use IDE and manage scripts for GUI.<br>
 ![sample](https://user-images.githubusercontent.com/69258547/166093114-4165e28a-452e-4844-a4d9-19b34bfe001c.png)<br>
 
 ## Features
+- Cross-platform
 - Standalone
 - No need to use IDE for GUI
 - Define GUI in .json

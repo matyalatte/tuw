@@ -1,7 +1,11 @@
+ver0.1.0
+- Added support for linux (ubuntu)
+- Fixed bug when compiling with gcc
+
 ver0.0.4
 - Added UTF-8 support for Windows
 - Added format check for gui_definition.json
-- Added auto-quotes to path components
+- Added a function to add quotes to path
 - Changed command format
 
 ver0.0.3

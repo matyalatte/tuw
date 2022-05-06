@@ -399,7 +399,7 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
 MainFrame::~MainFrame(){}
 
 void MainFrame::OpenURL(wxCommandEvent& event) {
-    std::string url = wxString::FromUTF8(definition["help"][event.GetId() - 1 - wxID_HIGHEST - definition["gui"].size()]["url"]);
+    wxString url = wxString::FromUTF8(definition["help"][event.GetId() - 1 - wxID_HIGHEST - definition["gui"].size()]["url"]);
     std::cout << "[OpenURL] " << url << std::endl;
     bool res = wxLaunchDefaultBrowser(url);
 }

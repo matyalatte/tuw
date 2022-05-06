@@ -6,6 +6,7 @@
 #for windows
 .vs
 out
+3rdparty
 build
 SimpleCommandRunner-v*
 *.exe
