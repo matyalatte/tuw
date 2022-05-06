@@ -1,8 +1,4 @@
-#pragma once
 #include "Component.h"
-#ifdef _WIN32
-#include <codecvt> //char code converter for Windows system
-#endif
 
 //Drop target for path picker
 template <typename T>

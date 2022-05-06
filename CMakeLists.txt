@@ -20,7 +20,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(json)
 
 if (WIN32)
-    #you may need to edit here
+	#you may need to edit here
 	set(wxWidgets_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/wxWidgets-3.1.5)
 endif()
 

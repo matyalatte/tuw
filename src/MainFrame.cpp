@@ -1,18 +1,49 @@
-#pragma once
 #include "MainFrame.h"
-#include "Exec.h"
-#include <fstream>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <array>
 
-const char* VERSION = "0.0.4";
+const char* VERSION = "0.1.0";
+
+//Console window for unix
+#ifndef _WIN32
+LogFrame::LogFrame(wxString exepath) : wxFrame(nullptr, wxID_ANY, exepath, \
+    wxDefaultPosition, wxSize(600, 400), \
+    wxSYSTEM_MENU | \
+    wxRESIZE_BORDER | \
+    wxMINIMIZE_BOX | \
+    wxMAXIMIZE_BOX | \
+    wxCAPTION | \
+    wxCLIP_CHILDREN) {
+    
+    logBox = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+    logBox->SetBackgroundColour(*wxBLACK);
+    logBox->SetForegroundColour(*wxWHITE);
+    wxFont font = logBox->GetFont();
+    font.SetPointSize(font.GetPointSize() + 1);
+    logBox->SetFont(font);
+    logRedirector = new wxStreamToTextRedirector(logBox);
+    Centre();
+    wxPoint pos = GetPosition();
+    SetPosition(wxPoint(pos.x-300, pos.y));
+    Show();
+}
+
+LogFrame::~LogFrame() {};
+
+void LogFrame::OnClose(wxCloseEvent& event)
+{
+    Destroy();
+}
+#endif
 
 //Main window
 MainFrame::MainFrame()
     : wxFrame(nullptr, wxID_ANY, "Simple Command Runner")
 {
+#ifndef _WIN32
+    wxStandardPaths& path = wxStandardPaths::Get();
+    path.UseAppInfo(wxStandardPaths::AppInfo_None);
+    wxString strExe = path.GetExecutablePath();
+    logFrame = new LogFrame(strExe);
+#endif
     std::cout << "Simple Command Runner v" << VERSION << " by matyalatte" << std::endl;
     
     //get gui definition
@@ -53,9 +84,8 @@ menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
     mainPanel = new wxPanel(this);
     components = std::vector<Component>();
     int y = UpdatePanel(mainPanel);
+    runButton = new wxButton(mainPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(143, y), wxSize(105, 25));
 
-    //run button
-    wxButton* button = new wxButton(mainPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(143, y), wxSize(105, 25));
     Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::RunCommand));
 
     mainPanel->Show();
@@ -309,14 +339,14 @@ void MainFrame::SaveConfig() {
     }
 }
 
-void MainFrame::ShowErrorDialog(std::string msg) {
+void MainFrame::ShowErrorDialog(wxString msg) {
     wxMessageDialog* dialog;
     dialog = new wxMessageDialog(this, msg, "Error", wxICON_ERROR | wxOK | wxCENTRE);
     dialog->ShowModal();
     dialog->Destroy();
 }
 
-void MainFrame::ShowSuccessDialog(std::string msg) {
+void MainFrame::ShowSuccessDialog(wxString msg) {
     wxMessageDialog* dialog;
     dialog = new wxMessageDialog(this, msg, "Success");
     dialog->ShowModal();
@@ -369,14 +399,15 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
         cmd += cmd_ary[i];
         i += 1;
     }
-
+    wxString text = runButton->GetLabel();
+    runButton->SetLabel("Processing...");
     //run command
     std::cout << "[RunCommand] Command: " << cmd << std::endl;
 #ifdef _WIN32
     cmd = "cmd.exe /c " + cmd;
 #endif
-    std::vector<std::string> msg = exec(cmd);
-
+    std::vector<wxString> msg = exec(cmd);
+    runButton->SetLabel(text);
     if (msg[0] == "__null__") {
         std::cout << "[RunCommand] Execution failed. " << std::endl;
         return;
@@ -420,10 +451,12 @@ void MainFrame::UpdateFrame(wxCommandEvent& event)
     
     wxPanel* newPanel = new wxPanel(this);
     int y = UpdatePanel(newPanel);
-    wxButton* button = new wxButton(newPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(158, y), wxSize(75, 25));
+    wxButton* newRunButton = new wxButton(newPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(143, y), wxSize(105, 25));
+
     newPanel->Show();
     wxPanel* unused = mainPanel;
     mainPanel = newPanel;
+    runButton = newRunButton;
     unused->Destroy();
 
     Layout();
@@ -466,10 +499,14 @@ int MainFrame::UpdatePanel(wxPanel* panel)
             components.push_back(*newComp);
         }
     }
+
     return y;
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
+#ifndef _WIN32
+    logFrame->Destroy();
+#endif
     Destroy();
 }

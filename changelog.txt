@@ -1,5 +1,6 @@
 ver0.1.0
 - Added support for linux (ubuntu)
+- Added console window for unix
 - Fixed bug when compiling with gcc
 
 ver0.0.4

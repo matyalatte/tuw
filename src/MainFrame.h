@@ -1,11 +1,25 @@
 #pragma once
 #include <wx/wx.h>
 #include <wx/filepicker.h>
-#pragma once
 #include <nlohmann/json.hpp>
 #include "Component.h"
+#include "Exec.h"
+#include <fstream>
+#include <iostream>
 
+#ifndef _WIN32
+#include <wx/stdpaths.h>
 
+class LogFrame : public wxFrame {
+private:
+    wxTextCtrl* logBox;
+    wxStreamToTextRedirector* logRedirector;
+public:
+    LogFrame(wxString exepath);
+    virtual ~LogFrame();
+    void OnClose(wxCloseEvent& event);
+};
+#endif
 
 //Main window
 class MainFrame : public wxFrame
@@ -14,24 +28,22 @@ private:
     nlohmann::json definition;
     nlohmann::json sub_definition;
     nlohmann::json config;
-
+#ifndef _WIN32
+    LogFrame* logFrame;
+#endif
     std::vector<Component> components;
     wxPanel* mainPanel;
+    wxButton* runButton;
 
     void LoadDefinition();
     int UpdatePanel(wxPanel* panel);
     void LoadConfig();
     void UpdateConfig();
     void SaveConfig();
-    void ShowErrorDialog(std::string msg);
-    void ShowSuccessDialog(std::string msg);
+    void ShowErrorDialog(wxString msg);
+    void ShowSuccessDialog(wxString msg);
 
 public:
-    //std::array<std::string, 2> names = { "Frame1", "Frame2" };
-    //wxFilePickerCtrl* filePicker;
-    //wxFilePickerCtrl* filePicker2;
-    //wxDirPickerCtrl* folderPicker;
-    //wxChoice* choice;
     MainFrame();
     virtual ~MainFrame();
 

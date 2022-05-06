@@ -5,6 +5,10 @@
 #include <wx/dnd.h>
 #include <string>
 
+#ifdef _WIN32
+#include <codecvt> //char code converter for Windows system
+#endif
+
 //Drop target for path picker
 template <typename T>
 class DropFilePath : public wxFileDropTarget
@@ -70,6 +74,7 @@ public:
 
 #ifdef _WIN32
 std::string wstring_to_utf8(const std::wstring& str);
+std::wstring utf8_to_wstring(const std::string& str);
 #endif
 
 bool hasKey(nlohmann::json json, std::string key);

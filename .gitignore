@@ -1,10 +1,9 @@
 #general
 *.json
 !samples/*/gui_definition.json
-3rdparty
 
 #for windows
-.vs
+*.vs
 out
 3rdparty
 build
