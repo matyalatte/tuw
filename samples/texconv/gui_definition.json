@@ -10,11 +10,13 @@
                 {
                     "type": "file",
                     "label": "Texture file",
-                    "extension": "any files | *"
+                    "extension": "any files | *",
+                    "add_quotes": true
                 },
                 {
                     "type": "folder",
-                    "label": "Output path"
+                    "label": "Output path",
+                    "add_quotes": true
                 },
                 {
                     "type": "choice",

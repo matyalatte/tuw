@@ -209,6 +209,9 @@ std::string checkSubDefinition(nlohmann::json sub_definition) {
                 }
             }
         }
+        if (hasKey(c, "add_quotes") && !c["add_quotes"].is_boolean()) {
+            return label + "['add_quotes'] should be a boolean.";
+        }
     }
     return "__null__";
 }

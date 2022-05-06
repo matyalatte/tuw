@@ -124,18 +124,10 @@ wxString Quote(wxString str) {
 }
 
 wxString Component::GetString() {
-	wxString str = GetRawString();
-	switch (type) {
-	case comp_type::TYPE_FILE:
-	case comp_type::TYPE_FOLDER:
-		str = Quote(str);
-		break;
-	case comp_type::TYPE_CHOICE:
-    case comp_type::TYPE_CHECK:
-    case comp_type::TYPE_CHECKS:
-	default:
-        break;
-	}
+    wxString str = GetRawString();
+    if (addQuotes){
+        return Quote(str);
+    }
 	return str;
 }
 
@@ -232,6 +224,10 @@ void Component::SetLabel(std::string str) {
 
 std::string Component::GetLabel() {
     return label;
+}
+
+void Component::SetAddQuotes(bool add) {
+    addQuotes = add;
 }
 
 bool Component::HasString() {
@@ -357,6 +353,9 @@ Component* Component::PutComponent(wxPanel* panel, nlohmann::json j, int y) {
     }
     else {
         std::cout << "[UpdatePanel] unknown component type detected. (" << j["type"] << ")" << std::endl;
+    }
+    if (hasKey(j, "add_quotes")) {
+        comp->SetAddQuotes(j["add_quotes"]);
     }
     comp->SetLabel(j["label"]);
     return comp;

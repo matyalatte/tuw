@@ -41,9 +41,11 @@ private:
 	std::vector<std::string> values;
 	std::string value;
 	bool hasString;
+	bool addQuotes;
 	std::string label;
 	wxString GetRawString();
 	void SetLabel(std::string str);
+	void SetAddQuotes(bool add);
 
 	static Component* PutText(wxPanel* panel, nlohmann::json j, int y);
 	static Component* PutFilePicker(wxPanel* panel, nlohmann::json j, int y);

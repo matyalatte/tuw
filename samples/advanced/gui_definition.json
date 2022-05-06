@@ -4,7 +4,7 @@
         {
             "label": "Sample GUI",
             "window_name": "Simple Command Runner",
-            "command": "echo file: %file% & echo folder: %folder% & echo num: %num% & echo checkbox: %check%",
+            "command": "echo \"file: %file%\" & echo \"folder: %folder%\" & echo \"num: %num%\" & echo \"checkbox: %check%\"",
             "button": "Echo!",
             "components": [
                 {
@@ -37,7 +37,7 @@
         {
             "label": "Sample GUI2",
             "window_name": "Simple Command Runner",
-            "command": "echo num: %hoo% & echo file: %bar% & echo Sample message!",
+            "command": "echo \"num: %hoo%\" & echo \"file: %bar%\" & echo \"Sample message!\"",
             "button": "Echo!",
             "show_last_line": true,
             "components": [
