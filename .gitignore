@@ -12,8 +12,6 @@ SimpleCommandRunner-v*
 *.zip
 
 #for unix
-*.sh
-!build.sh
 build
 
 #for test scripts

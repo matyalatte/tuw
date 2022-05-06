@@ -1,6 +1,7 @@
 ver0.1.0
 - Added support for linux (ubuntu)
 - Added console window for unix
+- Added add_quotes option to components
 - Fixed bug when compiling with gcc
 
 ver0.0.4
