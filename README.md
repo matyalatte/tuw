@@ -29,7 +29,7 @@ But I haven't tested enough yet.<br>
 There may be some bugs.
 
 ## Downloads
-Download `UE4-DDS-tools*.zip` from [here](https://github.com/matyalatte/UE4-DDS-tools/releases)<br>
+Download `SimpleCommandRunner*.zip` from [here](https://github.com/matyalatte/Simple-Command-Runner/releases)<br>
 
 \* There are no releases for linux and mac.
 

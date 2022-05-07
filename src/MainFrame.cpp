@@ -103,8 +103,8 @@ MainFrame::MainFrame()
 nlohmann::json default_definition() {
     nlohmann::json def =
     {
-#ifdef _WIN32
             {"label", "Default GUI"},
+#ifdef _WIN32
             {"command", "dir" },
             {"button", "run 'dir'"},
 #else
