@@ -1,5 +1,5 @@
-[![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg)
-# Simple-Command-Runner ver 0.0.4
+![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/main.yml/badge.svg)
+# Simple-Command-Runner ver 0.1.0
 Simple GUI builder to execute commands.<br>
 
 ## About
@@ -11,14 +11,20 @@ You don't need to use IDE and manage scripts for GUI.<br>
 ![sample](https://user-images.githubusercontent.com/69258547/166093114-4165e28a-452e-4844-a4d9-19b34bfe001c.png)<br>
 
 ## Features
+- Cross-platform
 - Standalone
 - No need to use IDE for GUI
 - Define GUI in .json
 
 ## Platforms
 Simple Command Runner uses cross-platform framework.<br>
-But I only tested with Windows10.<br>
-It may not work for other platforms.
+I made sure we can build it with the following platforms and compilers.
+- Windows10 + MSVC 19.31
+- Ubuntu 20.04 + GNU 9.4
+- MacOS 10.15 + AppleClang 12.0
+
+But I haven't tested enough yet.<br>
+There may be some bugs.
 
 ## Samples
 There are some [sample json files](./samples) to understand how to use.<br>

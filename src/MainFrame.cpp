@@ -1,18 +1,52 @@
-#pragma once
 #include "MainFrame.h"
-#include "Exec.h"
-#include <fstream>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <array>
 
-const char* VERSION = "0.0.4";
+const char* VERSION = "0.1.0";
+
+//Console window for unix
+#ifdef __linux__
+LogFrame::LogFrame(wxString exepath) : wxFrame(nullptr, wxID_ANY, exepath, \
+    wxDefaultPosition, wxSize(600, 400), \
+    wxSYSTEM_MENU | \
+    wxRESIZE_BORDER | \
+    wxMINIMIZE_BOX | \
+    wxMAXIMIZE_BOX | \
+    wxCAPTION | \
+    wxCLIP_CHILDREN) {
+    
+    logBox = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+    logBox->SetBackgroundColour(*wxBLACK);
+    logBox->SetForegroundColour(*wxWHITE);
+    wxFont font = logBox->GetFont();
+    font.SetPointSize(font.GetPointSize() + 1);
+    logBox->SetFont(font);
+    logRedirector = new wxStreamToTextRedirector(logBox);
+    Centre();
+    wxPoint pos = GetPosition();
+    SetPosition(wxPoint(pos.x-300, pos.y));
+    Show();
+}
+
+LogFrame::~LogFrame() {};
+
+void LogFrame::OnClose(wxCloseEvent& event)
+{
+    Destroy();
+}
+#endif
 
 //Main window
 MainFrame::MainFrame()
     : wxFrame(nullptr, wxID_ANY, "Simple Command Runner")
 {
+#ifndef _WIN32 
+    wxStandardPaths& path = wxStandardPaths::Get();
+    path.UseAppInfo(wxStandardPaths::AppInfo_None);
+    wxString strExe = path.GetExecutablePath();
+    wxSetWorkingDirectory(wxPathOnly(strExe));
+#endif
+#ifdef __linux__
+    logFrame = new LogFrame(strExe);
+#endif
     std::cout << "Simple Command Runner v" << VERSION << " by matyalatte" << std::endl;
     
     //get gui definition
@@ -25,8 +59,8 @@ MainFrame::MainFrame()
     
     if (definition["gui"].size() > 1) {
         for (int i = 0; i < definition["gui"].size(); i++) {
-menuFile->Append(wxID_HIGHEST + i + 1, wxString::FromUTF8(definition["gui"][i]["label"]));
-menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
+            menuFile->Append(wxID_HIGHEST + i + 1, wxString::FromUTF8(definition["gui"][i]["label"]));
+            menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
         }
     }
     menuFile->Append(wxID_EXIT, "Quit");
@@ -53,9 +87,8 @@ menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
     mainPanel = new wxPanel(this);
     components = std::vector<Component>();
     int y = UpdatePanel(mainPanel);
+    runButton = new wxButton(mainPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(143, y), wxSize(105, 25));
 
-    //run button
-    wxButton* button = new wxButton(mainPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(143, y), wxSize(105, 25));
     Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::RunCommand));
 
     mainPanel->Show();
@@ -138,7 +171,7 @@ std::string checkSubDefinition(nlohmann::json sub_definition) {
                 return "components['" + key + "'] should be a string.";
             }
         }
-        label = std::string(c["label"]);
+        label = c["label"];
         if (c["type"]=="file"){
             if (hasKey(c, "extention") && !c["extension"].is_string()) {
                 return label + "['extention'] should be a string.";
@@ -178,6 +211,9 @@ std::string checkSubDefinition(nlohmann::json sub_definition) {
                     return label + "['values'] and " + label + "['items'] should have the same size.";
                 }
             }
+        }
+        if (hasKey(c, "add_quotes") && !c["add_quotes"].is_boolean()) {
+            return label + "['add_quotes'] should be a boolean.";
         }
     }
     return "__null__";
@@ -309,14 +345,14 @@ void MainFrame::SaveConfig() {
     }
 }
 
-void MainFrame::ShowErrorDialog(std::string msg) {
+void MainFrame::ShowErrorDialog(wxString msg) {
     wxMessageDialog* dialog;
     dialog = new wxMessageDialog(this, msg, "Error", wxICON_ERROR | wxOK | wxCENTRE);
     dialog->ShowModal();
     dialog->Destroy();
 }
 
-void MainFrame::ShowSuccessDialog(std::string msg) {
+void MainFrame::ShowSuccessDialog(wxString msg) {
     wxMessageDialog* dialog;
     dialog = new wxMessageDialog(this, msg, "Success");
     dialog->ShowModal();
@@ -369,14 +405,15 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
         cmd += cmd_ary[i];
         i += 1;
     }
-
+    wxString text = runButton->GetLabel();
+    runButton->SetLabel("Processing...");
     //run command
     std::cout << "[RunCommand] Command: " << cmd << std::endl;
 #ifdef _WIN32
     cmd = "cmd.exe /c " + cmd;
 #endif
-    std::vector<std::string> msg = exec(cmd);
-
+    std::vector<wxString> msg = exec(cmd);
+    runButton->SetLabel(text);
     if (msg[0] == "__null__") {
         std::cout << "[RunCommand] Execution failed. " << std::endl;
         return;
@@ -399,7 +436,7 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
 MainFrame::~MainFrame(){}
 
 void MainFrame::OpenURL(wxCommandEvent& event) {
-    std::string url = wxString::FromUTF8(definition["help"][event.GetId() - 1 - wxID_HIGHEST - definition["gui"].size()]["url"]);
+    wxString url = wxString::FromUTF8(definition["help"][event.GetId() - 1 - wxID_HIGHEST - definition["gui"].size()]["url"]);
     std::cout << "[OpenURL] " << url << std::endl;
     bool res = wxLaunchDefaultBrowser(url);
 }
@@ -420,10 +457,12 @@ void MainFrame::UpdateFrame(wxCommandEvent& event)
     
     wxPanel* newPanel = new wxPanel(this);
     int y = UpdatePanel(newPanel);
-    wxButton* button = new wxButton(newPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(158, y), wxSize(75, 25));
+    wxButton* newRunButton = new wxButton(newPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(143, y), wxSize(105, 25));
+
     newPanel->Show();
     wxPanel* unused = mainPanel;
     mainPanel = newPanel;
+    runButton = newRunButton;
     unused->Destroy();
 
     Layout();
@@ -466,10 +505,14 @@ int MainFrame::UpdatePanel(wxPanel* panel)
             components.push_back(*newComp);
         }
     }
+
     return y;
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
+#ifdef __linux__
+    logFrame->Destroy();
+#endif
     Destroy();
 }

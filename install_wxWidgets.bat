@@ -6,7 +6,7 @@ set VS_VERSION=Visual Studio 17 2022
 set WX_VERSION=3.1.5
 
 REM install folder
-mkdir -p 3rdparty\wxWidgets-3.1.5
+mkdir -p 3rdparty\wxWidgets-%WX_VERSION%
 
 
 REM ** Download wxWidgets **

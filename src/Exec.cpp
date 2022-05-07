@@ -1,7 +1,4 @@
-#pragma once
 #include "Exec.h"
-#include <iostream>
-#include <wx/process.h>
 
 class wxProcessExecute : public wxProcess {
 public:
@@ -41,7 +38,7 @@ inline bool is_return(const char& input)
     return input == '\n' || input == '\r';
 }
 
-std::string last_line(const std::string& input)
+wxString last_line(const wxString& input)
 {
     if (input.length() <= 2) return input;
     size_t position = input.length() - 3;
@@ -51,19 +48,19 @@ std::string last_line(const std::string& input)
 }
 
 //get string from stream
-std::string read_stream(wxInputStream* stream, char* buf, size_t size) {
+wxString read_stream(wxInputStream* stream, char* buf, size_t size) {
     if (stream->CanRead()) {
         size_t read_size;
         stream->Read(buf, size);
         read_size = stream->LastRead();
-        return std::string(buf, read_size);
+        return wxString(buf, read_size);
     }
     return "";
 }
 
 //run command and return error messages
-std::vector<std::string> exec(const char* cmd) {
-
+std::vector<wxString> exec(const char* cmd) {
+    
     //open process
     wxProcessExecute* process = wxProcessExecute::Open(cmd);
     if (!process) {
@@ -75,14 +72,15 @@ std::vector<std::string> exec(const char* cmd) {
     wxInputStream* estream = process->GetErrorStream();
 
     //set buffers
-    size_t size = 512;
+    size_t size = 512;https://docs.wxwidgets.org/3.0/classwx_dialog__inherit__graph.png
     size_t read_size = 0;
     char ibuf[512]; //buffer for output
     char ebuf[512]; //buffer for error messages
-    std::string str = "";
-    std::string in_msg = "";
-    std::string err_msg = "";
-    while (!istream->Eof() && !estream->Eof()) {//while process is running
+    wxString str = "";
+    wxString in_msg = "";
+    wxString err_msg = "";
+    
+    while ((!istream->Eof() && !estream->Eof()) || istream->CanRead() || estream->CanRead()) {//while process is running
         //print outputs
         str = read_stream(istream, ibuf, size);
         std::cout << str;
@@ -91,7 +89,6 @@ std::vector<std::string> exec(const char* cmd) {
         //store error messages
         err_msg += read_stream(estream, ebuf, size);
     }
-
     //get last line
     in_msg = last_line(in_msg);
 

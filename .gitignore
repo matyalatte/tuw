@@ -1,19 +1,17 @@
 #general
 *.json
 !samples/*/gui_definition.json
-3rdparty
 
 #for windows
-.vs
+*.vs
 out
+3rdparty
 build
 SimpleCommandRunner-v*
 *.exe
 *.zip
 
 #for unix
-*.sh
-!build.sh
 build
 
 #for test scripts

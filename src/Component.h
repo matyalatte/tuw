@@ -5,6 +5,10 @@
 #include <wx/dnd.h>
 #include <string>
 
+#ifdef _WIN32
+#include <codecvt> //char code converter for Windows system
+#endif
+
 //Drop target for path picker
 template <typename T>
 class DropFilePath : public wxFileDropTarget
@@ -37,9 +41,11 @@ private:
 	std::vector<std::string> values;
 	std::string value;
 	bool hasString;
+	bool addQuotes;
 	std::string label;
 	wxString GetRawString();
 	void SetLabel(std::string str);
+	void SetAddQuotes(bool add);
 
 	static Component* PutText(wxPanel* panel, nlohmann::json j, int y);
 	static Component* PutFilePicker(wxPanel* panel, nlohmann::json j, int y);
@@ -70,6 +76,7 @@ public:
 
 #ifdef _WIN32
 std::string wstring_to_utf8(const std::wstring& str);
+std::wstring utf8_to_wstring(const std::string& str);
 #endif
 
 bool hasKey(nlohmann::json json, std::string key);

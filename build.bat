@@ -1,4 +1,4 @@
-REM build SimpleCommandRunner with cmake and VS2022
+REM Builds SimpleCommandRunner with cmake and VS2022
 REM SimpleCommandRunner.exe will be generated in ./build/Release
 
 set MSBUILD=C:\Program Files\Microsoft Visual Studio\2022\Community\Msbuild\Current\Bin\MSBuild.exe
