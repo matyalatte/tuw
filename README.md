@@ -1,4 +1,6 @@
-![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/main.yml/badge.svg)
+![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_windows.yml/badge.svg)
+![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_ubuntu.yml/badge.svg)
+![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_mac.yml/badge.svg)
 # Simple-Command-Runner ver 0.1.0
 Simple GUI builder to execute commands.<br>
 
@@ -25,6 +27,12 @@ I made sure we can build it with the following platforms and compilers.
 
 But I haven't tested enough yet.<br>
 There may be some bugs.
+
+## Downloads
+Download `UE4-DDS-tools*.zip` from [here](https://github.com/matyalatte/UE4-DDS-tools/releases)<br>
+
+\* There are no releases for linux and mac.
+
 
 ## Samples
 There are some [sample json files](./samples) to understand how to use.<br>
