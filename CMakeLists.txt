@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 
-#set(CMAKE_BUILD_TYPE DEBUG)
-
 #project
 set(PROJECT_NAME SimpleCommandRunner)
 project(${PROJECT_NAME})

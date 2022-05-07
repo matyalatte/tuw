@@ -1,6 +1,9 @@
 name: build_windows
 
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
   
 env:
@@ -11,7 +14,16 @@ jobs:
   build:
     runs-on: windows-2022
     steps:
-
+      - name: Check tag
+        id: check-tag
+        run: |
+          if [[ ${{ github.ref }} == refs/tags/v* ]]; then
+            VERSION=-$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
+          else
+            VERSION=""
+          fi
+          echo "::set-output name=version::$VERSION"
+        shell: bash
       - uses: actions/checkout@v2
       
       - name: Setup msbuild
@@ -23,7 +35,7 @@ jobs:
         id: cache-wx
         with:
           path: "C:/wxWidgets-${{ env.WX_VERSION }}"
-          key: windows-wx${{ env.WX_VERSION }}
+          key: ${{ runner.os }}-wx${{ env.WX_VERSION }}
         
       - name: download wxWidget
         if: steps.cache-wx.outputs.cache-hit != 'true'
@@ -31,7 +43,6 @@ jobs:
           cd C:/
           curl -OL https://github.com/wxWidgets/wxWidgets/releases/download/v${{ env.WX_VERSION }}/wxWidgets-${{ env.WX_VERSION }}.zip
           unzip -d wxWidgets-${{ env.WX_VERSION }} wxWidgets-${{ env.WX_VERSION }}.zip
-          ls
         shell: bash
         
       - name: build wxWidget
@@ -96,5 +107,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ../release/${{ env.ZIP_NAME }}.zip
-          asset_name: ${{ env.ZIP_NAME }}.zip
+          asset_name: ${{ env.ZIP_NAME }}${{ steps.check-tag.outputs.version }}.zip
           asset_content_type: application/zip

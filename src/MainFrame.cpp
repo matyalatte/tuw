@@ -3,7 +3,7 @@
 const char* VERSION = "0.1.0";
 
 //Console window for unix
-#ifndef _WIN32
+#ifdef __linux__
 LogFrame::LogFrame(wxString exepath) : wxFrame(nullptr, wxID_ANY, exepath, \
     wxDefaultPosition, wxSize(600, 400), \
     wxSYSTEM_MENU | \
@@ -38,10 +38,13 @@ void LogFrame::OnClose(wxCloseEvent& event)
 MainFrame::MainFrame()
     : wxFrame(nullptr, wxID_ANY, "Simple Command Runner")
 {
-#ifndef _WIN32
+#ifndef _WIN32 
     wxStandardPaths& path = wxStandardPaths::Get();
     path.UseAppInfo(wxStandardPaths::AppInfo_None);
     wxString strExe = path.GetExecutablePath();
+    wxSetWorkingDirectory(wxPathOnly(strExe));
+#endif
+#ifdef __linux__
     logFrame = new LogFrame(strExe);
 #endif
     std::cout << "Simple Command Runner v" << VERSION << " by matyalatte" << std::endl;
@@ -56,8 +59,8 @@ MainFrame::MainFrame()
     
     if (definition["gui"].size() > 1) {
         for (int i = 0; i < definition["gui"].size(); i++) {
-menuFile->Append(wxID_HIGHEST + i + 1, wxString::FromUTF8(definition["gui"][i]["label"]));
-menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
+            menuFile->Append(wxID_HIGHEST + i + 1, wxString::FromUTF8(definition["gui"][i]["label"]));
+            menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
         }
     }
     menuFile->Append(wxID_EXIT, "Quit");
@@ -168,7 +171,7 @@ std::string checkSubDefinition(nlohmann::json sub_definition) {
                 return "components['" + key + "'] should be a string.";
             }
         }
-        label = std::string(c["label"]);
+        label = c["label"];
         if (c["type"]=="file"){
             if (hasKey(c, "extention") && !c["extension"].is_string()) {
                 return label + "['extention'] should be a string.";
@@ -508,7 +511,7 @@ int MainFrame::UpdatePanel(wxPanel* panel)
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
-#ifndef _WIN32
+#ifdef __linux__
     logFrame->Destroy();
 #endif
     Destroy();

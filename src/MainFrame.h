@@ -9,7 +9,9 @@
 
 #ifndef _WIN32
 #include <wx/stdpaths.h>
+#endif
 
+#ifdef __linux__
 class LogFrame : public wxFrame {
 private:
     wxTextCtrl* logBox;
@@ -28,7 +30,7 @@ private:
     nlohmann::json definition;
     nlohmann::json sub_definition;
     nlohmann::json config;
-#ifndef _WIN32
+#ifdef __linux__
     LogFrame* logFrame;
 #endif
     std::vector<Component> components;
