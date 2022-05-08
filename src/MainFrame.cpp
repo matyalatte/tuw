@@ -51,7 +51,7 @@ MainFrame::MainFrame()
     
     //get gui definition
     LoadDefinition();
-    LoadConfig();
+    config = jsonUtils::loadJson("gui_config.json");
 
     //make menu bar
     wxMenuBar* menuBar = new wxMenuBar;
@@ -67,7 +67,7 @@ MainFrame::MainFrame()
     menuBar->Append(menuFile, "Menu");
 
     //put help urls to menu bar
-    if (hasKey(definition, "help")) {
+    if (jsonUtils::hasKey(definition, "help")) {
         wxMenu* menuHelp = new wxMenu;
 
         for (int i = 0; i < definition["help"].size(); i++) {
@@ -99,189 +99,38 @@ MainFrame::MainFrame()
     SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
-//get default definition of gui
-nlohmann::json default_definition() {
-    nlohmann::json def =
-    {
-            {"label", "Default GUI"},
-#ifdef _WIN32
-            {"command", "dir" },
-            {"button", "run 'dir'"},
-#else
-            {"command", "ls" },
-            {"button", "run 'ls'"},
-#endif
-            {"components",{}}
-    };
-    return def;
-}
-
-/*
-bool hasKey(nlohmann::json json, std::string key) {
-    auto subjectIdIter = json.find(key);
-    return subjectIdIter != json.end();
-}
-*/
-
-
-std::string checkSubDefinition(nlohmann::json sub_definition) {
-    //check if keys exist
-    std::vector<std::string> keys = { "label", "button", "command", "components" };
-    for (std::string key : keys) {
-        if (!hasKey(sub_definition, key)) {
-            return "'" + key + "' not found.";
-        }
-    }
-
-    //check is_string
-    keys = { "label", "button", "command"};
-    if (hasKey(sub_definition, "window_name")) {
-        keys.push_back("window_name");
-    }
-    for (std::string key : keys) {
-        if (!sub_definition[key].is_string()) {
-            return "'" + key + "' should be a string.";
-        }
-    }
-
-    //check is_boolean
-    if (hasKey(sub_definition, "show_last_line") && !sub_definition["show_last_line"].is_boolean()) {
-        return "'show_last_line' should be a boolean.";
-    }
-    
-    //check is_array
-    keys = { "components" };
-    for (std::string key : keys) {
-        if (!sub_definition[key].is_array()) {
-            return "'" + key + "' should be an array.";
-        }
-    }
-
-    //check components
-    keys = { "type", "label" };
-    std::vector<std::string> subkeys = {};
-    std::string label;
-    for (nlohmann::json c : sub_definition["components"]) {
-        //check if type and label exist
-        for (std::string key : keys) {
-            if (!hasKey(c, key)) {
-                return "components['" + key + "'] not found.";
-            }
-            if (!c[key].is_string()) {
-                return "components['" + key + "'] should be a string.";
-            }
-        }
-        label = c["label"];
-        if (c["type"]=="file"){
-            if (hasKey(c, "extention") && !c["extension"].is_string()) {
-                return label + "['extention'] should be a string.";
-            }
-        }
-        else if(c["type"] == "choice") {
-            subkeys = { "items", "values" };
-            for (std::string key : subkeys) {
-                if (hasKey(c, key) && !c[key].is_array()) {
-                    return label + "['" + key +"'] should be an array.";
-                }
-            }
-            subkeys = { "width", "default" };
-            for (std::string key : subkeys) {
-                if (hasKey(c, key) && !c[key].is_number()) {
-                    return label + "['" + key + "'] should be an int.";
-                }
-            }
-        }
-        else if (c["type"] == "check") {
-            if (hasKey(c, "value") && !c["value"].is_string()) {
-                return label + "['value'] should be a string.";
-            }
-        }
-        else if (c["type"] == "checks") {
-            if (!hasKey(c, "items")) {
-                return label + "['items'] not found.";
-            }
-            if (!c["items"].is_array()) {
-                return label + "['items'] should be an array.";
-            }
-            if (hasKey(c, "values")) {
-                if (!c["values"].is_array()) {
-                    return label + "['values'] should be an array.";
-                }
-                if (c["values"].size()!=c["items"].size()) {
-                    return label + "['values'] and " + label + "['items'] should have the same size.";
-                }
-            }
-        }
-        if (hasKey(c, "add_quotes") && !c["add_quotes"].is_boolean()) {
-            return label + "['add_quotes'] should be a boolean.";
-        }
-    }
-    return "__null__";
-}
-
-std::string checkHelpURLs(nlohmann::json definition) {
-    if (!definition["help"].is_array()) {
-        return "'help' should be an array.";
-    }
-    std::vector<std::string> keys = { "type", "label", "url" };
-    for (nlohmann::json h : definition["help"]) {
-        for (std::string key : keys) {
-            if (!hasKey(h, key)) {
-                return "'" + key + "' not found.";
-            }
-            if (!h[key].is_string()) {
-                return "'" + key + "' should be a string.";
-            }
-        }
-    }
-    return "__null__";
-}
 
 //read gui_definition.json
 void MainFrame::LoadDefinition() {
     std::ifstream istream("gui_definition.json");
     std::string msg;
+    definition = jsonUtils::loadJson("gui_definition.json");
 
-    if (!istream) {
-        msg = "Fialed to load gui_definition.json (Not found)";
+    if (definition == nlohmann::json({})) {
+        msg = "Fialed to load gui_definition.json (Can't read)";
         std::cout << "[LoadDefinition] " << msg << std::endl;
         ShowErrorDialog(msg);
-        sub_definition = default_definition();
+        sub_definition = jsonUtils::default_definition();
         definition = { { "gui", {sub_definition}} };
         return;
     }
-
-    //read json file
-    try {
-        istream >> definition;
-        istream.close();
-    }
-    catch (...) {
-        msg = "Fialed to load gui_definition.json (Can not read)";
-        std::cout << "[LoadDefinition] " << msg << std::endl;
-        ShowErrorDialog(msg);
-        sub_definition = default_definition();
-        definition = { { "gui", {sub_definition}} };
-        return;
-    }
-    
 
     //check format
-    if (hasKey(definition, "gui") && definition["gui"].is_array()) {
+    if (jsonUtils::hasKey(definition, "gui") && definition["gui"].is_array()) {
         sub_definition = definition["gui"][0];
     }
     else {
         msg = "Fialed to load gui_definition.json ('gui' array not found.)";
         std::cout << "[LoadDefinition] " << msg << std::endl;
         ShowErrorDialog(msg);
-        sub_definition = default_definition();
+        sub_definition = jsonUtils::default_definition();
         definition = { { "gui", {sub_definition}} };
         return;
     }
 
     //check help urls
-    if (hasKey(definition, "help")) {
-        msg = checkHelpURLs(definition);
+    if (jsonUtils::hasKey(definition, "help")) {
+        msg = jsonUtils::checkHelpURLs(definition);
         if (msg != "__null__") {
             msg = "Fialed to load help URLs (" + msg + ")";
             std::cout << "[LoadDefinition] " << msg << std::endl;
@@ -291,57 +140,31 @@ void MainFrame::LoadDefinition() {
         }
     }
 
-
     //check panel definitions
-    msg = checkSubDefinition(sub_definition);
+    msg = jsonUtils::checkSubDefinition(sub_definition);
     if (msg!="__null__") {
         msg = "Fialed to load gui_definition.json ("+ msg +")";
         std::cout << "[LoadDefinition] " << msg << std::endl;
         ShowErrorDialog(msg);
-        sub_definition = default_definition();
+        sub_definition = jsonUtils::default_definition();
         return;
     }
     std::cout << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
 }
-
-
 
 void MainFrame::UpdateConfig() {
     for (Component c: components){
         config[c.GetLabel()] = c.GetConfig();
     }
 }
-void MainFrame::LoadConfig() {
-    std::ifstream istream("gui_config.json");
-    if (!istream) {
-        std::cout << "[LoadConfig] Fialed to load gui_config.json" << std::endl;
-        config = {};
-    }
-    else {
-        try {
-            istream >> config;
-            istream.close();
-            std::cout << "[LoadConfig] Loaded gui_config.json" << std::endl;
-        }
-        catch(...) {
-            std::cout << "[LoadConfig] Fialed to load gui_config.json" << std::endl;
-            config = {};
-        }
-    }
-
-}
 
 void MainFrame::SaveConfig() {
-    UpdateConfig();
-    std::ofstream ostream("gui_config.json");
-
-    if (!ostream) {
-        std::cout << "[SaveConfig] Fialed to write gui_config.json" << std::endl;
+    bool saved = jsonUtils::saveJson(config, "gui_config.json");
+    if (saved) {
+        std::cout << "[SaveConfig] Saved gui_config.json" << std::endl;
     }
     else {
-        std::cout << "[SaveConfig] Saved gui_config.json" << std::endl;
-        ostream << std::setw(4) << config << std::endl;
-        ostream.close();
+        std::cout << "[SaveConfig] Failed to write gui_config.json" << std::endl;
     }
 }
 
@@ -383,6 +206,7 @@ std::vector<std::string> split(const std::string& s, const char delimiter)
 //run command
 void MainFrame::RunCommand(wxCommandEvent& event) {
     //save config
+    UpdateConfig();
     SaveConfig();
 
     //make command string
@@ -412,7 +236,7 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
 #ifdef _WIN32
     cmd = "cmd.exe /c " + cmd;
 #endif
-    std::vector<wxString> msg = exec(cmd);
+    std::vector<std::string> msg = exec(cmd);
     runButton->SetLabel(text);
     if (msg[0] == "__null__") {
         std::cout << "[RunCommand] Execution failed. " << std::endl;
@@ -424,7 +248,7 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
         ShowErrorDialog(msg[1]);
     }
     else {//if success
-        if (hasKey(sub_definition, "show_last_line") && sub_definition["show_last_line"]!=0 && msg[0]!="") {
+        if (jsonUtils::hasKey(sub_definition, "show_last_line") && sub_definition["show_last_line"]!=0 && msg[0]!="") {
             ShowSuccessDialog(msg[0]);
         }
         else {
@@ -444,12 +268,12 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
 void MainFrame::UpdateFrame(wxCommandEvent& event)
 {
     sub_definition = definition["gui"][event.GetId() - 1 - wxID_HIGHEST];
-    std::string msg = checkSubDefinition(sub_definition);
+    std::string msg = jsonUtils::checkSubDefinition(sub_definition);
     if (msg != "__null__") {
         msg = "Json format error(" + msg + ")";
         std::cout << "[UpdateFrame] " << msg << std::endl;
         ShowErrorDialog(msg);
-        sub_definition = default_definition();
+        sub_definition = jsonUtils::default_definition();
         return;
     }
 
@@ -476,14 +300,13 @@ int MainFrame::UpdatePanel(wxPanel* panel)
     std::string str = "Simple Command Runner";
     str = sub_definition["label"];
     std::cout << "[UpdatePanel] " << str.c_str() << std::endl;
-    if (hasKey(sub_definition, "window_name")) {
+    if (jsonUtils::hasKey(sub_definition, "window_name")) {
         SetLabel(wxString::FromUTF8(sub_definition["window_name"]));
     }
     else {
         SetLabel("Simple Command Runner");
     }
 
-    //file picker
     int y = 10;
     if (sub_definition["components"].is_null()) {
         sub_definition["components"] = std::vector<nlohmann::json>();
@@ -499,7 +322,7 @@ int MainFrame::UpdatePanel(wxPanel* panel)
         newComp = Component::PutComponent(panel, c, y);
         if (newComp != nullptr) {
             y += newComp->GetHeight();
-            if (hasKey(config, newComp->GetLabel())) {
+            if (jsonUtils::hasKey(config, newComp->GetLabel())) {
                 newComp->SetConfig(config[newComp->GetLabel()]);
             }
             components.push_back(*newComp);

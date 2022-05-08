@@ -174,29 +174,29 @@ void Component::SetConfig(nlohmann::json config) {
     std::vector<wxCheckBox*> checks;
     switch (type) {
     case comp_type::TYPE_FILE:
-        if (hasKey(config, "str") && config["str"].is_string()) {
+        if (jsonUtils::hasKey(config, "str") && config["str"].is_string()) {
             ((wxFilePickerCtrl*)widget)->SetPath(wxString::FromUTF8(config["str"]));
             ((wxFilePickerCtrl*)widget)->SetInitialDirectory(wxPathOnly(wxString::FromUTF8(config["str"])));
         }
         break;
     case comp_type::TYPE_FOLDER:
-        if (hasKey(config, "str") && config["str"].is_string()) {
+        if (jsonUtils::hasKey(config, "str") && config["str"].is_string()) {
             ((wxDirPickerCtrl*)widget)->SetPath(wxString::FromUTF8(config["str"]));
             ((wxDirPickerCtrl*)widget)->SetInitialDirectory(wxString::FromUTF8(config["str"]));
         }
         break;
     case comp_type::TYPE_CHOICE:
-        if (hasKey(config, "int") && config["int"].is_number() && config["int"] < values.size()) {
+        if (jsonUtils::hasKey(config, "int") && config["int"].is_number() && config["int"] < values.size()) {
             ((wxChoice*)widget)->SetSelection(config["int"]);
         }
         break;
     case comp_type::TYPE_CHECK:
-        if (hasKey(config, "int") && config["int"].is_number()) {
+        if (jsonUtils::hasKey(config, "int") && config["int"].is_number()) {
             ((wxCheckBox*)widget)->SetValue(config["int"]!=0);
         }
         break;
     case comp_type::TYPE_CHECKS:
-        if (hasKey(config, "ints") && config["int"].is_array()) {
+        if (jsonUtils::hasKey(config, "ints") && config["int"].is_array()) {
             checks = *(std::vector<wxCheckBox*>*)widget;
             for (int i = 0; i < config["ints"].size() && i<checks.size(); i++) {
                 checks[i]->SetValue(config["ints"][i] != 0);
@@ -244,7 +244,7 @@ Component* Component::PutText(wxPanel* panel, nlohmann::json j, int y) {
 Component* Component::PutFilePicker(wxPanel* panel, nlohmann::json j, int y) {
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     wxString ext;
-    if (hasKey(j, "extension")) {
+    if (jsonUtils::hasKey(j, "extension")) {
         ext = wxString::FromUTF8(j["extension"]);
     }
     else{
@@ -275,18 +275,18 @@ Component* Component::PutChoice(wxPanel* panel, nlohmann::json j, int y) {
         });
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     int width = 95;
-    if (hasKey(j, "width")) {
+    if (jsonUtils::hasKey(j, "width")) {
         width = j["width"];
     }
     wxChoice* choice = new wxChoice(panel, wxID_ANY, wxPoint(20, y + 20), wxSize(width, 30), wxitems);
-    if (hasKey(j, "default") && j["items"].size()>j["default"]) {
+    if (jsonUtils::hasKey(j, "default") && j["items"].size()>j["default"]) {
         choice->SetSelection(j["default"]);
     }
     else {
         choice->SetSelection(0);
     }
     Component* comp = new Component(choice, comp_type::TYPE_CHOICE);
-    if (hasKey(j, "values") && j["values"].size() == j["items"].size()) {
+    if (jsonUtils::hasKey(j, "values") && j["values"].size() == j["items"].size()) {
         comp->SetValues(j["values"]);
     }
     else {
@@ -299,7 +299,7 @@ Component* Component::PutChoice(wxPanel* panel, nlohmann::json j, int y) {
 Component* Component::PutCheckBox(wxPanel* panel, nlohmann::json j, int y) {
     wxCheckBox* check = new wxCheckBox(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y), wxSize(350, 25));
     Component* comp = new Component(check, comp_type::TYPE_CHECK);
-    if (hasKey(j, "value")) {
+    if (jsonUtils::hasKey(j, "value")) {
         comp->SetValue(j["value"]);
     }
     else {
@@ -319,7 +319,7 @@ Component* Component::PutCheckBoxes(wxPanel* panel, nlohmann::json j, int y) {
         checks->push_back(check);
     }
     Component* comp = new Component(checks, comp_type::TYPE_CHECKS);
-    if (hasKey(j, "values")) {
+    if (jsonUtils::hasKey(j, "values")) {
         comp->SetValues(j["values"]);
     }
     else {
@@ -354,14 +354,9 @@ Component* Component::PutComponent(wxPanel* panel, nlohmann::json j, int y) {
     else {
         std::cout << "[UpdatePanel] unknown component type detected. (" << j["type"] << ")" << std::endl;
     }
-    if (hasKey(j, "add_quotes")) {
+    if (jsonUtils::hasKey(j, "add_quotes")) {
         comp->SetAddQuotes(j["add_quotes"]);
     }
     comp->SetLabel(j["label"]);
     return comp;
-}
-
-bool hasKey(nlohmann::json json, std::string key) {
-    auto subjectIdIter = json.find(key);
-    return subjectIdIter != json.end();
 }

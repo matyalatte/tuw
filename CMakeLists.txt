@@ -33,8 +33,10 @@ add_executable(${PROJECT_NAME}
 	"src/MainFrame.cpp"
 	"src/Exec.h"
 	"src/Exec.cpp"
-	"src/Component.cpp"
 	"src/Component.h"
+	"src/Component.cpp"
+	"src/JsonUtils.h"
+	"src/JsonUtils.cpp"
 )
 
 #link libraries

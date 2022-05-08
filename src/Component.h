@@ -4,6 +4,7 @@
 #include <wx/filepicker.h>
 #include <wx/dnd.h>
 #include <string>
+#include "JsonUtils.h"
 
 #ifdef _WIN32
 #include <codecvt> //char code converter for Windows system
@@ -78,5 +79,3 @@ public:
 std::string wstring_to_utf8(const std::wstring& str);
 std::wstring utf8_to_wstring(const std::string& str);
 #endif
-
-bool hasKey(nlohmann::json json, std::string key);

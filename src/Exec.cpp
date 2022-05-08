@@ -38,7 +38,7 @@ inline bool is_return(const char& input)
     return input == '\n' || input == '\r';
 }
 
-wxString last_line(const wxString& input)
+std::string last_line(const std::string& input)
 {
     if (input.length() <= 2) return input;
     size_t position = input.length() - 3;
@@ -48,18 +48,18 @@ wxString last_line(const wxString& input)
 }
 
 //get string from stream
-wxString read_stream(wxInputStream* stream, char* buf, size_t size) {
+std::string read_stream(wxInputStream* stream, char* buf, size_t size) {
     if (stream->CanRead()) {
         size_t read_size;
         stream->Read(buf, size);
         read_size = stream->LastRead();
-        return wxString(buf, read_size);
+        return std::string(buf, read_size);
     }
     return "";
 }
 
 //run command and return error messages
-std::vector<wxString> exec(const char* cmd) {
+std::vector<std::string> exec(const char* cmd) {
     
     //open process
     wxProcessExecute* process = wxProcessExecute::Open(cmd);
@@ -76,9 +76,9 @@ std::vector<wxString> exec(const char* cmd) {
     size_t read_size = 0;
     char ibuf[512]; //buffer for output
     char ebuf[512]; //buffer for error messages
-    wxString str = "";
-    wxString in_msg = "";
-    wxString err_msg = "";
+    std::string str = "";
+    std::string in_msg = "";
+    std::string err_msg = "";
     
     while ((!istream->Eof() && !estream->Eof()) || istream->CanRead() || estream->CanRead()) {//while process is running
         //print outputs
