@@ -85,7 +85,7 @@ MainFrame::MainFrame()
 
     //put components
     mainPanel = new wxPanel(this);
-    components = std::vector<Component>();
+    components = std::vector<Component*>();
     int y = UpdatePanel(mainPanel);
     runButton = new wxButton(mainPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(143, y), wxSize(105, 25));
 
@@ -153,8 +153,8 @@ void MainFrame::LoadDefinition() {
 }
 
 void MainFrame::UpdateConfig() {
-    for (Component c: components){
-        config[c.GetLabel()] = c.GetConfig();
+    for (Component* c: components){
+        config[c->GetLabel()] = c->GetConfig();
     }
 }
 
@@ -213,14 +213,14 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
     std::vector<std::string> cmd_ary = split(sub_definition["command"], '%');
     wxString cmd = "";
     int i = 0;
-    for (Component c : components) {
-        if (c.HasString()) {
+    for (Component* c : components) {
+        if (c->HasString()) {
             if (cmd_ary.size() <= i) {
                 std::cout << "[RunCommand]: Json format error (Can not make command)" << std::endl;
                 ShowErrorDialog("Json format error (Can not make command)");
                 return;
             }
-            cmd += cmd_ary[i] + c.GetString();
+            cmd += cmd_ary[i] + c->GetString();
             i += 1;
         }
     }
@@ -325,7 +325,7 @@ int MainFrame::UpdatePanel(wxPanel* panel)
             if (jsonUtils::hasKey(config, newComp->GetLabel())) {
                 newComp->SetConfig(config[newComp->GetLabel()]);
             }
-            components.push_back(*newComp);
+            components.push_back(newComp);
         }
     }
 

@@ -24,52 +24,32 @@ public:
 	virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) override;
 };
 
-enum comp_type {
-	TYPE_TEXT,
-	TYPE_FILE,
-	TYPE_FOLDER,
-	TYPE_CHOICE,
-	TYPE_CHECK,
-	TYPE_CHECKS
-};
-
 //component for GUI
 class Component {
-private:
+protected:
 	void* widget;
-	int type;
-	int height;
 	std::vector<std::string> values;
 	std::string value;
+
+
+private:
+	int height;
 	bool hasString;
 	bool addQuotes;
 	std::string label;
-	wxString GetRawString();
-	void SetLabel(std::string str);
-	void SetAddQuotes(bool add);
-
-	static Component* PutText(wxPanel* panel, nlohmann::json j, int y);
-	static Component* PutFilePicker(wxPanel* panel, nlohmann::json j, int y);
-	static Component* PutDirPicker(wxPanel* panel, nlohmann::json j, int y);
-	static Component* PutChoice(wxPanel* panel, nlohmann::json j, int y);
-	static Component* PutCheckBox(wxPanel* panel, nlohmann::json j, int y);
-	static Component* PutCheckBoxes(wxPanel* panel, nlohmann::json j, int y);
 
 public:
-	Component(void* wid, int t);
+	Component(nlohmann::json j, int height, bool hasString);
 	~Component();
+	virtual wxString GetRawString();
 	wxString GetString();
 	std::string GetLabel();
-	int GetInt();
-	std::vector<int> GetInts();
 	int GetHeight();
-	int GetType();
-	nlohmann::json GetConfig();
-	void SetConfig(nlohmann::json config);
+	virtual nlohmann::json GetConfig();
+	virtual void SetConfig(nlohmann::json config);
 
 	void SetHeight(int h);
 	void SetValues(std::vector<std::string> vals);
-	void SetValue(std::string val);
 	bool HasString();
 
 	static Component* PutComponent(wxPanel* panel, nlohmann::json j, int y);
@@ -79,3 +59,48 @@ public:
 std::string wstring_to_utf8(const std::wstring& str);
 std::wstring utf8_to_wstring(const std::string& str);
 #endif
+
+class Text : public Component {
+public:
+	Text(wxPanel* panel, nlohmann::json j, int y);
+};
+
+class FilePicker : public Component {
+public:
+	wxString GetRawString() override;
+	FilePicker(wxPanel* panel, nlohmann::json j, int y);
+	nlohmann::json GetConfig() override;
+	void SetConfig(nlohmann::json config) override;
+};
+
+class DirPicker : public Component {
+public:
+	wxString GetRawString() override;
+	DirPicker(wxPanel* panel, nlohmann::json j, int y);
+	nlohmann::json GetConfig() override;
+	void SetConfig(nlohmann::json config) override;
+};
+
+class Choice : public Component {
+public:
+	wxString GetRawString() override;
+	Choice(wxPanel* panel, nlohmann::json j, int y);
+	nlohmann::json GetConfig() override;
+	void SetConfig(nlohmann::json config) override;
+};
+
+class CheckBox : public Component {
+public:
+	wxString GetRawString() override;
+	CheckBox(wxPanel* panel, nlohmann::json j, int y);
+	nlohmann::json GetConfig() override;
+	void SetConfig(nlohmann::json config) override;
+};
+
+class CheckBoxes : public Component {
+public:
+	wxString GetRawString() override;
+	CheckBoxes(wxPanel* panel, nlohmann::json j, int y);
+	nlohmann::json GetConfig() override;
+	void SetConfig(nlohmann::json config) override;
+};

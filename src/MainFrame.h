@@ -32,7 +32,7 @@ private:
 #ifdef __linux__
     LogFrame* logFrame;
 #endif
-    std::vector<Component> components;
+    std::vector<Component*> components;
     wxPanel* mainPanel;
     wxButton* runButton;
 

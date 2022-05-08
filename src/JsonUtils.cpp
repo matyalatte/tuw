@@ -25,7 +25,7 @@ namespace jsonUtils {
         }
         ostream << std::setw(4) << json << std::endl;
         ostream.close();
-        return true
+        return true;
     }
 
     bool hasKey(nlohmann::json json, std::string key) {
