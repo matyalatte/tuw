@@ -10,6 +10,6 @@ namespace jsonUtils {
 	bool hasKey(nlohmann::json json, std::string key);
 
 	nlohmann::json default_definition();
-	std::string checkSubDefinition(nlohmann::json sub_definition);
-	std::string checkHelpURLs(nlohmann::json definition);
+	std::string checkSubDefinition(nlohmann::json& sub_definition);
+	std::string checkHelpURLs(nlohmann::json& definition);
 }

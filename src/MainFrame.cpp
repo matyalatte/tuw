@@ -1,6 +1,6 @@
 #include "MainFrame.h"
 
-const char* VERSION = "0.1.0";
+const char* VERSION = "0.1.1";
 
 //Console window for unix
 #ifdef __linux__
@@ -115,19 +115,6 @@ void MainFrame::LoadDefinition() {
         return;
     }
 
-    //check format
-    if (jsonUtils::hasKey(definition, "gui") && definition["gui"].is_array()) {
-        sub_definition = definition["gui"][0];
-    }
-    else {
-        msg = "Fialed to load gui_definition.json ('gui' array not found.)";
-        std::cout << "[LoadDefinition] " << msg << std::endl;
-        ShowErrorDialog(msg);
-        sub_definition = jsonUtils::default_definition();
-        definition = { { "gui", {sub_definition}} };
-        return;
-    }
-
     //check help urls
     if (jsonUtils::hasKey(definition, "help")) {
         msg = jsonUtils::checkHelpURLs(definition);
@@ -140,15 +127,30 @@ void MainFrame::LoadDefinition() {
         }
     }
 
-    //check panel definitions
-    msg = jsonUtils::checkSubDefinition(sub_definition);
-    if (msg!="__null__") {
-        msg = "Fialed to load gui_definition.json ("+ msg +")";
+    //check format
+    if (!jsonUtils::hasKey(definition, "gui") || !definition["gui"].is_array()) {
+        msg = "Fialed to load gui_definition.json ('gui' array not found.)";
         std::cout << "[LoadDefinition] " << msg << std::endl;
         ShowErrorDialog(msg);
         sub_definition = jsonUtils::default_definition();
+        definition["gui"] = {sub_definition};
         return;
     }
+
+    //check panel definitions
+    for (nlohmann::json& sub_d : definition["gui"]) {
+        msg = jsonUtils::checkSubDefinition(sub_d);
+        if (msg != "__null__") {
+            msg = "Fialed to load gui_definition.json (" + msg + ")";
+            std::cout << "[LoadDefinition] " << msg << std::endl;
+            ShowErrorDialog(msg);
+            sub_definition = jsonUtils::default_definition();
+            definition["gui"] = {sub_definition};
+            return;
+        }
+    }
+    sub_definition = definition["gui"][0];
+    
     std::cout << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
 }
 
@@ -257,7 +259,8 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
     }
 }
 
-MainFrame::~MainFrame(){}
+MainFrame::~MainFrame(){
+}
 
 void MainFrame::OpenURL(wxCommandEvent& event) {
     wxString url = wxString::FromUTF8(definition["help"][event.GetId() - 1 - wxID_HIGHEST - definition["gui"].size()]["url"]);
@@ -268,14 +271,6 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
 void MainFrame::UpdateFrame(wxCommandEvent& event)
 {
     sub_definition = definition["gui"][event.GetId() - 1 - wxID_HIGHEST];
-    std::string msg = jsonUtils::checkSubDefinition(sub_definition);
-    if (msg != "__null__") {
-        msg = "Json format error(" + msg + ")";
-        std::cout << "[UpdateFrame] " << msg << std::endl;
-        ShowErrorDialog(msg);
-        sub_definition = jsonUtils::default_definition();
-        return;
-    }
 
     UpdateConfig();
     

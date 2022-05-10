@@ -50,7 +50,34 @@ namespace jsonUtils {
         return def;
     }
 
-    std::string checkSubDefinition(nlohmann::json sub_definition) {
+    std::string checkItemsValues(nlohmann::json& c) {
+        std::string label = c["label"];
+        if (!hasKey(c, "items")) {
+            if (hasKey(c, "item")) {
+                c["items"] = c["item"];
+            }
+            else {
+                return label + "['items'] not found.";
+            }
+        }
+        if (!c["items"].is_array()) {
+            return label + "['items'] should be an array.";
+        }
+        if (!hasKey(c, "values") && hasKey(c, "value")) {
+            c["values"] = c["value"];
+        }
+        if (hasKey(c, "values")) {
+            if (!c["values"].is_array()) {
+                return label + "['values'] should be an array.";
+            }
+            if (c["values"].size() != c["items"].size()) {
+                return label + "['values'] and " + label + "['items'] should have the same size.";
+            }
+        }
+        return "__null__";
+    }
+
+    std::string checkSubDefinition(nlohmann::json& sub_definition) {
         //check if keys exist
         std::vector<std::string> keys = { "label", "button", "command", "components" };
         for (std::string key : keys) {
@@ -87,7 +114,8 @@ namespace jsonUtils {
         keys = { "type", "label" };
         std::vector<std::string> subkeys = {};
         std::string label;
-        for (nlohmann::json c : sub_definition["components"]) {
+        std::string msg;
+        for (nlohmann::json& c : sub_definition["components"]) {
             //check if type and label exist
             for (std::string key : keys) {
                 if (!hasKey(c, key)) {
@@ -104,11 +132,10 @@ namespace jsonUtils {
                 }
             }
             else if (c["type"] == "choice") {
-                subkeys = { "items", "values" };
-                for (std::string key : subkeys) {
-                    if (hasKey(c, key) && !c[key].is_array()) {
-                        return label + "['" + key + "'] should be an array.";
-                    }
+                
+                msg = checkItemsValues(c);
+                if (msg != "__null__") {
+                    return msg;
                 }
                 subkeys = { "width", "default" };
                 for (std::string key : subkeys) {
@@ -122,21 +149,15 @@ namespace jsonUtils {
                     return label + "['value'] should be a string.";
                 }
             }
-            else if (c["type"] == "checks") {
-                if (!hasKey(c, "items")) {
-                    return label + "['items'] not found.";
+            else if (c["type"] == "checks" || c["type"] == "check_array") {
+                c["type"] = "check_array";
+                msg = checkItemsValues(c);
+                if (msg != "__null__") {
+                    return msg;
                 }
-                if (!c["items"].is_array()) {
-                    return label + "['items'] should be an array.";
-                }
-                if (hasKey(c, "values")) {
-                    if (!c["values"].is_array()) {
-                        return label + "['values'] should be an array.";
-                    }
-                    if (c["values"].size() != c["items"].size()) {
-                        return label + "['values'] and " + label + "['items'] should have the same size.";
-                    }
-                }
+            }
+            else if (c["type"] == "text_box") {
+                c["type"] = "text";
             }
             if (hasKey(c, "add_quotes") && !c["add_quotes"].is_boolean()) {
                 return label + "['add_quotes'] should be a boolean.";
@@ -145,7 +166,7 @@ namespace jsonUtils {
         return "__null__";
     }
 
-    std::string checkHelpURLs(nlohmann::json definition) {
+    std::string checkHelpURLs(nlohmann::json& definition) {
         if (!definition["help"].is_array()) {
             return "'help' should be an array.";
         }

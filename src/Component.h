@@ -60,9 +60,9 @@ std::string wstring_to_utf8(const std::wstring& str);
 std::wstring utf8_to_wstring(const std::string& str);
 #endif
 
-class Text : public Component {
+class StaticText : public Component {
 public:
-	Text(wxPanel* panel, nlohmann::json j, int y);
+	StaticText(wxPanel* panel, nlohmann::json j, int y);
 };
 
 class FilePicker : public Component {
@@ -97,10 +97,18 @@ public:
 	void SetConfig(nlohmann::json config) override;
 };
 
-class CheckBoxes : public Component {
+class CheckArray : public Component {
 public:
 	wxString GetRawString() override;
-	CheckBoxes(wxPanel* panel, nlohmann::json j, int y);
+	CheckArray(wxPanel* panel, nlohmann::json j, int y);
+	nlohmann::json GetConfig() override;
+	void SetConfig(nlohmann::json config) override;
+};
+
+class TextBox : public Component {
+public:
+	wxString GetRawString() override;
+	TextBox(wxPanel* panel, nlohmann::json j, int y);
 	nlohmann::json GetConfig() override;
 	void SetConfig(nlohmann::json config) override;
 };
