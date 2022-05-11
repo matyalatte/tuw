@@ -53,7 +53,7 @@
                     "default": 1
                 },
                 {
-                    "type": "text",
+                    "type": "text_box",
                     "label": "Some text"
                 }
             ]

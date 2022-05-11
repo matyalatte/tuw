@@ -1,7 +1,7 @@
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_windows.yml/badge.svg)
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_ubuntu.yml/badge.svg)
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_mac.yml/badge.svg)
-# Simple-Command-Runner ver 0.1.0
+# Simple-Command-Runner ver 0.1.1
 Simple GUI builder to execute commands.<br>
 
 ## About
