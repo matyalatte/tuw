@@ -15,6 +15,7 @@ cmake -G "%VS_VERSION%"^
  ../
 
 REM build with VS
+
 "%MSBUILD%" SimpleCommandRunner.vcxproj /t:build /p:configuration=Release /p:platform=x64 -maxcpucount
 
 pause

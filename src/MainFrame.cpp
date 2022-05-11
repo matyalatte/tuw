@@ -184,27 +184,6 @@ void MainFrame::ShowSuccessDialog(wxString msg) {
     dialog->Destroy();
 }
 
-
-
-std::vector<std::string> split(const std::string& s, const char delimiter)
-{
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream tokenStream(s);
-    bool store = true;
-    while (std::getline(tokenStream, token, delimiter))
-    {
-        if (store) {
-            tokens.push_back(token);
-            store = false;
-        }
-        else {
-            store = true;
-        }
-    }
-    return tokens;
-}
-
 //run command
 void MainFrame::RunCommand(wxCommandEvent& event) {
     //save config
@@ -212,7 +191,7 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
     SaveConfig();
 
     //make command string
-    std::vector<std::string> cmd_ary = split(sub_definition["command"], '%');
+    std::vector<std::string> cmd_ary = sub_definition["command"];
     wxString cmd = "";
     int i = 0;
     for (Component* c : components) {

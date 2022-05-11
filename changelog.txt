@@ -4,7 +4,6 @@ ver0.1.1
 - Fixed an error when reading utf-16 strings from stdout
 - Fixed a bug can't read configs for checkboxes
 
-
 ver0.1.0
 - Added support for mac and linux (ubuntu)
 - Added console window for linux

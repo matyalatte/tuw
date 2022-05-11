@@ -39,10 +39,10 @@ namespace jsonUtils {
         {
                 {"label", "Default GUI"},
     #ifdef _WIN32
-                {"command", "dir" },
+                {"command", {"dir"} },
                 {"button", "run 'dir'"},
     #else
-                {"command", "ls" },
+                {"command", {"ls"} },
                 {"button", "run 'ls'"},
     #endif
                 {"components",{}}
@@ -76,6 +76,25 @@ namespace jsonUtils {
         }
         return "__null__";
     }
+    
+    std::vector<std::string> split(const std::string& s, const char delimiter)
+    {
+        std::vector<std::string> tokens;
+        std::string token;
+        std::istringstream tokenStream(s);
+        bool store = true;
+        while (std::getline(tokenStream, token, delimiter))
+        {
+            if (store) {
+                tokens.push_back(token);
+                store = false;
+            }
+            else {
+                store = true;
+            }
+        }
+        return tokens;
+    }
 
     std::string checkSubDefinition(nlohmann::json& sub_definition) {
         //check if keys exist
@@ -87,7 +106,7 @@ namespace jsonUtils {
         }
 
         //check is_string
-        keys = { "label", "button", "command" };
+        keys = { "label", "button"};
         if (hasKey(sub_definition, "window_name")) {
             keys.push_back("window_name");
         }
@@ -95,6 +114,13 @@ namespace jsonUtils {
             if (!sub_definition[key].is_string()) {
                 return "'" + key + "' should be a string.";
             }
+        }
+
+        if (sub_definition["command"].is_string()) {
+            sub_definition["command"] = split(sub_definition["command"], '%');
+        }
+        if (!sub_definition["command"].is_array()) {
+            return "'command' should be a string or an string array.";
         }
 
         //check is_boolean
