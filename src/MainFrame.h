@@ -4,8 +4,7 @@
 #include <nlohmann/json.hpp>
 #include "Component.h"
 #include "Exec.h"
-#include <fstream>
-#include <iostream>
+#include "JsonUtils.h"
 
 #ifndef _WIN32
 #include <wx/stdpaths.h>
@@ -33,13 +32,12 @@ private:
 #ifdef __linux__
     LogFrame* logFrame;
 #endif
-    std::vector<Component> components;
+    std::vector<Component*> components;
     wxPanel* mainPanel;
     wxButton* runButton;
 
     void LoadDefinition();
     int UpdatePanel(wxPanel* panel);
-    void LoadConfig();
     void UpdateConfig();
     void SaveConfig();
     void ShowErrorDialog(wxString msg);
