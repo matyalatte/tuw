@@ -1,6 +1,6 @@
 #include "MainFrame.h"
 
-const char* VERSION = "0.1.1";
+const char* VERSION = "0.1.2";
 
 //Console window for unix
 #ifdef __linux__
