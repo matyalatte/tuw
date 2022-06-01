@@ -1,0 +1,29 @@
+{
+    "gui": [
+        {
+            "label": "Sample GUI",
+            "command": "echo file: %file% & echo folder: %folder% & echo num: %num% & echo checkbox: %check%",
+            "button": "Echo!",
+            "components": [
+                {
+                    "type": "static_text",
+                    "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
+                },
+                {
+                    "type": "file",
+                    "label": "Some file path",
+                    "extension": "any files | *"
+                },
+                {
+                    "type": "folder",
+                    "label": "Some folder path"
+                },
+                {
+                    "type": "check",
+                    "label": "checkbox",
+                    "value": "true"
+                }
+            ]
+        }
+    ]
+}

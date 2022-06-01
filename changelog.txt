@@ -1,3 +1,6 @@
+ver0.1.2
+- Fixed a bug it needs dll for runtime libs
+
 ver0.1.1
 - Added textbox to GUI components
 - Changed json format

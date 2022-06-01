@@ -1,7 +1,7 @@
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_windows.yml/badge.svg)
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_ubuntu.yml/badge.svg)
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_mac.yml/badge.svg)
-# Simple-Command-Runner ver 0.1.1
+# Simple-Command-Runner ver 0.1.2
 Simple GUI builder to execute commands.<br>
 
 ## About
@@ -10,12 +10,12 @@ All you need is write a `.json` file and run an `.exe` file.<br>
 It can make GUI to run commands of your scripts.<br>
 You don't need to use IDE and manage scripts for GUI.<br>
 
-![sample](https://user-images.githubusercontent.com/69258547/166093114-4165e28a-452e-4844-a4d9-19b34bfe001c.png)<br>
+![sample](https://user-images.githubusercontent.com/69258547/171450112-8e1b40a0-36ae-4507-a4a7-2952d0bdbb52.png)![json](https://user-images.githubusercontent.com/69258547/171449741-859ca1bb-6f99-4e06-a7b9-a1873ca8b7eb.png)<br>
 
 ## Features
 - Cross-platform
 - Standalone
-- No need to use IDE for GUI
+- No need IDE for GUI
 - Define GUI in .json
 
 ## Platforms
@@ -35,7 +35,7 @@ Download `SimpleCommandRunner*.zip` from [here](https://github.com/matyalatte/Si
 
 
 ## Samples
-There are some [sample json files](./samples) to understand how to use.<br>
+There are some [sample json files](./samples) to learn how to use.<br>
 
 ## License
 ### Simple Command Runner

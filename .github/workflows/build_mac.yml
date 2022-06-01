@@ -5,7 +5,6 @@ on:
   
 env:
   ZIP_NAME: SimpleCommandRunner
-  WX_VERSION: 3.1.5
 
 jobs:
   build:
@@ -13,48 +12,62 @@ jobs:
     steps:
         
       - uses: actions/checkout@v2
+
+      - name: Check wxWidget version
+        id: wx-version
+        run: |
+          VERSION=$(cat WX_VERSION.txt)
+          echo "::set-output name=version::$VERSION"
+        shell: bash
       
       - name: Cache wxWidget
         uses: actions/cache@v2
         id: cache-wx
         with:
-          path: "~/wxWidgets-${{ env.WX_VERSION }}"
-          key: ${{ runner.os }}-wx${{ env.WX_VERSION }}
+          path: "~/wxWidgets-${{ steps.wx-version.outputs.version }}"
+          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}
             
       - name: build wxWidget
         if: steps.cache-wx.outputs.cache-hit != 'true'
         run: |
-          cd ~/
-          wget https://github.com/wxWidgets/wxWidgets/releases/download/v${{ env.WX_VERSION }}/wxWidgets-${{ env.WX_VERSION }}.tar.bz2
-          tar -xvjof wxWidgets-${{ env.WX_VERSION }}.tar.bz2
-          cd wxWidgets-${{ env.WX_VERSION }}
-          mkdir release
-          cd release
-          ../configure --enable-monolithic --disable-shared
-          make -j$(nproc)
+          cd shell_scripts
+          download_wxWidget.sh
+          build_wxWidget.sh
           
       - name: install wxWidget
         run: |
-          cd ~/wxWidgets-${{ env.WX_VERSION }}/release
-          sudo make install
+          cd shell_scripts
+          install_wxWidget.sh
           
       - name: build exe
         run: |
-          ls
-          mkdir build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -D BUILD_SHARED_LIBS=OFF ../
-          cmake --build .
+          cd shell_scripts
+          build_exe.sh
           
       - name: copy files
         run: |
           mkdir -p ../release/${{ env.ZIP_NAME }}
           cp build/SimpleCommandRunner ../release/${{ env.ZIP_NAME }}
-          cp samples/advanced/gui_definition.json ../release/${{ env.ZIP_NAME }}
+          cp samples/5_advanced/gui_definition.json ../release/${{ env.ZIP_NAME }}
           cp changelog.txt ../release/${{ env.ZIP_NAME }}
           cp license.txt ../release/${{ env.ZIP_NAME }}
           cd ../release
           tar -jcvf ${{ env.ZIP_NAME }}.tar.bz2 ${{ env.ZIP_NAME }}
+          
+      - name: Create Release Draft
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body: |
+            Changelog
+            - First Change
+            - Second Change
+          draft: true
+          prerelease: false
           
       - name: Upload Release Asset for ubuntu
         id: upload-release-asset-ubuntu
@@ -62,7 +75,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ needs.setup.outputs.url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ../release/${{ env.ZIP_NAME }}.tar.bz2
           asset_name: ${{ env.ZIP_NAME }}-${{ runner.os }}.tar.bz2
           asset_content_type: application/zip

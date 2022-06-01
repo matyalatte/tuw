@@ -8,7 +8,6 @@ on:
   
 env:
   ZIP_NAME: SimpleCommandRunner
-  WX_VERSION: 3.1.5
 
 jobs:
   build:
@@ -24,54 +23,47 @@ jobs:
           fi
           echo "::set-output name=version::$VERSION"
         shell: bash
+
       - uses: actions/checkout@v2
-      
-      - name: Setup msbuild
-        uses: microsoft/setup-msbuild@v1.1
-        
-      # Gets cache
+
+      - name: Check wxWidget version
+        id: wx-version
+        run: |
+          VERSION=$(cat WX_VERSION.txt)
+          echo "::set-output name=version::$VERSION"
+        shell: bash
+
       - name: Cache wxWidget
         uses: actions/cache@v2
         id: cache-wx
         with:
-          path: "C:/wxWidgets-${{ env.WX_VERSION }}"
-          key: ${{ runner.os }}-wx${{ env.WX_VERSION }}
+          path: "C:/wxWidgets-${{ steps.wx-version.outputs.version }}"
+          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}
         
-      - name: download wxWidget
+      - name: Setup nmake
+        if: steps.cache-wx.outputs.cache-hit != 'true'
+        uses: ilammy/msvc-dev-cmd@v1
+        
+      - name: install wxWidget
         if: steps.cache-wx.outputs.cache-hit != 'true'
         run: |
-          cd C:/
-          curl -OL https://github.com/wxWidgets/wxWidgets/releases/download/v${{ env.WX_VERSION }}/wxWidgets-${{ env.WX_VERSION }}.zip
-          unzip -d wxWidgets-${{ env.WX_VERSION }} wxWidgets-${{ env.WX_VERSION }}.zip
-        shell: bash
+          cd batch_files
+          ./download_wxWidgets.bat
+          ./build_wxWidgets.bat
         
-      - name: build wxWidget
-        if: steps.cache-wx.outputs.cache-hit != 'true'
-        run: |
-          cd C:/wxWidgets-${{ env.WX_VERSION }}
-          mkdir release
-          cd release
-          cmake -G "Visual Studio 17 2022" -A x64 -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=install -D wxBUILD_SHARED=OFF ../
-          msbuild INSTALL.vcxproj /t:build /p:configuration=Release /p:platform=x64 -maxcpucount
-          del C:/wxWidgets-${{ env.WX_VERSION }}.zip
-          
-      - name: copy wx to git repo
-        run: |
-          mkdir 3rdparty
-          cp -r C:/wxWidgets-${{ env.WX_VERSION }}/release/install 3rdparty/wxWidgets-${{ env.WX_VERSION }}
+      - name: Setup msbuild
+        uses: microsoft/setup-msbuild@v1.1
 
       - name: build exe
         run: |
-          mkdir build
-          cd build
-          cmake -G "Visual Studio 17 2022" -A x64 -D CMAKE_BUILD_TYPE=Release -D CMAKE_BUILD_SHARED=OFF ../
-          msbuild SimpleCommandRunner.vcxproj /t:build /p:configuration=Release /p:platform=x64 -maxcpucount
+          cd batch_files
+          ./build_exe.bat
 
       - name: Copy files
         run: |
           mkdir -p ../release
           cp build/Release/SimpleCommandRunner.exe ../release/
-          cp samples/advanced/gui_definition.json ../release/
+          cp samples/5_advanced/gui_definition.json ../release/
           cp changelog.txt ../release/
           cp license.txt ../release/
         shell: bash
