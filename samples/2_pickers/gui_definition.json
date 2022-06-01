@@ -1,0 +1,23 @@
+{
+    "gui": [
+        {
+            "label": "Copy file",
+            "window_name": "Picker sample",
+            "command": "copy %file% %out_path%",
+            "button": "copy",
+            "components": [
+                {
+                    "type": "file",
+                    "label": "A file you want to copy",
+                    "extension": "any files | *",
+                    "add_quotes": true
+                },
+                {
+                    "type": "folder",
+                    "label": "Output path",
+                    "add_quotes": true
+                }
+            ]
+        }
+    ]
+}

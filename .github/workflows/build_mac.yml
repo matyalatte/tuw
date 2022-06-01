@@ -48,7 +48,7 @@ jobs:
         run: |
           mkdir -p ../release/${{ env.ZIP_NAME }}
           cp build/SimpleCommandRunner ../release/${{ env.ZIP_NAME }}
-          cp samples/advanced/gui_definition.json ../release/${{ env.ZIP_NAME }}
+          cp samples/5_advanced/gui_definition.json ../release/${{ env.ZIP_NAME }}
           cp changelog.txt ../release/${{ env.ZIP_NAME }}
           cp license.txt ../release/${{ env.ZIP_NAME }}
           cd ../release
