@@ -3,6 +3,8 @@
 REM Downloads wxWidget.
 REM Run it as admin. Or fail to install.
 
+cd %~dp0
+
 set /p WX_VERSION=< ../WX_VERSION.txt
 
 @pushd C:\

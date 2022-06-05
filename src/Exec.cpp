@@ -72,7 +72,7 @@ std::vector<std::string> exec(const char* cmd) {
     wxInputStream* estream = process->GetErrorStream();
 
     //set buffers
-    size_t size = 512;https://docs.wxwidgets.org/3.0/classwx_dialog__inherit__graph.png
+    size_t size = 512;
     size_t read_size = 0;
     char ibuf[512]; //buffer for output
     char ebuf[512]; //buffer for error messages

@@ -35,18 +35,18 @@ jobs:
         if: steps.cache-wx.outputs.cache-hit != 'true'
         run: |
           cd shell_scripts
-          download_wxWidget.sh
-          build_wxWidget.sh
+          bash download_wxWidgets.sh
+          bash build_wxWidgets.sh
           
       - name: install wxWidget
         run: |
           cd shell_scripts
-          install_wxWidget.sh
+          bash install_wxWidgets.sh
           
       - name: build exe
         run: |
           cd shell_scripts
-          build_exe.sh
+          bash build_exe.sh
           
       - name: copy files
         run: |

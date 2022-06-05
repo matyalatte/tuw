@@ -1,18 +1,15 @@
 #general
 *.json
 !samples/*/gui_definition.json
+build
+todo.txt
 
 #for windows
 *.vs
 out
-3rdparty
-build
 SimpleCommandRunner-v*
 *.exe
 *.zip
-
-#for unix
-build
 
 #for test scripts
 python
