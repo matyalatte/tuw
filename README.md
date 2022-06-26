@@ -22,7 +22,7 @@ You don't need to use IDE and manage scripts for GUI.<br>
 Simple Command Runner uses cross-platform framework.<br>
 I made sure we can build it with the following platforms and compilers.
 - Windows10 + MSVC 19.31
-- Ubuntu 20.04 + GNU 9.4
+- Ubuntu 20.04 + GCC 9.4
 - MacOS 10.15 + AppleClang 12.0
 
 But I haven't tested enough yet.<br>
