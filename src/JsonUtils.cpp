@@ -190,9 +190,13 @@ namespace jsonUtils {
                 if (hasKey(c, "default") && !c["default"].is_string()) {
                     return label + "['default'] should be a string.";
                 }
+
             }
             if (hasKey(c, "add_quotes") && !c["add_quotes"].is_boolean()) {
                 return label + "['add_quotes'] should be a boolean.";
+            }
+            if (hasKey(c, "empty_message") && !c["empty_message"].is_string()) {
+                return label + "['empty_message'] should be a string.";
             }
         }
         return "__null__";

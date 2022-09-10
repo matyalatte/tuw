@@ -1,4 +1,50 @@
 #include "Component.h"
+#include <wx/colour.h>
+
+BEGIN_EVENT_TABLE(FocusedTextCtrl, wxTextCtrl)
+EVT_SET_FOCUS(OnSetFocus)
+EVT_KILL_FOCUS(OnKillFocus)
+END_EVENT_TABLE()
+
+FocusedTextCtrl::FocusedTextCtrl(
+    wxWindow* parent,
+    wxWindowID id,
+    const wxString& value,
+    const wxString& emptyMessage,
+    const wxPoint& pos,
+    const wxSize& size,
+    long style,
+    const wxValidator& validator,
+    const wxString& name) :
+    wxTextCtrl(parent, id, value, pos, size, style, validator, name)
+{
+    this->emptyMessage = emptyMessage;
+    SetValue(value);
+    SetEmptyMessage();
+}
+
+const wxColour wxGREY(150, 150, 150);
+
+void FocusedTextCtrl::SetEmptyMessage() {
+    actualValue = GetValue();
+    if (actualValue == "" && emptyMessage != "") {
+        SetValue(emptyMessage);
+        SetForegroundColour(wxGREY);
+    }
+}
+
+
+void FocusedTextCtrl::OnKillFocus(wxFocusEvent& event) {
+    SetEmptyMessage();
+    event.Skip();
+}
+
+void FocusedTextCtrl::OnSetFocus(wxFocusEvent& event) {
+    SetValue(actualValue);
+    SetForegroundColour(*wxBLACK);
+    event.Skip();
+}
+
 
 //Drop target for path picker
 template <typename T>
@@ -134,9 +180,19 @@ FilePicker::FilePicker(wxPanel* panel, nlohmann::json j, int y) : Component(j, 5
     else {
         ext = "any files | *";
     }
-    wxFilePickerCtrl* picker = new wxFilePickerCtrl(panel, wxID_ANY, "", "", ext, wxPoint(20, y + 18), wxSize(350, 25), wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
-    picker->GetTextCtrl()->SetDropTarget(new DropFilePath<wxFilePickerCtrl>(picker));
+    std::string value = "";
+    wxFilePickerCtrl* picker = new wxFilePickerCtrl(panel, wxID_ANY, value, "", ext, wxPoint(20, y + 18), wxSize(350, 25), wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
+
+    std::string emptyMessage = "";
+    if (jsonUtils::hasKey(j, "empty_message")) {
+        emptyMessage = j["empty_message"];
+    }
+    wxTextCtrl* textCtrl = picker->GetTextCtrl();
+    FocusedTextCtrl* focusedTextCtrl = new FocusedTextCtrl(picker, wxID_ANY, value, emptyMessage, textCtrl->GetPosition(), textCtrl->GetSize());
+    picker->SetTextCtrl(focusedTextCtrl);
+    focusedTextCtrl->SetDropTarget(new DropFilePath<wxFilePickerCtrl>(picker));
     picker->DragAcceptFiles(true);
+    delete textCtrl;
     widget = picker;
 }
 
@@ -165,9 +221,18 @@ nlohmann::json FilePicker::GetConfig() {
 //Dir Picker
 DirPicker::DirPicker(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS_STRING) {
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
-    wxDirPickerCtrl* picker = new wxDirPickerCtrl(panel, wxID_ANY, "", "", wxPoint(20, y + 18), wxSize(350, 25), wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
-    picker->GetTextCtrl()->SetDropTarget(new DropFilePath<wxDirPickerCtrl>(picker));
+    std::string value = "";
+    wxDirPickerCtrl* picker = new wxDirPickerCtrl(panel, wxID_ANY, value, "", wxPoint(20, y + 18), wxSize(350, 25), wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
+    std::string emptyMessage = "";
+    if (jsonUtils::hasKey(j, "empty_message")) {
+        emptyMessage = j["empty_message"];
+    }
+    wxTextCtrl* textCtrl = picker->GetTextCtrl();
+    FocusedTextCtrl* focusedTextCtrl = new FocusedTextCtrl(picker, wxID_ANY, value, emptyMessage, textCtrl->GetPosition(), textCtrl->GetSize());
+    picker->SetTextCtrl(focusedTextCtrl);
+    focusedTextCtrl->SetDropTarget(new DropFilePath<wxDirPickerCtrl>(picker));
     picker->DragAcceptFiles(true);
+    delete textCtrl;
     widget = picker;
 }
 
@@ -339,10 +404,15 @@ nlohmann::json CheckArray::GetConfig() {
 //TextBox
 TextBox::TextBox(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS_STRING) {
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
-    wxTextCtrl* textbox = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(20, y + 20), wxSize(350, 23));
+    std::string value = "";
+    std::string emptyMessage = "";
     if (jsonUtils::hasKey(j, "default")) {
-        textbox->SetValue(j["default"]);
+        value = j["default"];
     }
+    if (jsonUtils::hasKey(j, "empty_message")) {
+        emptyMessage = j["empty_message"];
+    }
+    wxTextCtrl* textbox = new FocusedTextCtrl(panel, wxID_ANY, value, emptyMessage, wxPoint(20, y + 20), wxSize(350, 23));
     widget = textbox;
 }
 
