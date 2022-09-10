@@ -21,7 +21,8 @@
                 {
                     "type": "check",
                     "label": "checkbox",
-                    "value": "true"
+                    "value": "true",
+                    "default": "true"
                 }
             ]
         },
@@ -36,13 +37,15 @@
                 },
                 {
                     "type": "text_box",
-                    "label": "Some text"
+                    "label": "Some text",
+                    "default": "default value"
                 },
                 {
                     "type": "check_array",
                     "label": "options",
-                    "items": [" --option1 ", " --option2 ", " -flag"],
-                    "values": [" --option1 ", " --option2 ", " -flag"]
+                    "items": ["option1 ", "option2 ", " flag"],
+                    "values": [" --option1 ", " --option2 ", " -flag"],
+                    "default": ["true", "false", "false"]
                 }
             ]
         }

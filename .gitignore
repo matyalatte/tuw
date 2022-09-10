@@ -3,6 +3,7 @@
 !samples/*/gui_definition.json
 build
 todo.txt
+check*.sh
 
 #for windows
 *.vs

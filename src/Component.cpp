@@ -238,6 +238,15 @@ nlohmann::json Choice::GetConfig() {
     return config;
 }
 
+void SetDefaultForCheckBox(wxCheckBox* check, nlohmann::json j) {
+    if (j.is_string()) {
+        check->SetValue(j == "true" || j == "True");
+    }
+    else {
+        check->SetValue(j["default"] != 0);
+    }
+}
+
 //CheckBox
 CheckBox::CheckBox(wxPanel* panel, nlohmann::json j, int y) : Component(j, 35, HAS_STRING) {
     wxCheckBox* check = new wxCheckBox(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y), wxSize(350, 25));
@@ -246,6 +255,9 @@ CheckBox::CheckBox(wxPanel* panel, nlohmann::json j, int y) : Component(j, 35, H
     }
     else {
         value = j["label"];
+    }
+    if (jsonUtils::hasKey(j, "default")) {
+        SetDefaultForCheckBox(check, j["default"]);
     }
     widget = check;
 }
@@ -283,6 +295,11 @@ CheckArray::CheckArray(wxPanel* panel, nlohmann::json j, int y) : Component(j, 2
     }
     else {
         SetValues(j["items"]);
+    }
+    if (jsonUtils::hasKey(j, "default")) {
+        for (int i = 0; i < checks->size(); i++) {
+            SetDefaultForCheckBox((*checks)[i], j["default"][i]);
+        }
     }
     widget = checks;
 }
@@ -323,6 +340,9 @@ nlohmann::json CheckArray::GetConfig() {
 TextBox::TextBox(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS_STRING) {
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     wxTextCtrl* textbox = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(20, y + 20), wxSize(350, 23));
+    if (jsonUtils::hasKey(j, "default")) {
+        textbox->SetValue(j["default"]);
+    }
     widget = textbox;
 }
 

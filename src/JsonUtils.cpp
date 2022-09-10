@@ -66,12 +66,15 @@ namespace jsonUtils {
         if (!hasKey(c, "values") && hasKey(c, "value")) {
             c["values"] = c["value"];
         }
-        if (hasKey(c, "values")) {
-            if (!c["values"].is_array()) {
-                return label + "['values'] should be an array.";
-            }
-            if (c["values"].size() != c["items"].size()) {
-                return label + "['values'] and " + label + "['items'] should have the same size.";
+        std::vector<std::string> keys = { "values", "default" };
+        for (std::string key : keys) {
+            if (hasKey(c, key)) {
+                if (!c[key].is_array()) {
+                    return label + "['" + key + "'] should be an array.";
+                }
+                if (c[key].size() != c["items"].size()) {
+                    return label + "['" + key + "'] and " + label + "['items'] should have the same size.";
+                }
             }
         }
         return "__null__";
@@ -182,8 +185,11 @@ namespace jsonUtils {
                     return msg;
                 }
             }
-            else if (c["type"] == "text_box") {
+            else if (c["type"] == "text" || c["type"] == "text_box") {
                 c["type"] = "text";
+                if (hasKey(c, "default") && !c["default"].is_string()) {
+                    return label + "['default'] should be a string.";
+                }
             }
             if (hasKey(c, "add_quotes") && !c["add_quotes"].is_boolean()) {
                 return label + "['add_quotes'] should be a boolean.";

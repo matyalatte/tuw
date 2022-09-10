@@ -1,3 +1,7 @@
+ver0.1.3
+- Added "default" option to check box and text box
+- Fixed an error when failing to read json files
+
 ver0.1.2
 - Fixed a bug it needs dll for runtime libs
 

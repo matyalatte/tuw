@@ -7,7 +7,7 @@
 wxWidgets is a GUI framework.<br>
 You can install it with the following steps.
 
-1. Run download_wxWidgets.bat as admin.
+1. Run `download_wxWidgets.bat` as admin.
 2. Run `open_x64_native_command_prompt_for_VS2022.bat` to open the command prompt.
 3. Run `build_wxWidgets.bat` on the command prompt.
 

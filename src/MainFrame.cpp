@@ -56,13 +56,14 @@ MainFrame::MainFrame()
     //make menu bar
     wxMenuBar* menuBar = new wxMenuBar;
     wxMenu* menuFile = new wxMenu;
-    
+
     if (definition["gui"].size() > 1) {
         for (int i = 0; i < definition["gui"].size(); i++) {
             menuFile->Append(wxID_HIGHEST + i + 1, wxString::FromUTF8(definition["gui"][i]["label"]));
             menuFile->Bind(wxEVT_MENU, &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
         }
     }
+
     menuFile->Append(wxID_EXIT, "Quit");
     menuBar->Append(menuFile, "Menu");
 
@@ -133,7 +134,7 @@ void MainFrame::LoadDefinition() {
         std::cout << "[LoadDefinition] " << msg << std::endl;
         ShowErrorDialog(msg);
         sub_definition = jsonUtils::default_definition();
-        definition["gui"] = {sub_definition};
+        definition["gui"] = { { sub_definition } };
         return;
     }
 
@@ -145,7 +146,7 @@ void MainFrame::LoadDefinition() {
             std::cout << "[LoadDefinition] " << msg << std::endl;
             ShowErrorDialog(msg);
             sub_definition = jsonUtils::default_definition();
-            definition["gui"] = {sub_definition};
+            definition["gui"] = {{ sub_definition }};
             return;
         }
     }
