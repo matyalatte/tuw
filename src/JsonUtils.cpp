@@ -66,15 +66,13 @@ namespace jsonUtils {
         if (!hasKey(c, "values") && hasKey(c, "value")) {
             c["values"] = c["value"];
         }
-        std::vector<std::string> keys = { "values", "default" };
-        for (std::string key : keys) {
-            if (hasKey(c, key)) {
-                if (!c[key].is_array()) {
-                    return label + "['" + key + "'] should be an array.";
-                }
-                if (c[key].size() != c["items"].size()) {
-                    return label + "['" + key + "'] and " + label + "['items'] should have the same size.";
-                }
+        std::string key = "values";
+        if (hasKey(c, key)) {
+            if (!c[key].is_array()) {
+                return label + "['" + key + "'] should be an array.";
+            }
+            if (c[key].size() != c["items"].size()) {
+                return label + "['" + key + "'] and " + label + "['items'] should have the same size.";
             }
         }
         return "__null__";
@@ -181,6 +179,15 @@ namespace jsonUtils {
             else if (c["type"] == "checks" || c["type"] == "check_array") {
                 c["type"] = "check_array";
                 msg = checkItemsValues(c);
+                std::string key = "default";
+                if (hasKey(c, key)) {
+                    if (!c[key].is_array()) {
+                        return label + "['" + key + "'] should be an array.";
+                    }
+                    if (c[key].size() != c["items"].size()) {
+                        return label + "['" + key + "'] and " + label + "['items'] should have the same size.";
+                    }
+                }
                 if (msg != "__null__") {
                     return msg;
                 }
