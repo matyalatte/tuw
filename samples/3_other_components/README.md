@@ -19,7 +19,8 @@ There are more components you can use.
     {
         "type": "check",
         "label": "checkbox",
-        "value": "true"
+        "value": "checked!",
+        "default": true
     },
     {
         "type": "text_box",

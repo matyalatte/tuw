@@ -15,7 +15,8 @@
                 {
                     "type": "folder",
                     "label": "Output path",
-                    "add_quotes": true
+                    "add_quotes": true,
+                    "empty_message": "Drop a folder here!"
                 }
             ]
         }

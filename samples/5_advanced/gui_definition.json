@@ -12,7 +12,8 @@
                 {
                     "type": "file",
                     "label": "Some file path",
-                    "extension": "any files | *"
+                    "extension": "any files | *",
+                    "empty_message": "Drop a file here!"
                 },
                 {
                     "type": "folder",
@@ -22,7 +23,7 @@
                     "type": "check",
                     "label": "checkbox",
                     "value": "true",
-                    "default": "true"
+                    "default": true
                 }
             ]
         },
@@ -37,15 +38,14 @@
                 },
                 {
                     "type": "text_box",
-                    "label": "Some text",
-                    "default": "default value"
+                    "label": "Some text"
                 },
                 {
                     "type": "check_array",
                     "label": "options",
                     "items": ["option1 ", "option2 ", " flag"],
                     "values": [" --option1 ", " --option2 ", " -flag"],
-                    "default": ["true", "false", "false"]
+                    "default": [true, false, false]
                 }
             ]
         }

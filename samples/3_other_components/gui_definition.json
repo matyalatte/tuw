@@ -19,7 +19,8 @@
                 {
                     "type": "check",
                     "label": "checkbox",
-                    "value": "true"
+                    "value": "checked!",
+                    "default": true
                 },
                 {
                     "type": "text_box",

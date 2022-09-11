@@ -21,7 +21,8 @@ You can use file pickers and folder pickers.
                 {
                     "type": "folder",
                     "label": "Output path",
-                    "add_quotes": true
+                    "add_quotes": true,
+                    "empty_message": "Drop a folder here!"
                 }
             ]
         }
@@ -36,6 +37,7 @@ Each component will be defined as a dictionary.<br>
 `label` is a string written above the textbox of picker.<br>
 `extension` is an optional key for file picker. It's wildcard for file pickers. Use the same syntax as for [wxWidget's wildcards](https://docs.wxwidgets.org/3.0/classwx_file_dialog.html).<br>
 `add_quotes` is an optional key for components. It will add quotes to the input strings.<br>
+`empty_message` is an optional key for text box. It will show a message when the text box is empty.<br>
 <br>
 Inputs of components will be injected into `command` when executing the command.<br>
 You can specifiy where you inject the inputs with `%*%`.<br>

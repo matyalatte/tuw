@@ -304,8 +304,8 @@ nlohmann::json Choice::GetConfig() {
 }
 
 void SetDefaultForCheckBox(wxCheckBox* check, nlohmann::json j) {
-    if (j.is_string()) {
-        check->SetValue(j == "true" || j == "True");
+    if (j.is_boolean()) {
+        check->SetValue(j);
     }
     else {
         check->SetValue(j["default"] != 0);
