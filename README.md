@@ -10,7 +10,8 @@ All you need is write a `.json` file and run an `.exe` file.<br>
 It can make GUI to run commands of your scripts.<br>
 You don't need to use IDE and manage scripts for GUI.<br>
 
-![sample](https://user-images.githubusercontent.com/69258547/171450112-8e1b40a0-36ae-4507-a4a7-2952d0bdbb52.png)![json](https://user-images.githubusercontent.com/69258547/171449741-859ca1bb-6f99-4e06-a7b9-a1873ca8b7eb.png)<br>
+![sample](https://user-images.githubusercontent.com/69258547/171450112-8e1b40a0-36ae-4507-a4a7-2952d0bdbb52.png)
+![json](https://user-images.githubusercontent.com/69258547/171449741-859ca1bb-6f99-4e06-a7b9-a1873ca8b7eb.png)<br>
 
 ## Features
 - Cross-platform
@@ -36,6 +37,15 @@ Download `SimpleCommandRunner*.zip` from [here](https://github.com/matyalatte/Si
 
 ## Samples
 There are some [sample json files](./samples) to learn how to use.<br>
+
+## FAQ
+### Can I distribute the exe with my scripts?
+Yes, and you can rename it to `GUI.exe`, `'project name'-GUI.exe`, or `'project name'_GUI.exe`.<br>
+
+### Linux says `Could Not Display` when lauching the executable.
+Check `Allow executing file as program.` (Properties->Permissions->Execute)<br>
+You will be able to launch the executable by double-click.<br>
+![Screenshot (729)](https://user-images.githubusercontent.com/69258547/189526464-cd62887b-62b1-4071-ae38-a7ab73600bbf.png)
 
 ## License
 ### Simple Command Runner

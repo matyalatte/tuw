@@ -2,8 +2,8 @@
 #include <wx/colour.h>
 
 BEGIN_EVENT_TABLE(FocusedTextCtrl, wxTextCtrl)
-EVT_SET_FOCUS(OnSetFocus)
-EVT_KILL_FOCUS(OnKillFocus)
+EVT_SET_FOCUS(FocusedTextCtrl::OnSetFocus)
+EVT_KILL_FOCUS(FocusedTextCtrl::OnKillFocus)
 END_EVENT_TABLE()
 
 FocusedTextCtrl::FocusedTextCtrl(
