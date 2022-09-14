@@ -63,7 +63,7 @@ jobs:
         run: |
           mkdir -p ../release
           cp build/Release/SimpleCommandRunner.exe ../release/
-          cp samples/5_advanced/gui_definition.json ../release/
+          cp examples/5_advanced/gui_definition.json ../release/
           cp changelog.txt ../release/
           cp license.txt ../release/
         shell: bash
