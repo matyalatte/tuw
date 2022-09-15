@@ -8,8 +8,8 @@ REM Run it with "x64 Ntive Tools Command Prompt for VS 2022". Or fail to build.
 
 set VS_VERSION=Visual Studio 17 2022
 
-mkdir ..\build
-@pushd ..\build
+mkdir %~dp0\..\build
+@pushd %~dp0\..\build
 
 cmake -G "%VS_VERSION%"^
  -A x64^

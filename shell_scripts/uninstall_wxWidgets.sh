@@ -1,7 +1,7 @@
 #!/bin/bash
 #Uninstalls wxWidgets and remove resource files.
 
-wx_version="$(cat ../WX_VERSION.txt)"
+wx_version="$(cat $(dirname "$0")/../WX_VERSION.txt)"
 
 pushd ~/wxWidgets-$wx_version/release
 sudo make uninstall

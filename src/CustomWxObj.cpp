@@ -1,5 +1,5 @@
 #include "CustomWxObj.h"
-#include <wx/colour.h>
+
 
 BEGIN_EVENT_TABLE(CustomTextCtrl, wxTextCtrl)
 EVT_SET_FOCUS(CustomTextCtrl::OnSetFocusEmptyMessage)

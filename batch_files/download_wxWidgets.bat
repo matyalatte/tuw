@@ -3,9 +3,7 @@
 REM Downloads wxWidget.
 REM Run it as admin. Or fail to install.
 
-cd %~dp0
-
-set /p WX_VERSION=< ../WX_VERSION.txt
+set /p WX_VERSION=< %~dp0\..\WX_VERSION.txt
 
 @pushd C:\
 curl -OL https://github.com/wxWidgets/wxWidgets/releases/download/v%WX_VERSION%/wxWidgets-%WX_VERSION%.zip

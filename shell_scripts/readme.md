@@ -20,7 +20,6 @@ You can build Simple Command Runner with shell scripts.<br>
 The steps are as follows.
 
 1. Open the Terminal.
-2. Move to `Simple-Command-Runner/shell_scripts`.
 3. Type `bush build_exe.sh`.
 4. An executable file `SimpleCommandRunner` will be generated in `./Simple-Command-Runner/build`.
 

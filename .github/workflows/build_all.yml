@@ -140,13 +140,11 @@ jobs:
           
       - name: install wxWidget
         run: |
-          cd shell_scripts
-          bash install_wxWidgets.sh
+          bash shell_scripts/install_wxWidgets.sh
           
       - name: build exe
         run: |
-          cd shell_scripts
-          bash build_exe.sh
+          bash shell_scripts/build_exe.sh
           
       - name: copy files
         run: |

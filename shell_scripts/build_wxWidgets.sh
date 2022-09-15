@@ -27,5 +27,18 @@ cd release
  --disable-iff\
  --disable-svg
 
-make -j$(nproc)
+function nproc_for_mac(){
+  if sysctl -n hw.logicalcpu;
+    then num_proc=`sysctl -n hw.logicalcpu`; # use hw.logicalcpu if exists
+    else num_proc=2; # when sysctl won't work
+  fi
+  echo ${num_proc}
+}
+
+if nproc;
+  then num_proc=$(nproc); # use nproc if exists
+  else num_proc=`nproc_for_mac`; # when nproc doesn't exist
+fi
+
+make -j${num_proc}
 popd

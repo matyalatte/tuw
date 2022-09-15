@@ -1,6 +1,6 @@
 #general
 *.json
-!samples/*/gui_definition.json
+!examples/*/gui_definition.json
 build
 todo.txt
 check*.sh
