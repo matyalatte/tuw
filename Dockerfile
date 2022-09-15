@@ -20,11 +20,11 @@ RUN apt-get install -y --no-install-recommends\
 
 # Install wxWidgets
 ARG wx_version="3.1.5"
-RUN wget https://github.com/wxWidgets/wxWidgets/releases/download/v${wx_version}/wxWidgets-${wx_version}.tar.bz2
-RUN tar -xvjof wxWidgets-${wx_version}.tar.bz2
-RUN rm -f wxWidgets-${wx_version}.tar.bz2
-RUN mkdir wxWidgets-${wx_version}/release
-RUN cd wxWidgets-${wx_version}/release;\
+RUN wget https://github.com/wxWidgets/wxWidgets/releases/download/v${wx_version}/wxWidgets-${wx_version}.tar.bz2;\
+    tar -xvjof wxWidgets-${wx_version}.tar.bz2;\
+    rm -f wxWidgets-${wx_version}.tar.bz2
+RUN mkdir wxWidgets-${wx_version}/release;\
+    cd wxWidgets-${wx_version}/release;\
     ../configure --disable-shared\
     --disable-sys-libs\
     --without-libpng\
@@ -46,9 +46,9 @@ RUN cd wxWidgets-${wx_version}/release;\
     make install
 
 # Build Simple Command Runner
-RUN git clone -b dev https://github.com/matyalatte/Simple-Command-Runner.git
-RUN mkdir Simple-Command-Runner/build
-RUN cd Simple-Command-Runner/build;\
+RUN git clone https://github.com/matyalatte/Simple-Command-Runner.git
+RUN mkdir Simple-Command-Runner/build;\
+    cd Simple-Command-Runner/build;\
     cmake -DCMAKE_BUILD_TYPE=Release -D BUILD_SHARED_LIBS=OFF ../
 RUN cd Simple-Command-Runner/build;\
     cmake --build .

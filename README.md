@@ -33,7 +33,7 @@ There may be some bugs.
 Download the executable from [here](https://github.com/matyalatte/Simple-Command-Runner/releases)
 - `SimpleCommandRunner*-Windows.zip` is for Windows.<br>
 - `SimpleCommandRunner*-macOS.tar.bz2` is for Mac.<br>
-- `SimpleCommandRunner*-Linux.tar.bz2` is for uUbuntu (20.04 or later).<br>
+- `SimpleCommandRunner*-Linux.tar.bz2` is for Ubuntu (20.04 or later).<br>
 
 (The Linux one won't work on old Ubuntu versions and other linux distributions due to glibc dependances.)<br>
 

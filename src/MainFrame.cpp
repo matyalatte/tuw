@@ -68,7 +68,7 @@ MainFrame::MainFrame()
     menuBar->Append(menuFile, "Menu");
 
     //put help urls to menu bar
-    if (jsonUtils::hasKey(definition, "help")) {
+    if (definition.contains("help")) {
         wxMenu* menuHelp = new wxMenu;
 
         for (int i = 0; i < definition["help"].size(); i++) {
@@ -117,19 +117,19 @@ void MainFrame::LoadDefinition() {
     }
 
     //check help urls
-    if (jsonUtils::hasKey(definition, "help")) {
-        msg = jsonUtils::checkHelpURLs(definition);
-        if (msg != "__null__") {
-            msg = "Fialed to load help URLs (" + msg + ")";
+    if (definition.contains("help")) {
+        try {
+            jsonUtils::checkHelpURLs(definition);
+        }
+        catch(std::exception& e) {
+            msg = "Fialed to load help URLs (" + std::string(e.what()) + ")";
             std::cout << "[LoadDefinition] " << msg << std::endl;
-            ShowErrorDialog(msg);
             definition.erase("help");
-            return;
         }
     }
 
     //check format
-    if (!jsonUtils::hasKey(definition, "gui") || !definition["gui"].is_array()) {
+    if (!definition.contains("gui") || !definition["gui"].is_array()) {
         msg = "Fialed to load gui_definition.json ('gui' array not found.)";
         std::cout << "[LoadDefinition] " << msg << std::endl;
         ShowErrorDialog(msg);
@@ -140,9 +140,11 @@ void MainFrame::LoadDefinition() {
 
     //check panel definitions
     for (nlohmann::json& sub_d : definition["gui"]) {
-        msg = jsonUtils::checkSubDefinition(sub_d);
-        if (msg != "__null__") {
-            msg = "Fialed to load gui_definition.json (" + msg + ")";
+        try {
+            jsonUtils::checkSubDefinition(sub_d);
+        }
+        catch (std::exception& e) {
+            msg = "Fialed to load gui_definition.json (" + std::string(e.what()) + ")";
             std::cout << "[LoadDefinition] " << msg << std::endl;
             ShowErrorDialog(msg);
             sub_definition = jsonUtils::default_definition();
@@ -230,7 +232,7 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
         ShowErrorDialog(msg[1]);
     }
     else {//if success
-        if (jsonUtils::hasKey(sub_definition, "show_last_line") && sub_definition["show_last_line"]!=0 && msg[0]!="") {
+        if (sub_definition.contains("show_last_line") && sub_definition["show_last_line"]!=0 && msg[0]!="") {
             ShowSuccessDialog(msg[0]);
         }
         else {
@@ -275,7 +277,7 @@ int MainFrame::UpdatePanel(wxPanel* panel)
     std::string str = "Simple Command Runner";
     str = sub_definition["label"];
     std::cout << "[UpdatePanel] " << str.c_str() << std::endl;
-    if (jsonUtils::hasKey(sub_definition, "window_name")) {
+    if (sub_definition.contains("window_name")) {
         SetLabel(wxString::FromUTF8(sub_definition["window_name"]));
     }
     else {
@@ -297,7 +299,7 @@ int MainFrame::UpdatePanel(wxPanel* panel)
         newComp = Component::PutComponent(panel, c, y);
         if (newComp != nullptr) {
             y += newComp->GetHeight();
-            if (jsonUtils::hasKey(config, newComp->GetLabel())) {
+            if (config.contains(newComp->GetLabel())) {
                 newComp->SetConfig(config[newComp->GetLabel()]);
             }
             components.push_back(newComp);

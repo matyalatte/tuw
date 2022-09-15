@@ -38,6 +38,8 @@ add_executable(${PROJECT_NAME}
 	"src/Component.cpp"
 	"src/JsonUtils.h"
 	"src/JsonUtils.cpp"
+	"src/CustomWxObj.h"
+	"src/CustomWxObj.cpp"
 )
 
 #link libraries

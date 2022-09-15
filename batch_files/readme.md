@@ -7,10 +7,9 @@
 wxWidgets is a GUI framework.<br>
 You can install it with the following steps.
 
-1. Move to `Simple-Command-Runner/bathc_files`.
-2. Run `download_wxWidgets.bat` as admin.
-3. Run `open_x64_native_command_prompt_for_VS2022.bat` to open the command prompt.
-4. Type `build_wxWidgets.bat` on the command prompt.
+1. Run `download_wxWidgets.bat` as admin.
+2. Run `open_x64_native_command_prompt_for_VS2022.bat` to open the command prompt.
+3. Type `build_wxWidgets.bat` on the command prompt.
 
 ## 2-a. Build .exe with Batch Files
 You can build Simple Command Runner with batch files.<br>

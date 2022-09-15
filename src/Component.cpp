@@ -1,66 +1,5 @@
 #include "Component.h"
-#include <wx/colour.h>
 
-BEGIN_EVENT_TABLE(FocusedTextCtrl, wxTextCtrl)
-EVT_SET_FOCUS(FocusedTextCtrl::OnSetFocus)
-EVT_KILL_FOCUS(FocusedTextCtrl::OnKillFocus)
-END_EVENT_TABLE()
-
-FocusedTextCtrl::FocusedTextCtrl(
-    wxWindow* parent,
-    wxWindowID id,
-    const wxString& value,
-    const wxString& emptyMessage,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxValidator& validator,
-    const wxString& name) :
-    wxTextCtrl(parent, id, value, pos, size, style, validator, name)
-{
-    this->emptyMessage = emptyMessage;
-    SetValue(value);
-    SetEmptyMessage();
-}
-
-const wxColour wxGREY(150, 150, 150);
-
-void FocusedTextCtrl::SetEmptyMessage() {
-    actualValue = GetValue();
-    if (actualValue == "" && emptyMessage != "") {
-        SetValue(emptyMessage);
-        SetForegroundColour(wxGREY);
-    }
-}
-
-
-void FocusedTextCtrl::OnKillFocus(wxFocusEvent& event) {
-    SetEmptyMessage();
-    event.Skip();
-}
-
-void FocusedTextCtrl::OnSetFocus(wxFocusEvent& event) {
-    SetValue(actualValue);
-    SetForegroundColour(*wxBLACK);
-    event.Skip();
-}
-
-
-//Drop target for path picker
-template <typename T>
-DropFilePath<T>::DropFilePath(T* frame) : wxFileDropTarget() {
-    this->frame = frame;
-}
-
-template <typename T>
-DropFilePath<T>::~DropFilePath() {
-}
-
-template <typename T>
-bool DropFilePath<T>::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) {
-    this->frame->SetPath(filenames[0]);
-    return 1;
-}
 
 //Component for GUI
 Component::Component(nlohmann::json j, int height, bool hasString) {
@@ -68,10 +7,7 @@ Component::Component(nlohmann::json j, int height, bool hasString) {
     this->height = height;
     this->hasString = hasString;
     label = j["label"];
-    addQuotes = false;
-    if (jsonUtils::hasKey(j, "add_quotes")) {
-        addQuotes= j["add_quotes"];
-    }
+    addQuotes = j.value("add_quotes", false);
 }
 
 Component::~Component() {
@@ -174,25 +110,16 @@ StaticText::StaticText(wxPanel* panel, nlohmann::json j, int y): Component(j, 25
 FilePicker::FilePicker(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS_STRING) {
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     wxString ext;
-    if (jsonUtils::hasKey(j, "extension")) {
+    if (j.contains("extension")) {
         ext = wxString::FromUTF8(j["extension"]);
     }
     else {
         ext = "any files | *";
     }
     std::string value = "";
-    wxFilePickerCtrl* picker = new wxFilePickerCtrl(panel, wxID_ANY, value, "", ext, wxPoint(20, y + 18), wxSize(350, 25), wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
-
-    std::string emptyMessage = "";
-    if (jsonUtils::hasKey(j, "empty_message")) {
-        emptyMessage = j["empty_message"];
-    }
-    wxTextCtrl* textCtrl = picker->GetTextCtrl();
-    FocusedTextCtrl* focusedTextCtrl = new FocusedTextCtrl(picker, wxID_ANY, value, emptyMessage, textCtrl->GetPosition(), textCtrl->GetSize());
-    picker->SetTextCtrl(focusedTextCtrl);
-    focusedTextCtrl->SetDropTarget(new DropFilePath<wxFilePickerCtrl>(picker));
+    std::string emptyMessage = j.value("empty_message", "");
+    CustomFilePicker* picker = new CustomFilePicker(panel, wxID_ANY, value, "", ext, emptyMessage, wxPoint(20, y + 18), wxSize(350, 25), wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
     picker->DragAcceptFiles(true);
-    delete textCtrl;
     widget = picker;
 }
 
@@ -201,7 +128,7 @@ wxString FilePicker::GetRawString(){
 }
 
 void FilePicker::SetConfig(nlohmann::json config){
-    if (jsonUtils::hasKey(config, "str") && config["str"].is_string()) {
+    if (config.contains("str") && config["str"].is_string()) {
         ((wxFilePickerCtrl*)widget)->SetPath(wxString::FromUTF8(config["str"]));
         ((wxFilePickerCtrl*)widget)->SetInitialDirectory(wxPathOnly(wxString::FromUTF8(config["str"])));
     }
@@ -222,17 +149,9 @@ nlohmann::json FilePicker::GetConfig() {
 DirPicker::DirPicker(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS_STRING) {
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     std::string value = "";
-    wxDirPickerCtrl* picker = new wxDirPickerCtrl(panel, wxID_ANY, value, "", wxPoint(20, y + 18), wxSize(350, 25), wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
-    std::string emptyMessage = "";
-    if (jsonUtils::hasKey(j, "empty_message")) {
-        emptyMessage = j["empty_message"];
-    }
-    wxTextCtrl* textCtrl = picker->GetTextCtrl();
-    FocusedTextCtrl* focusedTextCtrl = new FocusedTextCtrl(picker, wxID_ANY, value, emptyMessage, textCtrl->GetPosition(), textCtrl->GetSize());
-    picker->SetTextCtrl(focusedTextCtrl);
-    focusedTextCtrl->SetDropTarget(new DropFilePath<wxDirPickerCtrl>(picker));
+    std::string emptyMessage = j.value("empty_message", "");
+    CustomDirPicker* picker = new CustomDirPicker(panel, wxID_ANY, value, "", emptyMessage, wxPoint(20, y + 18), wxSize(350, 25), wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
     picker->DragAcceptFiles(true);
-    delete textCtrl;
     widget = picker;
 }
 
@@ -241,7 +160,7 @@ wxString DirPicker::GetRawString() {
 }
 
 void DirPicker::SetConfig(nlohmann::json config) {
-    if (jsonUtils::hasKey(config, "str") && config["str"].is_string()) {
+    if (config.contains("str") && config["str"].is_string()) {
         ((wxDirPickerCtrl*)widget)->SetPath(wxString::FromUTF8(config["str"]));
         ((wxDirPickerCtrl*)widget)->SetInitialDirectory(wxString::FromUTF8(config["str"]));
     }
@@ -266,18 +185,15 @@ Choice::Choice(wxPanel* panel, nlohmann::json j, int y) : Component(j, 55, HAS_S
         wxitems.Add(wxString::FromUTF8(i));
         });
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
-    int width = 95;
-    if (jsonUtils::hasKey(j, "width")) {
-        width = j["width"];
-    }
+    int width = j.value("width", 95);
     wxChoice* choice = new wxChoice(panel, wxID_ANY, wxPoint(20, y + 20), wxSize(width, 30), wxitems);
-    if (jsonUtils::hasKey(j, "default") && j["items"].size() > j["default"]) {
+    if (j.contains("default") && j["items"].size() > j["default"]) {
         choice->SetSelection(j["default"]);
     }
     else {
         choice->SetSelection(0);
     }
-    if (jsonUtils::hasKey(j, "values") && j["values"].size() == j["items"].size()) {
+    if (j.contains("values") && j["values"].size() == j["items"].size()) {
         SetValues(j["values"]);
     }
     else {
@@ -292,7 +208,7 @@ wxString Choice::GetRawString() {
 }
 
 void Choice::SetConfig(nlohmann::json config) {
-    if (jsonUtils::hasKey(config, "int") && config["int"].is_number() && config["int"] < values.size()) {
+    if (config.contains("int") && config["int"].is_number() && config["int"] < values.size()) {
         ((wxChoice*)widget)->SetSelection(config["int"]);
     }
 }
@@ -315,13 +231,8 @@ void SetDefaultForCheckBox(wxCheckBox* check, nlohmann::json j) {
 //CheckBox
 CheckBox::CheckBox(wxPanel* panel, nlohmann::json j, int y) : Component(j, 35, HAS_STRING) {
     wxCheckBox* check = new wxCheckBox(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y), wxSize(350, 25));
-    if (jsonUtils::hasKey(j, "value")) {
-        value = j["value"];
-    }
-    else {
-        value = j["label"];
-    }
-    if (jsonUtils::hasKey(j, "default")) {
+    value = j.value("value", j["label"]);
+    if (j.contains("default")) {
         SetDefaultForCheckBox(check, j["default"]);
     }
     widget = check;
@@ -335,7 +246,7 @@ wxString CheckBox::GetRawString() {
 }
 
 void CheckBox::SetConfig(nlohmann::json config) {
-    if (jsonUtils::hasKey(config, "int") && config["int"].is_number()) {
+    if (config.contains("int") && config["int"].is_number()) {
         ((wxCheckBox*)widget)->SetValue(config["int"] != 0);
     }
 }
@@ -355,13 +266,13 @@ CheckArray::CheckArray(wxPanel* panel, nlohmann::json j, int y) : Component(j, 2
         check = new wxCheckBox(panel, wxID_ANY, wxString::FromUTF8(j["items"][i]), wxPoint(20, y + 20 + i * 20), wxSize(350, 15));
         checks->push_back(check);
     }
-    if (jsonUtils::hasKey(j, "values")) {
+    if (j.contains("values")) {
         SetValues(j["values"]);
     }
     else {
         SetValues(j["items"]);
     }
-    if (jsonUtils::hasKey(j, "default")) {
+    if (j.contains("default")) {
         for (int i = 0; i < checks->size(); i++) {
             SetDefaultForCheckBox((*checks)[i], j["default"][i]);
         }
@@ -383,7 +294,7 @@ wxString CheckArray::GetRawString() {
 
 void CheckArray::SetConfig(nlohmann::json config) {
     std::vector<wxCheckBox*> checks;
-    if (jsonUtils::hasKey(config, "ints") && config["ints"].is_array()) {
+    if (config.contains("ints") && config["ints"].is_array()) {
         checks = *(std::vector<wxCheckBox*>*)widget;
         for (int i = 0; i < config["ints"].size() && i < checks.size(); i++) {
             checks[i]->SetValue(config["ints"][i] != 0);
@@ -404,15 +315,9 @@ nlohmann::json CheckArray::GetConfig() {
 //TextBox
 TextBox::TextBox(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS_STRING) {
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
-    std::string value = "";
-    std::string emptyMessage = "";
-    if (jsonUtils::hasKey(j, "default")) {
-        value = j["default"];
-    }
-    if (jsonUtils::hasKey(j, "empty_message")) {
-        emptyMessage = j["empty_message"];
-    }
-    wxTextCtrl* textbox = new FocusedTextCtrl(panel, wxID_ANY, value, emptyMessage, wxPoint(20, y + 20), wxSize(350, 23));
+    std::string value = j.value("default", "");
+    std::string emptyMessage = j.value("empty_message", "");
+    wxTextCtrl* textbox = new CustomTextCtrl(panel, wxID_ANY, value, emptyMessage, wxPoint(20, y + 20), wxSize(350, 23));
     widget = textbox;
 }
 
@@ -421,7 +326,7 @@ wxString TextBox::GetRawString() {
 }
 
 void TextBox::SetConfig(nlohmann::json config) {
-    if (jsonUtils::hasKey(config, "str") && config["str"].is_string()) {
+    if (config.contains("str") && config["str"].is_string()) {
         ((wxTextCtrl*)widget)->SetValue(config["str"]);
     }
 }

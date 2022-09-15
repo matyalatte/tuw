@@ -11,7 +11,6 @@ wxWidgets is a GUI framework.<br>
 You can install it with the following steps.
 
 1. Open the Terminal.
-2. Move to `Simple-Command-Runner/shell_scripts`.
 2. Type `bash download_wxWidgets.sh` (Use `bash`. `sh` won't work.)
 3. Type `bash build_wxWidgets.sh`.
 4. Type `bash install_wxWidgets.sh`.
@@ -21,8 +20,9 @@ You can build Simple Command Runner with shell scripts.<br>
 The steps are as follows.
 
 1. Open the Terminal.
-2. Type `bush build_exe.sh`.
-3. An executable file `SimpleCommandRunner` will be generated in `./Simple-Command-Runner/build`.
+2. Move to `Simple-Command-Runner/shell_scripts`.
+3. Type `bush build_exe.sh`.
+4. An executable file `SimpleCommandRunner` will be generated in `./Simple-Command-Runner/build`.
 
 ## Uninstall wxWidgets
 `uninstall_wxWidgets.sh` will uninstall the libs and remove all resource files.
