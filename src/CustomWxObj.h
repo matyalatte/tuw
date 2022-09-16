@@ -46,7 +46,7 @@ public:
 
 	DropFilePath(T* frame, CustomTextCtrl* textCtrl);
 	~DropFilePath();
-	virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) override;
+	virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) wxOVERRIDE;
 };
 
 // Customized wxFileDirPickerCtrlBase

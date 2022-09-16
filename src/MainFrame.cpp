@@ -285,7 +285,7 @@ int MainFrame::UpdatePanel(wxPanel* panel)
     }
 
     int y = 10;
-    if (sub_definition["components"].is_null()) {
+    if (sub_definition["components"].size() == 0) {
         sub_definition["components"] = std::vector<nlohmann::json>();
         return y;
     }

@@ -19,6 +19,7 @@ CustomTextCtrl::CustomTextCtrl(
     wxTextCtrl(parent, id, value, pos, size, style, validator, name)
 {
     this->emptyMessage = emptyMessage;
+    actualValue = value;
     ChangeValue(value);
     SetEmptyMessage();
 }
@@ -46,8 +47,14 @@ void CustomTextCtrl::OnKillFocusEmptyMessage(wxFocusEvent& event) {
 }
 
 void CustomTextCtrl::OnSetFocusEmptyMessage(wxFocusEvent& event) {
+    wxString value = GetValue();
     if (GetForegroundColour() != wxGREY) {
-        actualValue = GetValue();
+        actualValue = value;
+    }
+    else if (value != emptyMessage && value.Left(emptyMessage.Len()) == emptyMessage){
+        // Somehow, droppped paths can be injected to empty message on MacOS.
+        // This will fix the issue.
+        actualValue = value.Mid(emptyMessage.Len());
     }
     ChangeValue(actualValue);
     SetForegroundColour(*wxBLACK);
@@ -127,11 +134,11 @@ bool CustomPickerBase::CustomCreatePickerBase(wxWindow* parent,
 
         m_text->SetMaxLength(32);
 
-        m_text->SetValue(text);
+        customTextCtrl->UpdateText(text);
 
-        m_text->Bind(wxEVT_TEXT, &CustomPickerBase::OnTextCtrlUpdate, this);
-        m_text->Bind(wxEVT_KILL_FOCUS, &CustomPickerBase::OnTextCtrlKillFocus, this);
-        m_text->Bind(wxEVT_DESTROY, &CustomPickerBase::OnTextCtrlDelete, this);
+        customTextCtrl->Bind(wxEVT_TEXT, &CustomPickerBase::OnTextCtrlUpdate, this);
+        customTextCtrl->Bind(wxEVT_KILL_FOCUS, &CustomPickerBase::OnTextCtrlKillFocus, this);
+        customTextCtrl->Bind(wxEVT_DESTROY, &CustomPickerBase::OnTextCtrlDelete, this);
 
         m_sizer->Add(m_text,
             wxSizerFlags(1).CentreVertical().Border(wxRIGHT));

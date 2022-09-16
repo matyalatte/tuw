@@ -1,7 +1,7 @@
 ver0.1.3
 - Added "empty_message" option to text box and pickers. They can show messages when their text boxes are empty.
 - Added "default" option to check box and text box
-- Fixed an error when failing to read json files
+- Fixed errors when failing to read json files
 - Removed dependancies from macOS build
 
 ver0.1.2

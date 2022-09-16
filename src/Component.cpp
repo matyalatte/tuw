@@ -114,7 +114,7 @@ FilePicker::FilePicker(wxPanel* panel, nlohmann::json j, int y) : Component(j, 5
         ext = wxString::FromUTF8(j["extension"]);
     }
     else {
-        ext = "any files | *";
+        ext = "any files (*)|*";
     }
     std::string value = "";
     std::string emptyMessage = j.value("empty_message", "");
@@ -124,13 +124,13 @@ FilePicker::FilePicker(wxPanel* panel, nlohmann::json j, int y) : Component(j, 5
 }
 
 wxString FilePicker::GetRawString(){
-    return ((wxFilePickerCtrl*)widget)->GetPath();
+    return ((CustomFilePicker*)widget)->GetTextCtrlValue();
 }
 
 void FilePicker::SetConfig(nlohmann::json config){
     if (config.contains("str") && config["str"].is_string()) {
-        ((wxFilePickerCtrl*)widget)->SetPath(wxString::FromUTF8(config["str"]));
-        ((wxFilePickerCtrl*)widget)->SetInitialDirectory(wxPathOnly(wxString::FromUTF8(config["str"])));
+        ((CustomFilePicker*)widget)->SetPath(wxString::FromUTF8(config["str"]));
+        ((CustomFilePicker*)widget)->SetInitialDirectory(wxPathOnly(wxString::FromUTF8(config["str"])));
     }
 }
 
@@ -156,13 +156,13 @@ DirPicker::DirPicker(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53,
 }
 
 wxString DirPicker::GetRawString() {
-    return ((wxDirPickerCtrl*)widget)->GetPath();
+    return ((CustomDirPicker*)widget)->GetTextCtrlValue();
 }
 
 void DirPicker::SetConfig(nlohmann::json config) {
     if (config.contains("str") && config["str"].is_string()) {
-        ((wxDirPickerCtrl*)widget)->SetPath(wxString::FromUTF8(config["str"]));
-        ((wxDirPickerCtrl*)widget)->SetInitialDirectory(wxString::FromUTF8(config["str"]));
+        ((CustomDirPicker*)widget)->SetPath(wxString::FromUTF8(config["str"]));
+        ((CustomDirPicker*)widget)->SetInitialDirectory(wxString::FromUTF8(config["str"]));
     }
 }
 

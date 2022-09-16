@@ -15,10 +15,9 @@ You can install it with the following steps.
 You can build Simple Command Runner with batch files.<br>
 The steps are as follows.
 
-1. Move to `Simple-Command-Runner/bathc_files`.
-2. Run `open_x64_native_command_prompt_for_VS2022.bat` to open the command prompt.
-3. Run `build_exe.bat` on the command prompt.
-4. `SimpleCommandRunner.exe` will be generated in `./Simple-Command-Runner/build/Release`.
+1. Run `open_x64_native_command_prompt_for_VS2022.bat` to open the command prompt.
+2. Run `build_exe.bat` on the command prompt.
+3. `SimpleCommandRunner.exe` will be generated in `./Simple-Command-Runner/build/Release`.
 
 ## 2-b. Build .exe with Visual Studio
 Of course, you can build the exe with Visual Studio.<br>

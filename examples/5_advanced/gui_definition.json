@@ -12,7 +12,7 @@
                 {
                     "type": "file",
                     "label": "Some file path",
-                    "extension": "any files | *",
+                    "extension": "any files (*)|*",
                     "empty_message": "Drop a file here!"
                 },
                 {

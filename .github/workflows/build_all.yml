@@ -5,6 +5,7 @@ on:
   
 env:
   ZIP_NAME: SimpleCommandRunner
+  CACHE_NAME: main
 
 jobs:
   setup:
@@ -61,8 +62,8 @@ jobs:
         id: cache-wx
         with:
             path: "C:/wxWidgets-${{ needs.setup.outputs.wx_version }}"
-            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}
-            
+            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-${{ env.CACHE_NAME }}
+
       - name: Setup nmake
         if: steps.cache-wx.outputs.cache-hit != 'true'
         uses: ilammy/msvc-dev-cmd@v1
@@ -124,7 +125,7 @@ jobs:
         id: cache-wx
         with:
             path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
-            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}
+            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-${{ env.CACHE_NAME }}
             
       - name: install gtk
         if: runner.os=='Linux'
