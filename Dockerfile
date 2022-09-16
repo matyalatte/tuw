@@ -11,9 +11,8 @@
 ARG ubuntu_version="20.04"
 FROM ubuntu:${ubuntu_version}
 
-ENV DEBIAN_FRONTEND=noninteractive
-
 # Install packages
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends\
     wget ca-certificates build-essential libgtk-3-dev git cmake

@@ -2,6 +2,7 @@
 
 ## 0. Requirements
 - Visual Studio 2022 (need cmake tools)
+- Batch files in [`./Simple-Command-Runner/batch_files`](../batch_files)
 
 ## 1. Build wxWidgets
 wxWidgets is a GUI framework.<br>

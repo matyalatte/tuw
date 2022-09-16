@@ -1,6 +1,9 @@
 name: build_all
 
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
   
 env:

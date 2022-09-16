@@ -1,9 +1,6 @@
 name: build_windows
 
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
   
 env:

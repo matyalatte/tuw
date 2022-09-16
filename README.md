@@ -1,6 +1,4 @@
-![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_windows.yml/badge.svg)
-![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_ubuntu.yml/badge.svg)
-![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_mac.yml/badge.svg)
+![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
 # Simple-Command-Runner ver 0.1.3
 Simple GUI wrapper to execute commands.<br>
 
@@ -18,16 +16,8 @@ No need to use IDE and manage scripts for GUI.<br>
 - Portable
 - No need IDE for GUI
 - Define GUI in .json
-
-## Platforms
-Simple Command Runner uses cross-platform framework.<br>
-I made sure we can build it with the following platforms and compilers.
-- Windows10 + MSVC 19.31
-- Ubuntu 20.04 + GCC 9.4
-- MacOS 10.15 + AppleClang 12.0
-
-But I haven't tested enough yet.<br>
-There may be some bugs.
+- Save arguments even if you close app
+- Able to input paths by drag and drop
 
 ## Downloads
 Download the executable from [here](https://github.com/matyalatte/Simple-Command-Runner/releases)
@@ -40,16 +30,39 @@ Download the executable from [here](https://github.com/matyalatte/Simple-Command
 ## Examples
 There are some [json files](./examples) to learn how to use.<br>
 
+## FAQ
+[Frequently Asked Questions](./doc/FAQ.md)
+
+## Platforms
+Simple Command Runner uses cross-platform framework.<br>
+I made sure we can build it with the following platforms and compilers.
+- Windows10 + MSVC 19.31
+- Ubuntu 20.04 + GCC 9.4
+- MacOS 10.15 + AppleClang 12.0
+
+But I haven't tested enough yet.<br>
+There may be some bugs.
+
 ## How to Build
+### Github Actions
+There are some building workflows for Github Actions.<br>
+You can make Github build and upload the executable for your platform.<br>
+- [`build_windows`](./.github/workflows/build_windows.yml) is for Windows.
+- [`build_mac`](./.github/workflows/build_mac.yml) is for MacOS.
+- [`build_ubuntu`](./.github/workflows/build_ubuntu.yml) is for Ubuntu (20.04 or later).
+
+See here for the details.<br>
+[How to Build With Github Actions](./doc/Github_Actions.md)
+
 ### Windows
 There is a document for Windows users.<br>
-[Simple-Command-Runner/batch_files](./batch_files)<br>
+[Building Workflow for Windows](./doc/Build_With_Windows.md)<br>
 
 It only supports Visual Studio 2022, but you can see the batch files to find a way to build it with your environment.<br>
 
 ### Mac and Ubuntu
 There is a document for Mac and Ubuntu users.<br>
-[Simple-Command-Runner/shell_scripts](./shell_scripts)<br>
+[Building Workflow for Ubuntu and MacOS](./doc/Build_With_Unix.md)<br>
 
 And you can see the shell scripts to understand the workflow.<br>
 
@@ -57,18 +70,9 @@ And you can see the shell scripts to understand the workflow.<br>
 Ubuntu users can also use a docker file to build the executable.<br>
 See [the docker file](./Dockerfile) for the instruction.<br>
 
-## FAQ
-### Can I distribute the exe with my scripts?
-Yes, and you can rename it to `GUI.exe`, `'project name'-GUI.exe`, or `'project name'_GUI.exe`.<br>
-
-### Linux says `Could Not Display` when lauching the executable.
-Check `Allow executing file as program.` (Properties->Permissions->Execute)<br>
-You will be able to launch the executable by double-click.<br>
-![Screenshot (729)](https://user-images.githubusercontent.com/69258547/189526464-cd62887b-62b1-4071-ae38-a7ab73600bbf.png)
-
 ## License
 ### Simple Command Runner
-Simple Command Runner is licensed under [wxWindows Library Licence](license.txt).<br>
+Files in this repository are licensed under [wxWindows Library Licence](license.txt).<br>
 It is a modified version of LGPL explicitly allowing not distributing
 the sources of an application using the library even in the case of static linking.<br>
 
