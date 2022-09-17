@@ -15,7 +15,7 @@ You can use file pickers and folder pickers.
                 {
                     "type": "file",
                     "label": "A file you want to copy",
-                    "extension": "any files | *",
+                    "extension": "any files (*)|*",
                     "add_quotes": true
                 },
                 {

@@ -26,8 +26,14 @@ The steps are as follows.
 
 1. Open `./Simple-Command-Runner` with Visual Studio.
 2. Select `Manage Configurations` from configuration.
-3. Add `-D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded` to `CMake command arguments`.
+3. Add `-D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded` to `CMake command arguments` in `x64-Release`.
 4. Build SimpleCommandRunner.exe.
+
+## Debug build
+If you want a debug build, you need to use `Debug` as an argument for batch files.<br>
+So, you should type `download_wxWidgets.bat Debug`, `build_wxWidgets.bat Debug`, and `build_exe.bat Debug` on the command prompt.<br>
+And no need `-D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded` for cmake arguments.
+
 
 ## Uninstall wxWidgets
 If you want to uninstall wxWidgets, remove `C:/wxWidgets-*`.

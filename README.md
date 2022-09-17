@@ -31,7 +31,7 @@ Download the executable from [here](https://github.com/matyalatte/Simple-Command
 There are some [json files](./examples) to learn how to use.<br>
 
 ## FAQ
-[Frequently Asked Questions](./doc/FAQ.md)
+[Frequently Asked Questions](./docs/FAQ.md)
 
 ## Platforms
 Simple Command Runner uses cross-platform framework.<br>
@@ -52,17 +52,17 @@ You can make Github build and upload the executable for your platform.<br>
 - [`build_ubuntu`](./.github/workflows/build_ubuntu.yml) is for Ubuntu (20.04 or later).
 
 See here for the details.<br>
-[How to Build With Github Actions](./doc/Github_Actions.md)
+[How to Build With Github Actions](./docs/Github_Actions.md)
 
 ### Windows
 There is a document for Windows users.<br>
-[Building Workflow for Windows](./doc/Build_With_Windows.md)<br>
+[Building Workflow for Windows](./docs/Build_With_Windows.md)<br>
 
 It only supports Visual Studio 2022, but you can see the batch files to find a way to build it with your environment.<br>
 
 ### Mac and Ubuntu
 There is a document for Mac and Ubuntu users.<br>
-[Building Workflow for Ubuntu and MacOS](./doc/Build_With_Unix.md)<br>
+[Building Workflow for Ubuntu and MacOS](./docs/Build_With_Unix.md)<br>
 
 And you can see the shell scripts to understand the workflow.<br>
 

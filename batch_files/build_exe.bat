@@ -8,16 +8,35 @@ REM Run it with "x64 Ntive Tools Command Prompt for VS 2022". Or fail to build.
 
 set VS_VERSION=Visual Studio 17 2022
 
-mkdir %~dp0\..\build
-@pushd %~dp0\..\build
+REM You can specify build type as an argument like "build_exe.bat Release"
+if /I "%~1"=="Release" (
+    set BUILD_TYPE=Release
+) else if /I "%~1"=="Debug" (
+    set BUILD_TYPE=Debug
+) else (
+    set BUILD_TYPE=Release
+)
+echo BUILD_TYPE:%BUILD_TYPE%
 
-cmake -G "%VS_VERSION%"^
- -A x64^
- -D CMAKE_BUILD_TYPE=Release^
- -D CMAKE_BUILD_SHARED=OFF^
- -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded^
- ../
+mkdir %~dp0\..\%BUILD_TYPE%
+@pushd %~dp0\..\%BUILD_TYPE%
 
-msbuild SimpleCommandRunner.vcxproj /t:build /p:configuration=Release /p:platform=x64 -maxcpucount
+if "%BUILD_TYPE%"=="Release" (
+    REM Release build
+    cmake -G "%VS_VERSION%"^
+        -A x64^
+        -D CMAKE_CONFIGURATION_TYPES=%BUILD_TYPE%^
+        -D CMAKE_BUILD_TYPE=%BUILD_TYPE%^
+        -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded^
+        ../
+) else (
+    REM Debug build
+    cmake -G "%VS_VERSION%"^
+        -A x64^
+        -D CMAKE_BUILD_TYPE=%BUILD_TYPE%^
+        -D CMAKE_CONFIGURATION_TYPES=%BUILD_TYPE%^
+        ../
+)
 
+cmake --build . --config %BUILD_TYPE%
 @popd

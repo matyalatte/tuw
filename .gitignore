@@ -2,6 +2,8 @@
 *.json
 !examples/*/gui_definition.json
 build
+Release
+Debug
 todo.txt
 check*.sh
 
@@ -15,4 +17,4 @@ SimpleCommandRunner-v*
 #for test scripts
 python
 *.py
-test
+

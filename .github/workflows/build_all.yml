@@ -64,7 +64,7 @@ jobs:
         uses: actions/cache@v2
         id: cache-wx
         with:
-            path: "C:/wxWidgets-${{ needs.setup.outputs.wx_version }}"
+            path: "C:/wxWidgets-${{ needs.setup.outputs.wx_version }}-Release"
             key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-${{ env.CACHE_NAME }}
 
       - name: Setup nmake
@@ -89,7 +89,7 @@ jobs:
       - name: copy files
         run: |
           mkdir -p ../release
-          cp build/Release/SimpleCommandRunner.exe ../release
+          cp Release/Release/SimpleCommandRunner.exe ../release
           cp examples/5_advanced/gui_definition.json ../release
           cp changelog.txt ../release
           cp license.txt ../release

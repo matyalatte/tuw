@@ -12,7 +12,7 @@ namespace jsonUtils {
             istream.close();
         }
         catch (...) {
-            json = {};
+            json = nlohmann::json({});
         }
         return json;
     }
