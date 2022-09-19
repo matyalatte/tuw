@@ -18,7 +18,7 @@ The steps are as follows.
 
 1. Run `open_x64_native_command_prompt_for_VS2022.bat` to open the command prompt.
 2. Run `build_exe.bat` on the command prompt.
-3. `SimpleCommandRunner.exe` will be generated in `./Simple-Command-Runner/build/Release`.
+3. `SimpleCommandRunner.exe` will be generated in `./Simple-Command-Runner/Release/Release`.
 
 ## 2-b. Build .exe with Visual Studio
 Of course, you can build the exe with Visual Studio.<br>
@@ -26,14 +26,16 @@ The steps are as follows.
 
 1. Open `./Simple-Command-Runner` with Visual Studio.
 2. Select `Manage Configurations` from configuration.
-3. Add `-D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded` to `CMake command arguments` in `x64-Release`.
-4. Build SimpleCommandRunner.exe.
+4. Add `-D wxWidgets_ROOT_DIR=C:/wxWidgets-3.1.5/Release/Installed -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -D wxWidgets_CONFIGURATION=mswu` for `x64-Release`.
+5. Build SimpleCommandRunner.exe.
 
 ## Debug build
 If you want a debug build, you need to use `Debug` as an argument for batch files.<br>
-So, you should type `download_wxWidgets.bat Debug`, `build_wxWidgets.bat Debug`, and `build_exe.bat Debug` on the command prompt.<br>
-And no need `-D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded` for cmake arguments.
+So, you should type `build_wxWidgets.bat Debug` and `build_exe.bat Debug` on the command prompt.<br>
+If you will build the exe with Visual Studio, you should add `-D wxWidgets_ROOT_DIR=C:/wxWidgets-3.1.5/Debug/Installed -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL -D wxWidgets_CONFIGURATION=mswud` to `CMake command arguments` for `x64-Debug` in the IDE.
 
+## Test
+If you want to build tests, type `test.bat` or `test.bat Debug` on the command prompt.
 
 ## Uninstall wxWidgets
 If you want to uninstall wxWidgets, remove `C:/wxWidgets-*`.

@@ -14,7 +14,6 @@ You can install it with the following steps.
 2. Move to `./Simple-Command-Runner/shell_scripts`
 3. Type `bash download_wxWidgets.sh` (Use `bash`. `sh` won't work.)
 4. Type `bash build_wxWidgets.sh`.
-5. Type `bash install_wxWidgets.sh`.
 
 ## 2. Build an executable with Shell Scripts
 You can build Simple Command Runner with shell scripts.<br>
@@ -23,7 +22,14 @@ The steps are as follows.
 1. Open the Terminal.
 2. Move to `./Simple-Command-Runner/shell_scripts`
 3. Type `bush build_exe.sh`.
-4. An executable file `SimpleCommandRunner` will be generated in `./Simple-Command-Runner/build`.
+4. An executable file `SimpleCommandRunner` will be generated in `./Simple-Command-Runner/Release`.
+
+## Debug build
+If you want a debug build, you need to use `Debug` as an argument for shell scripts.<br>
+So, you should type `bash build_wxWidgets.sh Debug` and `bush build_exe.sh Debug` on the terminal.<br>
+
+## Test
+If you want to build tests, type `bash test.sh` or `bash test.sh Debug` on the terminal.
 
 ## Uninstall wxWidgets
-`uninstall_wxWidgets.sh` will uninstall the libs and remove all resource files.
+If you want to uninstall wxWidgets, remove `~/wxWidgets-*`.

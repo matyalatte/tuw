@@ -1,9 +1,10 @@
 #general
 *.json
 !examples/*/gui_definition.json
+!tests/**.json
 build
-Release
-Debug
+Release*
+Debug*
 todo.txt
 check*.sh
 

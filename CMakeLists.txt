@@ -9,15 +9,12 @@ set(PROJECT_NAME SimpleCommandRunner)
 project(${PROJECT_NAME})
 
 if (CMAKE_COMPILER_IS_GNUCXX)
-	#settings for unix
+	#settings for GCC
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
 endif()
 
 # find wxWidgets
-if (WIN32)
-	file(STRINGS WX_VERSION.txt WX_VERSION)
-	set(wxWidgets_ROOT_DIR C:/wxWidgets-${WX_VERSION}-${CMAKE_BUILD_TYPE})
-endif()
+# set(CMAKE_FIND_DEBUG_MODE TRUE)
 find_package(wxWidgets REQUIRED COMPONENTS core base)
 include(${wxWidgets_USE_FILE})
 
@@ -43,6 +40,7 @@ target_link_libraries(
 	nlohmann_json::nlohmann_json
 	${wxWidgets_LIBRARIES}
 )
+
 # add main app
 if (BUILD_EXE)
 	add_executable(${PROJECT_NAME}

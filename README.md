@@ -16,7 +16,7 @@ No need to use IDE and manage scripts for GUI.<br>
 - Portable
 - No need IDE for GUI
 - Define GUI in .json
-- Save arguments even if you close app
+- Save arguments
 - Able to input paths by drag and drop
 
 ## Downloads
@@ -58,13 +58,13 @@ See here for the details.<br>
 There is a document for Windows users.<br>
 [Building Workflow for Windows](./docs/Build_With_Windows.md)<br>
 
-It only supports Visual Studio 2022, but you can see the batch files to find a way to build it with your environment.<br>
+It only supports Visual Studio 2022, but you can see [the batch files](./batch_files/) to find a way to build it with your environment.<br>
 
 ### Mac and Ubuntu
 There is a document for Mac and Ubuntu users.<br>
 [Building Workflow for Ubuntu and MacOS](./docs/Build_With_Unix.md)<br>
 
-And you can see the shell scripts to understand the workflow.<br>
+And you can see [the shell scripts](./shell_scripts/) to understand the workflow.<br>
 
 ### Docker
 Ubuntu users can also use a docker file to build the executable.<br>

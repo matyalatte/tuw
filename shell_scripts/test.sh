@@ -13,8 +13,13 @@ export PATH=${install_dir}/bin:$PATH
 export WX_CONFIG=${install_dir}/wx-config
 
 pushd $(dirname "$0")/..
-    mkdir ${build_type}
-    cd ${build_type}
-    cmake -D CMAKE_BUILD_TYPE=${build_type} -D BUILD_SHARED_LIBS=OFF ../
+    mkdir ${build_type}Test
+    cd ${build_type}Test
+    cmake -D CMAKE_BUILD_TYPE=${build_type}\
+        -D BUILD_SHARED_LIBS=OFF\
+        -D BUILD_EXE=OFF\
+        -D BUILD_TESTS=ON\
+        ../
     cmake --build .
+    ctest --verbose
 popd

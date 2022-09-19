@@ -39,10 +39,6 @@ jobs:
           bash download_wxWidgets.sh
           bash build_wxWidgets.sh
           
-      - name: install wxWidget
-        run: |
-          bash shell_scripts/install_wxWidgets.sh
-          
       - name: build exe
         run: |
           bash shell_scripts/build_exe.sh
@@ -50,7 +46,7 @@ jobs:
       - name: copy files
         run: |
           mkdir -p ../release/${{ env.ZIP_NAME }}
-          cp build/SimpleCommandRunner ../release/${{ env.ZIP_NAME }}
+          cp Release/SimpleCommandRunner ../release/${{ env.ZIP_NAME }}
           cp examples/5_advanced/gui_definition.json ../release/${{ env.ZIP_NAME }}
           cp changelog.txt ../release/${{ env.ZIP_NAME }}
           cp license.txt ../release/${{ env.ZIP_NAME }}
