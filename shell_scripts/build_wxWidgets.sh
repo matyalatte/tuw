@@ -4,7 +4,7 @@
 #you need build-essential and libgtk-3-dev for linux
 #sudo apt -y install build-essential libgtk-3-dev
 
-wx_version="$(cat ../WX_VERSION.txt)"
+wx_version="$(cat $(dirname "$0")/../WX_VERSION.txt)"
 
 if [ "$1" = "Debug" ];
     then build_type="Debug";
@@ -43,9 +43,8 @@ fi
 function nproc_for_mac(){
     if sysctl -n hw.logicalcpu;
         then num_proc=`sysctl -n hw.logicalcpu`; # use hw.logicalcpu if exists
-        else num_proc=2; # when sysctl won't work
+        else num_proc=2; echo ${num_proc}; # when sysctl won't work
     fi
-    echo ${num_proc}
 }
 
 if nproc;

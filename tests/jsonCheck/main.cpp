@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "jsonUtils.h"
+#include "JsonUtils.h"
 
 char const * broken;
 char const * fineHelp;

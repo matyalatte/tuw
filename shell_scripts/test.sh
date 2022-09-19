@@ -7,7 +7,7 @@ if [ "$1" = "Debug" ];
     else build_type="Release";
 fi
 
-wx_version="$(cat ../WX_VERSION.txt)"
+wx_version="$(cat $(dirname "$0")/../WX_VERSION.txt)"
 install_dir=$HOME/wxWidgets-${wx_version}/${build_type}
 export PATH=${install_dir}/bin:$PATH
 export WX_CONFIG=${install_dir}/wx-config

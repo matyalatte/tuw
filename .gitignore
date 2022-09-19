@@ -1,7 +1,7 @@
 #general
 *.json
 !examples/*/gui_definition.json
-!tests/**.json
+!tests/**/*.json
 build
 Release*
 Debug*
