@@ -24,13 +24,10 @@ set WXRC_CMD=C:/wxWidgets-%WX_VERSION%/%BUILD_TYPE%/Installed/bin/wxrc.exe
 mkdir %~dp0\..\%BUILD_TYPE%Test
 @pushd %~dp0\..\%BUILD_TYPE%Test
     if "%BUILD_TYPE%"=="Release" (
-        set RUNTIME_LIB=-D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
-        set CONFIG=-D wxWidgets_CONFIGURATION=mswu
+        set OPTIONS=%OPTIONS% -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -D wxWidgets_CONFIGURATION=mswu
     ) else (
-        set RUNTIME_LIB=-D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL
-        set CONFIG=-D wxWidgets_CONFIGURATION=mswud
+        set OPTIONS=%OPTIONS% -D wxWidgets_CONFIGURATION=mswud
     )
-    set OPTIONS=%OPTIONS% %RUNTIME_LIB% %CONFIG%
     echo CMake arguments: %OPTIONS%
 
     cmake %OPTIONS% ../

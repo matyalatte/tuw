@@ -144,62 +144,52 @@ namespace jsonUtils {
         return tokens;
     }
 
+    const std::string COMMAND = "command";
+    const std::string COMPONENTS = "components";
+
     void checkSubDefinition(nlohmann::json& sub_definition) {
-        //check if keys exist
-        std::vector<std::string> keys = { "label", "button", "command", "components" };
-        for (std::string key : keys) {
-            checkContain(sub_definition, key, "");
-        }
-
         //check is_string
-        keys = { "label", "button"};
-        if (sub_definition.contains("window_name")) {
-            keys.push_back("window_name");
-        }
-        for (std::string key : keys) {
-            checkJsonType(sub_definition, key, JsonType::STRING);
-        }
+        checkJsonType(sub_definition, "label", JsonType::STRING);
+        checkJsonType(sub_definition, "button", JsonType::STRING, "", true);
+        checkJsonType(sub_definition, "window_name", JsonType::STRING, "", true);
 
-        if (sub_definition["command"].is_string()) {
-            sub_definition["command"] = split(sub_definition["command"], '%');
+        checkContain(sub_definition, COMMAND, "");
+        if (sub_definition[COMMAND].is_string()) {
+            sub_definition[COMMAND] = split(sub_definition[COMMAND], '%');
         }
-        checkJsonType(sub_definition, "command", JsonType::ARRAY);
+        checkJsonType(sub_definition, COMMAND, JsonType::ARRAY);
 
         //check is_boolean
         checkJsonType(sub_definition, "show_last_line", JsonType::BOOLEAN, "", true);
 
         //check is_array
-        keys = { "components" };
-        for (std::string key : keys) {
-            checkJsonType(sub_definition, key, JsonType::ARRAY);
-        }
+        checkJsonType(sub_definition, COMPONENTS, JsonType::ARRAY);
 
         //check components
-        keys = { "type", "label" };
         std::vector<std::string> subkeys = {};
         std::string label;
-        for (nlohmann::json& c : sub_definition["components"]) {
+        std::string type;
+        for (nlohmann::json& c : sub_definition[COMPONENTS]) {
             //check if type and label exist
-            for (std::string key : keys) {
-                checkJsonType(c, key, JsonType::STRING, "components");
-            }
+            checkJsonType(c, "type", JsonType::STRING, COMPONENTS);
+            checkJsonType(c, "label", JsonType::STRING, COMPONENTS);
+
             label = c["label"];
-            if (c["type"] == "file") {
+            type = c["type"];
+            if (type == "file") {
                 checkJsonType(c, "extention", JsonType::STRING, label, true);
             }
-            else if (c["type"] == "choice") {
-                
+            else if (type == "choice") {
                 checkItemsValues(c);
                 subkeys = { "width", "default" };
                 for (std::string key : subkeys) {
                     checkJsonType(c, key, JsonType::NUMBER, label, true);
                 }
             }
-            else if (c["type"] == "check") {
+            else if (type == "check") {
                 checkJsonType(c, "value", JsonType::STRING, label, true);
             }
-            else if (c["type"] == "checks" || c["type"] == "check_array") {
-                c["type"] = "check_array";
+            else if (type == "checks" || type == "check_array") {
                 checkItemsValues(c);
                 std::string key = "default";
                 checkJsonType(c, key, JsonType::ARRAY, label, true);
@@ -207,8 +197,7 @@ namespace jsonUtils {
                     raise(GetLabel(label, key) + " and " + GetLabel(label, "items") + " should have the same size.");
                 }
             }
-            else if (c["type"] == "text" || c["type"] == "text_box") {
-                c["type"] = "text";
+            else if (type == "text" || type == "text_box") {
                 checkJsonType(c, "default", JsonType::STRING, label, true);
             }
             checkJsonType(c, "add_quotes", JsonType::BOOLEAN, label, true);

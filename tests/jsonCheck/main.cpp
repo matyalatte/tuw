@@ -1,3 +1,6 @@
+// Tests for json checking
+// Todo: Write more tests
+
 #include <gtest/gtest.h>
 #include "JsonUtils.h"
 

@@ -59,12 +59,12 @@ std::string read_stream(wxInputStream* stream, char* buf, size_t size) {
 }
 
 //run command and return error messages
-std::vector<std::string> exec(const char* cmd) {
+std::array<std::string, 2> exec(const char* cmd) {
     
     //open process
     wxProcessExecute* process = wxProcessExecute::Open(cmd);
     if (!process) {
-        return { "__null__", "" };
+        return { "", "Failed to open a process." };
     }
 
     //get stream

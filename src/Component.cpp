@@ -72,29 +72,30 @@ bool Component::HasString() {
 Component* Component::PutComponent(wxPanel* panel, nlohmann::json j, int y) {
 
     Component* comp=nullptr;
-    if (j["type"] == "static_text") {//statc text
+    std::string type = j["type"];
+    if (type == "static_text") {//statc text
         comp = new StaticText(panel, j, y);
     }
-    else if (j["type"] == "file") {//file picker
+    else if (type == "file") {//file picker
         comp = new FilePicker(panel, j, y);
     }
-    else if (j["type"] == "folder") {//dir picker
+    else if (type == "folder") {//dir picker
         comp = new DirPicker(panel, j, y);
     }
-    else if (j["type"] == "choice") {//choice
+    else if (type == "choice") {//choice
         comp = new Choice(panel, j, y);
     }
-    else if (j["type"] == "check") {//checkbox
+    else if (type == "check") {//checkbox
         comp = new CheckBox(panel, j, y);
     }
-    else if (j["type"] == "check_array") {//checkArray
+    else if (type == "checks" || type == "check_array") {//checkArray
         comp = new CheckArray(panel, j, y);
     }
-    else if (j["type"] == "text") {//text box
+    else if (type == "text" || type == "text_box") {//text box
         comp = new TextBox(panel, j, y);
     }
     else {
-        std::cout << "[UpdatePanel] Unknown component type detected. (" << j["type"] << ")" << std::endl;
+        std::cout << "[UpdatePanel] Unknown component type detected. (" << type << ")" << std::endl;
     }
     return comp;
 }
@@ -186,6 +187,7 @@ Choice::Choice(wxPanel* panel, nlohmann::json j, int y) : Component(j, 55, HAS_S
         });
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     int width = j.value("width", 95);
+
     wxChoice* choice = new wxChoice(panel, wxID_ANY, wxPoint(20, y + 20), wxSize(width, 30), wxitems);
     if (j.contains("default") && j["items"].size() > j["default"]) {
         choice->SetSelection(j["default"]);
@@ -317,22 +319,22 @@ TextBox::TextBox(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     std::string value = j.value("default", "");
     std::string emptyMessage = j.value("empty_message", "");
-    wxTextCtrl* textbox = new CustomTextCtrl(panel, wxID_ANY, value, emptyMessage, wxPoint(20, y + 20), wxSize(350, 23));
+    CustomTextCtrl* textbox = new CustomTextCtrl(panel, wxID_ANY, value, emptyMessage, wxPoint(20, y + 20), wxSize(350, 23));
     widget = textbox;
 }
 
 wxString TextBox::GetRawString() {
-    return ((wxTextCtrl*)widget)->GetValue();
+    return ((CustomTextCtrl*)widget)->GetActualValue();
 }
 
 void TextBox::SetConfig(nlohmann::json config) {
     if (config.contains("str") && config["str"].is_string()) {
-        ((wxTextCtrl*)widget)->SetValue(config["str"]);
+        ((CustomTextCtrl*)widget)->UpdateText(config["str"]);
     }
 }
 
 nlohmann::json TextBox::GetConfig() {
     nlohmann::json config = {};
-    config["str"] = ((wxTextCtrl*)widget)->GetValue();
+    config["str"] = (std::string)GetRawString();
     return config;
 }

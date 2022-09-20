@@ -10,15 +10,13 @@ It has only a button to echo `Hello!`.<br>
         {
             "label": "Minimal Sample",
             "command": "echo Hello!",
-            "button": "Echo!",
             "components": []
         }
     ]
 }
 ```
 
-You can write definition of your GUI in `gui: [{}]`.<br>
-`label` is a label of your definition. You can type here as you like.<br>
-`command` is a command you want to run when clicking the execution button.<br>
-`button` will be printed on the button.<br>
-`compoents` is an array of GUI components (e.g. file picker). `[]`
+You can write definition of your GUI in `"gui": [{}]`.<br>
+- `label` is a label of your definition. You can type here as you like.
+- `command` is a command you want to execute when clicking the execution button.
+- `compoents` is an array of GUI components (e.g. file pickers). `[]` means no components.

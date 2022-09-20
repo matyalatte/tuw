@@ -25,7 +25,7 @@ Download the executable from [here](https://github.com/matyalatte/Simple-Command
 - `SimpleCommandRunner*-macOS.tar.bz2` is for Mac.<br>
 - `SimpleCommandRunner*-Linux.tar.bz2` is for Ubuntu (20.04 or later).<br>
 
-(The Linux one won't work on old Ubuntu versions and other linux distributions due to glibc dependances.)<br>
+(The Linux build won't work on old Ubuntu versions and other linux distributions due to glibc dependances.)<br>
 
 ## Examples
 There are some [json files](./examples) to learn how to use.<br>
@@ -35,13 +35,12 @@ There are some [json files](./examples) to learn how to use.<br>
 
 ## Platforms
 Simple Command Runner uses cross-platform framework.<br>
-I made sure we can build it with the following platforms and compilers.
+I made sure I can build it with the following platforms and compilers.
 - Windows10 + MSVC 19.31
 - Ubuntu 20.04 + GCC 9.4
 - MacOS 10.15 + AppleClang 12.0
 
-But I haven't tested enough yet.<br>
-There may be some bugs.
+And I think it supports your environment as well if [wxWidgets library](https://github.com/wxWidgets/wxWidgets) supports.<br>
 
 ## How to Build
 ### Github Actions

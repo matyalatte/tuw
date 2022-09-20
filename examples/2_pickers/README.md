@@ -30,15 +30,19 @@ You can use file pickers and folder pickers.
 }
 ```
 
-`window_name` is an optional key to rename the window title of `SimpleCommandRunner.exe`.<br>
-`compoents` is an array of GUI components.<br>
-Each component will be defined as a dictionary.<br>
-`type` is component type. `file` is for file picker and `folder` is for dir picker.<br>
-`label` is a string written above the textbox of picker.<br>
-`extension` is an optional key for file picker. It's wildcard for file pickers. Use the same syntax as for [wxWidget's wildcards](https://docs.wxwidgets.org/3.0/classwx_file_dialog.html).<br>
-`add_quotes` is an optional key for components. It will add quotes to the input strings.<br>
-`empty_message` is an optional key for text box. It will show a message when the text box is empty.<br>
-<br>
+### "gui"
+- `window_name` is an optional key to rename the window title of `SimpleCommandRunner.exe`.
+- `button` is an optional key to rename the execution button.
+- `compoents` is an array of GUI components. Each component will be defined as a dictionary.
+
+### "components"
+- `type` is component type. `file` for a file picker, and `folder` for a dir picker.
+- `label` is a string written above the text box of picker.
+- `extension` is an optional key for file picker. It's wildcard for file pickers. Use the same syntax as for [wxWidget's wildcards](https://docs.wxwidgets.org/3.0/classwx_file_dialog.html).
+- `add_quotes` is an optional key for components. It will add quotes to the input strings.
+- `empty_message` is an optional key for text box. It will show a message when the text box is empty.
+
+### "command"
 Inputs of components will be injected into `command` when executing the command.<br>
 You can specifiy where you inject the inputs with `%*%`.<br>
-In the sample, file path will be injected in `%file%`, and folder path will be in %out_path%.
+In the example, file path will be injected in `%file%`, and folder path will be in `%out_path%`.

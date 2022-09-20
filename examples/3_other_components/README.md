@@ -29,7 +29,7 @@ There are more components you can use.
 ]
 ```
 
-`static_text` is a string component. You don't need to put `%*%` in command for this component.<br>
-`choice` is a combo box. `values` will be inputted to command.<br>
-`check` is a check box. `value` will be inputted to command if you check the check box.<br>
-`text_box` is a text box.
+- `static_text` is a string component. You don't need to put `%*%` in command for this component.
+- `choice` is a combo box. `values` will be inputted to command.
+- `check` is a check box. `value` will be inputted to command if you check the check box.
+- `text_box` is a text box.

@@ -36,7 +36,8 @@ private:
     wxPanel* mainPanel;
     wxButton* runButton;
 
-    void LoadDefinition();
+    void CreateFrame();
+    void CheckDefinition();
     int UpdatePanel(wxPanel* panel);
     void UpdateConfig();
     void SaveConfig();
@@ -45,10 +46,13 @@ private:
 
 public:
     MainFrame();
+    MainFrame(nlohmann::json definition);
     virtual ~MainFrame();
 
     void OnClose(wxCloseEvent& event);
     void OpenURL(wxCommandEvent& event);
     void UpdateFrame(wxCommandEvent& event);
-    void RunCommand(wxCommandEvent& event);
+    void ClickButton(wxCommandEvent& event);
+    std::array<std::string, 2> RunCommand();
+    nlohmann::json GetDefinition();
 };

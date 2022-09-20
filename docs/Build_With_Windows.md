@@ -26,7 +26,7 @@ The steps are as follows.
 
 1. Open `./Simple-Command-Runner` with Visual Studio.
 2. Select `Manage Configurations` from configuration.
-4. Add `-D wxWidgets_ROOT_DIR=C:/wxWidgets-3.1.5/Release/Installed -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -D wxWidgets_CONFIGURATION=mswu` for `x64-Release`.
+4. Add `-D wxWidgets_ROOT_DIR=C:/wxWidgets-3.1.5/Release/Installed -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -D wxWidgets_CONFIGURATION=mswu` to `CMake command arguments` for `x64-Release`.
 5. Build SimpleCommandRunner.exe.
 
 ## Debug build

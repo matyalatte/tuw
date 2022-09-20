@@ -38,6 +38,33 @@ void LogFrame::OnClose(wxCloseEvent& event)
 MainFrame::MainFrame()
     : wxFrame(nullptr, wxID_ANY, "Simple Command Runner")
 {
+    std::ifstream istream("gui_definition.json");
+    definition = jsonUtils::loadJson("gui_definition.json");
+    CreateFrame();
+}
+
+MainFrame::MainFrame(nlohmann::json definition)
+    : wxFrame(nullptr, wxID_ANY, "Simple Command Runner")
+{
+    if (definition == nullptr) {
+        definition = nlohmann::json({});
+    }
+    this->definition = definition;
+    CreateFrame();
+}
+
+wxButton* GetRunButton(wxPanel* panel, nlohmann::json sub_definition, int y) {
+    std::string button;
+    if (sub_definition.contains("button")) {
+        button = wxString::FromUTF8(sub_definition["button"]);
+    }
+    else {
+        button = "Run";
+    }
+    return new wxButton(panel, wxID_EXECUTE, button, wxPoint(143, y), wxSize(105, 25));
+}
+
+void MainFrame::CreateFrame(){
 #ifndef _WIN32 
     wxStandardPaths& path = wxStandardPaths::Get();
     path.UseAppInfo(wxStandardPaths::AppInfo_None);
@@ -50,7 +77,8 @@ MainFrame::MainFrame()
     std::cout << "Simple Command Runner v" << VERSION << " by matyalatte" << std::endl;
     
     //get gui definition
-    LoadDefinition();
+
+    CheckDefinition();
     config = jsonUtils::loadJson("gui_config.json");
 
     //make menu bar
@@ -85,12 +113,12 @@ MainFrame::MainFrame()
     Bind(wxEVT_MENU, [this](wxCommandEvent&) { Close(true); }, wxID_EXIT);
 
     //put components
+
     mainPanel = new wxPanel(this);
     components = std::vector<Component*>();
     int y = UpdatePanel(mainPanel);
-    runButton = new wxButton(mainPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(143, y), wxSize(105, 25));
-
-    Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::RunCommand));
+    runButton = GetRunButton(mainPanel, sub_definition, y);
+    Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::ClickButton));
 
     mainPanel->Show();
 
@@ -98,14 +126,13 @@ MainFrame::MainFrame()
     Centre();
     SetSize(wxSize(405, y + 105));
     SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
+
 }
 
 
 //read gui_definition.json
-void MainFrame::LoadDefinition() {
-    std::ifstream istream("gui_definition.json");
+void MainFrame::CheckDefinition() {
     std::string msg;
-    definition = jsonUtils::loadJson("gui_definition.json");
 
     if (definition == nlohmann::json({})) {
         msg = "Fialed to load gui_definition.json (Can't read)";
@@ -187,12 +214,7 @@ void MainFrame::ShowSuccessDialog(wxString msg) {
     dialog->Destroy();
 }
 
-//run command
-void MainFrame::RunCommand(wxCommandEvent& event) {
-    //save config
-    UpdateConfig();
-    SaveConfig();
-
+std::array<std::string, 2> MainFrame::RunCommand() {
     //make command string
     std::vector<std::string> cmd_ary = sub_definition["command"];
     wxString cmd = "";
@@ -201,8 +223,7 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
         if (c->HasString()) {
             if (cmd_ary.size() <= i) {
                 std::cout << "[RunCommand]: Json format error (Can not make command)" << std::endl;
-                ShowErrorDialog("Json format error (Can not make command)");
-                return;
+                return {"", "Json format error(Can not make command)"};
             }
             cmd += cmd_ary[i] + c->GetString();
             i += 1;
@@ -220,15 +241,22 @@ void MainFrame::RunCommand(wxCommandEvent& event) {
 #ifdef _WIN32
     cmd = "cmd.exe /c " + cmd;
 #endif
-    std::vector<std::string> msg = exec(cmd);
+    std::array<std::string, 2> msg = exec(cmd);
     runButton->SetLabel(text);
-    if (msg[0] == "__null__") {
-        std::cout << "[RunCommand] Execution failed. " << std::endl;
-        return;
-    }
+    return msg;
+}
+
+//run command
+void MainFrame::ClickButton(wxCommandEvent& event) {
+    //save config
+    UpdateConfig();
+    SaveConfig();
+
+    std::array<std::string, 2> msg = RunCommand();
 
     //show result
     if (msg[1] != "") {//if error
+        std::cout << "[RunCommand] Failed to execute commands." << std::endl;
         ShowErrorDialog(msg[1]);
     }
     else {//if success
@@ -258,8 +286,7 @@ void MainFrame::UpdateFrame(wxCommandEvent& event)
     
     wxPanel* newPanel = new wxPanel(this);
     int y = UpdatePanel(newPanel);
-    wxButton* newRunButton = new wxButton(newPanel, wxID_EXECUTE, wxString::FromUTF8(sub_definition["button"]), wxPoint(143, y), wxSize(105, 25));
-
+    wxButton* newRunButton = GetRunButton(newPanel, sub_definition, y);
     newPanel->Show();
     wxPanel* unused = mainPanel;
     mainPanel = newPanel;
@@ -315,4 +342,8 @@ void MainFrame::OnClose(wxCloseEvent& event)
     logFrame->Destroy();
 #endif
     Destroy();
+}
+
+nlohmann::json MainFrame::GetDefinition() {
+    return definition;
 }
