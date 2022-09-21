@@ -10,6 +10,7 @@ namespace jsonUtils {
 	bool saveJson(nlohmann::json json, std::string file);
 
 	nlohmann::json default_definition();
+	void checkDefinition(nlohmann::json& definition);
 	void checkSubDefinition(nlohmann::json& sub_definition);
 	void checkHelpURLs(nlohmann::json& definition);
 }

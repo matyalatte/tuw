@@ -1,5 +1,5 @@
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
-# Simple-Command-Runner ver 0.1.3
+# Simple-Command-Runner ver 0.2.0
 Simple GUI wrapper to execute commands.<br>
 
 ## About

@@ -32,7 +32,7 @@ The steps are as follows.
 ## Debug build
 If you want a debug build, you need to use `Debug` as an argument for batch files.<br>
 So, you should type `build_wxWidgets.bat Debug` and `build_exe.bat Debug` on the command prompt.<br>
-If you will build the exe with Visual Studio, you should add `-D wxWidgets_ROOT_DIR=C:/wxWidgets-3.1.5/Debug/Installed -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL -D wxWidgets_CONFIGURATION=mswud` to `CMake command arguments` for `x64-Debug` in the IDE.
+If you will build the exe with Visual Studio, you should add `-D wxWidgets_ROOT_DIR=C:/wxWidgets-3.1.5/Debug/Installed -D wxWidgets_CONFIGURATION=mswud` to `CMake command arguments` for `x64-Debug` in the IDE.
 
 ## Test
 If you want to build tests, type `test.bat` or `test.bat Debug` on the command prompt.

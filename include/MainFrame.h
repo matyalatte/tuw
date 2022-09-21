@@ -43,6 +43,7 @@ private:
     void SaveConfig();
     void ShowErrorDialog(wxString msg);
     void ShowSuccessDialog(wxString msg);
+    void JsonLoadFailed(std::string msg);
 
 public:
     MainFrame();

@@ -1,6 +1,6 @@
 #include "MainFrame.h"
 
-const char* VERSION = "0.1.3";
+const char* VERSION = "0.2.0";
 
 //Console window for unix
 #ifdef __linux__
@@ -129,6 +129,12 @@ void MainFrame::CreateFrame(){
 
 }
 
+void MainFrame::JsonLoadFailed(std::string msg){
+    std::cout << "[LoadDefinition] " << msg << std::endl;
+    ShowErrorDialog(msg);
+    sub_definition = jsonUtils::default_definition();
+    definition["gui"] = nlohmann::json::array({ sub_definition });
+}
 
 //read gui_definition.json
 void MainFrame::CheckDefinition() {
@@ -136,10 +142,8 @@ void MainFrame::CheckDefinition() {
 
     if (definition == nlohmann::json({})) {
         msg = "Fialed to load gui_definition.json (Can't read)";
-        std::cout << "[LoadDefinition] " << msg << std::endl;
-        ShowErrorDialog(msg);
-        sub_definition = jsonUtils::default_definition();
-        definition = { { "gui", {sub_definition}} };
+        definition = nlohmann::json({});
+        JsonLoadFailed(msg);
         return;
     }
 
@@ -155,30 +159,16 @@ void MainFrame::CheckDefinition() {
         }
     }
 
-    //check format
-    if (!definition.contains("gui") || !definition["gui"].is_array()) {
-        msg = "Fialed to load gui_definition.json ('gui' array not found.)";
-        std::cout << "[LoadDefinition] " << msg << std::endl;
-        ShowErrorDialog(msg);
-        sub_definition = jsonUtils::default_definition();
-        definition["gui"] = { { sub_definition } };
+    //check panel definitions
+    try {
+        jsonUtils::checkDefinition(definition);
+    }
+    catch (std::exception& e) {
+        msg = "Fialed to load gui_definition.json (" + std::string(e.what()) + ")";
+        JsonLoadFailed(msg);
         return;
     }
 
-    //check panel definitions
-    for (nlohmann::json& sub_d : definition["gui"]) {
-        try {
-            jsonUtils::checkSubDefinition(sub_d);
-        }
-        catch (std::exception& e) {
-            msg = "Fialed to load gui_definition.json (" + std::string(e.what()) + ")";
-            std::cout << "[LoadDefinition] " << msg << std::endl;
-            ShowErrorDialog(msg);
-            sub_definition = jsonUtils::default_definition();
-            definition["gui"] = {{ sub_definition }};
-            return;
-        }
-    }
     sub_definition = definition["gui"][0];
     
     std::cout << "[LoadDefinition] Loaded gui_definition.json" << std::endl;

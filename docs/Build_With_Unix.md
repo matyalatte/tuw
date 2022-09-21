@@ -31,5 +31,9 @@ So, you should type `bash build_wxWidgets.sh Debug` and `bush build_exe.sh Debug
 ## Test
 If you want to build tests, type `bash test.sh` or `bash test.sh Debug` on the terminal.
 
+## Coverage
+If you will use GCC, you can get coverage reports with `bash coverage.sh` or `bash coverage.sh Debug`.<br>
+It'll generate html files in `./Simple-Command-Runner/coverage-report/`.
+
 ## Uninstall wxWidgets
 If you want to uninstall wxWidgets, remove `~/wxWidgets-*`.

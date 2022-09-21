@@ -5,14 +5,14 @@
 #include "JsonUtils.h"
 
 char const * broken;
-char const * fineHelp;
+char const * json_file;
 
 int main (int argc, char * argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
     assert(argc == 3);
 
     broken = argv[1];
-    fineHelp = argv[2];
+    json_file = argv[2];
 
     return RUN_ALL_TESTS();
 }
@@ -27,39 +27,84 @@ TEST(JsonCheckTest, LoadJsonFail2) {
     EXPECT_EQ(nlohmann::json({}), test_json);
 }
 
-TEST(JsonCheckTest, LoadJsonSuccess) {
-    nlohmann::json test_json = jsonUtils::loadJson(fineHelp);
+nlohmann::json GetTestJson(){
+    nlohmann::json test_json = jsonUtils::loadJson(json_file);
     EXPECT_NE(nlohmann::json({}), test_json);
+    return test_json;
+}
+
+TEST(JsonCheckTest, LoadJsonSuccess) {
+    nlohmann::json test_json = GetTestJson();
+}
+
+TEST(JsonCheckTest, checkGUISuccess) {
+    nlohmann::json test_json = GetTestJson();
+    jsonUtils::checkDefinition(test_json);
+}
+
+void CheckGUIError(nlohmann::json test_json, const char* expected){
+    try{
+        jsonUtils::checkDefinition(test_json);
+        FAIL();
+    }
+    catch(std::exception& err) {
+        EXPECT_STREQ(expected, err.what());
+    }
+}
+
+TEST(JsonCheckTest, checkGUIFail) {
+    nlohmann::json test_json = GetTestJson();
+    test_json.erase("gui");
+    CheckGUIError(test_json, "['gui'] not found.");
+}
+
+TEST(JsonCheckTest, checkGUIFail2) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["gui"] = 1;
+    CheckGUIError(test_json, "['gui'] should be an array.");
+}
+
+TEST(JsonCheckTest, checkGUIFail3) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["gui"][0]["components"][0]["label"] = 1;
+    CheckGUIError(test_json, "['components']['label'] should be a string.");
+}
+
+TEST(JsonCheckTest, checkGUIFail4) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["gui"][1]["components"][4]["values"] = nlohmann::json::array();
+    CheckGUIError(test_json, "['combo box']['values'] and ['combo box']['items'] should have the same size.");
+}
+
+TEST(JsonCheckTest, checkGUIFail5) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["gui"][2]["show_last_line"] = "test";
+    CheckGUIError(test_json, "['show_last_line'] should be a boolean.");
 }
 
 TEST(JsonCheckTest, checkHelpSuccess) {
-    nlohmann::json test_json = jsonUtils::loadJson(fineHelp);
-    ASSERT_NE(nlohmann::json({}), test_json);
+    nlohmann::json test_json = GetTestJson();
     jsonUtils::checkHelpURLs(test_json);
 }
 
-TEST(JsonCheckTest, checkHelpFail) {
-    nlohmann::json test_json = jsonUtils::loadJson(fineHelp);
-    ASSERT_NE(nlohmann::json({}), test_json);
-    test_json["help"][0].erase("label");
+void CheckHelpError(nlohmann::json test_json, const char* expected){
     try{
         jsonUtils::checkHelpURLs(test_json);
         FAIL();
     }
-    catch(std::exception& expected) {
-        EXPECT_STREQ("['label'] not found.", expected.what());
+    catch(std::exception& err) {
+        EXPECT_STREQ(expected, err.what());
     }
 }
 
+TEST(JsonCheckTest, checkHelpFail) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["help"][0].erase("label");
+    CheckHelpError(test_json, "['label'] not found.");
+}
+
 TEST(JsonCheckTest, checkHelpFail2) {
-    nlohmann::json test_json = jsonUtils::loadJson(std::string(fineHelp));
-    ASSERT_NE(nlohmann::json({}), test_json);
+    nlohmann::json test_json = GetTestJson();
     test_json["help"][0]["label"] = 3;
-    try{
-        jsonUtils::checkHelpURLs(test_json);
-        FAIL();
-    }
-    catch(std::exception& expected) {
-        EXPECT_STREQ("['label'] should be a string.", expected.what());
-    }
+    CheckHelpError(test_json, "['label'] should be a string.");
 }

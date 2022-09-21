@@ -5,6 +5,7 @@
 build
 Release*
 Debug*
+coverage-report
 todo.txt
 check*.sh
 

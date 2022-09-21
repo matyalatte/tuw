@@ -97,7 +97,7 @@ namespace jsonUtils {
                 {"command", {"ls"} },
                 {"button", "run 'ls'"},
     #endif
-                {"components",{}}
+                {"components",nlohmann::json::array({})}
         };
         return def;
     }
@@ -142,6 +142,13 @@ namespace jsonUtils {
             }
         }
         return tokens;
+    }
+
+    void checkDefinition(nlohmann::json& definition) {
+        checkJsonType(definition, "gui", JsonType::ARRAY);
+        for (nlohmann::json& sub_d : definition["gui"]){
+            checkSubDefinition(sub_d);
+        }
     }
 
     const std::string COMMAND = "command";

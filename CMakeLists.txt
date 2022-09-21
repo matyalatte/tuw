@@ -11,6 +11,10 @@ project(${PROJECT_NAME})
 if (CMAKE_COMPILER_IS_GNUCXX)
 	#settings for GCC
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
+	if (BUILD_TESTS)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+		set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+	endif()
 endif()
 
 # find wxWidgets
@@ -35,22 +39,15 @@ add_library(${PROJECT_NAME}_lib STATIC
 	"src/JsonUtils.cpp"
 	"src/CustomWxObj.cpp"
 )
-target_link_libraries(
-	${PROJECT_NAME}_lib
+target_link_libraries(${PROJECT_NAME}_lib
 	nlohmann_json::nlohmann_json
 	${wxWidgets_LIBRARIES}
 )
 
 # add main app
 if (BUILD_EXE)
-	add_executable(${PROJECT_NAME}
-		"src/Main.cpp"
-	)
-	# link libraries
-	target_link_libraries(
-		${PROJECT_NAME}
-		${PROJECT_NAME}_lib
-	)
+	add_executable(${PROJECT_NAME} "src/Main.cpp")
+	target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_lib)
 endif()
 
 #------------------------------
