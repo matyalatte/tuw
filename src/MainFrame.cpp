@@ -40,16 +40,18 @@ MainFrame::MainFrame()
 {
     std::ifstream istream("gui_definition.json");
     definition = jsonUtils::loadJson("gui_definition.json");
+    config = jsonUtils::loadJson("gui_config.json");
     CreateFrame();
 }
 
-MainFrame::MainFrame(nlohmann::json definition)
+MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
     : wxFrame(nullptr, wxID_ANY, "Simple Command Runner")
 {
     if (definition == nullptr) {
         definition = nlohmann::json({});
     }
     this->definition = definition;
+    this->config = config;
     CreateFrame();
 }
 
@@ -79,7 +81,6 @@ void MainFrame::CreateFrame(){
     //get gui definition
 
     CheckDefinition();
-    config = jsonUtils::loadJson("gui_config.json");
 
     //make menu bar
     wxMenuBar* menuBar = new wxMenuBar;
@@ -181,6 +182,7 @@ void MainFrame::UpdateConfig() {
 }
 
 void MainFrame::SaveConfig() {
+    UpdateConfig();
     bool saved = jsonUtils::saveJson(config, "gui_config.json");
     if (saved) {
         std::cout << "[SaveConfig] Saved gui_config.json" << std::endl;
@@ -239,7 +241,6 @@ std::array<std::string, 2> MainFrame::RunCommand() {
 //run command
 void MainFrame::ClickButton(wxCommandEvent& event) {
     //save config
-    UpdateConfig();
     SaveConfig();
 
     std::array<std::string, 2> msg = RunCommand();

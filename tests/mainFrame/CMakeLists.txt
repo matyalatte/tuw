@@ -10,5 +10,5 @@ target_link_libraries(mainFrame
 
 add_test(
     NAME mainFrame
-    COMMAND $<TARGET_FILE:mainFrame> "${PROJECT_SOURCE_DIR}/examples/6_all_keys/gui_definition.json"
+    COMMAND $<TARGET_FILE:mainFrame> "${PROJECT_SOURCE_DIR}/examples/6_all_keys/gui_definition.json" "${CMAKE_CURRENT_SOURCE_DIR}/config.json"
     )

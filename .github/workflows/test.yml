@@ -8,7 +8,7 @@ on:
   
 env:
   ZIP_NAME: SimpleCommandRunner
-  CACHE_NAME: test
+  CACHE_NAME: main
 
 jobs:
   setup:

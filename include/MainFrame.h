@@ -40,14 +40,13 @@ private:
     void CheckDefinition();
     int UpdatePanel(wxPanel* panel);
     void UpdateConfig();
-    void SaveConfig();
     void ShowErrorDialog(wxString msg);
     void ShowSuccessDialog(wxString msg);
     void JsonLoadFailed(std::string msg);
 
 public:
     MainFrame();
-    MainFrame(nlohmann::json definition);
+    MainFrame(nlohmann::json definition, nlohmann::json config=nlohmann::json({}));
     virtual ~MainFrame();
 
     void OnClose(wxCloseEvent& event);
@@ -56,4 +55,5 @@ public:
     void ClickButton(wxCommandEvent& event);
     std::array<std::string, 2> RunCommand();
     nlohmann::json GetDefinition();
+    void SaveConfig();
 };

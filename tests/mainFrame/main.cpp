@@ -7,6 +7,7 @@
 #include "MainFrame.h"
 
 char const * json_file;
+char const * config_file;
 
 // Hook to skip message dialogues
 class DialogSkipper : public wxModalDialogHook
@@ -25,9 +26,10 @@ protected:
 
 int main (int argc, char * argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
-    assert(argc == 2);
+    assert(argc == 3);
 
     json_file = argv[1];
+    config_file = argv[2];
 
     // Make dummy app
     wxApp* app = new wxApp();
@@ -108,5 +110,16 @@ TEST(MainFrameTest, RunCommandFail2) {
 TEST(MainFrameTest, DeleteFrame){
     nlohmann::json test_json = GetTestJson();
     MainFrame* mainFrame = new MainFrame(nlohmann::json(test_json));
-    wxDELETE(mainFrame);
+    mainFrame->Destroy();
+}
+
+TEST(MainFrameTest, LoadSaveConfig){
+    nlohmann::json test_json = GetTestJson();
+    nlohmann::json test_config = jsonUtils::loadJson(config_file);
+    MainFrame* mainFrame = new MainFrame(nlohmann::json(test_json), nlohmann::json(test_config));
+    mainFrame->SaveConfig();
+    nlohmann::json saved_config = jsonUtils::loadJson("gui_config.json");
+    test_config.erase("Some folder path");
+    saved_config.erase("Some folder path");
+    EXPECT_EQ(test_config, saved_config);
 }
