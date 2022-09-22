@@ -76,7 +76,7 @@ Files in this repository are licensed under [wxWindows Library Licence](license.
 It is a modified version of LGPL explicitly allowing not distributing
 the sources of an application using the library even in the case of static linking.<br>
 
-### wxWidget
+### wxWidgets
 Simple Command Runner uses [wxWidgets library](https://github.com/wxWidgets/wxWidgets) for the GUI framework.<br>
 It is licensed under [wxWindows Library Licence](https://github.com/wxWidgets/wxWidgets/blob/master/docs/licence.txt).<br>
 

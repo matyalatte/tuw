@@ -6,17 +6,27 @@ build
 Release*
 Debug*
 coverage-report
-todo.txt
-check*.sh
+*.txt
+!changelog.txt
+!CMakeLists.txt
+!license.txt
+!WX_VERSION.txt
 
 #for windows
-*.vs
+.vs*
 out
 SimpleCommandRunner-v*
 *.exe
 *.zip
+*.bat
+!batch_files/*.bat
 
-#for test scripts
+# for unix
+*.sh
+!shell_scripts/*.sh
+*.tar.*
+
+# for test scripts
 python
 *.py
 

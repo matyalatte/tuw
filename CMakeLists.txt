@@ -33,11 +33,11 @@ FetchContent_MakeAvailable(json)
 # make a lib
 include_directories(include)
 add_library(${PROJECT_NAME}_lib STATIC
-	"src/MainFrame.cpp"
-	"src/Exec.cpp"
-	"src/Component.cpp"
-	"src/JsonUtils.cpp"
-	"src/CustomWxObj.cpp"
+	"src/main_frame.cpp"
+	"src/exec.cpp"
+	"src/component.cpp"
+	"src/json_utils.cpp"
+	"src/custom_wx_obj.cpp"
 )
 target_link_libraries(${PROJECT_NAME}_lib
 	nlohmann_json::nlohmann_json
@@ -46,7 +46,7 @@ target_link_libraries(${PROJECT_NAME}_lib
 
 # add main app
 if (BUILD_EXE)
-	add_executable(${PROJECT_NAME} "src/Main.cpp")
+	add_executable(${PROJECT_NAME} "src/main.cpp")
 	target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_lib)
 endif()
 

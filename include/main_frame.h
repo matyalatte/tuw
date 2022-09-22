@@ -1,10 +1,12 @@
 #pragma once
-#include <wx/wx.h>
-#include <wx/filepicker.h>
+#include <vector>
+#include <string>
 #include <nlohmann/json.hpp>
-#include "Component.h"
-#include "Exec.h"
-#include "JsonUtils.h"
+#include "wx/wx.h"
+#include "wx/filepicker.h"
+#include "component.h"
+#include "exec.h"
+#include "json_utils.h"
 
 #ifndef _WIN32
 #include <wx/stdpaths.h>
@@ -12,29 +14,28 @@
 
 #ifdef __linux__
 class LogFrame : public wxFrame {
-private:
-    wxTextCtrl* logBox;
-    wxStreamToTextRedirector* logRedirector;
-public:
-    LogFrame(wxString exepath);
-    virtual ~LogFrame();
+ private:
+    wxTextCtrl* m_log_box;
+    wxStreamToTextRedirector* m_log_redirector;
+ public:
+    explicit LogFrame(wxString exepath);
+    virtual ~LogFrame() {}
     void OnClose(wxCloseEvent& event);
 };
 #endif
 
-//Main window
-class MainFrame : public wxFrame
-{
-private:
-    nlohmann::json definition;
-    nlohmann::json sub_definition;
-    nlohmann::json config;
+// Main window
+class MainFrame : public wxFrame {
+ private:
+    nlohmann::json m_definition;
+    nlohmann::json m_sub_definition;
+    nlohmann::json m_config;
 #ifdef __linux__
-    LogFrame* logFrame;
+    LogFrame* m_log_frame;
 #endif
-    std::vector<Component*> components;
-    wxPanel* mainPanel;
-    wxButton* runButton;
+    std::vector<Component*> m_components;
+    wxPanel* m_main_panel;
+    wxButton* m_run_button;
 
     void CreateFrame();
     void CheckDefinition();
@@ -44,10 +45,10 @@ private:
     void ShowSuccessDialog(wxString msg);
     void JsonLoadFailed(std::string msg);
 
-public:
+ public:
     MainFrame();
-    MainFrame(nlohmann::json definition, nlohmann::json config=nlohmann::json({}));
-    virtual ~MainFrame();
+    explicit MainFrame(nlohmann::json definition, nlohmann::json config = nlohmann::json({}));
+    virtual ~MainFrame() {}
 
     void OnClose(wxCloseEvent& event);
     void OpenURL(wxCommandEvent& event);

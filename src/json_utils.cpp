@@ -1,7 +1,7 @@
-#include "JsonUtils.h"
+#include "json_utils.h"
 
-namespace jsonUtils {
-    nlohmann::json loadJson(std::string file) {
+namespace json_utils {
+    nlohmann::json LoadJson(std::string file) {
         std::ifstream istream(file);
         nlohmann::json json;
         if (!istream) {
@@ -17,7 +17,7 @@ namespace jsonUtils {
         return json;
     }
 
-    bool saveJson(nlohmann::json json, std::string file) {
+    bool SaveJson(nlohmann::json json, std::string file) {
         std::ofstream ostream(file);
 
         if (!ostream) {
@@ -35,7 +35,8 @@ namespace jsonUtils {
         }
         return msg;
     }
-    void checkContain(nlohmann::json j, std::string key, std::string label = "") {
+
+    void CheckContain(nlohmann::json j, std::string key, std::string label = "") {
         if (!j.contains(key)) {
             std::string msg = GetLabel(label, key) + " not found.";
             throw std::runtime_error(msg);
@@ -49,15 +50,18 @@ namespace jsonUtils {
         ARRAY
     };
 
-    void raise(std::string msg) {
+    void Raise(std::string msg) {
         throw std::runtime_error(msg);
     }
 
-    void checkJsonType(nlohmann::json j, std::string key, JsonType type, std::string label="", bool canSkip=false) {
+    const bool CAN_SKIP = true;
+
+    void CheckJsonType(nlohmann::json j, std::string key,
+        JsonType type, std::string label = "", bool canSkip = false) {
         if (canSkip && !j.contains(key)) {
             return;
         }
-        checkContain(j, key, label);
+        CheckContain(j, key, label);
 
         bool valid = false;
         std::string type_name;
@@ -80,15 +84,13 @@ namespace jsonUtils {
             break;
         }
         if (!valid) {
-            raise(GetLabel(label, key) + " should be " + type_name + ".");
+            Raise(GetLabel(label, key) + " should be " + type_name + ".");
         }
     }
 
-
-    //get default definition of gui
-    nlohmann::json default_definition() {
-        nlohmann::json def =
-        {
+    // get default definition of gui
+    nlohmann::json GetDefaultDefinition() {
+        nlohmann::json def = {
                 {"label", "Default GUI"},
     #ifdef _WIN32
                 {"command", {"dir"} },
@@ -97,128 +99,122 @@ namespace jsonUtils {
                 {"command", {"ls"} },
                 {"button", "run 'ls'"},
     #endif
-                {"components",nlohmann::json::array({})}
+                {"components", nlohmann::json::array({})}
         };
         return def;
     }
 
-    void checkItemsValues(nlohmann::json& c) {
+    void CheckItemsValues(nlohmann::json& c) {
         std::string label = c["label"];
         if (!c.contains("items")) {
             if (c.contains("item")) {
                 c["items"] = c["item"];
-            }
-            else {
-                raise(GetLabel(label, "items") + " not found.");
+            } else {
+                Raise(GetLabel(label, "items") + " not found.");
             }
         }
-        checkJsonType(c, "items", JsonType::ARRAY, label);
+        CheckJsonType(c, "items", JsonType::ARRAY, label);
         if (!c.contains("values") && c.contains("value")) {
             c["values"] = c["value"];
         }
         std::string key = "values";
-        checkJsonType(c, key, JsonType::ARRAY, label, true);
+        CheckJsonType(c, key, JsonType::ARRAY, label, CAN_SKIP);
         if (c.contains(key)) {
             if (c[key].size() != c["items"].size()) {
-                raise(GetLabel(label, key) + " and " + GetLabel(label, "items") + " should have the same size.");
+                Raise(GetLabel(label, key) + " and " +
+                    GetLabel(label, "items") + " should have the same size.");
             }
         }
     }
-    
-    std::vector<std::string> split(const std::string& s, const char delimiter)
-    {
+
+    std::vector<std::string> split(const std::string& s, const char delimiter) {
         std::vector<std::string> tokens;
         std::string token;
         std::istringstream tokenStream(s);
         bool store = true;
-        while (std::getline(tokenStream, token, delimiter))
-        {
+        while (std::getline(tokenStream, token, delimiter)) {
             if (store) {
                 tokens.push_back(token);
                 store = false;
-            }
-            else {
+            } else {
                 store = true;
             }
         }
         return tokens;
     }
 
-    void checkDefinition(nlohmann::json& definition) {
-        checkJsonType(definition, "gui", JsonType::ARRAY);
-        for (nlohmann::json& sub_d : definition["gui"]){
-            checkSubDefinition(sub_d);
-        }
-    }
-
     const std::string COMMAND = "command";
     const std::string COMPONENTS = "components";
 
-    void checkSubDefinition(nlohmann::json& sub_definition) {
-        //check is_string
-        checkJsonType(sub_definition, "label", JsonType::STRING);
-        checkJsonType(sub_definition, "button", JsonType::STRING, "", true);
-        checkJsonType(sub_definition, "window_name", JsonType::STRING, "", true);
+    void CheckSubDefinition(nlohmann::json& sub_definition) {
+        // check is_string
+        CheckJsonType(sub_definition, "label", JsonType::STRING);
+        CheckJsonType(sub_definition, "button", JsonType::STRING, "", CAN_SKIP);
+        CheckJsonType(sub_definition, "window_name", JsonType::STRING, "", CAN_SKIP);
 
-        checkContain(sub_definition, COMMAND, "");
+        CheckContain(sub_definition, COMMAND, "");
         if (sub_definition[COMMAND].is_string()) {
             sub_definition[COMMAND] = split(sub_definition[COMMAND], '%');
         }
-        checkJsonType(sub_definition, COMMAND, JsonType::ARRAY);
+        CheckJsonType(sub_definition, COMMAND, JsonType::ARRAY);
 
-        //check is_boolean
-        checkJsonType(sub_definition, "show_last_line", JsonType::BOOLEAN, "", true);
+        // check is_boolean
+        CheckJsonType(sub_definition, "show_last_line", JsonType::BOOLEAN, "", CAN_SKIP);
 
-        //check is_array
-        checkJsonType(sub_definition, COMPONENTS, JsonType::ARRAY);
+        // check is_array
+        CheckJsonType(sub_definition, COMPONENTS, JsonType::ARRAY);
 
-        //check components
+        // check components
         std::vector<std::string> subkeys = {};
         std::string label;
         std::string type;
         for (nlohmann::json& c : sub_definition[COMPONENTS]) {
-            //check if type and label exist
-            checkJsonType(c, "type", JsonType::STRING, COMPONENTS);
-            checkJsonType(c, "label", JsonType::STRING, COMPONENTS);
-
+            // check if type and label exist
+            CheckJsonType(c, "type", JsonType::STRING, COMPONENTS);
+            CheckJsonType(c, "label", JsonType::STRING, COMPONENTS);
             label = c["label"];
             type = c["type"];
+
             if (type == "file") {
-                checkJsonType(c, "extention", JsonType::STRING, label, true);
-            }
-            else if (type == "choice") {
-                checkItemsValues(c);
+                CheckJsonType(c, "extention", JsonType::STRING, label, CAN_SKIP);
+            } else if (type == "choice") {
+                CheckItemsValues(c);
                 subkeys = { "width", "default" };
                 for (std::string key : subkeys) {
-                    checkJsonType(c, key, JsonType::NUMBER, label, true);
+                    CheckJsonType(c, key, JsonType::NUMBER, label, CAN_SKIP);
                 }
-            }
-            else if (type == "check") {
-                checkJsonType(c, "value", JsonType::STRING, label, true);
-            }
-            else if (type == "checks" || type == "check_array") {
-                checkItemsValues(c);
+            } else if (type == "check") {
+                CheckJsonType(c, "value", JsonType::STRING, label, CAN_SKIP);
+            } else if (type == "checks" || type == "check_array") {
+                CheckItemsValues(c);
                 std::string key = "default";
-                checkJsonType(c, key, JsonType::ARRAY, label, true);
+                CheckJsonType(c, key, JsonType::ARRAY, label, true);
                 if (c.contains(key) && c[key].size() != c["items"].size()) {
-                    raise(GetLabel(label, key) + " and " + GetLabel(label, "items") + " should have the same size.");
+                    Raise(GetLabel(label, key) + " and " +
+                        GetLabel(label, "items") + " should have the same size.");
                 }
+            } else if (type == "text" || type == "text_box") {
+                CheckJsonType(c, "default", JsonType::STRING, label, CAN_SKIP);
             }
-            else if (type == "text" || type == "text_box") {
-                checkJsonType(c, "default", JsonType::STRING, label, true);
-            }
-            checkJsonType(c, "add_quotes", JsonType::BOOLEAN, label, true);
-            checkJsonType(c, "empty_message", JsonType::STRING, label, true);
+            CheckJsonType(c, "add_quotes", JsonType::BOOLEAN, label, CAN_SKIP);
+            CheckJsonType(c, "empty_message", JsonType::STRING, label, CAN_SKIP);
         }
     }
 
-    void checkHelpURLs(nlohmann::json& definition) {
-        checkJsonType(definition, "help", JsonType::ARRAY);
+    void CheckDefinition(nlohmann::json& definition) {
+        CheckJsonType(definition, "gui", JsonType::ARRAY);
+        for (nlohmann::json& sub_d : definition["gui"]) {
+            CheckSubDefinition(sub_d);
+        }
+    }
+
+    void CheckHelpURLs(const nlohmann::json& definition) {
+        CheckJsonType(definition, "help", JsonType::ARRAY);
         std::vector<std::string> keys = { "type", "label", "url" };
         for (nlohmann::json h : definition["help"]) {
             for (std::string key : keys) {
-                checkJsonType(h, key, JsonType::STRING);
+                CheckJsonType(h, key, JsonType::STRING);
             }
         }
     }
-}
+}  // namespace json_utils

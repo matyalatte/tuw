@@ -1,5 +1,4 @@
-#include "CustomWxObj.h"
-
+#include "custom_wx_obj.h"
 
 BEGIN_EVENT_TABLE(CustomTextCtrl, wxTextCtrl)
 EVT_SET_FOCUS(CustomTextCtrl::OnSetFocusEmptyMessage)
@@ -10,16 +9,15 @@ CustomTextCtrl::CustomTextCtrl(
     wxWindow* parent,
     wxWindowID id,
     const wxString& value,
-    const wxString& emptyMessage,
+    const wxString& empty_message,
     const wxPoint& pos,
     const wxSize& size,
     long style,
     const wxValidator& validator,
     const wxString& name) :
-    wxTextCtrl(parent, id, value, pos, size, style, validator, name)
-{
-    this->emptyMessage = emptyMessage;
-    actualValue = value;
+    wxTextCtrl(parent, id, value, pos, size, style, validator, name) {
+    m_empty_message = empty_message;
+    m_actual_value = value;
     ChangeValue(value);
     SetEmptyMessage();
 }
@@ -27,12 +25,11 @@ CustomTextCtrl::CustomTextCtrl(
 const wxColour wxGREY(150, 150, 150);
 
 void CustomTextCtrl::SetEmptyMessage() {
-    if (actualValue == "" && emptyMessage != "") {
-        ChangeValue(emptyMessage);
+    if (m_actual_value == "" && m_empty_message != "") {
+        ChangeValue(m_empty_message);
         SetForegroundColour(wxGREY);
-    }
-    else {
-        ChangeValue(actualValue);
+    } else {
+        ChangeValue(m_actual_value);
         SetForegroundColour(*wxBLACK);
     }
 }
@@ -40,7 +37,7 @@ void CustomTextCtrl::SetEmptyMessage() {
 
 void CustomTextCtrl::OnKillFocusEmptyMessage(wxFocusEvent& event) {
     if (GetForegroundColour() != wxGREY) {
-        actualValue = GetValue();
+        m_actual_value = GetValue();
     }
     SetEmptyMessage();
     event.Skip();
@@ -49,39 +46,38 @@ void CustomTextCtrl::OnKillFocusEmptyMessage(wxFocusEvent& event) {
 void CustomTextCtrl::OnSetFocusEmptyMessage(wxFocusEvent& event) {
     wxString value = GetValue();
     if (GetForegroundColour() != wxGREY) {
-        actualValue = value;
-    }
-    else if (value != emptyMessage && value.Left(emptyMessage.Len()) == emptyMessage){
+        m_actual_value = value;
+    } else if (value != m_empty_message && value.Left(m_empty_message.Len()) == m_empty_message) {
         // Somehow, droppped paths can be injected to empty message on MacOS.
         // This will fix the issue.
-        actualValue = value.Mid(emptyMessage.Len());
+        m_actual_value = value.Mid(m_empty_message.Len());
     }
-    ChangeValue(actualValue);
+    ChangeValue(m_actual_value);
     SetForegroundColour(*wxBLACK);
     event.Skip();
 }
 
 void CustomTextCtrl::UpdateText(const wxString string) {
-    actualValue = string;
+    m_actual_value = string;
     SetEmptyMessage();
 }
 
 bool CustomTextCtrl::IsEmpty() {
-    return actualValue == "";
+    return m_actual_value == "";
 }
 
 wxString CustomTextCtrl::GetActualValue() {
     if (GetForegroundColour() != wxGREY) {
         return GetValue();
     }
-    return actualValue;
+    return m_actual_value;
 }
 
-//Drop target for path picker
+// Drop target for path picker
 template <typename T>
-DropFilePath<T>::DropFilePath(T* frame, CustomTextCtrl* textCtrl) : wxFileDropTarget() {
-    this->frame = frame;
-    this->textCtrl = textCtrl;
+DropFilePath<T>::DropFilePath(T* frame, CustomTextCtrl* text_ctrl) : wxFileDropTarget() {
+    m_frame = frame;
+    m_text_ctrl = text_ctrl;
 }
 
 template <typename T>
@@ -90,13 +86,12 @@ DropFilePath<T>::~DropFilePath() {
 
 template <typename T>
 bool DropFilePath<T>::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) {
-    this->textCtrl->UpdateText(filenames[0]);
+    m_text_ctrl->UpdateText(filenames[0]);
     return 1;
 }
 
-CustomPickerBase::CustomPickerBase(): wxFileDirPickerCtrlBase()
-{
-    customTextCtrl = nullptr;
+CustomPickerBase::CustomPickerBase(): wxFileDirPickerCtrlBase() {
+    m_custom_text_ctrl = nullptr;
 }
 
 bool CustomPickerBase::CustomCreatePickerBase(wxWindow* parent,
@@ -107,8 +102,7 @@ bool CustomPickerBase::CustomCreatePickerBase(wxWindow* parent,
     const wxSize& size,
     long style,
     const wxValidator& validator,
-    const wxString& name)
-{
+    const wxString& name) {
     style &= ~wxBORDER_MASK;
 
     if (!wxControl::Create(parent, id, pos, size, style | wxNO_BORDER | wxTAB_TRAVERSAL,
@@ -119,26 +113,24 @@ bool CustomPickerBase::CustomCreatePickerBase(wxWindow* parent,
 
     m_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    if (HasFlag(wxPB_USE_TEXTCTRL))
-    {
-        customTextCtrl = new CustomTextCtrl(this, wxID_ANY, wxEmptyString,
+    if (HasFlag(wxPB_USE_TEXTCTRL)) {
+        m_custom_text_ctrl = new CustomTextCtrl(this, wxID_ANY, wxEmptyString,
             empty_message,
             wxDefaultPosition, wxDefaultSize,
             GetTextCtrlStyle(style));
-        m_text = (wxTextCtrl*)customTextCtrl;
-        if (!m_text)
-        {
+        m_text = reinterpret_cast<wxTextCtrl*>(m_custom_text_ctrl);
+        if (!m_text) {
             wxFAIL_MSG(wxT("wxPickerBase's textctrl creation failed"));
             return false;
         }
 
         m_text->SetMaxLength(32);
 
-        customTextCtrl->UpdateText(text);
+        m_custom_text_ctrl->UpdateText(text);
 
-        customTextCtrl->Bind(wxEVT_TEXT, &CustomPickerBase::OnTextCtrlUpdate, this);
-        customTextCtrl->Bind(wxEVT_KILL_FOCUS, &CustomPickerBase::OnTextCtrlKillFocus, this);
-        customTextCtrl->Bind(wxEVT_DESTROY, &CustomPickerBase::OnTextCtrlDelete, this);
+        m_custom_text_ctrl->Bind(wxEVT_TEXT, &CustomPickerBase::OnTextCtrlUpdate, this);
+        m_custom_text_ctrl->Bind(wxEVT_KILL_FOCUS, &CustomPickerBase::OnTextCtrlKillFocus, this);
+        m_custom_text_ctrl->Bind(wxEVT_DESTROY, &CustomPickerBase::OnTextCtrlDelete, this);
 
         m_sizer->Add(m_text,
             wxSizerFlags(1).CentreVertical().Border(wxRIGHT));
@@ -156,15 +148,14 @@ bool CustomPickerBase::CustomCreateBase(wxWindow * parent,
     const wxSize & size,
     long style,
     const wxValidator & validator,
-    const wxString & name)
-{
+    const wxString & name) {
 
     if (!CustomCreatePickerBase(parent, id, path, empty_message, pos, size,
         style, validator, name))
         return false;
 
     if (!HasFlag(wxFLP_OPEN) && !HasFlag(wxFLP_SAVE))
-        m_windowStyle |= wxFLP_OPEN;     // wxFD_OPEN is the default
+        m_windowStyle |= wxFLP_OPEN;  // wxFD_OPEN is the default
 
     // check that the styles are not contradictory
     wxASSERT_MSG(!(HasFlag(wxFLP_SAVE) && HasFlag(wxFLP_OPEN)),
@@ -190,22 +181,19 @@ bool CustomPickerBase::CustomCreateBase(wxWindow * parent,
     return true;
 }
 
-void CustomPickerBase::UpdateTextCtrlFromPicker()
-{
+void CustomPickerBase::UpdateTextCtrlFromPicker() {
     if (!m_text)
         return;
     if (m_pickerIface->GetPath() == m_text->GetValue()) {
         return;
     }
     m_text->ChangeValue(m_pickerIface->GetPath());
-    customTextCtrl->UpdateText(m_pickerIface->GetPath());
+    m_custom_text_ctrl->UpdateText(m_pickerIface->GetPath());
 }
 
-void CustomPickerBase::UpdatePickerFromTextCtrl()
-{
+void CustomPickerBase::UpdatePickerFromTextCtrl() {
     wxString newpath(GetTextCtrlValue());
-    if (m_pickerIface->GetPath() != newpath)
-    {
+    if (m_pickerIface->GetPath() != newpath) {
         m_pickerIface->SetPath(newpath);
 
         if (IsCwdToUpdate())
@@ -228,9 +216,10 @@ CustomFilePicker::CustomFilePicker(
     const wxSize& size,
     long style,
     const wxValidator& validator,
-    const wxString& name)
-{
-    CustomFilePicker::Create(parent, id, path, message, wildcard, empty_message, pos, size, style, validator, name);
+    const wxString& name) {
+    CustomFilePicker::Create(parent, id,
+        path, message, wildcard, empty_message,
+        pos, size, style, validator, name);
 }
 
 bool CustomFilePicker::Create(wxWindow* parent,
@@ -243,25 +232,21 @@ bool CustomFilePicker::Create(wxWindow* parent,
     const wxSize& size,
     long style,
     const wxValidator& validator,
-    const wxString& name)
-{
-    if (!CustomCreateBase
-    (
+    const wxString& name) {
+    if (!CustomCreateBase(
         parent, id, path, message, wildcard, empty_message,
-        pos, size, style, validator, name
-    ))
+        pos, size, style, validator, name))
         return false;
 
     if (HasTextCtrl())
         GetTextCtrl()->AutoCompleteFileNames();
-    m_text->SetDropTarget(new DropFilePath<CustomFilePicker>(this, customTextCtrl));
+    m_text->SetDropTarget(new DropFilePath<CustomFilePicker>(this, m_custom_text_ctrl));
 
     return true;
 }
 
-wxString CustomFilePicker::GetTextCtrlValue() const
-{
-    return wxFileName(customTextCtrl->GetActualValue()).GetFullPath();
+wxString CustomFilePicker::GetTextCtrlValue() const {
+    return wxFileName(m_custom_text_ctrl->GetActualValue()).GetFullPath();
 }
 
 CustomDirPicker::CustomDirPicker(
@@ -274,9 +259,10 @@ CustomDirPicker::CustomDirPicker(
     const wxSize& size,
     long style,
     const wxValidator& validator,
-    const wxString& name)
-{
-    CustomDirPicker::Create(parent, id, path, message, empty_message, pos, size, style, validator, name);
+    const wxString& name) {
+    CustomDirPicker::Create(parent, id,
+        path, message, empty_message,
+        pos, size, style, validator, name);
 }
 
 bool CustomDirPicker::Create(wxWindow* parent,
@@ -288,24 +274,20 @@ bool CustomDirPicker::Create(wxWindow* parent,
     const wxSize& size,
     long style,
     const wxValidator& validator,
-    const wxString& name)
-{
-    if (!CustomCreateBase
-    (
+    const wxString& name) {
+    if (!CustomCreateBase(
         parent, id, path, message, wxEmptyString, empty_message,
-        pos, size, style, validator, name
-    ))
+        pos, size, style, validator, name))
         return false;
 
     if (HasTextCtrl())
         GetTextCtrl()->AutoCompleteDirectories();
 
-    m_text->SetDropTarget(new DropFilePath<CustomDirPicker>(this, customTextCtrl));
+    m_text->SetDropTarget(new DropFilePath<CustomDirPicker>(this, m_custom_text_ctrl));
 
     return true;
 }
 
-wxString CustomDirPicker::GetTextCtrlValue() const
-{
-    return wxFileName::DirName(customTextCtrl->GetActualValue()).GetFullPath();
+wxString CustomDirPicker::GetTextCtrlValue() const {
+    return wxFileName::DirName(m_custom_text_ctrl->GetActualValue()).GetFullPath();
 }

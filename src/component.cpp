@@ -1,24 +1,12 @@
-#include "Component.h"
+#include "component.h"
 
-
-//Component for GUI
-Component::Component(nlohmann::json j, int height, bool hasString) {
-    widget = nullptr;
-    this->height = height;
-    this->hasString = hasString;
-    label = j["label"];
-    addQuotes = j.value("add_quotes", false);
-}
-
-Component::~Component() {
-};
-
-void Component::SetValues(std::vector<std::string> vals) {
-	values = vals;
-}
-
-wxString Component::GetRawString() {
-    return "";
+// Component for GUI
+Component::Component(nlohmann::json j, int height, bool has_string) {
+    m_widget = nullptr;
+    m_height = height;
+    m_has_string = has_string;
+    m_label = j["label"];
+    m_add_quotes = j.value("add_quotes", false);
 }
 
 wxString Quote(wxString str) {
@@ -27,21 +15,20 @@ wxString Quote(wxString str) {
 
 wxString Component::GetString() {
     wxString str = GetRawString();
-    if (addQuotes){
+    if (m_add_quotes) {
         return Quote(str);
     }
-	return str;
+    return str;
 }
 
 #ifdef _WIN32
-//utf-16 to utf-8 for Windows
-std::string wstring_to_utf8(const std::wstring& str)
-{
+// utf-16 to utf-8 for Windows
+std::string WStringToUTF8(const std::wstring& str) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
     return conv.to_bytes(str);
 }
-std::wstring utf8_to_wstring(const std::string& str)
-{
+
+std::wstring UTF8ToWString(const std::string& str) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
     return myconv.from_bytes(str);
 }
@@ -51,50 +38,40 @@ nlohmann::json Component::GetConfig() {
     return {};
 }
 
-void Component::SetConfig(nlohmann::json config) {
+void Component::SetHeight(int h) {
+    m_height = h;
 }
 
-void Component::SetHeight(int h) {
-    height = h;
-}
 int Component::GetHeight() {
-    return height;
+    return m_height;
 }
 
 std::string Component::GetLabel() {
-    return label;
+    return m_label;
 }
 
 bool Component::HasString() {
-    return hasString;
+    return m_has_string;
 }
 
 Component* Component::PutComponent(wxPanel* panel, nlohmann::json j, int y) {
-
-    Component* comp=nullptr;
+    Component* comp = nullptr;
     std::string type = j["type"];
-    if (type == "static_text") {//statc text
+    if (type == "static_text") {  // statc text
         comp = new StaticText(panel, j, y);
-    }
-    else if (type == "file") {//file picker
+    } else if (type == "file") {  // file picker
         comp = new FilePicker(panel, j, y);
-    }
-    else if (type == "folder") {//dir picker
+    } else if (type == "folder") {  // dir picker
         comp = new DirPicker(panel, j, y);
-    }
-    else if (type == "choice") {//choice
+    } else if (type == "choice") {  // choice
         comp = new Choice(panel, j, y);
-    }
-    else if (type == "check") {//checkbox
+    } else if (type == "check") {  // checkbox
         comp = new CheckBox(panel, j, y);
-    }
-    else if (type == "checks" || type == "check_array") {//checkArray
+    } else if (type == "checks" || type == "check_array") {  // checkArray
         comp = new CheckArray(panel, j, y);
-    }
-    else if (type == "text" || type == "text_box") {//text box
+    } else if (type == "text" || type == "text_box") {  // text box
         comp = new TextBox(panel, j, y);
-    }
-    else {
+    } else {
         std::cout << "[UpdatePanel] Unknown component type detected. (" << type << ")" << std::endl;
     }
     return comp;
@@ -104,174 +81,188 @@ const bool HAS_STRING = true;
 const bool NOT_STRING = false;
 
 StaticText::StaticText(wxPanel* panel, nlohmann::json j, int y): Component(j, 25, NOT_STRING) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
+    wxStaticText* text = new wxStaticText(panel, wxID_ANY,
+        wxString::FromUTF8(j["label"]), wxPoint(20, y));
 }
 
-//File Picker
+// File Picker
 FilePicker::FilePicker(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS_STRING) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
+    wxStaticText* text = new wxStaticText(panel, wxID_ANY,
+        wxString::FromUTF8(j["label"]), wxPoint(20, y));
     wxString ext;
     if (j.contains("extension")) {
         ext = wxString::FromUTF8(j["extension"]);
-    }
-    else {
+    } else {
         ext = "any files (*)|*";
     }
     std::string value = "";
     std::string emptyMessage = j.value("empty_message", "");
-    CustomFilePicker* picker = new CustomFilePicker(panel, wxID_ANY, value, "", ext, emptyMessage, wxPoint(20, y + 18), wxSize(350, 25), wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
+    CustomFilePicker* picker = new CustomFilePicker(panel, wxID_ANY,
+        value, "", ext, emptyMessage,
+        wxPoint(20, y + 18), wxSize(350, 25),
+        wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
     picker->DragAcceptFiles(true);
-    widget = picker;
+    m_widget = picker;
 }
 
-wxString FilePicker::GetRawString(){
-    return ((CustomFilePicker*)widget)->GetTextCtrlValue();
+wxString FilePicker::GetRawString() {
+    return reinterpret_cast<CustomFilePicker*>(m_widget)->GetTextCtrlValue();
 }
 
-void FilePicker::SetConfig(nlohmann::json config){
+void FilePicker::SetConfig(nlohmann::json config) {
     if (config.contains("str") && config["str"].is_string()) {
-        ((CustomFilePicker*)widget)->SetPath(wxString::FromUTF8(config["str"]));
-        ((CustomFilePicker*)widget)->SetInitialDirectory(wxPathOnly(wxString::FromUTF8(config["str"])));
+        wxString str = wxString::FromUTF8(config["str"]);
+        reinterpret_cast<CustomFilePicker*>(m_widget)->SetPath(str);
+        reinterpret_cast<CustomFilePicker*>(m_widget)->SetInitialDirectory(wxPathOnly(str));
     }
 }
 
 nlohmann::json FilePicker::GetConfig() {
     nlohmann::json config = {};
 #ifdef _WIN32
-    //utf-16 to utf-8 for Windows
-    config["str"] = wstring_to_utf8(std::wstring(GetRawString()));
+    // utf-16 to utf-8 for Windows
+    config["str"] = WStringToUTF8(std::wstring(GetRawString()));
 #else
     config["str"] = GetRawString();
 #endif
     return config;
 }
 
-//Dir Picker
+// Dir Picker
 DirPicker::DirPicker(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS_STRING) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
+    wxStaticText* text = new wxStaticText(panel, wxID_ANY, \
+                                          wxString::FromUTF8(j["label"]), wxPoint(20, y));
     std::string value = "";
     std::string emptyMessage = j.value("empty_message", "");
-    CustomDirPicker* picker = new CustomDirPicker(panel, wxID_ANY, value, "", emptyMessage, wxPoint(20, y + 18), wxSize(350, 25), wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
+    CustomDirPicker* picker = new CustomDirPicker(panel, wxID_ANY,
+        value, "", emptyMessage,
+        wxPoint(20, y + 18), wxSize(350, 25),
+        wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
     picker->DragAcceptFiles(true);
-    widget = picker;
+    m_widget = picker;
 }
 
 wxString DirPicker::GetRawString() {
-    return ((CustomDirPicker*)widget)->GetTextCtrlValue();
+    return reinterpret_cast<CustomDirPicker*>(m_widget)->GetTextCtrlValue();
 }
 
 void DirPicker::SetConfig(nlohmann::json config) {
     if (config.contains("str") && config["str"].is_string()) {
-        ((CustomDirPicker*)widget)->SetPath(wxString::FromUTF8(config["str"]));
-        ((CustomDirPicker*)widget)->SetInitialDirectory(wxString::FromUTF8(config["str"]));
+        wxString str = wxString::FromUTF8(config["str"]);
+        reinterpret_cast<CustomDirPicker*>(m_widget)->SetPath(str);
+        reinterpret_cast<CustomDirPicker*>(m_widget)->SetInitialDirectory(str);
     }
 }
 
 nlohmann::json DirPicker::GetConfig() {
     nlohmann::json config = {};
 #ifdef _WIN32
-    //utf-16 to utf-8 for Windows
-    config["str"] = wstring_to_utf8(std::wstring(GetRawString()));
+    // utf-16 to utf-8 for Windows
+    config["str"] = WStringToUTF8(std::wstring(GetRawString()));
 #else
     config["str"] = GetRawString();
 #endif
     return config;
 }
 
-//Choice
+// Choice
 Choice::Choice(wxPanel* panel, nlohmann::json j, int y) : Component(j, 55, HAS_STRING) {
     wxArrayString wxitems;
     std::vector<std::string> items = j["items"];
     std::for_each(items.begin(), items.end(), [&](std::string i) {
         wxitems.Add(wxString::FromUTF8(i));
         });
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
+    wxStaticText* text = new wxStaticText(panel, wxID_ANY,
+        wxString::FromUTF8(j["label"]), wxPoint(20, y));
     int width = j.value("width", 95);
 
-    wxChoice* choice = new wxChoice(panel, wxID_ANY, wxPoint(20, y + 20), wxSize(width, 30), wxitems);
+    wxChoice* choice = new wxChoice(panel, wxID_ANY,
+        wxPoint(20, y + 20), wxSize(width, 30), wxitems);
     if (j.contains("default") && j["items"].size() > j["default"]) {
         choice->SetSelection(j["default"]);
-    }
-    else {
+    } else {
         choice->SetSelection(0);
     }
     if (j.contains("values") && j["values"].size() == j["items"].size()) {
         SetValues(j["values"]);
-    }
-    else {
+    } else {
         SetValues(j["items"]);
     }
-    widget = choice;
+    m_widget = choice;
 }
 
 wxString Choice::GetRawString() {
-    int sel = ((wxChoice*)widget)->GetSelection();
-    return wxString::FromUTF8(values[sel]);
+    int sel = reinterpret_cast<wxChoice*>(m_widget)->GetSelection();
+    return wxString::FromUTF8(m_values[sel]);
 }
 
 void Choice::SetConfig(nlohmann::json config) {
-    if (config.contains("int") && config["int"].is_number() && config["int"] < values.size()) {
-        ((wxChoice*)widget)->SetSelection(config["int"]);
+    if (config.contains("int") && config["int"].is_number() && config["int"] < m_values.size()) {
+        reinterpret_cast<wxChoice*>(m_widget)->SetSelection(config["int"]);
     }
 }
 
 nlohmann::json Choice::GetConfig() {
     nlohmann::json config = {};
-    config["int"] = ((wxChoice*)widget)->GetSelection();
+    config["int"] = reinterpret_cast<wxChoice*>(m_widget)->GetSelection();
     return config;
 }
 
 void SetDefaultForCheckBox(wxCheckBox* check, nlohmann::json j) {
     if (j.is_boolean()) {
         check->SetValue(j);
-    }
-    else {
+    } else {
         check->SetValue(j["default"] != 0);
     }
 }
 
-//CheckBox
+// CheckBox
 CheckBox::CheckBox(wxPanel* panel, nlohmann::json j, int y) : Component(j, 35, HAS_STRING) {
-    wxCheckBox* check = new wxCheckBox(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y), wxSize(350, 25));
-    value = j.value("value", j["label"]);
+    wxCheckBox* check = new wxCheckBox(panel, wxID_ANY,
+        wxString::FromUTF8(j["label"]),
+        wxPoint(20, y), wxSize(350, 25));
+    m_value = j.value("value", j["label"]);
     if (j.contains("default")) {
         SetDefaultForCheckBox(check, j["default"]);
     }
-    widget = check;
+    m_widget = check;
 }
 
 wxString CheckBox::GetRawString() {
-    if (((wxCheckBox*)widget)->GetValue()) {
-        return wxString::FromUTF8(value);
+    if (reinterpret_cast<wxCheckBox*>(m_widget)->GetValue()) {
+        return wxString::FromUTF8(m_value);
     }
     return "";
 }
 
 void CheckBox::SetConfig(nlohmann::json config) {
     if (config.contains("int") && config["int"].is_number()) {
-        ((wxCheckBox*)widget)->SetValue(config["int"] != 0);
+        reinterpret_cast<wxCheckBox*>(m_widget)->SetValue(config["int"] != 0);
     }
 }
 
 nlohmann::json CheckBox::GetConfig() {
     nlohmann::json config = {};
-    config["int"] = (int)((wxCheckBox*)widget)->IsChecked();
+    config["int"] = static_cast<int>(reinterpret_cast<wxCheckBox*>(m_widget)->IsChecked());
     return config;
 }
 
-//CheckArray
-CheckArray::CheckArray(wxPanel* panel, nlohmann::json j, int y) : Component(j, 20 + j["items"].size() * 20 + 10, HAS_STRING) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
+// CheckArray
+CheckArray::CheckArray(wxPanel* panel, nlohmann::json j, int y) :
+    Component(j, 20 + j["items"].size() * 20 + 10, HAS_STRING) {
+    wxStaticText* text = new wxStaticText(panel, wxID_ANY,
+        wxString::FromUTF8(j["label"]), wxPoint(20, y));
     std::vector<wxCheckBox*>* checks = new std::vector<wxCheckBox*>();
     wxCheckBox* check;
     for (int i = 0; i < j["items"].size(); i++) {
-        check = new wxCheckBox(panel, wxID_ANY, wxString::FromUTF8(j["items"][i]), wxPoint(20, y + 20 + i * 20), wxSize(350, 15));
+        check = new wxCheckBox(panel, wxID_ANY,
+            wxString::FromUTF8(j["items"][i]),
+            wxPoint(20, y + 20 + i * 20), wxSize(350, 15));
         checks->push_back(check);
     }
     if (j.contains("values")) {
         SetValues(j["values"]);
-    }
-    else {
+    } else {
         SetValues(j["items"]);
     }
     if (j.contains("default")) {
@@ -279,16 +270,16 @@ CheckArray::CheckArray(wxPanel* panel, nlohmann::json j, int y) : Component(j, 2
             SetDefaultForCheckBox((*checks)[i], j["default"][i]);
         }
     }
-    widget = checks;
+    m_widget = checks;
 }
 
 wxString CheckArray::GetRawString() {
     wxString str = "";
     std::vector<wxCheckBox*> checks;
-    checks = *(std::vector<wxCheckBox*>*)widget;
+    checks = *(std::vector<wxCheckBox*>*)m_widget;
     for (int i = 0; i < checks.size(); i++) {
         if (checks[i]->GetValue()) {
-            str += wxString::FromUTF8(values[i]);
+            str += wxString::FromUTF8(m_values[i]);
         }
     }
     return str;
@@ -297,7 +288,7 @@ wxString CheckArray::GetRawString() {
 void CheckArray::SetConfig(nlohmann::json config) {
     std::vector<wxCheckBox*> checks;
     if (config.contains("ints") && config["ints"].is_array()) {
-        checks = *(std::vector<wxCheckBox*>*)widget;
+        checks = *(std::vector<wxCheckBox*>*)m_widget;
         for (int i = 0; i < config["ints"].size() && i < checks.size(); i++) {
             checks[i]->SetValue(config["ints"][i] != 0);
         }
@@ -307,29 +298,32 @@ void CheckArray::SetConfig(nlohmann::json config) {
 nlohmann::json CheckArray::GetConfig() {
     nlohmann::json config = {};
     std::vector<int> ints;
-    for (wxCheckBox* check : *(std::vector<wxCheckBox*>*)widget) {
+    for (wxCheckBox* check : *(std::vector<wxCheckBox*>*)m_widget) {
         ints.push_back(check->GetValue());
     }
     config["ints"] = ints;
     return config;
 }
 
-//TextBox
+// TextBox
 TextBox::TextBox(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS_STRING) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
+    wxStaticText* text = new wxStaticText(panel, wxID_ANY,
+        wxString::FromUTF8(j["label"]), wxPoint(20, y));
     std::string value = j.value("default", "");
     std::string emptyMessage = j.value("empty_message", "");
-    CustomTextCtrl* textbox = new CustomTextCtrl(panel, wxID_ANY, value, emptyMessage, wxPoint(20, y + 20), wxSize(350, 23));
-    widget = textbox;
+    CustomTextCtrl* textbox = new CustomTextCtrl(panel, wxID_ANY,
+        value, emptyMessage,
+        wxPoint(20, y + 20), wxSize(350, 23));
+    m_widget = textbox;
 }
 
 wxString TextBox::GetRawString() {
-    return ((CustomTextCtrl*)widget)->GetActualValue();
+    return reinterpret_cast<CustomTextCtrl*>(m_widget)->GetActualValue();
 }
 
 void TextBox::SetConfig(nlohmann::json config) {
     if (config.contains("str") && config["str"].is_string()) {
-        ((CustomTextCtrl*)widget)->UpdateText(config["str"]);
+        reinterpret_cast<CustomTextCtrl*>(m_widget)->UpdateText(config["str"]);
     }
 }
 

@@ -2,12 +2,12 @@
 // Todo: Write more tests
 
 #include <gtest/gtest.h>
-#include "JsonUtils.h"
+#include "json_utils.h"
 
 char const * broken;
 char const * json_file;
 
-int main (int argc, char * argv[]) {
+int main(int argc, char * argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
     assert(argc == 3);
 
@@ -18,17 +18,17 @@ int main (int argc, char * argv[]) {
 }
 
 TEST(JsonCheckTest, LoadJsonFail) {
-    nlohmann::json test_json = jsonUtils::loadJson("");
+    nlohmann::json test_json = json_utils::LoadJson("");
     EXPECT_EQ(nlohmann::json({}), test_json);
 }
 
 TEST(JsonCheckTest, LoadJsonFail2) {
-    nlohmann::json test_json = jsonUtils::loadJson(broken);
+    nlohmann::json test_json = json_utils::LoadJson(broken);
     EXPECT_EQ(nlohmann::json({}), test_json);
 }
 
-nlohmann::json GetTestJson(){
-    nlohmann::json test_json = jsonUtils::loadJson(json_file);
+nlohmann::json GetTestJson() {
+    nlohmann::json test_json = json_utils::LoadJson(json_file);
     EXPECT_NE(nlohmann::json({}), test_json);
     return test_json;
 }
@@ -39,12 +39,12 @@ TEST(JsonCheckTest, LoadJsonSuccess) {
 
 TEST(JsonCheckTest, checkGUISuccess) {
     nlohmann::json test_json = GetTestJson();
-    jsonUtils::checkDefinition(test_json);
+    json_utils::CheckDefinition(test_json);
 }
 
-void CheckGUIError(nlohmann::json test_json, const char* expected){
-    try{
-        jsonUtils::checkDefinition(test_json);
+void CheckGUIError(nlohmann::json test_json, const char* expected) {
+    try {
+        json_utils::CheckDefinition(test_json);
         FAIL();
     }
     catch(std::exception& err) {
@@ -73,7 +73,8 @@ TEST(JsonCheckTest, checkGUIFail3) {
 TEST(JsonCheckTest, checkGUIFail4) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][1]["components"][4]["values"] = nlohmann::json::array();
-    CheckGUIError(test_json, "['combo box']['values'] and ['combo box']['items'] should have the same size.");
+    CheckGUIError(test_json,
+        "['combo box']['values'] and ['combo box']['items'] should have the same size.");
 }
 
 TEST(JsonCheckTest, checkGUIFail5) {
@@ -84,12 +85,12 @@ TEST(JsonCheckTest, checkGUIFail5) {
 
 TEST(JsonCheckTest, checkHelpSuccess) {
     nlohmann::json test_json = GetTestJson();
-    jsonUtils::checkHelpURLs(test_json);
+    json_utils::CheckHelpURLs(test_json);
 }
 
-void CheckHelpError(nlohmann::json test_json, const char* expected){
-    try{
-        jsonUtils::checkHelpURLs(test_json);
+void CheckHelpError(nlohmann::json test_json, const char* expected) {
+    try {
+        json_utils::CheckHelpURLs(test_json);
         FAIL();
     }
     catch(std::exception& err) {
