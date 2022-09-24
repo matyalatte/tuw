@@ -33,6 +33,10 @@ class MainFrame : public wxFrame {
 #ifdef __linux__
     LogFrame* m_log_frame;
 #endif
+#ifndef _WIN32
+    wxString m_exe_path;
+    void CalcExePath();
+#endif
     std::vector<Component*> m_components;
     wxPanel* m_main_panel;
     wxButton* m_run_button;

@@ -32,10 +32,21 @@ void LogFrame::OnClose(wxCloseEvent& event) {
 }
 #endif
 
+#ifndef _WIN32
+void MainFrame::CalcExePath() {
+    wxStandardPaths& path = wxStandardPaths::Get();
+    path.UseAppInfo(wxStandardPaths::AppInfo_None);
+    m_exe_path = path.GetExecutablePath();
+    wxSetWorkingDirectory(wxPathOnly(m_exe_path));
+}
+#endif
+
 // Main window
 MainFrame::MainFrame()
     : wxFrame(nullptr, wxID_ANY, "Simple Command Runner") {
-    std::ifstream istream("gui_definition.json");
+#ifndef _WIN32
+    CalcExePath();
+#endif
     m_definition = json_utils::LoadJson("gui_definition.json");
     m_config = json_utils::LoadJson("gui_config.json");
     CreateFrame();
@@ -43,6 +54,9 @@ MainFrame::MainFrame()
 
 MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
     : wxFrame(nullptr, wxID_ANY, "Simple Command Runner") {
+#ifndef _WIN32
+    CalcExePath();
+#endif
     if (m_definition == nullptr) {
         m_definition = nlohmann::json({});
     }
@@ -62,14 +76,8 @@ wxButton* GetRunButton(wxPanel* panel, nlohmann::json sub_definition, int y) {
 }
 
 void MainFrame::CreateFrame() {
-#ifndef _WIN32
-    wxStandardPaths& path = wxStandardPaths::Get();
-    path.UseAppInfo(wxStandardPaths::AppInfo_None);
-    wxString strExe = path.GetExecutablePath();
-    wxSetWorkingDirectory(wxPathOnly(strExe));
-#endif
 #ifdef __linux__
-    m_log_frame = new LogFrame(strExe);
+    m_log_frame = new LogFrame(m_exe_path);
 #endif
     std::cout << "Simple Command Runner v" << VERSION << " by matyalatte" << std::endl;
 
@@ -121,7 +129,13 @@ void MainFrame::CreateFrame() {
 
     Layout();
     Centre();
+
+#ifdef __APPLE__
+    // mac build should have a small window because it doesn't have the menu bar on the window.
+    SetSize(wxSize(405, y + 65));
+#else
     SetSize(wxSize(405, y + 105));
+#endif
     SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
@@ -172,7 +186,9 @@ void MainFrame::CheckDefinition() {
 
 void MainFrame::UpdateConfig() {
     for (Component *c : m_components) {
-        m_config[c->GetLabel()] = c->GetConfig();
+        nlohmann::json comp_config = c->GetConfig();
+        if (comp_config.is_null()) continue;
+        m_config[c->GetLabel()] = comp_config;
     }
 }
 

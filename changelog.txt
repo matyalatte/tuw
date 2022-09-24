@@ -1,6 +1,8 @@
 ver0.2.0
 - Made "button" key optional
 - Fixed a bug that text boxes can't handle their input values properly.
+- Modified window size for macOS
+- Removed null values from gui_config.json
 - Introduced tests and linting
 
 ver0.1.3
