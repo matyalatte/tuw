@@ -45,6 +45,7 @@ class MainFrame : public wxFrame {
     void CheckDefinition();
     int UpdatePanel(wxPanel* panel);
     void UpdateConfig();
+    void Align(int y);
     void ShowErrorDialog(wxString msg);
     void ShowSuccessDialog(wxString msg);
     void JsonLoadFailed(std::string msg);

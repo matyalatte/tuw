@@ -75,6 +75,17 @@ wxButton* GetRunButton(wxPanel* panel, nlohmann::json sub_definition, int y) {
     return new wxButton(panel, wxID_EXECUTE, button, wxPoint(143, y), wxSize(105, 25));
 }
 
+void MainFrame::Align(int y) {
+    Layout();
+    Centre();
+#ifdef __APPLE__
+    // mac build should have a small window because it doesn't have the menu bar on the window.
+    SetSize(wxSize(405, y + 65));
+#else
+    SetSize(wxSize(405, y + 105));
+#endif
+}
+
 void MainFrame::CreateFrame() {
 #ifdef __linux__
     m_log_frame = new LogFrame(m_exe_path);
@@ -127,15 +138,7 @@ void MainFrame::CreateFrame() {
 
     m_main_panel->Show();
 
-    Layout();
-    Centre();
-
-#ifdef __APPLE__
-    // mac build should have a small window because it doesn't have the menu bar on the window.
-    SetSize(wxSize(405, y + 65));
-#else
-    SetSize(wxSize(405, y + 105));
-#endif
+    Align(y);
     SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
@@ -291,8 +294,7 @@ void MainFrame::UpdateFrame(wxCommandEvent& event) {
     m_run_button = new_run_button;
     unused->Destroy();
 
-    Layout();
-    SetSize(wxSize(405, y + 105));
+    Align(y);
     Refresh();
 }
 
