@@ -9,8 +9,8 @@ All you need is write a `.json` file and run an `.exe` file.<br>
 It can make GUI to run commands of your scripts.<br>
 No need to use IDE and manage scripts for GUI.<br>
 
-![sample](https://user-images.githubusercontent.com/69258547/171450112-8e1b40a0-36ae-4507-a4a7-2952d0bdbb52.png)
-![json](https://user-images.githubusercontent.com/69258547/171449741-859ca1bb-6f99-4e06-a7b9-a1873ca8b7eb.png)<br>
+![sample](https://user-images.githubusercontent.com/69258547/192090786-11a3f5ef-988e-442f-8ba9-fd1636b9f350.png)
+<img src=https://user-images.githubusercontent.com/69258547/192090797-f5e5b52d-59aa-4942-a361-2c8b5c7bd746.png width=387></img><br>
 
 ## Features
 - Cross-platform

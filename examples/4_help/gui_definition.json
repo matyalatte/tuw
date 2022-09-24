@@ -1,0 +1,40 @@
+{
+    "gui": [
+        {
+            "label": "Sample GUI",
+            "command": "echo file: %file% & echo folder: %folder% & echo num: %num% & echo checkbox: %check%",
+            "components": [
+                {
+                    "type": "static_text",
+                    "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
+                },
+                {
+                    "type": "file",
+                    "label": "Some file path",
+                    "extension": "any files (*)|*",
+                    "empty_message": "Drop a file here!"
+                },
+                {
+                    "type": "folder",
+                    "label": "Some folder path"
+                },
+                {
+                    "type": "check",
+                    "label": "flag"
+                }
+            ]
+        }
+    ],
+    "help": [
+        {
+            "type": "url",
+            "label": "About Simple Command Runner",
+            "url": "https://github.com/matyalatte/Simple-Command-Runner"
+        },
+        {
+            "type": "url",
+            "label": "Releases",
+            "url": "https://github.com/matyalatte/Simple-Command-Runner/releases"
+        }
+    ]
+}

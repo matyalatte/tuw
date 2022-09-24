@@ -83,7 +83,7 @@ jobs:
         run: |
           mkdir -p ../release
           cp Release/Release/SimpleCommandRunner.exe ../release
-          cp examples/5_advanced/gui_definition.json ../release
+          cp examples/4_help/gui_definition.json ../release
           cp changelog.txt ../release
           cp license.txt ../release
         shell: bash
@@ -143,7 +143,7 @@ jobs:
         run: |
           mkdir -p ../release/${{ env.ZIP_NAME }}
           cp Release/SimpleCommandRunner ../release/${{ env.ZIP_NAME }}
-          cp examples/5_advanced/gui_definition.json ../release/${{ env.ZIP_NAME }}
+          cp examples/4_help/gui_definition.json ../release/${{ env.ZIP_NAME }}
           cp changelog.txt ../release/${{ env.ZIP_NAME }}
           cp license.txt ../release/${{ env.ZIP_NAME }}
           cd ../release
