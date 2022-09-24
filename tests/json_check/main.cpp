@@ -34,7 +34,7 @@ nlohmann::json GetTestJson() {
 }
 
 TEST(JsonCheckTest, LoadJsonSuccess) {
-    nlohmann::json test_json = GetTestJson();
+    GetTestJson();
 }
 
 TEST(JsonCheckTest, checkGUISuccess) {

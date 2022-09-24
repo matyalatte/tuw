@@ -61,10 +61,6 @@ void CustomTextCtrl::UpdateText(const wxString string) {
     SetEmptyMessage();
 }
 
-bool CustomTextCtrl::IsEmpty() {
-    return m_actual_value == "";
-}
-
 wxString CustomTextCtrl::GetActualValue() {
     if (GetForegroundColour() != wxGREY) {
         return GetValue();
@@ -214,32 +210,16 @@ CustomFilePicker::CustomFilePicker(
     long style,
     const wxValidator& validator,
     const wxString& name) {
-    CustomFilePicker::Create(parent, id,
-        path, message, wildcard, empty_message,
-        pos, size, style, validator, name);
-}
 
-bool CustomFilePicker::Create(wxWindow* parent,
-    wxWindowID id,
-    const wxString& path,
-    const wxString& message,
-    const wxString& wildcard,
-    const wxString& empty_message,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxValidator& validator,
-    const wxString& name) {
     if (!CustomCreateBase(
         parent, id, path, message, wildcard, empty_message,
         pos, size, style, validator, name))
-        return false;
+        return;
 
     if (HasTextCtrl())
         GetTextCtrl()->AutoCompleteFileNames();
     m_text->SetDropTarget(new DropFilePath<CustomFilePicker>(this, m_custom_text_ctrl));
 
-    return true;
 }
 
 wxString CustomFilePicker::GetTextCtrlValue() const {
@@ -257,32 +237,16 @@ CustomDirPicker::CustomDirPicker(
     long style,
     const wxValidator& validator,
     const wxString& name) {
-    CustomDirPicker::Create(parent, id,
-        path, message, empty_message,
-        pos, size, style, validator, name);
-}
 
-bool CustomDirPicker::Create(wxWindow* parent,
-    wxWindowID id,
-    const wxString& path,
-    const wxString& message,
-    const wxString& empty_message,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxValidator& validator,
-    const wxString& name) {
     if (!CustomCreateBase(
         parent, id, path, message, wxEmptyString, empty_message,
         pos, size, style, validator, name))
-        return false;
+        return;
 
     if (HasTextCtrl())
         GetTextCtrl()->AutoCompleteDirectories();
 
     m_text->SetDropTarget(new DropFilePath<CustomDirPicker>(this, m_custom_text_ctrl));
-
-    return true;
 }
 
 wxString CustomDirPicker::GetTextCtrlValue() const {

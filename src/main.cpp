@@ -5,6 +5,9 @@ class MainApp : public wxApp {
  private:
     MainFrame* m_frame;
  public:
+    MainApp(): wxApp() {
+        m_frame = nullptr;
+    }
     bool OnInit() override;
 };
 

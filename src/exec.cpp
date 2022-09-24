@@ -64,10 +64,9 @@ std::array<std::string, 2> Exec(const char* cmd) {
 
     // set buffers
     size_t size = 512;
-    size_t read_size = 0;
     char ibuf[512];  // buffer for output
     char ebuf[512];  // buffer for error messages
-    std::string str = "";
+    std::string str;
     std::string in_msg = "";
     std::string err_msg = "";
 

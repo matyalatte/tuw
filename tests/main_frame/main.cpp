@@ -1,4 +1,4 @@
-// Tests for MainFrame.cpp
+// Tests for main_frame.cpp
 // Todo: Write more tests
 
 #include <gtest/gtest.h>
@@ -32,7 +32,10 @@ int main(int argc, char *argv[]) {
     wxApp* app = new wxApp();
 
     // Initialize app
-    wxEntryStart(argc, argv);
+    int argc_ = 1;
+    char *argv_[1] = { argv[0] };
+    wxEntryStart(argc_, argv_);
+    app->OnInit();
 
     // Make hook to skip message dialogues
     DialogSkipper* hook = new DialogSkipper();
@@ -89,7 +92,6 @@ TEST(MainFrameTest, RunCommandFail) {
     MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
 
     std::array<std::string, 2> msg = main_frame->RunCommand();
-    std::string errmsg = msg[1];
     EXPECT_STREQ("", msg[0].c_str());
     EXPECT_STREQ("Json format error(Can not make command)", msg[1].c_str());
 }
@@ -101,7 +103,6 @@ TEST(MainFrameTest, RunCommandFail2) {
     MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
 
     std::array<std::string, 2> msg = main_frame->RunCommand();
-    std::string errmsg = msg[1];
     EXPECT_STREQ("", msg[0].c_str());
     EXPECT_STRNE("", msg[1].c_str());
 }

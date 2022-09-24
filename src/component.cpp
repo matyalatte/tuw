@@ -1,6 +1,6 @@
 #include "component.h"
 
-// Component for GUI
+// Base class for GUI components (file picker, combo box, etc.)
 Component::Component(nlohmann::json j, int height, bool has_string) {
     m_widget = nullptr;
     m_height = height;
@@ -9,14 +9,10 @@ Component::Component(nlohmann::json j, int height, bool has_string) {
     m_add_quotes = j.value("add_quotes", false);
 }
 
-wxString Quote(wxString str) {
-    return "\"" + str + "\"";
-}
-
 wxString Component::GetString() {
     wxString str = GetRawString();
     if (m_add_quotes) {
-        return Quote(str);
+        return "\"" + str + "\"";
     }
     return str;
 }
@@ -81,14 +77,11 @@ const bool HAS_STRING = true;
 const bool NOT_STRING = false;
 
 StaticText::StaticText(wxPanel* panel, nlohmann::json j, int y): Component(j, 25, NOT_STRING) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY,
-        wxString::FromUTF8(j["label"]), wxPoint(20, y));
+    new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
 }
 
-// File Picker
 FilePicker::FilePicker(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS_STRING) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY,
-        wxString::FromUTF8(j["label"]), wxPoint(20, y));
+    new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     wxString ext;
     if (j.contains("extension")) {
         ext = wxString::FromUTF8(j["extension"]);
@@ -98,9 +91,9 @@ FilePicker::FilePicker(wxPanel* panel, nlohmann::json j, int y) : Component(j, 5
     std::string value = "";
     std::string emptyMessage = j.value("empty_message", "");
     CustomFilePicker* picker = new CustomFilePicker(panel, wxID_ANY,
-        value, "", ext, emptyMessage,
-        wxPoint(20, y + 18), wxSize(350, 25),
-        wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
+                                                    value, "", ext, emptyMessage,
+                                                    wxPoint(20, y + 18), wxSize(350, 25),
+                                                    wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
     picker->DragAcceptFiles(true);
     m_widget = picker;
 }
@@ -130,14 +123,13 @@ nlohmann::json FilePicker::GetConfig() {
 
 // Dir Picker
 DirPicker::DirPicker(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS_STRING) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, \
-                                          wxString::FromUTF8(j["label"]), wxPoint(20, y));
+    new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     std::string value = "";
-    std::string emptyMessage = j.value("empty_message", "");
+    std::string empty_message = j.value("empty_message", "");
     CustomDirPicker* picker = new CustomDirPicker(panel, wxID_ANY,
-        value, "", emptyMessage,
-        wxPoint(20, y + 18), wxSize(350, 25),
-        wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
+                                                  value, "", empty_message,
+                                                  wxPoint(20, y + 18), wxSize(350, 25),
+                                                  wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
     picker->DragAcceptFiles(true);
     m_widget = picker;
 }
@@ -172,8 +164,7 @@ Choice::Choice(wxPanel* panel, nlohmann::json j, int y) : Component(j, 55, HAS_S
     std::for_each(items.begin(), items.end(), [&](std::string i) {
         wxitems.Add(wxString::FromUTF8(i));
         });
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY,
-        wxString::FromUTF8(j["label"]), wxPoint(20, y));
+    new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     int width = j.value("width", 95);
 
     wxChoice* choice = new wxChoice(panel, wxID_ANY,
@@ -219,8 +210,8 @@ void SetDefaultForCheckBox(wxCheckBox* check, nlohmann::json j) {
 // CheckBox
 CheckBox::CheckBox(wxPanel* panel, nlohmann::json j, int y) : Component(j, 35, HAS_STRING) {
     wxCheckBox* check = new wxCheckBox(panel, wxID_ANY,
-        wxString::FromUTF8(j["label"]),
-        wxPoint(20, y), wxSize(350, 25));
+                                       wxString::FromUTF8(j["label"]),
+                                       wxPoint(20, y), wxSize(350, 25));
     m_value = j.value("value", j["label"]);
     if (j.contains("default")) {
         SetDefaultForCheckBox(check, j["default"]);
@@ -250,15 +241,14 @@ nlohmann::json CheckBox::GetConfig() {
 // CheckArray
 CheckArray::CheckArray(wxPanel* panel, nlohmann::json j, int y) :
     Component(j, 20 + j["items"].size() * 20 + 10, HAS_STRING) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY,
-        wxString::FromUTF8(j["label"]), wxPoint(20, y));
+    new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     std::vector<wxCheckBox*>* checks = new std::vector<wxCheckBox*>();
-    wxCheckBox* check;
     for (int i = 0; i < j["items"].size(); i++) {
-        check = new wxCheckBox(panel, wxID_ANY,
-            wxString::FromUTF8(j["items"][i]),
-            wxPoint(20, y + 20 + i * 20), wxSize(350, 15));
-        checks->push_back(check);
+        checks->push_back(
+            new wxCheckBox(panel, wxID_ANY,
+                           wxString::FromUTF8(j["items"][i]),
+                           wxPoint(20, y + 20 + i * 20), wxSize(350, 15))
+        );
     }
     if (j.contains("values")) {
         SetValues(j["values"]);
@@ -307,8 +297,7 @@ nlohmann::json CheckArray::GetConfig() {
 
 // TextBox
 TextBox::TextBox(wxPanel* panel, nlohmann::json j, int y) : Component(j, 53, HAS_STRING) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY,
-        wxString::FromUTF8(j["label"]), wxPoint(20, y));
+    new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"]), wxPoint(20, y));
     std::string value = j.value("default", "");
     std::string emptyMessage = j.value("empty_message", "");
     CustomTextCtrl* textbox = new CustomTextCtrl(panel, wxID_ANY,

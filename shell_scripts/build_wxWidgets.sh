@@ -11,7 +11,7 @@ if [ "$1" = "Debug" ];
     else build_type="Release";
 fi
 
-pushd ~/wxWidgets-$wx_version
+pushd ~/wxWidgets-"$wx_version"
 mkdir ${build_type}
 cd ${build_type}
 
@@ -39,20 +39,20 @@ if [ ${build_type} = "Debug" ];
 fi
 
 # configure
-../configure ${options}; 
+../configure "${options}"; 
 
 function nproc_for_mac(){
     if sysctl -n hw.logicalcpu;
-        then num_proc=`sysctl -n hw.logicalcpu`; # use hw.logicalcpu if exists
+        then num_proc=$(sysctl -n hw.logicalcpu); # use hw.logicalcpu if exists
         else num_proc=2; echo ${num_proc}; # when sysctl won't work
     fi
 }
 
 if nproc;
     then num_proc=$(nproc); # use nproc if exists
-    else num_proc=`nproc_for_mac`; # when nproc doesn't exist
+    else num_proc=$(nproc_for_mac); # when nproc doesn't exist
 fi
 
 # build
-make -j${num_proc}
+make -j"${num_proc}"
 popd

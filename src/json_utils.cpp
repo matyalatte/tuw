@@ -28,7 +28,7 @@ namespace json_utils {
         return true;
     }
 
-    std::string GetLabel(std::string label, std::string key) {
+    std::string GetLabel(const std::string& label, const std::string& key) {
         std::string msg = "['" + key + "']";
         if (label != "") {
             msg = "['" + label + "']" + msg;
@@ -36,7 +36,8 @@ namespace json_utils {
         return msg;
     }
 
-    void CheckContain(nlohmann::json j, std::string key, std::string label = "") {
+    void CheckContain(const nlohmann::json& j,
+                      const std::string& key, const std::string& label = "") {
         if (!j.contains(key)) {
             std::string msg = GetLabel(label, key) + " not found.";
             throw std::runtime_error(msg);
@@ -56,8 +57,8 @@ namespace json_utils {
 
     const bool CAN_SKIP = true;
 
-    void CheckJsonType(nlohmann::json j, std::string key,
-        JsonType type, std::string label = "", bool canSkip = false) {
+    void CheckJsonType(const nlohmann::json& j, const std::string& key,
+        const JsonType& type, const std::string& label = "", const bool& canSkip = false) {
         if (canSkip && !j.contains(key)) {
             return;
         }
@@ -165,7 +166,6 @@ namespace json_utils {
         CheckJsonType(sub_definition, COMPONENTS, JsonType::ARRAY);
 
         // check components
-        std::vector<std::string> subkeys = {};
         std::string label;
         std::string type;
         for (nlohmann::json& c : sub_definition[COMPONENTS]) {
@@ -179,10 +179,8 @@ namespace json_utils {
                 CheckJsonType(c, "extention", JsonType::STRING, label, CAN_SKIP);
             } else if (type == "choice") {
                 CheckItemsValues(c);
-                subkeys = { "width", "default" };
-                for (std::string key : subkeys) {
-                    CheckJsonType(c, key, JsonType::NUMBER, label, CAN_SKIP);
-                }
+                CheckJsonType(c, "width", JsonType::NUMBER, label, CAN_SKIP);
+                CheckJsonType(c, "default", JsonType::NUMBER, label, CAN_SKIP);
             } else if (type == "check") {
                 CheckJsonType(c, "value", JsonType::STRING, label, CAN_SKIP);
             } else if (type == "checks" || type == "check_array") {

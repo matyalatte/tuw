@@ -1,4 +1,4 @@
-// Tests for MainFrame.cpp
+// Tests for custom_wx_obj.cpp
 // Todo: Write more tests
 
 #include <gtest/gtest.h>
@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
 
     // Initialize app
     wxEntryStart(argc, argv);
+    app->OnInit();
 
     return RUN_ALL_TESTS();
 }
@@ -56,6 +57,7 @@ TEST(CustomWxObjTest, ShowEmptyMessage) {
 }
 
 TEST(CustomWxObjTest, HideEmptyMessage) {
+    wxYield();  // idk why but this will fix errors on unix
     TestFrame* frame = new TestFrame();
     wxYield();
     frame->m_file_picker->GetTextCtrl()->SetFocus();

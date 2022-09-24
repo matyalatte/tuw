@@ -28,7 +28,6 @@ class CustomTextCtrl : public wxTextCtrl {
     void OnKillFocusEmptyMessage(wxFocusEvent& event);
     void SetEmptyMessage();
     void UpdateText(const wxString string);
-    bool IsEmpty();
     wxString GetActualValue();
     DECLARE_EVENT_TABLE();
 };
@@ -100,17 +99,6 @@ class CustomFilePicker : public CustomPickerBase {
         const wxString& name = wxFilePickerCtrlNameStr);
     virtual ~CustomFilePicker() {}
 
-    bool Create(wxWindow* parent, wxWindowID id,
-        const wxString& path = wxEmptyString,
-        const wxString& message = wxFileSelectorPromptStr,
-        const wxString& wildcard = wxFileSelectorDefaultWildcardStr,
-        const wxString& empty_message = wxEmptyString,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxFLP_DEFAULT_STYLE,
-        const wxValidator& validator = wxDefaultValidator,
-        const wxString& name = wxFilePickerCtrlNameStr);
-
     wxString GetTextCtrlValue() const wxOVERRIDE;
 
     bool IsCwdToUpdate() const wxOVERRIDE {
@@ -164,16 +152,6 @@ class CustomDirPicker : public CustomPickerBase {
         const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxFilePickerCtrlNameStr);
     virtual ~CustomDirPicker() {}
-
-    bool Create(wxWindow* parent, wxWindowID id,
-        const wxString& path = wxEmptyString,
-        const wxString& message = wxFileSelectorPromptStr,
-        const wxString& empty_message = wxEmptyString,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxFLP_DEFAULT_STYLE,
-        const wxValidator& validator = wxDefaultValidator,
-        const wxString& name = wxFilePickerCtrlNameStr);
 
     wxString GetTextCtrlValue() const wxOVERRIDE;
 

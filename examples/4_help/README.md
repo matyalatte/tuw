@@ -2,9 +2,9 @@
 
 ![sample](https://user-images.githubusercontent.com/69258547/192090786-11a3f5ef-988e-442f-8ba9-fd1636b9f350.png)
 
-You can put help urls to menu bar.<br>
+You can put help urls to menu bar.  
 
-```
+```json
 "help": [
     {
         "type": "url",
@@ -18,4 +18,3 @@ You can put help urls to menu bar.<br>
     }
 ]
 ```
-

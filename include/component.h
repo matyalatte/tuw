@@ -12,7 +12,7 @@
 #include <codecvt>  // char code converter for Windows system
 #endif
 
-// component for GUI
+// Base class for GUI components (file picker, combo box, etc.)
 class Component {
  protected:
     void* m_widget;
@@ -29,17 +29,19 @@ class Component {
     virtual wxString GetRawString() { return "";}
     wxString GetString();
     std::string GetLabel();
-    int GetHeight();
-    virtual nlohmann::json GetConfig();
+
     virtual void SetConfig(nlohmann::json config) {}
+    virtual nlohmann::json GetConfig();
 
     void SetHeight(int h);
+    int GetHeight();
 
     bool HasString();
 
     static Component* PutComponent(wxPanel* panel, nlohmann::json j, int y);
 };
 
+// containers for Choice and CheckArray
 class MultipleValuesContainer {
  protected:
     std::vector<std::string> m_values;
@@ -51,6 +53,7 @@ class MultipleValuesContainer {
 };
 
 #ifdef _WIN32
+// char code converter for Windows system
 std::string WStringToUTF8(const std::wstring& str);
 std::wstring UTF8ToWString(const std::string& str);
 #endif

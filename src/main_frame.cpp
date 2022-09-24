@@ -277,7 +277,10 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
     wxString url = wxString::FromUTF8(m_definition["help"][event.GetId()
         - 1 - wxID_HIGHEST - m_definition["gui"].size()]["url"]);
     std::cout << "[OpenURL] " << url << std::endl;
-    bool res = wxLaunchDefaultBrowser(url);
+    bool success = wxLaunchDefaultBrowser(url);
+    if (!success) {
+        std::cout << "[OpenURL] Failed to open URL by an unexpected error." << std::endl;
+    }
 }
 
 void MainFrame::UpdateFrame(wxCommandEvent& event) {
