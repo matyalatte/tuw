@@ -1,0 +1,29 @@
+{
+    "All components with their required keys.": null,
+    "Some file path": {
+        "str": "test.bin"
+    },
+    "Some folder path": {
+        "str": "somefolder"
+    },
+    "checkbox": {
+        "int": 0
+    },
+    "combo box": {
+        "int": 1
+    },
+    "flag!": {
+        "int": 1
+    },
+    "options": {
+        "ints": [
+            0,
+            1,
+            0,
+            0
+        ]
+    },
+    "text box": {
+        "str": "testtesttest"
+    }
+}

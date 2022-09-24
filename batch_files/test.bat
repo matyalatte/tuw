@@ -32,5 +32,5 @@ mkdir %~dp0\..\%BUILD_TYPE%Test
 
     cmake %OPTIONS% ../
     cmake --build . --config %BUILD_TYPE%
-    ctest --verbose -C %BUILD_TYPE%
+    ctest --verbose --output-on-failure -C %BUILD_TYPE%
 @popd

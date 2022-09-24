@@ -16,6 +16,7 @@ mkdir ${build_type}
 cd ${build_type}
 
 options="--disable-shared\
+    --disable-tests\
     --disable-sys-libs\
     --without-libpng\
     --without-libjpeg\

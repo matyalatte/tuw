@@ -21,5 +21,5 @@ pushd $(dirname "$0")/..
         -D BUILD_TESTS=ON\
         ../
     cmake --build .
-    ctest --verbose
+    ctest --verbose --output-on-failure
 popd

@@ -34,7 +34,6 @@ void CustomTextCtrl::SetEmptyMessage() {
     }
 }
 
-
 void CustomTextCtrl::OnKillFocusEmptyMessage(wxFocusEvent& event) {
     if (GetForegroundColour() != wxGREY) {
         m_actual_value = GetValue();
@@ -113,28 +112,26 @@ bool CustomPickerBase::CustomCreatePickerBase(wxWindow* parent,
 
     m_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    if (HasFlag(wxPB_USE_TEXTCTRL)) {
-        m_custom_text_ctrl = new CustomTextCtrl(this, wxID_ANY, wxEmptyString,
-            empty_message,
-            wxDefaultPosition, wxDefaultSize,
-            GetTextCtrlStyle(style));
-        m_text = reinterpret_cast<wxTextCtrl*>(m_custom_text_ctrl);
-        if (!m_text) {
-            wxFAIL_MSG(wxT("wxPickerBase's textctrl creation failed"));
-            return false;
-        }
-
-        m_text->SetMaxLength(32);
-
-        m_custom_text_ctrl->UpdateText(text);
-
-        m_custom_text_ctrl->Bind(wxEVT_TEXT, &CustomPickerBase::OnTextCtrlUpdate, this);
-        m_custom_text_ctrl->Bind(wxEVT_KILL_FOCUS, &CustomPickerBase::OnTextCtrlKillFocus, this);
-        m_custom_text_ctrl->Bind(wxEVT_DESTROY, &CustomPickerBase::OnTextCtrlDelete, this);
-
-        m_sizer->Add(m_text,
-            wxSizerFlags(1).CentreVertical().Border(wxRIGHT));
+    m_custom_text_ctrl = new CustomTextCtrl(this, wxID_ANY, wxEmptyString,
+        empty_message,
+        wxDefaultPosition, wxDefaultSize,
+        GetTextCtrlStyle(style));
+    m_text = reinterpret_cast<wxTextCtrl*>(m_custom_text_ctrl);
+    if (!m_text) {
+        wxFAIL_MSG(wxT("wxPickerBase's textctrl creation failed"));
+        return false;
     }
+
+    m_text->SetMaxLength(32);
+
+    m_custom_text_ctrl->UpdateText(text);
+
+    m_custom_text_ctrl->Bind(wxEVT_TEXT, &CustomPickerBase::OnTextCtrlUpdate, this);
+    m_custom_text_ctrl->Bind(wxEVT_KILL_FOCUS, &CustomPickerBase::OnTextCtrlKillFocus, this);
+    m_custom_text_ctrl->Bind(wxEVT_DESTROY, &CustomPickerBase::OnTextCtrlDelete, this);
+
+    m_sizer->Add(m_text,
+        wxSizerFlags(1).CentreVertical().Border(wxRIGHT));
     return true;
 }
 

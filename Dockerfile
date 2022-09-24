@@ -26,6 +26,7 @@ RUN mkdir wxWidgets-${wx_version}/release;\
     cd wxWidgets-${wx_version}/release;\
     ../configure --disable-shared\
     --disable-sys-libs\
+    --disable-tests\
     --without-libpng\
     --without-libjpeg\
     --without-libtiff\
