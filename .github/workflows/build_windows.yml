@@ -1,30 +1,18 @@
 name: build_windows
 
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
   
 env:
   ZIP_NAME: SimpleCommandRunner
+  CACHE_NAME: main
 
 jobs:
   build:
     runs-on: windows-2022
     steps:
-      - name: Check tag
-        id: check-tag
-        run: |
-          if [[ ${{ github.ref }} == refs/tags/v* ]]; then
-            VERSION=-$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
-          else
-            VERSION=""
-          fi
-          echo "::set-output name=version::$VERSION"
-        shell: bash
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Check wxWidget version
         id: wx-version
@@ -38,11 +26,7 @@ jobs:
         id: cache-wx
         with:
           path: "C:/wxWidgets-${{ steps.wx-version.outputs.version }}"
-          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}
-        
-      - name: Setup nmake
-        if: steps.cache-wx.outputs.cache-hit != 'true'
-        uses: ilammy/msvc-dev-cmd@v1
+          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}-${{ env.CACHE_NAME }}
         
       - name: install wxWidget
         if: steps.cache-wx.outputs.cache-hit != 'true'
@@ -50,9 +34,6 @@ jobs:
           cd batch_files
           ./download_wxWidgets.bat
           ./build_wxWidgets.bat
-        
-      - name: Setup msbuild
-        uses: microsoft/setup-msbuild@v1.1
 
       - name: build exe
         run: |
@@ -62,8 +43,8 @@ jobs:
       - name: Copy files
         run: |
           mkdir -p ../release
-          cp build/Release/SimpleCommandRunner.exe ../release/
-          cp samples/5_advanced/gui_definition.json ../release/
+          cp Release/Release/SimpleCommandRunner.exe ../release/
+          cp examples/4_help/gui_definition.json ../release/
           cp changelog.txt ../release/
           cp license.txt ../release/
         shell: bash
@@ -99,5 +80,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ../release/${{ env.ZIP_NAME }}.zip
-          asset_name: ${{ env.ZIP_NAME }}${{ steps.check-tag.outputs.version }}.zip
+          asset_name: ${{ env.ZIP_NAME }}-${{ runner.os }}.zip
           asset_content_type: application/zip

@@ -1,3 +1,16 @@
+ver0.2.0
+- Made "button" key optional
+- Fixed a bug that text boxes can't handle their input values properly.
+- Modified window size for macOS
+- Removed null values from gui_config.json
+- Introduced tests and linting
+
+ver0.1.3
+- Added "empty_message" option to text box and pickers. They can show messages when their text boxes are empty.
+- Added "default" option to check box and text box
+- Fixed errors when failing to read json files
+- Removed dependancies from macOS build
+
 ver0.1.2
 - Fixed a bug it needs dll for runtime libs
 

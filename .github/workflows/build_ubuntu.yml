@@ -5,13 +5,14 @@ on:
   
 env:
   ZIP_NAME: SimpleCommandRunner
+  CACHE_NAME: main
 
 jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
         
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Check wxWidget version
         id: wx-version
@@ -25,7 +26,7 @@ jobs:
         id: cache-wx
         with:
           path: "~/wxWidgets-${{ steps.wx-version.outputs.version }}"
-          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}
+          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}-${{ env.CACHE_NAME }}
             
       - name: install gtk
         run: |
@@ -38,21 +39,15 @@ jobs:
           bash download_wxWidgets.sh
           bash build_wxWidgets.sh
           
-      - name: install wxWidget
-        run: |
-          cd shell_scripts
-          bash install_wxWidgets.sh
-          
       - name: build exe
         run: |
-          cd shell_scripts
-          bash build_exe.sh
+          bash shell_scripts/build_exe.sh
           
       - name: copy files
         run: |
           mkdir -p ../release/${{ env.ZIP_NAME }}
-          cp build/SimpleCommandRunner ../release/${{ env.ZIP_NAME }}
-          cp samples/5_advanced/gui_definition.json ../release/${{ env.ZIP_NAME }}
+          cp Release/SimpleCommandRunner ../release/${{ env.ZIP_NAME }}
+          cp examples/4_help/gui_definition.json ../release/${{ env.ZIP_NAME }}
           cp changelog.txt ../release/${{ env.ZIP_NAME }}
           cp license.txt ../release/${{ env.ZIP_NAME }}
           cd ../release
