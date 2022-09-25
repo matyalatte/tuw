@@ -39,7 +39,7 @@ if [ ${build_type} = "Debug" ];
 fi
 
 # configure
-../configure "${options}"; 
+../configure ${options};
 
 function nproc_for_mac(){
     if sysctl -n hw.logicalcpu;
