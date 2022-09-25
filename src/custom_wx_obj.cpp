@@ -185,7 +185,7 @@ void CustomPickerBase::UpdateTextCtrlFromPicker() {
 }
 
 void CustomPickerBase::UpdatePickerFromTextCtrl() {
-    wxString newpath(GetTextCtrlValue());
+    wxString newpath(GetFullPath());
     if (m_pickerIface->GetPath() != newpath) {
         m_pickerIface->SetPath(newpath);
 
@@ -219,10 +219,13 @@ CustomFilePicker::CustomFilePicker(
     if (HasTextCtrl())
         GetTextCtrl()->AutoCompleteFileNames();
     m_text->SetDropTarget(new DropFilePath<CustomFilePicker>(this, m_custom_text_ctrl));
-
 }
 
 wxString CustomFilePicker::GetTextCtrlValue() const {
+    return m_custom_text_ctrl->GetActualValue();
+}
+
+wxString CustomFilePicker::GetFullPath() {
     return wxFileName(m_custom_text_ctrl->GetActualValue()).GetFullPath();
 }
 
@@ -250,5 +253,9 @@ CustomDirPicker::CustomDirPicker(
 }
 
 wxString CustomDirPicker::GetTextCtrlValue() const {
+    return m_custom_text_ctrl->GetActualValue();
+}
+
+wxString CustomDirPicker::GetFullPath() {
     return wxFileName::DirName(m_custom_text_ctrl->GetActualValue()).GetFullPath();
 }

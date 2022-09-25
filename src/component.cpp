@@ -247,8 +247,7 @@ CheckArray::CheckArray(wxPanel* panel, nlohmann::json j, int y) :
         checks->push_back(
             new wxCheckBox(panel, wxID_ANY,
                            wxString::FromUTF8(j["items"][i]),
-                           wxPoint(20, y + 20 + i * 20), wxSize(350, 15))
-        );
+                           wxPoint(20, y + 20 + i * 20), wxSize(350, 15)));
     }
     if (j.contains("values")) {
         SetValues(j["values"]);

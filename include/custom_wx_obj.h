@@ -81,6 +81,7 @@ class CustomPickerBase : public wxFileDirPickerCtrlBase {
         const wxString& name);
     void UpdateTextCtrlFromPicker();
     void UpdatePickerFromTextCtrl();
+    virtual wxString GetFullPath() {return "";}
 };
 
 // Customized wxFilePicker
@@ -100,6 +101,7 @@ class CustomFilePicker : public CustomPickerBase {
     virtual ~CustomFilePicker() {}
 
     wxString GetTextCtrlValue() const wxOVERRIDE;
+    wxString GetFullPath() wxOVERRIDE;
 
     bool IsCwdToUpdate() const wxOVERRIDE {
         return HasFlag(wxFLP_CHANGE_DIR);
@@ -154,6 +156,7 @@ class CustomDirPicker : public CustomPickerBase {
     virtual ~CustomDirPicker() {}
 
     wxString GetTextCtrlValue() const wxOVERRIDE;
+    wxString GetFullPath() wxOVERRIDE;
 
     bool IsCwdToUpdate() const wxOVERRIDE {
         return HasFlag(wxDIRP_CHANGE_DIR);

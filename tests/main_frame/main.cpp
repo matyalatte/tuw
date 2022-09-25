@@ -119,7 +119,5 @@ TEST(MainFrameTest, LoadSaveConfig) {
     MainFrame* main_frame = new MainFrame(nlohmann::json(test_json), nlohmann::json(test_config));
     main_frame->SaveConfig();
     nlohmann::json saved_config = json_utils::LoadJson("gui_config.json");
-    test_config.erase("Some folder path");
-    saved_config.erase("Some folder path");
     EXPECT_EQ(test_config, saved_config);
 }
