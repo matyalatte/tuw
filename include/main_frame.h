@@ -38,14 +38,13 @@ class MainFrame : public wxFrame {
     void CalcExePath();
 #endif
     std::vector<Component*> m_components;
-    wxPanel* m_main_panel;
+    wxPanel* m_panel;
     wxButton* m_run_button;
 
     void CreateFrame();
     void CheckDefinition();
-    int UpdatePanel(wxPanel* panel);
+    void UpdatePanel();
     void UpdateConfig();
-    void Align(int y);
     void ShowErrorDialog(wxString msg);
     void ShowSuccessDialog(wxString msg);
     void JsonLoadFailed(std::string msg);

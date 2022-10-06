@@ -1,6 +1,6 @@
 #include "main_frame.h"
 
-const char* VERSION = "0.2.0";
+const char* VERSION = "0.2.1";
 
 #ifdef __linux__
 // Console window for linux
@@ -65,25 +65,14 @@ MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
     CreateFrame();
 }
 
-wxButton* GetRunButton(wxPanel* panel, nlohmann::json sub_definition, int y) {
+wxButton* GetRunButton(wxWindow* panel, nlohmann::json sub_definition) {
     std::string button;
     if (sub_definition.contains("button")) {
         button = wxString::FromUTF8(sub_definition["button"]);
     } else {
         button = "Run";
     }
-    return new wxButton(panel, wxID_EXECUTE, button, wxPoint(143, y), wxSize(105, 25));
-}
-
-void MainFrame::Align(int y) {
-    Layout();
-    Centre();
-#ifdef __APPLE__
-    // mac build should have a small window because it doesn't have the menu bar on the window.
-    SetSize(wxSize(405, y + 65));
-#else
-    SetSize(wxSize(405, y + 105));
-#endif
+    return new wxButton(panel, wxID_EXECUTE, button);
 }
 
 void MainFrame::CreateFrame() {
@@ -112,15 +101,15 @@ void MainFrame::CreateFrame() {
 
     // put help urls to menu bar
     if (m_definition.contains("help")) {
-        wxMenu* menuHelp = new wxMenu;
+        wxMenu* menu_help = new wxMenu;
 
         for (int i = 0; i < m_definition["help"].size(); i++) {
-            menuHelp->Append(wxID_HIGHEST + i + 1 + m_definition["gui"].size(),
+            menu_help->Append(wxID_HIGHEST + i + 1 + m_definition["gui"].size(),
                 wxString::FromUTF8(m_definition["help"][i]["label"]));
-            menuHelp->Bind(wxEVT_MENU,
+            menu_help->Bind(wxEVT_MENU,
                 &MainFrame::OpenURL, this, wxID_HIGHEST + i + 1 + m_definition["gui"].size());
         }
-        menu_bar->Append(menuHelp, "Help");
+        menu_bar->Append(menu_help, "Help");
     }
     SetMenuBar(menu_bar);
 
@@ -129,16 +118,14 @@ void MainFrame::CreateFrame() {
     Bind(wxEVT_MENU, [this](wxCommandEvent&) { Close(true); }, wxID_EXIT);
 
     // put components
-    m_main_panel = new wxPanel(this);
     m_components = std::vector<Component*>();
-    int y = UpdatePanel(m_main_panel);
-    m_run_button = GetRunButton(m_main_panel, m_sub_definition, y);
+    UpdatePanel();
+
     Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED,
         wxCommandEventHandler(MainFrame::ClickButton));
 
-    m_main_panel->Show();
+    Fit();
 
-    Align(y);
     SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
@@ -288,21 +275,17 @@ void MainFrame::UpdateFrame(wxCommandEvent& event) {
 
     UpdateConfig();
 
-    wxPanel* new_panel = new wxPanel(this);
-    int y = UpdatePanel(new_panel);
-    wxButton* new_run_button = GetRunButton(new_panel, m_sub_definition, y);
-    new_panel->Show();
-    wxPanel* unused = m_main_panel;
-    m_main_panel = new_panel;
-    m_run_button = new_run_button;
-    unused->Destroy();
+    wxPanel* unused_panel = m_panel;
+    UpdatePanel();
 
-    Align(y);
+    unused_panel->Destroy();
+    Fit();
+
     Refresh();
 }
 
 // put components
-int MainFrame::UpdatePanel(wxPanel* panel) {
+void MainFrame::UpdatePanel() {
     std::string str = "Simple Command Runner";
     str = m_sub_definition["label"];
     std::cout << "[UpdatePanel] " << str.c_str() << std::endl;
@@ -312,11 +295,14 @@ int MainFrame::UpdatePanel(wxPanel* panel) {
         SetLabel("Simple Command Runner");
     }
 
-    int y = 10;
     if (m_sub_definition["components"].size() == 0) {
         m_sub_definition["components"] = std::vector<nlohmann::json>();
-        return y;
     }
+    wxBoxSizer* main_sizer = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer* comp_sizer = new wxBoxSizer(wxVERTICAL);
+    comp_sizer->SetMinSize(wxSize(200, 25));
+    m_panel = new wxPanel(this);
+
     std::vector<nlohmann::json> comp = m_sub_definition["components"];
     m_components.clear();
     m_components.shrink_to_fit();
@@ -324,9 +310,8 @@ int MainFrame::UpdatePanel(wxPanel* panel) {
 
     // put components
     for (nlohmann::json c : comp) {
-        new_comp = Component::PutComponent(panel, c, y);
+        new_comp = Component::PutComponent(m_panel, comp_sizer, c);
         if (new_comp != nullptr) {
-            y += new_comp->GetHeight();
             if (m_config.contains(new_comp->GetLabel())) {
                 new_comp->SetConfig(m_config[new_comp->GetLabel()]);
             }
@@ -334,7 +319,12 @@ int MainFrame::UpdatePanel(wxPanel* panel) {
         }
     }
 
-    return y;
+    m_run_button = GetRunButton(m_panel, m_sub_definition);
+    comp_sizer->Add(m_run_button, 0, wxFIXED_MINSIZE | wxALIGN_CENTER);
+    main_sizer->Add(comp_sizer, 0, wxFIXED_MINSIZE | wxALL, 15);
+
+    m_panel->Show();
+    m_panel->SetSizerAndFit(main_sizer);
 }
 
 void MainFrame::OnClose(wxCloseEvent& event) {

@@ -1,3 +1,7 @@
+ver0.2.1
+- Use wxBoxSizer to align components automatically.
+- Fixed a bug that non-ascii characters won't be showed up as "empty_message."
+
 ver0.2.0
 - Made "button" key optional
 - Fixed a bug that text boxes can't handle their input values properly.
