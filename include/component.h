@@ -8,10 +8,6 @@
 #include "json_utils.h"
 #include "custom_wx_obj.h"
 
-#ifdef _WIN32
-#include <codecvt>  // char code converter for Windows system
-#endif
-
 // Base class for GUI components (file picker, combo box, etc.)
 class Component {
  protected:

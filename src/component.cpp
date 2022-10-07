@@ -16,19 +16,6 @@ wxString Component::GetString() {
     return str;
 }
 
-#ifdef _WIN32
-// utf-16 to utf-8 for Windows
-std::string WStringToUTF8(const std::wstring& str) {
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-    return conv.to_bytes(str);
-}
-
-std::wstring UTF8ToWString(const std::string& str) {
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
-    return myconv.from_bytes(str);
-}
-#endif
-
 nlohmann::json Component::GetConfig() {
     return {};
 }
@@ -87,12 +74,7 @@ StringComponentBase::StringComponentBase(wxWindow* panel, wxBoxSizer* sizer, nlo
 
 nlohmann::json StringComponentBase::GetConfig() {
     nlohmann::json config = {};
-#ifdef _WIN32
-    // utf-16 to utf-8 for Windows
-    config["str"] = WStringToUTF8(std::wstring(GetRawString()));
-#else
-    config["str"] = GetRawString();
-#endif
+    config["str"] = GetRawString().ToUTF8();
     return config;
 }
 
@@ -111,7 +93,7 @@ FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
                                                     value, "", ext, empty_message,
                                                     wxDefaultPosition, wxSize(350, 25),
                                                     wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
-    
+
     sizer->Add(picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
     picker->DragAcceptFiles(true);
     m_widget = picker;
@@ -248,9 +230,8 @@ CheckArray::CheckArray(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
             wxString::FromUTF8(j["label"])),
             0, DEFAULT_SIZER_FLAG, 3);
     std::vector<wxCheckBox*>* checks = new std::vector<wxCheckBox*>();
-    wxCheckBox* check;
     for (int i = 0; i < j["items"].size(); i++) {
-        check = new wxCheckBox(panel, wxID_ANY,
+        wxCheckBox* check = new wxCheckBox(panel, wxID_ANY,
                            wxString::FromUTF8(j["items"][i]));
         checks->push_back(check);
         sizer->Add(check, 0, DEFAULT_SIZER_FLAG, 3 + 10 * (i + 1 == j["items"].size()));

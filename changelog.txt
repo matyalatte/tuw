@@ -1,6 +1,7 @@
 ver0.2.1
 - Use wxBoxSizer to align components automatically.
 - Fixed a bug that non-ascii characters won't be showed up as "empty_message."
+- Fixed an error when executing non-ascii commands on Unix systems.
 - Fixed an error when saving non-ascii characters for text box.
 - Added "default" option to all components
 

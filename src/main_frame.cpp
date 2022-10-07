@@ -222,9 +222,11 @@ std::array<std::string, 2> MainFrame::RunCommand() {
     wxString text = m_run_button->GetLabel();
     m_run_button->SetLabel("Processing...");
     // run command
-    std::cout << "[RunCommand] Command: " << cmd << std::endl;
 #ifdef _WIN32
+    std::cout << "[RunCommand] Command: " << cmd << std::endl;
     cmd = "cmd.exe /c " + cmd;
+#else
+    std::cout << "[RunCommand] Command: " << cmd.ToUTF8() << std::endl;
 #endif
     std::array<std::string, 2> msg = Exec(cmd);
     m_run_button->SetLabel(text);
