@@ -42,6 +42,13 @@ TEST(JsonCheckTest, checkGUISuccess) {
     json_utils::CheckDefinition(test_json);
 }
 
+TEST(JsonCheckTest, checkGUISuccess2) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["gui"][0]["components"][5]["item"] = test_json["gui"][0]["components"][5]["items"];
+    test_json["gui"][0]["components"][5].erase("items");
+    json_utils::CheckDefinition(test_json);
+}
+
 void CheckGUIError(nlohmann::json test_json, const char* expected) {
     try {
         json_utils::CheckDefinition(test_json);
@@ -60,27 +67,40 @@ TEST(JsonCheckTest, checkGUIFail) {
 
 TEST(JsonCheckTest, checkGUIFail2) {
     nlohmann::json test_json = GetTestJson();
-    test_json["gui"] = 1;
-    CheckGUIError(test_json, "['gui'] should be an array.");
+    test_json["gui"][0]["components"][5].erase("items");
+    CheckGUIError(test_json, "['options']['items'] not found.");
 }
 
 TEST(JsonCheckTest, checkGUIFail3) {
     nlohmann::json test_json = GetTestJson();
-    test_json["gui"][0]["components"][0]["label"] = 1;
-    CheckGUIError(test_json, "['components']['label'] should be a string.");
+    test_json["gui"] = 1;
+    CheckGUIError(test_json, "['gui'] should be an array.");
 }
 
 TEST(JsonCheckTest, checkGUIFail4) {
     nlohmann::json test_json = GetTestJson();
-    test_json["gui"][1]["components"][4]["values"] = nlohmann::json::array();
-    CheckGUIError(test_json,
-        "['Combo box']['values'] and ['Combo box']['items'] should have the same size.");
+    test_json["gui"][0]["components"][0]["label"] = 1;
+    CheckGUIError(test_json, "['components']['label'] should be a string.");
 }
 
 TEST(JsonCheckTest, checkGUIFail5) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][2]["show_last_line"] = "test";
     CheckGUIError(test_json, "['show_last_line'] should be a boolean.");
+}
+
+TEST(JsonCheckTest, checkGUIFail6) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["gui"][1]["components"][4]["values"] = nlohmann::json::array();
+    CheckGUIError(test_json,
+        "['Combo box']['values'] and ['Combo box']['items'] should have the same size.");
+}
+
+TEST(JsonCheckTest, checkGUIFail7) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["gui"][0]["components"][5]["default"] = nlohmann::json::array();
+    CheckGUIError(test_json,
+        "['options']['default'] and ['options']['items'] should have the same size.");
 }
 
 TEST(JsonCheckTest, checkHelpSuccess) {

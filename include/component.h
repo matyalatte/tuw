@@ -58,7 +58,6 @@ class StaticText : public Component {
 class StringComponentBase : public Component {
  public:
     StringComponentBase(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
-    ~StringComponentBase() {}
     nlohmann::json GetConfig() override;
 };
 

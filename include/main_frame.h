@@ -19,7 +19,6 @@ class LogFrame : public wxFrame {
     wxStreamToTextRedirector* m_log_redirector;
  public:
     explicit LogFrame(wxString exepath);
-    virtual ~LogFrame() {}
     void OnClose(wxCloseEvent& event);
 };
 #endif
@@ -52,7 +51,6 @@ class MainFrame : public wxFrame {
  public:
     MainFrame();
     explicit MainFrame(nlohmann::json definition, nlohmann::json config = nlohmann::json({}));
-    virtual ~MainFrame() {}
 
     void OnClose(wxCloseEvent& event);
     void OpenURL(wxCommandEvent& event);

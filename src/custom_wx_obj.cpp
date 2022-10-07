@@ -67,27 +67,6 @@ wxString CustomTextCtrl::GetActualValue() {
     return m_actual_value;
 }
 
-// Drop target for path picker
-template <typename T>
-DropFilePath<T>::DropFilePath(T* frame, CustomTextCtrl* text_ctrl) : wxFileDropTarget() {
-    m_frame = frame;
-    m_text_ctrl = text_ctrl;
-}
-
-template <typename T>
-DropFilePath<T>::~DropFilePath() {
-}
-
-template <typename T>
-bool DropFilePath<T>::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) {
-    m_text_ctrl->UpdateText(filenames[0]);
-    return 1;
-}
-
-CustomPickerBase::CustomPickerBase(): wxFileDirPickerCtrlBase() {
-    m_custom_text_ctrl = nullptr;
-}
-
 bool CustomPickerBase::CustomCreatePickerBase(wxWindow* parent,
     wxWindowID id,
     const wxString& text,

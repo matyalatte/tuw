@@ -22,7 +22,6 @@ class CustomTextCtrl : public wxTextCtrl {
         long style = 0,
         const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxTextCtrlNameStr);
-    virtual ~CustomTextCtrl() {}
 
     void OnSetFocusEmptyMessage(wxFocusEvent& event);
     void OnKillFocusEmptyMessage(wxFocusEvent& event);
@@ -41,9 +40,14 @@ class DropFilePath : public wxFileDropTarget{
     CustomTextCtrl* m_text_ctrl;
 
  public:
-    DropFilePath(T* frame, CustomTextCtrl* text_ctrl);
-    ~DropFilePath();
-    virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) wxOVERRIDE;
+    DropFilePath(T* frame, CustomTextCtrl* text_ctrl): wxFileDropTarget() {
+        m_frame = frame;
+        m_text_ctrl = text_ctrl;
+    }
+    bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames){
+        m_text_ctrl->UpdateText(filenames[0]);
+        return 1;
+    }
 };
 
 // Customized wxFileDirPickerCtrlBase
@@ -53,8 +57,9 @@ class CustomPickerBase : public wxFileDirPickerCtrlBase {
     CustomTextCtrl* m_custom_text_ctrl;
 
  public:
-    CustomPickerBase();
-    virtual ~CustomPickerBase() {}
+    CustomPickerBase() : wxFileDirPickerCtrlBase() {
+        m_custom_text_ctrl = nullptr;
+    }
 
     // Customized wxPickerBase::CreateBase
     bool CustomCreatePickerBase(wxWindow* parent,
@@ -98,7 +103,6 @@ class CustomFilePicker : public CustomPickerBase {
         long style = wxFLP_DEFAULT_STYLE,
         const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxFilePickerCtrlNameStr);
-    virtual ~CustomFilePicker() {}
 
     wxString GetTextCtrlValue() const wxOVERRIDE;
     wxString GetFullPath() wxOVERRIDE;
@@ -153,7 +157,6 @@ class CustomDirPicker : public CustomPickerBase {
         long style = wxFLP_DEFAULT_STYLE,
         const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxFilePickerCtrlNameStr);
-    virtual ~CustomDirPicker() {}
 
     wxString GetTextCtrlValue() const wxOVERRIDE;
     wxString GetFullPath() wxOVERRIDE;

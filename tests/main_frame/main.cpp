@@ -109,10 +109,33 @@ TEST(MainFrameTest, RunCommandFail2) {
     EXPECT_STRNE("", msg[1].c_str());
 }
 
+TEST(MainFrameTest, ClickRunButton) {
+    nlohmann::json test_json = GetTestJson();
+    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    wxCommandEvent event = wxCommandEvent();
+    main_frame->ClickButton(event);
+}
+
+TEST(MainFrameTest, UpdateFrame) {
+    nlohmann::json test_json = GetTestJson();
+    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    wxCommandEvent event = wxCommandEvent(wxEVT_NULL, wxID_HIGHEST + 2);
+    main_frame->UpdateFrame(event);
+}
+
+TEST(MainFrameTest, ClickRunButtonShowLast) {
+    nlohmann::json test_json = GetTestJson();
+    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    wxCommandEvent event = wxCommandEvent(wxEVT_NULL, wxID_HIGHEST + 3);
+    main_frame->UpdateFrame(event);
+    main_frame->ClickButton(event);
+}
+
 TEST(MainFrameTest, DeleteFrame) {
     nlohmann::json test_json = GetTestJson();
     MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
-    main_frame->Destroy();
+    wxCloseEvent event = wxCloseEvent();
+    main_frame->OnClose(event);
 }
 
 void TestConfig(nlohmann::json config) {
