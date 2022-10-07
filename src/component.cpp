@@ -84,8 +84,8 @@ FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     } else {
         ext = "any files (*)|*";
     }
-    std::string value = j.value("default", "");
-    std::string empty_message = wxString::FromUTF8(j.value("empty_message", ""));
+    wxString value = wxString::FromUTF8(j.value("default", ""));
+    wxString empty_message = wxString::FromUTF8(j.value("empty_message", ""));
     CustomFilePicker* picker = new CustomFilePicker(panel, wxID_ANY,
                                                     value, "", ext, empty_message,
                                                     wxDefaultPosition, wxSize(350, 25),
@@ -124,8 +124,8 @@ nlohmann::json FilePicker::GetConfig() {
 // Dir Picker
 DirPicker::DirPicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     : Component(j, HAS_STRING) {
-    std::string value = j.value("default", "");
-    std::string empty_message = wxString::FromUTF8(j.value("empty_message", ""));
+    wxString value = wxString::FromUTF8(j.value("default", ""));
+    wxString empty_message = wxString::FromUTF8(j.value("empty_message", ""));
     CustomDirPicker* picker = new CustomDirPicker(panel, wxID_ANY,
                                                   value, "", empty_message,
                                                   wxDefaultPosition, wxSize(350, 25),
@@ -313,10 +313,10 @@ TextBox::TextBox(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
         new wxStaticText(panel, wxID_ANY,
             wxString::FromUTF8(j["label"])),
             0, DEFAULT_SIZER_FLAG, 3);
-    std::string value = j.value("default", "");
-    std::string emptyMessage = wxString::FromUTF8(j.value("empty_message", ""));
+    wxString value = wxString::FromUTF8(j.value("default", ""));
+    wxString empty_message = wxString::FromUTF8(j.value("empty_message", ""));
     CustomTextCtrl* textbox = new CustomTextCtrl(panel, wxID_ANY,
-        value, emptyMessage,
+        value, empty_message,
         wxDefaultPosition, wxSize(350, 23));
     sizer->Add(textbox, 0, wxALIGN_LEFT | wxBOTTOM, 13);
     m_widget = textbox;

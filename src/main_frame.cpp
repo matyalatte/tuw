@@ -57,22 +57,9 @@ MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
 #ifndef _WIN32
     CalcExePath();
 #endif
-    if (m_definition == nullptr) {
-        m_definition = nlohmann::json({});
-    }
     this->m_definition = definition;
     this->m_config = config;
     CreateFrame();
-}
-
-wxButton* GetRunButton(wxWindow* panel, nlohmann::json sub_definition) {
-    std::string button;
-    if (sub_definition.contains("button")) {
-        button = wxString::FromUTF8(sub_definition["button"]);
-    } else {
-        button = "Run";
-    }
-    return new wxButton(panel, wxID_EXECUTE, button);
 }
 
 void MainFrame::CreateFrame() {
@@ -113,18 +100,23 @@ void MainFrame::CreateFrame() {
     }
     SetMenuBar(menu_bar);
 
-    // set close event
+    // set events
     Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
     Bind(wxEVT_MENU, [this](wxCommandEvent&) { Close(true); }, wxID_EXIT);
+    Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED,
+        wxCommandEventHandler(MainFrame::ClickButton));
 
     // put components
     m_components = std::vector<Component*>();
     UpdatePanel();
-
-    Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED,
-        wxCommandEventHandler(MainFrame::ClickButton));
-
     Fit();
+
+#ifdef __linux__
+    // Idk why, but the sizer will ignore the last component on Ubuntu
+    int button_height;
+    m_run_button->GetSize(nullptr, &button_height);
+    SetSize(GetSize() + wxSize(0, button_height));
+#endif
 
     SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
@@ -319,12 +311,19 @@ void MainFrame::UpdatePanel() {
         }
     }
 
-    m_run_button = GetRunButton(m_panel, m_sub_definition);
+    // put a button
+    wxString button;
+    if (m_sub_definition.contains("button")) {
+        button = wxString::FromUTF8(m_sub_definition["button"]);
+    } else {
+        button = "Run";
+    }
+    m_run_button = new wxButton(m_panel, wxID_EXECUTE, button);
     comp_sizer->Add(m_run_button, 0, wxFIXED_MINSIZE | wxALIGN_CENTER);
-    main_sizer->Add(comp_sizer, 0, wxFIXED_MINSIZE | wxALL, 15);
 
-    m_panel->Show();
+    main_sizer->Add(comp_sizer, 0, wxALIGN_CENTER | wxALL, 15);
     m_panel->SetSizerAndFit(main_sizer);
+    m_panel->Show();
 }
 
 void MainFrame::OnClose(wxCloseEvent& event) {
