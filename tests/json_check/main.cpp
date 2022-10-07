@@ -74,7 +74,7 @@ TEST(JsonCheckTest, checkGUIFail4) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][1]["components"][4]["values"] = nlohmann::json::array();
     CheckGUIError(test_json,
-        "['combo box']['values'] and ['combo box']['items'] should have the same size.");
+        "['Combo box']['values'] and ['Combo box']['items'] should have the same size.");
 }
 
 TEST(JsonCheckTest, checkGUIFail5) {

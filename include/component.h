@@ -59,19 +59,24 @@ class StaticText : public Component {
     StaticText(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
 };
 
-class FilePicker : public Component {
+class StringComponentBase : public Component {
+ public:
+    StringComponentBase(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
+    ~StringComponentBase() {}
+    nlohmann::json GetConfig() override;
+};
+
+class FilePicker : public StringComponentBase {
  public:
     wxString GetRawString() override;
     FilePicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
-    nlohmann::json GetConfig() override;
     void SetConfig(nlohmann::json config) override;
 };
 
-class DirPicker : public Component {
+class DirPicker : public StringComponentBase {
  public:
     wxString GetRawString() override;
     DirPicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
-    nlohmann::json GetConfig() override;
     void SetConfig(nlohmann::json config) override;
 };
 
@@ -101,10 +106,9 @@ class CheckArray : public Component, MultipleValuesContainer {
     void SetConfig(nlohmann::json config) override;
 };
 
-class TextBox : public Component {
+class TextBox : public StringComponentBase {
  public:
     wxString GetRawString() override;
     TextBox(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
-    nlohmann::json GetConfig() override;
     void SetConfig(nlohmann::json config) override;
 };

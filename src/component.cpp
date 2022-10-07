@@ -68,6 +68,7 @@ const bool HAS_STRING = true;
 const bool NOT_STRING = false;
 const int DEFAULT_SIZER_FLAG = wxFIXED_MINSIZE | wxALIGN_LEFT | wxBOTTOM;
 
+// Static Text
 StaticText::StaticText(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     : Component(j, NOT_STRING) {
     sizer->Add(
@@ -76,8 +77,28 @@ StaticText::StaticText(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
             0, DEFAULT_SIZER_FLAG , 13);
 }
 
-FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
+// Base Class for strings
+StringComponentBase::StringComponentBase(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     : Component(j, HAS_STRING) {
+    sizer->Add(
+        new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"])),
+        0, DEFAULT_SIZER_FLAG, 3);
+}
+
+nlohmann::json StringComponentBase::GetConfig() {
+    nlohmann::json config = {};
+#ifdef _WIN32
+    // utf-16 to utf-8 for Windows
+    config["str"] = WStringToUTF8(std::wstring(GetRawString()));
+#else
+    config["str"] = GetRawString();
+#endif
+    return config;
+}
+
+// File Picker
+FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
+    : StringComponentBase(panel, sizer, j) {
     wxString ext;
     if (j.contains("extension")) {
         ext = wxString::FromUTF8(j["extension"]);
@@ -90,9 +111,7 @@ FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
                                                     value, "", ext, empty_message,
                                                     wxDefaultPosition, wxSize(350, 25),
                                                     wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
-    sizer->Add(
-        new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"])),
-        0, DEFAULT_SIZER_FLAG, 3);
+    
     sizer->Add(picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
     picker->DragAcceptFiles(true);
     m_widget = picker;
@@ -110,30 +129,16 @@ void FilePicker::SetConfig(nlohmann::json config) {
     }
 }
 
-nlohmann::json FilePicker::GetConfig() {
-    nlohmann::json config = {};
-#ifdef _WIN32
-    // utf-16 to utf-8 for Windows
-    config["str"] = WStringToUTF8(std::wstring(GetRawString()));
-#else
-    config["str"] = GetRawString();
-#endif
-    return config;
-}
-
 // Dir Picker
 DirPicker::DirPicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
-    : Component(j, HAS_STRING) {
+    : StringComponentBase(panel, sizer, j) {
     wxString value = wxString::FromUTF8(j.value("default", ""));
     wxString empty_message = wxString::FromUTF8(j.value("empty_message", ""));
     CustomDirPicker* picker = new CustomDirPicker(panel, wxID_ANY,
                                                   value, "", empty_message,
                                                   wxDefaultPosition, wxSize(350, 25),
                                                   wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
-    sizer->Add(
-        new wxStaticText(panel, wxID_ANY,
-            wxString::FromUTF8(j["label"])),
-            0, DEFAULT_SIZER_FLAG, 3);
+
     sizer->Add(picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
     picker->DragAcceptFiles(true);
     m_widget = picker;
@@ -149,17 +154,6 @@ void DirPicker::SetConfig(nlohmann::json config) {
         reinterpret_cast<CustomDirPicker*>(m_widget)->SetPath(str);
         reinterpret_cast<CustomDirPicker*>(m_widget)->SetInitialDirectory(str);
     }
-}
-
-nlohmann::json DirPicker::GetConfig() {
-    nlohmann::json config = {};
-#ifdef _WIN32
-    // utf-16 to utf-8 for Windows
-    config["str"] = WStringToUTF8(std::wstring(GetRawString()));
-#else
-    config["str"] = GetRawString();
-#endif
-    return config;
 }
 
 // Choice
@@ -308,16 +302,13 @@ nlohmann::json CheckArray::GetConfig() {
 
 // TextBox
 TextBox::TextBox(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
-    : Component(j, HAS_STRING) {
-    sizer->Add(
-        new wxStaticText(panel, wxID_ANY,
-            wxString::FromUTF8(j["label"])),
-            0, DEFAULT_SIZER_FLAG, 3);
+    : StringComponentBase(panel, sizer, j) {
     wxString value = wxString::FromUTF8(j.value("default", ""));
     wxString empty_message = wxString::FromUTF8(j.value("empty_message", ""));
     CustomTextCtrl* textbox = new CustomTextCtrl(panel, wxID_ANY,
         value, empty_message,
         wxDefaultPosition, wxSize(350, 23));
+
     sizer->Add(textbox, 0, wxALIGN_LEFT | wxBOTTOM, 13);
     m_widget = textbox;
 }
@@ -328,12 +319,7 @@ wxString TextBox::GetRawString() {
 
 void TextBox::SetConfig(nlohmann::json config) {
     if (config.contains("str") && config["str"].is_string()) {
-        reinterpret_cast<CustomTextCtrl*>(m_widget)->UpdateText(config["str"]);
+        wxString str = wxString::FromUTF8(config["str"]);
+        reinterpret_cast<CustomTextCtrl*>(m_widget)->UpdateText(str);
     }
-}
-
-nlohmann::json TextBox::GetConfig() {
-    nlohmann::json config = {};
-    config["str"] = (std::string)GetRawString();
-    return config;
 }

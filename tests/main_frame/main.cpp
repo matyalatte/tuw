@@ -7,7 +7,8 @@
 #include "main_frame.h"
 
 char const * json_file;
-char const * config_file;
+char const * config_ascii;
+char const * config_utf;
 
 // Hook to skip message dialogues
 class DialogSkipper : public wxModalDialogHook {
@@ -23,10 +24,11 @@ class DialogSkipper : public wxModalDialogHook {
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
-    assert(argc == 3);
+    assert(argc == 4);
 
     json_file = argv[1];
-    config_file = argv[2];
+    config_ascii = argv[2];
+    config_utf = argv[3];
 
     // Make dummy app
     wxApp* app = new wxApp();
@@ -113,11 +115,19 @@ TEST(MainFrameTest, DeleteFrame) {
     main_frame->Destroy();
 }
 
-TEST(MainFrameTest, LoadSaveConfig) {
+void TestConfig(nlohmann::json config) {
     nlohmann::json test_json = GetTestJson();
-    nlohmann::json test_config = json_utils::LoadJson(config_file);
+    nlohmann::json test_config = json_utils::LoadJson(config);
     MainFrame* main_frame = new MainFrame(nlohmann::json(test_json), nlohmann::json(test_config));
     main_frame->SaveConfig();
     nlohmann::json saved_config = json_utils::LoadJson("gui_config.json");
     EXPECT_EQ(test_config, saved_config);
+}
+
+TEST(MainFrameTest, LoadSaveConfigAscii) {
+    TestConfig(config_ascii);
+}
+
+TEST(MainFrameTest, LoadSaveConfigUTF) {
+    TestConfig(config_utf);
 }

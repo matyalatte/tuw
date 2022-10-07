@@ -1,10 +1,9 @@
 {
-    "All components with their required keys.": null,
     "Some file path": {
-        "str": "test.bin"
+        "str": "テスト"
     },
     "Some folder path": {
-        "str": "somefolder"
+        "str": "検証"
     },
     "checkbox": {
         "int": 0
@@ -24,6 +23,6 @@
         ]
     },
     "text box": {
-        "str": "testtesttest"
+        "str": "текстове поле"
     }
 }

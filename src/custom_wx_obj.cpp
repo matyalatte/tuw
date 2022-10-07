@@ -14,8 +14,7 @@ CustomTextCtrl::CustomTextCtrl(
     const wxSize& size,
     long style,
     const wxValidator& validator,
-    const wxString& name) :
-    wxTextCtrl(parent, id, value, pos, size, style, validator, name) {
+    const wxString& name) : wxTextCtrl(parent, id, value, pos, size, style, validator, name) {
     m_empty_message = empty_message;
     m_actual_value = value;
     ChangeValue(value);
@@ -108,7 +107,7 @@ bool CustomPickerBase::CustomCreatePickerBase(wxWindow* parent,
 
     m_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    m_custom_text_ctrl = new CustomTextCtrl(this, wxID_ANY, wxEmptyString,
+    m_custom_text_ctrl = new CustomTextCtrl(this, wxID_ANY, text,
         empty_message,
         wxDefaultPosition, wxDefaultSize,
         GetTextCtrlStyle(style));
@@ -210,7 +209,6 @@ CustomFilePicker::CustomFilePicker(
     long style,
     const wxValidator& validator,
     const wxString& name) {
-
     if (!CustomCreateBase(
         parent, id, path, message, wildcard, empty_message,
         pos, size, style, validator, name))
@@ -240,7 +238,6 @@ CustomDirPicker::CustomDirPicker(
     long style,
     const wxValidator& validator,
     const wxString& name) {
-
     if (!CustomCreateBase(
         parent, id, path, message, wxEmptyString, empty_message,
         pos, size, style, validator, name))
