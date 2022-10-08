@@ -1,5 +1,35 @@
 #include "exec.h"
 
+#ifdef __linux__
+// Console window for linux
+LogFrame::LogFrame(wxString exepath) : wxFrame(nullptr, wxID_ANY, exepath,
+    wxDefaultPosition, wxSize(600, 400),
+    wxSYSTEM_MENU |
+    wxRESIZE_BORDER |
+    wxMINIMIZE_BOX |
+    wxMAXIMIZE_BOX |
+    wxCAPTION |
+    wxCLIP_CHILDREN) {
+
+    m_log_box = new wxTextCtrl(this, wxID_ANY,
+        "", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+    m_log_box->SetBackgroundColour(*wxBLACK);
+    m_log_box->SetForegroundColour(*wxWHITE);
+    wxFont font = m_log_box->GetFont();
+    font.SetPointSize(font.GetPointSize() + 1);
+    m_log_box->SetFont(font);
+    m_log_redirector = new wxStreamToTextRedirector(m_log_box);
+    Centre();
+    wxPoint pos = GetPosition();
+    SetPosition(wxPoint(pos.x-300, pos.y));
+    Show();
+}
+
+void LogFrame::OnClose(wxCloseEvent& event) {
+    Destroy();
+}
+#endif
+
 class wxProcessExecute : public wxProcess {
  public:
     explicit wxProcessExecute(int flags) : wxProcess(flags) {}
@@ -51,7 +81,11 @@ std::string ReadStream(wxInputStream* stream, char* buf, size_t size) {
 }
 
 // run command and return error messages
-std::array<std::string, 2> Exec(const char* cmd) {
+#ifdef __linux__
+std::array<std::string, 2> Exec(LogFrame& ostream, wxString& cmd) {
+#else
+std::array<std::string, 2> Exec(std::ostream& ostream, wxString& cmd) {
+#endif
     // open process
     wxProcessExecute* process = wxProcessExecute::Open(cmd);
     if (!process) {
@@ -74,7 +108,7 @@ std::array<std::string, 2> Exec(const char* cmd) {
         istream->CanRead() || estream->CanRead()) {  // while process is running
         // print outputs
         str = ReadStream(istream, ibuf, size);
-        std::cout << str;
+        ostream << str;
         in_msg += str;
 
         // store error messages
@@ -84,6 +118,6 @@ std::array<std::string, 2> Exec(const char* cmd) {
     in_msg = LastLine(in_msg);
 
     // print and return error messages
-    std::cout << err_msg;
+    ostream << err_msg;
     return {in_msg, err_msg};
 }

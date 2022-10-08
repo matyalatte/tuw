@@ -1,3 +1,11 @@
+ver0.2.1
+- Introduced wxBoxSizer to align components automatically.
+- Added "default" option to all components.
+- Fixed a bug that non-ascii characters won't be shown up as "empty_message." (Windows)
+- Fixed a bug that LogFrame can't catch non-ascii characters from std::cout. (Linux)
+- Fixed an error when executing non-ascii commands. (Unix)
+- Fixed an error when saving non-ascii characters for text box.
+
 ver0.2.0
 - Made "button" key optional
 - Fixed a bug that text boxes can't handle their input values properly.

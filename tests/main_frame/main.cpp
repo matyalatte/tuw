@@ -7,7 +7,8 @@
 #include "main_frame.h"
 
 char const * json_file;
-char const * config_file;
+char const * config_ascii;
+char const * config_utf;
 
 // Hook to skip message dialogues
 class DialogSkipper : public wxModalDialogHook {
@@ -23,10 +24,11 @@ class DialogSkipper : public wxModalDialogHook {
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
-    assert(argc == 3);
+    assert(argc == 4);
 
     json_file = argv[1];
-    config_file = argv[2];
+    config_ascii = argv[2];
+    config_utf = argv[3];
 
     // Make dummy app
     wxApp* app = new wxApp();
@@ -107,17 +109,48 @@ TEST(MainFrameTest, RunCommandFail2) {
     EXPECT_STRNE("", msg[1].c_str());
 }
 
+TEST(MainFrameTest, ClickRunButton) {
+    nlohmann::json test_json = GetTestJson();
+    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    wxCommandEvent event = wxCommandEvent();
+    main_frame->ClickButton(event);
+}
+
+TEST(MainFrameTest, UpdateFrame) {
+    nlohmann::json test_json = GetTestJson();
+    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    wxCommandEvent event = wxCommandEvent(wxEVT_NULL, wxID_HIGHEST + 2);
+    main_frame->UpdateFrame(event);
+}
+
+TEST(MainFrameTest, ClickRunButtonShowLast) {
+    nlohmann::json test_json = GetTestJson();
+    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    wxCommandEvent event = wxCommandEvent(wxEVT_NULL, wxID_HIGHEST + 3);
+    main_frame->UpdateFrame(event);
+    main_frame->ClickButton(event);
+}
+
 TEST(MainFrameTest, DeleteFrame) {
     nlohmann::json test_json = GetTestJson();
     MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
-    main_frame->Destroy();
+    wxCloseEvent event = wxCloseEvent();
+    main_frame->OnClose(event);
 }
 
-TEST(MainFrameTest, LoadSaveConfig) {
+void TestConfig(nlohmann::json config) {
     nlohmann::json test_json = GetTestJson();
-    nlohmann::json test_config = json_utils::LoadJson(config_file);
+    nlohmann::json test_config = json_utils::LoadJson(config);
     MainFrame* main_frame = new MainFrame(nlohmann::json(test_json), nlohmann::json(test_config));
     main_frame->SaveConfig();
     nlohmann::json saved_config = json_utils::LoadJson("gui_config.json");
     EXPECT_EQ(test_config, saved_config);
+}
+
+TEST(MainFrameTest, LoadSaveConfigAscii) {
+    TestConfig(config_ascii);
+}
+
+TEST(MainFrameTest, LoadSaveConfigUTF) {
+    TestConfig(config_utf);
 }

@@ -57,7 +57,6 @@ TEST(CustomWxObjTest, ShowEmptyMessage) {
 }
 
 TEST(CustomWxObjTest, HideEmptyMessage) {
-    wxYield();  // idk why but this will fix errors on unix
     TestFrame* frame = new TestFrame();
     wxYield();
     frame->m_file_picker->GetTextCtrl()->SetFocus();

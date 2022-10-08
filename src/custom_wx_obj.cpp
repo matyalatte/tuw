@@ -14,8 +14,7 @@ CustomTextCtrl::CustomTextCtrl(
     const wxSize& size,
     long style,
     const wxValidator& validator,
-    const wxString& name) :
-    wxTextCtrl(parent, id, value, pos, size, style, validator, name) {
+    const wxString& name) : wxTextCtrl(parent, id, value, pos, size, style, validator, name) {
     m_empty_message = empty_message;
     m_actual_value = value;
     ChangeValue(value);
@@ -68,27 +67,6 @@ wxString CustomTextCtrl::GetActualValue() {
     return m_actual_value;
 }
 
-// Drop target for path picker
-template <typename T>
-DropFilePath<T>::DropFilePath(T* frame, CustomTextCtrl* text_ctrl) : wxFileDropTarget() {
-    m_frame = frame;
-    m_text_ctrl = text_ctrl;
-}
-
-template <typename T>
-DropFilePath<T>::~DropFilePath() {
-}
-
-template <typename T>
-bool DropFilePath<T>::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) {
-    m_text_ctrl->UpdateText(filenames[0]);
-    return 1;
-}
-
-CustomPickerBase::CustomPickerBase(): wxFileDirPickerCtrlBase() {
-    m_custom_text_ctrl = nullptr;
-}
-
 bool CustomPickerBase::CustomCreatePickerBase(wxWindow* parent,
     wxWindowID id,
     const wxString& text,
@@ -108,7 +86,7 @@ bool CustomPickerBase::CustomCreatePickerBase(wxWindow* parent,
 
     m_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    m_custom_text_ctrl = new CustomTextCtrl(this, wxID_ANY, wxEmptyString,
+    m_custom_text_ctrl = new CustomTextCtrl(this, wxID_ANY, text,
         empty_message,
         wxDefaultPosition, wxDefaultSize,
         GetTextCtrlStyle(style));
@@ -210,7 +188,6 @@ CustomFilePicker::CustomFilePicker(
     long style,
     const wxValidator& validator,
     const wxString& name) {
-
     if (!CustomCreateBase(
         parent, id, path, message, wildcard, empty_message,
         pos, size, style, validator, name))
@@ -240,7 +217,6 @@ CustomDirPicker::CustomDirPicker(
     long style,
     const wxValidator& validator,
     const wxString& name) {
-
     if (!CustomCreateBase(
         parent, id, path, message, wxEmptyString, empty_message,
         pos, size, style, validator, name))

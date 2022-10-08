@@ -8,23 +8,18 @@
 #include "json_utils.h"
 #include "custom_wx_obj.h"
 
-#ifdef _WIN32
-#include <codecvt>  // char code converter for Windows system
-#endif
-
 // Base class for GUI components (file picker, combo box, etc.)
 class Component {
  protected:
     void* m_widget;
 
  private:
-    int m_height;
     bool m_has_string;
     bool m_add_quotes;
     std::string m_label;
 
  public:
-    Component(nlohmann::json j, int height, bool has_string);
+    Component(nlohmann::json j, bool has_string);
     ~Component() {}
     virtual wxString GetRawString() { return "";}
     wxString GetString();
@@ -33,12 +28,9 @@ class Component {
     virtual void SetConfig(nlohmann::json config) {}
     virtual nlohmann::json GetConfig();
 
-    void SetHeight(int h);
-    int GetHeight();
-
     bool HasString();
 
-    static Component* PutComponent(wxPanel* panel, nlohmann::json j, int y);
+    static Component* PutComponent(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
 };
 
 // containers for Choice and CheckArray
@@ -60,29 +52,33 @@ std::wstring UTF8ToWString(const std::string& str);
 
 class StaticText : public Component {
  public:
-    StaticText(wxPanel* panel, nlohmann::json j, int y);
+    StaticText(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
 };
 
-class FilePicker : public Component {
+class StringComponentBase : public Component {
+ public:
+    StringComponentBase(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
+    nlohmann::json GetConfig() override;
+};
+
+class FilePicker : public StringComponentBase {
  public:
     wxString GetRawString() override;
-    FilePicker(wxPanel* panel, nlohmann::json j, int y);
-    nlohmann::json GetConfig() override;
+    FilePicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
     void SetConfig(nlohmann::json config) override;
 };
 
-class DirPicker : public Component {
+class DirPicker : public StringComponentBase {
  public:
     wxString GetRawString() override;
-    DirPicker(wxPanel* panel, nlohmann::json j, int y);
-    nlohmann::json GetConfig() override;
+    DirPicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
     void SetConfig(nlohmann::json config) override;
 };
 
 class Choice : public Component, MultipleValuesContainer {
  public:
     wxString GetRawString() override;
-    Choice(wxPanel* panel, nlohmann::json j, int y);
+    Choice(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
     nlohmann::json GetConfig() override;
     void SetConfig(nlohmann::json config) override;
 };
@@ -92,7 +88,7 @@ class CheckBox : public Component {
     std::string m_value;
  public:
     wxString GetRawString() override;
-    CheckBox(wxPanel* panel, nlohmann::json j, int y);
+    CheckBox(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
     nlohmann::json GetConfig() override;
     void SetConfig(nlohmann::json config) override;
 };
@@ -100,15 +96,14 @@ class CheckBox : public Component {
 class CheckArray : public Component, MultipleValuesContainer {
  public:
     wxString GetRawString() override;
-    CheckArray(wxPanel* panel, nlohmann::json j, int y);
+    CheckArray(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
     nlohmann::json GetConfig() override;
     void SetConfig(nlohmann::json config) override;
 };
 
-class TextBox : public Component {
+class TextBox : public StringComponentBase {
  public:
     wxString GetRawString() override;
-    TextBox(wxPanel* panel, nlohmann::json j, int y);
-    nlohmann::json GetConfig() override;
+    TextBox(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
     void SetConfig(nlohmann::json config) override;
 };

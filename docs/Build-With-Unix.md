@@ -25,13 +25,13 @@ The steps are as follows.
 
 1.  Open the Terminal.
 2.  Move to `./Simple-Command-Runner/shell_scripts`
-3.  Type `bush build_exe.sh`.
+3.  Type `bash build_exe.sh`.
 4.  An executable file `SimpleCommandRunner` will be generated in `./Simple-Command-Runner/Release`.
 
 ## Debug build
 
 If you want a debug build, you need to use `Debug` as an argument for shell scripts.  
-So, you should type `bash build_wxWidgets.sh Debug` and `bush build_exe.sh Debug` on the terminal.  
+So, you should type `bash build_wxWidgets.sh Debug` and `bash build_exe.sh Debug` on the terminal.  
 
 ## Test
 

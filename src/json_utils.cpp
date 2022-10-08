@@ -179,10 +179,10 @@ namespace json_utils {
                 CheckJsonType(c, "extention", JsonType::STRING, label, CAN_SKIP);
             } else if (type == "choice") {
                 CheckItemsValues(c);
-                CheckJsonType(c, "width", JsonType::NUMBER, label, CAN_SKIP);
                 CheckJsonType(c, "default", JsonType::NUMBER, label, CAN_SKIP);
             } else if (type == "check") {
                 CheckJsonType(c, "value", JsonType::STRING, label, CAN_SKIP);
+                CheckJsonType(c, "default", JsonType::BOOLEAN, label, CAN_SKIP);
             } else if (type == "checks" || type == "check_array") {
                 CheckItemsValues(c);
                 std::string key = "default";
@@ -191,7 +191,8 @@ namespace json_utils {
                     Raise(GetLabel(label, key) + " and " +
                         GetLabel(label, "items") + " should have the same size.");
                 }
-            } else if (type == "text" || type == "text_box") {
+            }
+            if (type == "text" || type == "text_box" || type == "file" || type == "folder") {
                 CheckJsonType(c, "default", JsonType::STRING, label, CAN_SKIP);
             }
             CheckJsonType(c, "add_quotes", JsonType::BOOLEAN, label, CAN_SKIP);

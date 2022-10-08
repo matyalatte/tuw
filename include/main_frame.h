@@ -12,40 +12,35 @@
 #include <wx/stdpaths.h>
 #endif
 
-#ifdef __linux__
-class LogFrame : public wxFrame {
- private:
-    wxTextCtrl* m_log_box;
-    wxStreamToTextRedirector* m_log_redirector;
- public:
-    explicit LogFrame(wxString exepath);
-    virtual ~LogFrame() {}
-    void OnClose(wxCloseEvent& event);
-};
-#endif
-
 // Main window
 class MainFrame : public wxFrame {
  private:
     nlohmann::json m_definition;
     nlohmann::json m_sub_definition;
     nlohmann::json m_config;
+
 #ifdef __linux__
+    // Linux needs a window to show outputs
     LogFrame* m_log_frame;
+    LogFrame* m_ostream;
+#else
+    std::ostream* m_ostream;
 #endif
+
 #ifndef _WIN32
+    // Unix systems need to get current dir to read json files.
     wxString m_exe_path;
     void CalcExePath();
 #endif
+
     std::vector<Component*> m_components;
-    wxPanel* m_main_panel;
+    wxPanel* m_panel;
     wxButton* m_run_button;
 
     void CreateFrame();
     void CheckDefinition();
-    int UpdatePanel(wxPanel* panel);
+    void UpdatePanel();
     void UpdateConfig();
-    void Align(int y);
     void ShowErrorDialog(wxString msg);
     void ShowSuccessDialog(wxString msg);
     void JsonLoadFailed(std::string msg);
@@ -53,7 +48,6 @@ class MainFrame : public wxFrame {
  public:
     MainFrame();
     explicit MainFrame(nlohmann::json definition, nlohmann::json config = nlohmann::json({}));
-    virtual ~MainFrame() {}
 
     void OnClose(wxCloseEvent& event);
     void OpenURL(wxCommandEvent& event);
