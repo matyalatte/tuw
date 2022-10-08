@@ -2,36 +2,6 @@
 
 const char* VERSION = "0.2.1";
 
-#ifdef __linux__
-// Console window for linux
-LogFrame::LogFrame(wxString exepath) : wxFrame(nullptr, wxID_ANY, exepath,
-    wxDefaultPosition, wxSize(600, 400),
-    wxSYSTEM_MENU |
-    wxRESIZE_BORDER |
-    wxMINIMIZE_BOX |
-    wxMAXIMIZE_BOX |
-    wxCAPTION |
-    wxCLIP_CHILDREN) {
-
-    m_log_box = new wxTextCtrl(this, wxID_ANY,
-        "", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-    m_log_box->SetBackgroundColour(*wxBLACK);
-    m_log_box->SetForegroundColour(*wxWHITE);
-    wxFont font = m_log_box->GetFont();
-    font.SetPointSize(font.GetPointSize() + 1);
-    m_log_box->SetFont(font);
-    m_log_redirector = new wxStreamToTextRedirector(m_log_box);
-    Centre();
-    wxPoint pos = GetPosition();
-    SetPosition(wxPoint(pos.x-300, pos.y));
-    Show();
-}
-
-void LogFrame::OnClose(wxCloseEvent& event) {
-    Destroy();
-}
-#endif
-
 #ifndef _WIN32
 void MainFrame::CalcExePath() {
     wxStandardPaths& path = wxStandardPaths::Get();
@@ -65,8 +35,11 @@ MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
 void MainFrame::CreateFrame() {
 #ifdef __linux__
     m_log_frame = new LogFrame(m_exe_path);
+    m_ostream = m_log_frame;
+#else
+    m_ostream = &std::cout;
 #endif
-    std::cout << "Simple Command Runner v" << VERSION << " by matyalatte" << std::endl;
+    *m_ostream << "Simple Command Runner v" << VERSION << " by matyalatte" << std::endl;
 
     CheckDefinition();
 
@@ -122,7 +95,7 @@ void MainFrame::CreateFrame() {
 }
 
 void MainFrame::JsonLoadFailed(std::string msg) {
-    std::cout << "[LoadDefinition] " << msg << std::endl;
+    *m_ostream << "[LoadDefinition] " << msg << std::endl;
     ShowErrorDialog(msg);
     m_sub_definition = json_utils::GetDefaultDefinition();
     m_definition["gui"] = nlohmann::json::array({ m_sub_definition });
@@ -146,7 +119,7 @@ void MainFrame::CheckDefinition() {
         }
         catch(std::exception& e) {
             msg = "Fialed to load help URLs (" + std::string(e.what()) + ")";
-            std::cout << "[LoadDefinition] " << msg << std::endl;
+            *m_ostream << "[LoadDefinition] " << msg << std::endl;
             m_definition.erase("help");
         }
     }
@@ -163,7 +136,7 @@ void MainFrame::CheckDefinition() {
 
     m_sub_definition = m_definition["gui"][0];
 
-    std::cout << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
+    *m_ostream << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
 }
 
 void MainFrame::UpdateConfig() {
@@ -178,9 +151,9 @@ void MainFrame::SaveConfig() {
     UpdateConfig();
     bool saved = json_utils::SaveJson(m_config, "gui_config.json");
     if (saved) {
-        std::cout << "[SaveConfig] Saved gui_config.json" << std::endl;
+        *m_ostream << "[SaveConfig] Saved gui_config.json" << std::endl;
     } else {
-        std::cout << "[SaveConfig] Failed to write gui_config.json" << std::endl;
+        *m_ostream << "[SaveConfig] Failed to write gui_config.json" << std::endl;
     }
 }
 
@@ -206,7 +179,7 @@ std::array<std::string, 2> MainFrame::RunCommand() {
     for (Component* c :  m_components) {
         if (c->HasString()) {
             if (cmd_ary.size() <= i) {
-                std::cout << "[RunCommand]: Json format error (Can not make command)" << std::endl;
+                *m_ostream << "[RunCommand]: Json format error (Can not make command)" << std::endl;
                 return {"", "Json format error(Can not make command)"};
             }
             cmd += cmd_ary[i] + c->GetString();
@@ -222,13 +195,11 @@ std::array<std::string, 2> MainFrame::RunCommand() {
     wxString text = m_run_button->GetLabel();
     m_run_button->SetLabel("Processing...");
     // run command
+    *m_ostream << "[RunCommand] Command: " << cmd << std::endl;
 #ifdef _WIN32
-    std::cout << "[RunCommand] Command: " << cmd << std::endl;
     cmd = "cmd.exe /c " + cmd;
-#else
-    std::cout << "[RunCommand] Command: " << cmd.ToUTF8() << std::endl;
 #endif
-    std::array<std::string, 2> msg = Exec(cmd);
+    std::array<std::string, 2> msg = Exec(*m_ostream, cmd);
     m_run_button->SetLabel(text);
     return msg;
 }
@@ -242,7 +213,7 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
 
     // show result
     if (msg[1] != "") {  // if error
-        std::cout << "[RunCommand] Failed to execute commands." << std::endl;
+        *m_ostream << "[RunCommand] Failed to execute commands." << std::endl;
         ShowErrorDialog(msg[1]);
     } else {  // if success
         if (m_sub_definition.contains("show_last_line") &&
@@ -257,10 +228,10 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
 void MainFrame::OpenURL(wxCommandEvent& event) {
     wxString url = wxString::FromUTF8(m_definition["help"][event.GetId()
         - 1 - wxID_HIGHEST - m_definition["gui"].size()]["url"]);
-    std::cout << "[OpenURL] " << url << std::endl;
+    *m_ostream << "[OpenURL] " << url << std::endl;
     bool success = wxLaunchDefaultBrowser(url);
     if (!success) {
-        std::cout << "[OpenURL] Failed to open URL by an unexpected error." << std::endl;
+        *m_ostream << "[OpenURL] Failed to open URL by an unexpected error." << std::endl;
     }
 }
 
@@ -282,7 +253,7 @@ void MainFrame::UpdateFrame(wxCommandEvent& event) {
 void MainFrame::UpdatePanel() {
     std::string str = "Simple Command Runner";
     str = m_sub_definition["label"];
-    std::cout << "[UpdatePanel] " << str.c_str() << std::endl;
+    *m_ostream << "[UpdatePanel] " << str.c_str() << std::endl;
     if (m_sub_definition.contains("window_name")) {
         SetLabel(wxString::FromUTF8(m_sub_definition["window_name"]));
     } else {
