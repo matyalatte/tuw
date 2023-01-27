@@ -1,6 +1,6 @@
 #!/bin/bash
-#Builds an executable file with cmake.
-#SimpleCommandRunner will be generated in ../build
+# Builds an executable file with cmake.
+# SimpleCommandRunner will be generated in ../build
 
 if [ "$1" = "Debug" ];
     then build_type="Debug";

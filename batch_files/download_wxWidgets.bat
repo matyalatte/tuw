@@ -1,4 +1,5 @@
 @echo off
+
 REM Downloads wxWidget.
 REM Run it as admin. Or fail to install.
 

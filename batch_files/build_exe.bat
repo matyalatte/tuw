@@ -1,10 +1,7 @@
 @echo off
 
-REM Builds SimpleCommandRunner with cmake.
+REM Builds SimpleCommandRunner with CMake and Visual Studio.
 REM SimpleCommandRunner.exe will be generated in Simple-Command-Runner/%BUILD_TYPE%/Release
-
-REM You need Visual Studio to use this batch file.
-REM Run it with "x64 Ntive Tools Command Prompt for VS 2022". Or fail to build.
 
 set /p WX_VERSION=< %~dp0\..\WX_VERSION.txt
 set VS_VERSION=Visual Studio 17 2022

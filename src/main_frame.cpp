@@ -143,7 +143,7 @@ void MainFrame::UpdateConfig() {
     for (Component *c : m_components) {
         nlohmann::json comp_config = c->GetConfig();
         if (comp_config.is_null()) continue;
-        m_config[c->GetLabel()] = comp_config;
+        m_config[c->GetID()] = comp_config;
     }
 }
 
@@ -171,30 +171,56 @@ void MainFrame::ShowSuccessDialog(wxString msg) {
     dialog->Destroy();
 }
 
-std::array<std::string, 2> MainFrame::RunCommand() {
-    // make command string
+// Make command string
+wxString MainFrame::GetCommand() {
     std::vector<std::string> cmd_ary = m_sub_definition["command"];
-    wxString cmd = "";
-    int i = 0;
-    for (Component* c :  m_components) {
-        if (c->HasString()) {
-            if (cmd_ary.size() <= i) {
-                *m_ostream << "[RunCommand]: Json format error (Can not make command)" << std::endl;
-                return {"", "Json format error(Can not make command)"};
+    std::vector<std::string> cmd_ids = m_sub_definition["command_ids"];
+    std::vector<std::string> comp_ids = m_sub_definition["component_ids"];
+
+    std::vector<wxString> comp_strings = std::vector<wxString>(m_components.size());
+    for (int i = 0; i < m_components.size(); i++) {
+        comp_strings[i] = m_components[i]->GetString();
+    }
+
+    wxString cmd = wxString::FromUTF8(cmd_ary[0]);
+    std::string id;
+    int comp_size = comp_ids.size();
+    int j;
+    int non_id_comp = 0;
+    for (int i = 0; i < cmd_ids.size(); i++) {
+        id = cmd_ids[i];
+        if (id == ""){
+            j = comp_size;
+        }
+        else {
+            for (j = 0; j < comp_size; j++) {
+                if (id == comp_ids[j]) {
+                    break;
+                }
             }
-            cmd += cmd_ary[i] + c->GetString();
-            i += 1;
+        }
+        if (j >= comp_size) {
+            while ((!m_components[non_id_comp]->HasString() || comp_ids[non_id_comp] != "") && non_id_comp < comp_size) {
+                non_id_comp++;
+            }
+            j = non_id_comp;
+            non_id_comp++;
+        }
+        if (j < comp_size) {
+            cmd += comp_strings[j];
+        }
+        if (i + 1 < cmd_ary.size()) {
+            cmd += wxString::FromUTF8(cmd_ary[i + 1]);
         }
     }
+    return cmd;
+}
 
-    while (cmd_ary.size() > i) {
-        cmd += cmd_ary[i];
-        i += 1;
-    }
-
+std::array<std::string, 2> MainFrame::RunCommand() {
+    wxString cmd = GetCommand();
     wxString text = m_run_button->GetLabel();
     m_run_button->SetLabel("Processing...");
-    // run command
+
     *m_ostream << "[RunCommand] Command: " << cmd << std::endl;
 #ifdef _WIN32
     cmd = "cmd.exe /c " + cmd;
@@ -277,8 +303,9 @@ void MainFrame::UpdatePanel() {
     for (nlohmann::json c : comp) {
         new_comp = Component::PutComponent(m_panel, comp_sizer, c);
         if (new_comp != nullptr) {
-            if (m_config.contains(new_comp->GetLabel())) {
-                new_comp->SetConfig(m_config[new_comp->GetLabel()]);
+            std::string const id = new_comp->GetID();
+            if (m_config.contains(id)) {
+                new_comp->SetConfig(m_config[id]);
             }
             m_components.push_back(new_comp);
         }

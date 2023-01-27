@@ -1,8 +1,6 @@
 @echo off
 
-REM Builds wxWidgets with cmake.
-REM You need Visual Studio to use this batch file.
-REM Run it with "x64 Ntive Tools Command Prompt for VS 2022". Or fail to build.
+REM Builds wxWidgets with CMake and Visual Studio.
 
 set /p WX_VERSION=< %~dp0\..\WX_VERSION.txt
 set VS_VERSION=Visual Studio 17 2022

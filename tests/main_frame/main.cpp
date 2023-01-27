@@ -74,6 +74,33 @@ TEST(MainFrameTest, InvalidHelp) {
         main_frame->GetDefinition()["gui"][0]["components"]);
 }
 
+TEST(MainFrameTest, GetCommand1) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["gui"][0] = json_utils::GetDefaultDefinition();
+    test_json["gui"][0]["command"] = "command!";
+    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    EXPECT_STREQ("command!", main_frame->GetCommand().ToUTF8());
+}
+
+TEST(MainFrameTest, GetCommand2) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["gui"][0] = test_json["gui"][1];
+    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    std::string expected = "echo file: \"test.txt\" & echo folder: \"testdir\" & echo choice: value3";
+    expected += " & echo check: flag! & echo check_array: falg3 & echo textbox: remove this text!";
+    std::string cmd = main_frame->GetCommand().ToUTF8();
+    EXPECT_STREQ(expected.c_str(), cmd.c_str());
+}
+
+TEST(MainFrameTest, GetCommand3) {
+    nlohmann::json test_json = GetTestJson();
+    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    std::string expected = "echo file:  & echo folder:  & echo choice: value1";
+    expected += " & echo check:  & echo check_array:  & echo textbox: ";
+    std::string cmd = main_frame->GetCommand().ToUTF8();
+    EXPECT_STREQ(expected.c_str(), cmd.c_str());
+}
+
 TEST(MainFrameTest, RunCommandSuccess) {
     nlohmann::json test_json = GetTestJson();
     MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
@@ -89,16 +116,6 @@ TEST(MainFrameTest, RunCommandSuccess) {
 }
 
 TEST(MainFrameTest, RunCommandFail) {
-    nlohmann::json test_json = GetTestJson();
-    test_json["gui"][0]["command"] = "I want errors";
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
-
-    std::array<std::string, 2> msg = main_frame->RunCommand();
-    EXPECT_STREQ("", msg[0].c_str());
-    EXPECT_STREQ("Json format error(Can not make command)", msg[1].c_str());
-}
-
-TEST(MainFrameTest, RunCommandFail2) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][0] = json_utils::GetDefaultDefinition();
     test_json["gui"][0]["command"] = "I'll fail";

@@ -4,7 +4,16 @@
 Component::Component(nlohmann::json j, bool has_string) {
     m_widget = nullptr;
     m_has_string = has_string;
-    m_label = j["label"];
+    m_label = wxString::FromUTF8(j["label"]);
+    m_id = j.value("id", "");
+    if (m_id == ""){
+        if (m_label.Length() > 128) {
+            m_id = m_label.Left(128).ToUTF8();
+        }
+        else {
+            m_id = m_label;
+        }
+    }
     m_add_quotes = j.value("add_quotes", false);
 }
 
@@ -20,8 +29,8 @@ nlohmann::json Component::GetConfig() {
     return {};
 }
 
-std::string Component::GetLabel() {
-    return m_label;
+std::string const Component::GetID() {
+    return m_id;
 }
 
 bool Component::HasString() {
@@ -58,18 +67,13 @@ const int DEFAULT_SIZER_FLAG = wxFIXED_MINSIZE | wxALIGN_LEFT | wxBOTTOM;
 // Static Text
 StaticText::StaticText(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     : Component(j, NOT_STRING) {
-    sizer->Add(
-        new wxStaticText(panel, wxID_ANY,
-            wxString::FromUTF8(j["label"])),
-            0, DEFAULT_SIZER_FLAG , 13);
+    sizer->Add(new wxStaticText(panel, wxID_ANY, m_label), 0, DEFAULT_SIZER_FLAG , 13);
 }
 
 // Base Class for strings
 StringComponentBase::StringComponentBase(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     : Component(j, HAS_STRING) {
-    sizer->Add(
-        new wxStaticText(panel, wxID_ANY, wxString::FromUTF8(j["label"])),
-        0, DEFAULT_SIZER_FLAG, 3);
+    sizer->Add(new wxStaticText(panel, wxID_ANY, m_label), 0, DEFAULT_SIZER_FLAG, 3);
 }
 
 nlohmann::json StringComponentBase::GetConfig() {
@@ -146,10 +150,7 @@ Choice::Choice(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     std::for_each(items.begin(), items.end(), [&](std::string i) {
         wxitems.Add(wxString::FromUTF8(i));
         });
-    sizer->Add(
-        new wxStaticText(panel, wxID_ANY,
-            wxString::FromUTF8(j["label"])),
-            0, DEFAULT_SIZER_FLAG, 3);
+    sizer->Add(new wxStaticText(panel, wxID_ANY, m_label), 0, DEFAULT_SIZER_FLAG, 3);
     wxChoice* choice = new wxChoice(panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxitems);
     sizer->Add(choice, 0, DEFAULT_SIZER_FLAG, 13);
     if (j.contains("default") && j["items"].size() > j["default"]) {
@@ -193,10 +194,9 @@ void SetDefaultForCheckBox(wxCheckBox* check, nlohmann::json j) {
 // CheckBox
 CheckBox::CheckBox(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     : Component(j, HAS_STRING) {
-    wxCheckBox* check = new wxCheckBox(panel, wxID_ANY,
-                                       wxString::FromUTF8(j["label"]));
+    wxCheckBox* check = new wxCheckBox(panel, wxID_ANY, m_label);
     sizer->Add(check, 0, DEFAULT_SIZER_FLAG, 13);
-    m_value = j.value("value", j["label"]);
+    m_value = j.value("value", m_label.ToUTF8());
     if (j.contains("default")) {
         SetDefaultForCheckBox(check, j["default"]);
     }
@@ -225,10 +225,7 @@ nlohmann::json CheckBox::GetConfig() {
 // CheckArray
 CheckArray::CheckArray(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     : Component(j, HAS_STRING) {
-    sizer->Add(
-        new wxStaticText(panel, wxID_ANY,
-            wxString::FromUTF8(j["label"])),
-            0, DEFAULT_SIZER_FLAG, 3);
+    sizer->Add(new wxStaticText(panel, wxID_ANY, m_label), 0, DEFAULT_SIZER_FLAG, 3);
     std::vector<wxCheckBox*>* checks = new std::vector<wxCheckBox*>();
     for (int i = 0; i < j["items"].size(); i++) {
         wxCheckBox* check = new wxCheckBox(panel, wxID_ANY,

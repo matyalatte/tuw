@@ -1,9 +1,6 @@
 name: test
 
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
   
 env:
