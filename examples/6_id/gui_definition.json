@@ -1,0 +1,50 @@
+{
+    "gui": [
+        {
+            "label": "Sample GUI",
+            "command": "echo x: %x% & echo y: %y% & echo z: %z%",
+            "button": "Echo!",
+            "components": [
+                {
+                    "type": "static_text",
+                    "label": "Sample GUI for \"id\" option."
+                },
+                {
+                    "type": "text",
+                    "label": "Value of z",
+                    "id": "z"
+                },
+                {
+                    "type": "text",
+                    "label": "Value of y",
+                    "id": "y"
+                },
+                {
+                    "type": "text",
+                    "label": "Value of x",
+                    "id": "x"
+                }
+            ]
+        },
+        {
+            "label": "Sample GUI2",
+            "command": "echo y: %something% & echo x: %x% & echo x: %x%",
+            "button": "Echo!",
+            "components": [
+                {
+                    "type": "static_text",
+                    "label": "Sample GUI for \"id\" option."
+                },
+                {
+                    "type": "text",
+                    "label": "Value of x",
+                    "id": "x"
+                },
+                {
+                    "type": "text",
+                    "label": "Value of y"
+                }
+            ]
+        }
+    ]
+}

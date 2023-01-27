@@ -189,10 +189,9 @@ wxString MainFrame::GetCommand() {
     int non_id_comp = 0;
     for (int i = 0; i < cmd_ids.size(); i++) {
         id = cmd_ids[i];
-        if (id == ""){
+        if (id == "") {
             j = comp_size;
-        }
-        else {
+        } else {
             for (j = 0; j < comp_size; j++) {
                 if (id == comp_ids[j]) {
                     break;
@@ -200,7 +199,8 @@ wxString MainFrame::GetCommand() {
             }
         }
         if (j >= comp_size) {
-            while ((!m_components[non_id_comp]->HasString() || comp_ids[non_id_comp] != "") && non_id_comp < comp_size) {
+            while ((!m_components[non_id_comp]->HasString() || comp_ids[non_id_comp] != "")
+                   && non_id_comp < comp_size) {
                 non_id_comp++;
             }
             j = non_id_comp;

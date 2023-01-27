@@ -167,7 +167,8 @@ namespace json_utils {
         }
     }
 
-    std::vector<std::string> Split(const std::string& s, const char delimiter, const bool skip_first=false) {
+    std::vector<std::string> Split(const std::string& s, const char delimiter,
+                                   const bool skip_first = false) {
         std::vector<std::string> tokens = std::vector<std::string>(0);
         std::string token;
         std::istringstream tokenStream(s);
@@ -183,10 +184,11 @@ namespace json_utils {
         return tokens;
     }
 
-    std::vector<std::string> Split(const std::vector<std::string>& ary, const bool skip_first=false) {
+    std::vector<std::string> Split(const std::vector<std::string>& ary,
+                                   const bool skip_first = false) {
         std::vector<std::string> tokens = std::vector<std::string>(0);
         bool store = !skip_first;
-        for (const std::string& token: ary){
+        for (const std::string& token : ary) {
             if (store) {
                 tokens.push_back(token);
                 store = false;
@@ -208,7 +210,8 @@ namespace json_utils {
             if (str == "") { continue; }
             for (int j = i + 1; j < size; j++) {
                 if (str == component_ids[j]) {
-                    Raise(GetLabel(COMPONENTS, "id") + " should not be duplicated in a gui definition. (" + str + ")");
+                    Raise(GetLabel(COMPONENTS, "id")
+                          + " should not be duplicated in a gui definition. (" + str + ")");
                 }
             }
         }
@@ -226,8 +229,7 @@ namespace json_utils {
             std::string cmd = sub_definition[COMMAND];
             sub_definition[COMMAND] = Split(cmd, '%');
             sub_definition["command_ids"] = Split(cmd, '%', true);
-        }
-        else {
+        } else {
             CheckJsonType(sub_definition, COMMAND, JsonType::STR_ARRAY);
             std::vector<std::string> cmd = sub_definition[COMMAND];
             sub_definition[COMMAND] = Split(cmd);
@@ -276,8 +278,7 @@ namespace json_utils {
             CheckJsonType(c, "id", JsonType::STRING, label, CAN_SKIP);
             if (c.contains("id")) {
                 comp_ids.push_back(c["id"]);
-            }
-            else {
+            } else {
                 comp_ids.push_back("");
             }
         }

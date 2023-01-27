@@ -86,10 +86,10 @@ TEST(MainFrameTest, GetCommand2) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][0] = test_json["gui"][1];
     MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
-    std::string expected = "echo file: \"test.txt\" & echo folder: \"testdir\" & echo choice: value3";
-    expected += " & echo check: flag! & echo check_array: falg3 & echo textbox: remove this text!";
-    std::string cmd = main_frame->GetCommand().ToUTF8();
-    EXPECT_STREQ(expected.c_str(), cmd.c_str());
+    std::string expected = "echo file: \"test.txt\" & echo folder: \"testdir\"";
+    expected += " & echo choice: value3 & echo check: flag!";
+    expected += " & echo check_array: falg3 & echo textbox: remove this text!";
+    EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().ToUTF8());
 }
 
 TEST(MainFrameTest, GetCommand3) {
@@ -97,8 +97,7 @@ TEST(MainFrameTest, GetCommand3) {
     MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
     std::string expected = "echo file:  & echo folder:  & echo choice: value1";
     expected += " & echo check:  & echo check_array:  & echo textbox: ";
-    std::string cmd = main_frame->GetCommand().ToUTF8();
-    EXPECT_STREQ(expected.c_str(), cmd.c_str());
+    EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().ToUTF8());
 }
 
 TEST(MainFrameTest, RunCommandSuccess) {
