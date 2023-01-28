@@ -1,4 +1,4 @@
-# Simple-Command-Runner ver 0.2.1
+# Simple-Command-Runner ver 0.2.2
 
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/test.yml/badge.svg)
@@ -71,14 +71,14 @@ See here for the details.
 ### Windows
 
 There is a document for Windows users.  
-[Building Workflow for Windows](./Build-With-Windows.md)  
+[Building Workflow for Windows](./Build-on-Windows.md)  
 
 It only supports Visual Studio 2022, but you can see [the batch files](../batch_files/) to find a way to build it with your environment.  
 
 ### Mac and Ubuntu
 
 There is a document for Mac and Ubuntu users.  
-[Building Workflow for Ubuntu and MacOS](./Build-With-Unix.md)  
+[Building Workflow for Ubuntu and MacOS](./Build-on-Unix.md)  
 
 And you can see [the shell scripts](../shell_scripts/) to understand the workflow.  
 

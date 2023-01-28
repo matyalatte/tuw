@@ -1,6 +1,6 @@
 #include "main_frame.h"
 
-const char* VERSION = "0.2.1";
+const char* VERSION = "0.2.2";
 
 #ifndef _WIN32
 void MainFrame::CalcExePath() {

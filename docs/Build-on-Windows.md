@@ -6,6 +6,8 @@
 -   CMake
 -   Batch files in [`./Simple-Command-Runner/batch_files`](../batch_files)
 
+If you won't use Visual Studio 2022, you could need to edit cmake commands in batch files.
+
 ## 1. Build wxWidgets
 
 wxWidgets is a GUI framework.  
