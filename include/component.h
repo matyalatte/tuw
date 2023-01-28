@@ -12,18 +12,19 @@
 class Component {
  protected:
     void* m_widget;
+    wxString m_label;
 
  private:
     bool m_has_string;
     bool m_add_quotes;
-    std::string m_label;
+    std::string m_id;
 
  public:
     Component(nlohmann::json j, bool has_string);
     ~Component() {}
     virtual wxString GetRawString() { return "";}
     wxString GetString();
-    std::string GetLabel();
+    std::string const GetID();
 
     virtual void SetConfig(nlohmann::json config) {}
     virtual nlohmann::json GetConfig();

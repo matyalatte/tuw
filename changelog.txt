@@ -1,3 +1,8 @@
+ver 0.2.2
+- Added "id" option to all components.
+  (It'll be used as a variable name for the command and gui_config.json)
+- Improved json validatior
+
 ver0.2.1
 - Introduced wxBoxSizer to align components automatically.
 - Added "default" option to all components.

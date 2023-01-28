@@ -1,5 +1,5 @@
 #!/bin/bash
-#Downloads wxWidgets.
+# Downloads wxWidgets.
 
 wx_version="$(cat $(dirname "$0")/../WX_VERSION.txt)"
 

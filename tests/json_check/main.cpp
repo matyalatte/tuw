@@ -74,7 +74,7 @@ TEST(JsonCheckTest, checkGUIFail2) {
 TEST(JsonCheckTest, checkGUIFail3) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"] = 1;
-    CheckGUIError(test_json, "['gui'] should be an array.");
+    CheckGUIError(test_json, "['gui'] should be an array of json objects.");
 }
 
 TEST(JsonCheckTest, checkGUIFail4) {
