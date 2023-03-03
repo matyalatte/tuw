@@ -7,11 +7,8 @@ Component::Component(nlohmann::json j, bool has_string) {
     m_label = wxString::FromUTF8(j["label"]);
     m_id = j.value("id", "");
     if (m_id == "") {
-        if (m_label.Length() > 128) {
-            m_id = m_label.Left(128).ToUTF8();
-        } else {
-            m_id = m_label;
-        }
+        size_t hash = std::hash<std::string>()(j["label"]);
+        m_id = std::to_string(hash);
     }
     m_add_quotes = j.value("add_quotes", false);
 }

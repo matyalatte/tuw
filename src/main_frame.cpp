@@ -199,11 +199,16 @@ wxString MainFrame::GetCommand() {
             }
         }
         if (j >= comp_size) {
-            while ((!m_components[non_id_comp]->HasString() || comp_ids[non_id_comp] != "")
-                   && non_id_comp < comp_size) {
+            while (non_id_comp < comp_size &&
+                  (!m_components[non_id_comp]->HasString() || comp_ids[non_id_comp] != "")) {
                 non_id_comp++;
             }
             j = non_id_comp;
+            if (non_id_comp >= comp_size) {
+                *m_ostream << "[RunCommand] Warning: "
+                           << "The command requires more components for arguments."
+                           << std::endl;
+            }
             non_id_comp++;
         }
         if (j < comp_size) {

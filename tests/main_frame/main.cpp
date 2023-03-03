@@ -154,8 +154,7 @@ TEST(MainFrameTest, DeleteFrame) {
     main_frame->OnClose(event);
 }
 
-void TestConfig(nlohmann::json config) {
-    nlohmann::json test_json = GetTestJson();
+void TestConfig(nlohmann::json test_json, nlohmann::json config) {
     nlohmann::json test_config = json_utils::LoadJson(config);
     MainFrame* main_frame = new MainFrame(nlohmann::json(test_json), nlohmann::json(test_config));
     main_frame->SaveConfig();
@@ -164,9 +163,12 @@ void TestConfig(nlohmann::json config) {
 }
 
 TEST(MainFrameTest, LoadSaveConfigAscii) {
-    TestConfig(config_ascii);
+    nlohmann::json test_json = GetTestJson();
+    TestConfig(test_json, config_ascii);
 }
 
 TEST(MainFrameTest, LoadSaveConfigUTF) {
-    TestConfig(config_utf);
+    nlohmann::json test_json = GetTestJson();
+    test_json["gui"][0]["components"][1]["id"] = "ファイル";
+    TestConfig(test_json, config_utf);
 }

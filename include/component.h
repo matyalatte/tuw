@@ -45,12 +45,6 @@ class MultipleValuesContainer {
     }
 };
 
-#ifdef _WIN32
-// char code converter for Windows system
-std::string WStringToUTF8(const std::wstring& str);
-std::wstring UTF8ToWString(const std::string& str);
-#endif
-
 class StaticText : public Component {
  public:
     StaticText(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);

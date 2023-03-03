@@ -1,7 +1,13 @@
+ver 0.2.3
+- Fixed errors when using non-ascii characters in labels
+- Fixed an error when a command requires more components for arguments.
+- Fixed some examples that will raise the command error.
+- Used hash instead of label in gui_config.json
+
 ver 0.2.2
 - Added "id" option to all components.
   (It'll be used as a variable name for the command and gui_config.json)
-- Improved json validatior
+- Improved json validator
 
 ver0.2.1
 - Introduced wxBoxSizer to align components automatically.
