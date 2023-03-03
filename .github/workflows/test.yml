@@ -11,29 +11,15 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.check-tag.outputs.version }}
-      url: ${{ steps.create-release.outputs.upload_url }}
       wx_version: ${{ steps.wx-version.outputs.version }}
     steps:
-    
-      - name: Check tag
-        id: check-tag
-        run: |
-          if [[ ${{ github.ref }} == refs/tags/v* ]]; then
-            VERSION=-$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
-          else
-            VERSION=""
-          fi
-          echo "::set-output name=version::$VERSION"
-        shell: bash
-      
       - uses: actions/checkout@v3
 
       - name: Check wxWidget version
         id: wx-version
         run: |
           VERSION=$(cat WX_VERSION.txt)
-          echo "::set-output name=version::$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
         shell: bash
 
   lint:
@@ -44,14 +30,14 @@ jobs:
       - run: pip install cpplint
       - run: cpplint --recursive --quiet .
 
-  build_windows:
+  test_windows:
     runs-on: windows-2022
     needs: [setup, lint]
     steps:
       - uses: actions/checkout@v3
       
       - name: Cache wxWidget
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-wx
         with:
             path: "C:/wxWidgets-${{ needs.setup.outputs.wx_version }}"
@@ -69,7 +55,7 @@ jobs:
           cd batch_files
           ./test.bat
           
-  build_unix:
+  test_unix:
     strategy:
       matrix:
         os: [ubuntu-20.04, macos-11]
@@ -79,7 +65,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Cache wxWidget
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-wx
         with:
             path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
@@ -106,7 +92,7 @@ jobs:
           xvfb-run bash shell_scripts/test.sh
 
       # xquartz has xvfb functions
-      - name: build and run tests on mac
+      - name: build and run tests for mac
         if: runner.os=='macOS'
         run: |
           brew update

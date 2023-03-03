@@ -164,11 +164,13 @@ void TestConfig(nlohmann::json test_json, nlohmann::json config) {
 
 TEST(MainFrameTest, LoadSaveConfigAscii) {
     nlohmann::json test_json = GetTestJson();
+    test_json["gui"][0] = test_json["gui"][1];
     TestConfig(test_json, config_ascii);
 }
 
 TEST(MainFrameTest, LoadSaveConfigUTF) {
     nlohmann::json test_json = GetTestJson();
+    test_json["gui"][0] = test_json["gui"][1];
     test_json["gui"][0]["components"][1]["id"] = "ファイル";
     TestConfig(test_json, config_utf);
 }

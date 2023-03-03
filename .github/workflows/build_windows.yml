@@ -12,17 +12,28 @@ jobs:
     runs-on: windows-2022
     steps:
 
+      - name: Check tag
+        id: check-tag
+        run: |
+          if [[ ${{ github.ref }} == refs/tags/v* ]]; then
+            TAG=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
+          else
+            TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+        shell: bash
+
       - uses: actions/checkout@v3
 
       - name: Check wxWidget version
         id: wx-version
         run: |
           VERSION=$(cat WX_VERSION.txt)
-          echo "::set-output name=version::$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
         shell: bash
 
       - name: Cache wxWidget
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-wx
         with:
           path: "C:/wxWidgets-${{ steps.wx-version.outputs.version }}"
@@ -42,29 +53,26 @@ jobs:
 
       - name: Copy files
         run: |
-          mkdir -p ../release
-          cp Release/Release/SimpleCommandRunner.exe ../release/
-          cp examples/4_help/gui_definition.json ../release/
-          cp changelog.txt ../release/
-          cp license.txt ../release/
+          mkdir -p archive
+          cp Release/Release/SimpleCommandRunner.exe archive
+          cp examples/4_help/gui_definition.json archive
+          cp changelog.txt archive
+          cp license.txt archive
         shell: bash
 
       - name: Archive Release
         uses: thedoctor0/zip-release@master
         with:
-          directory: '../release'
+          directory: 'archive'
           type: 'zip'
-          filename: '${{ env.ZIP_NAME }}.zip'
-          exclusions: '*.git* .gitignore'
-          
+          filename: '${{ env.ZIP_NAME }}_${{ runner.os }}.zip'
+
       - name: Create Release Draft
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: create-release
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+          tag_name: ${{ steps.check-tag.outputs.tag }}
+          name: ${{ steps.check-tag.outputs.tag }}
           body: |
             Changelog
             - First Change
@@ -73,12 +81,6 @@ jobs:
           prerelease: false
 
       - name: Upload Release Asset
-        id: upload-release-asset-python
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ../release/${{ env.ZIP_NAME }}.zip
-          asset_name: ${{ env.ZIP_NAME }}-${{ runner.os }}.zip
-          asset_content_type: application/zip
+        run: gh release upload ${{ steps.check-tag.outputs.tag }} archive/${{ env.ZIP_NAME }}_${{ runner.os }}.zip

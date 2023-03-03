@@ -14,7 +14,7 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.check-tag.outputs.version }}
+      tag: ${{ steps.check-tag.outputs.tag }}
       url: ${{ steps.create-release.outputs.upload_url }}
       wx_version: ${{ steps.wx-version.outputs.version }}
     steps:
@@ -23,11 +23,11 @@ jobs:
         id: check-tag
         run: |
           if [[ ${{ github.ref }} == refs/tags/v* ]]; then
-            VERSION=-$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
+            TAG=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
           else
-            VERSION=""
+            TAG=$(echo ${{ github.sha }} | cut -c1-7)
           fi
-          echo "::set-output name=version::$VERSION"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
         shell: bash
       
       - uses: actions/checkout@v3
@@ -36,17 +36,15 @@ jobs:
         id: wx-version
         run: |
           VERSION=$(cat WX_VERSION.txt)
-          echo "::set-output name=version::$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
         shell: bash
-        
+
       - name: Create Release Draft
         id: create-release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+          tag_name: ${{ steps.check-tag.outputs.tag }}
+          name: ${{ steps.check-tag.outputs.tag }}
           body: |
             Changelog
             - First Change
@@ -61,7 +59,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Cache wxWidget
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-wx
         with:
             path: "C:/wxWidgets-${{ needs.setup.outputs.wx_version }}"
@@ -81,32 +79,25 @@ jobs:
           
       - name: copy files
         run: |
-          mkdir -p ../release
-          cp Release/Release/SimpleCommandRunner.exe ../release
-          cp examples/4_help/gui_definition.json ../release
-          cp changelog.txt ../release
-          cp license.txt ../release
+          mkdir -p archive
+          cp Release/Release/SimpleCommandRunner.exe archive
+          cp examples/4_help/gui_definition.json archive
+          cp changelog.txt archive
+          cp license.txt archive
         shell: bash
         
       - name: Archive Release
         uses: thedoctor0/zip-release@master
         with:
-          directory: '../release'
+          directory: 'archive'
           type: 'zip'
-          filename: '${{ env.ZIP_NAME }}.zip'
-          exclusions: '*.git* .gitignore'
-          
-      - name: Upload Release Asset for windows
-        id: upload-release-asset-windows
-        uses: actions/upload-release-asset@v1
+          filename: '${{ env.ZIP_NAME }}_${{ needs.setup.outputs.tag }}_${{ runner.os }}.zip'
+
+      - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.setup.outputs.url }}
-          asset_path: ../release/${{ env.ZIP_NAME }}.zip
-          asset_name: ${{ env.ZIP_NAME }}${{ needs.setup.outputs.version }}-${{ runner.os }}.zip
-          asset_content_type: application/zip
-          
+        run: gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}_${{ needs.setup.outputs.tag }}_${{ runner.os }}.zip
+
   build_unix:
     strategy:
       matrix:
@@ -117,7 +108,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Cache wxWidget
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-wx
         with:
             path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
@@ -141,22 +132,15 @@ jobs:
           
       - name: copy files
         run: |
-          mkdir -p ../release/${{ env.ZIP_NAME }}
-          cp Release/SimpleCommandRunner ../release/${{ env.ZIP_NAME }}
-          cp examples/4_help/gui_definition.json ../release/${{ env.ZIP_NAME }}
-          cp changelog.txt ../release/${{ env.ZIP_NAME }}
-          cp license.txt ../release/${{ env.ZIP_NAME }}
-          cd ../release
-          tar -jcvf ${{ env.ZIP_NAME }}.tar.bz2 ${{ env.ZIP_NAME }}
+          mkdir -p archive/${{ env.ZIP_NAME }}
+          cp Release/SimpleCommandRunner archive/${{ env.ZIP_NAME }}
+          cp examples/4_help/gui_definition.json archive/${{ env.ZIP_NAME }}
+          cp changelog.txt archive/${{ env.ZIP_NAME }}
+          cp license.txt archive/${{ env.ZIP_NAME }}
+          cd archive
+          tar -jcvf ${{ env.ZIP_NAME }}_${{ needs.setup.outputs.tag }}_${{ runner.os }}.tar.bz2 ${{ env.ZIP_NAME }}
 
-      - name: Upload Release Asset for ubuntu
-        id: upload-release-asset-ubuntu
-        uses: actions/upload-release-asset@v1
+      - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.setup.outputs.url }}
-          asset_path: ../release/${{ env.ZIP_NAME }}.tar.bz2
-          asset_name: ${{ env.ZIP_NAME }}${{ needs.setup.outputs.version }}-${{ runner.os }}.tar.bz2
-          asset_content_type: application/zip
-  
+        run: gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}_${{ needs.setup.outputs.tag }}_${{ runner.os }}.tar.bz2
