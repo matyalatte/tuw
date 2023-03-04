@@ -5,28 +5,38 @@ on:
   
 env:
   ZIP_NAME: SimpleCommandRunner
-  CACHE_NAME: main
 
 jobs:
   build:
     runs-on: macos-11
     steps:
-        
+
+      - name: Check tag
+        id: check-tag
+        run: |
+          if [[ ${{ github.ref }} == refs/tags/v* ]]; then
+            TAG=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
+          else
+            TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+        shell: bash
+
       - uses: actions/checkout@v3
 
       - name: Check wxWidget version
         id: wx-version
         run: |
           VERSION=$(cat WX_VERSION.txt)
-          echo "::set-output name=version::$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
         shell: bash
       
       - name: Cache wxWidget
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-wx
         with:
           path: "~/wxWidgets-${{ steps.wx-version.outputs.version }}"
-          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}-${{ env.CACHE_NAME }}
+          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}
             
       - name: build wxWidget
         if: steps.cache-wx.outputs.cache-hit != 'true'
@@ -41,36 +51,28 @@ jobs:
           
       - name: copy files
         run: |
-          mkdir -p ../release/${{ env.ZIP_NAME }}
-          cp Release/SimpleCommandRunner ../release/${{ env.ZIP_NAME }}
-          cp examples/4_help/gui_definition.json ../release/${{ env.ZIP_NAME }}
-          cp changelog.txt ../release/${{ env.ZIP_NAME }}
-          cp license.txt ../release/${{ env.ZIP_NAME }}
-          cd ../release
-          tar -jcvf ${{ env.ZIP_NAME }}.tar.bz2 ${{ env.ZIP_NAME }}
-          
+          mkdir -p archive/${{ env.ZIP_NAME }}
+          cp Release/SimpleCommandRunner archive/${{ env.ZIP_NAME }}
+          cp examples/4_help/gui_definition.json archive/${{ env.ZIP_NAME }}
+          cp changelog.txt archive/${{ env.ZIP_NAME }}
+          cp license.txt archive/${{ env.ZIP_NAME }}
+          cd archive
+          tar -jcvf ${{ env.ZIP_NAME }}_${{ runner.os }}.tar.bz2 ${{ env.ZIP_NAME }}
+
       - name: Create Release Draft
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: create-release
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+          tag_name: ${{ steps.check-tag.outputs.tag }}
+          name: ${{ steps.check-tag.outputs.tag }}
           body: |
             Changelog
             - First Change
             - Second Change
           draft: true
           prerelease: false
-          
-      - name: Upload Release Asset for ubuntu
-        id: upload-release-asset-ubuntu
-        uses: actions/upload-release-asset@v1
+
+      - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ../release/${{ env.ZIP_NAME }}.tar.bz2
-          asset_name: ${{ env.ZIP_NAME }}-${{ runner.os }}.tar.bz2
-          asset_content_type: application/zip
+        run: gh release upload ${{ steps.check-tag.outputs.tag }} archive/${{ env.ZIP_NAME }}_${{ runner.os }}.tar.bz2

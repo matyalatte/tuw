@@ -1,7 +1,7 @@
 @echo off
 
 REM Downloads wxWidget.
-REM Run it as admin. Or fail to install.
+REM Run it as admin. Or fail to download.
 
 set /p WX_VERSION=< %~dp0\..\WX_VERSION.txt
 

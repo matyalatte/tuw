@@ -1,28 +1,25 @@
 {
-    "Some file path": {
-        "str": "test.bin"
-    },
-    "Some folder path": {
-        "str": "somefolder"
-    },
-    "checkbox": {
-        "int": 0
-    },
-    "combo box": {
+    "check": {
         "int": 1
     },
-    "flag!": {
-        "int": 1
+    "choice": {
+        "int": 2
+    },
+    "file": {
+        "str": "test.txt"
+    },
+    "folder": {
+        "str": "testdir"
     },
     "options": {
         "ints": [
             0,
-            1,
             0,
+            1,
             0
         ]
     },
-    "text box": {
-        "str": "testtesttest"
+    "text": {
+        "str": "remove this text!"
     }
 }

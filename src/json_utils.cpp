@@ -139,7 +139,9 @@ namespace json_utils {
                 {"command", {"ls"} },
                 {"button", "run 'ls'"},
     #endif
-                {"components", nlohmann::json::array({})}
+                {"command_ids", nlohmann::json::array({})},
+                {"components", nlohmann::json::array({})},
+                {"component_ids", nlohmann::json::array({})}
         };
         return def;
     }
@@ -167,34 +169,24 @@ namespace json_utils {
         }
     }
 
-    std::vector<std::string> Split(const std::string& s, const char delimiter,
-                                   const bool skip_first = false) {
+    std::vector<std::string> SplitString(const std::string& s, const std::string& delimiter) {
         std::vector<std::string> tokens = std::vector<std::string>(0);
         std::string token;
-        std::istringstream tokenStream(s);
-        bool store = !skip_first;
-        while (std::getline(tokenStream, token, delimiter)) {
-            if (store) {
-                tokens.push_back(token);
-                store = false;
-            } else {
-                store = true;
-            }
+        size_t delim_length = delimiter.length();
+        if (delim_length == 0) {
+            tokens.push_back(s);
+            return tokens;
         }
-        return tokens;
-    }
 
-    std::vector<std::string> Split(const std::vector<std::string>& ary,
-                                   const bool skip_first = false) {
-        std::vector<std::string> tokens = std::vector<std::string>(0);
-        bool store = !skip_first;
-        for (const std::string& token : ary) {
-            if (store) {
-                tokens.push_back(token);
-                store = false;
-            } else {
-                store = true;
+        size_t offset = std::string::size_type(0);
+        while (s.length() > offset + 1) {
+            size_t pos = s.find(delimiter, offset);
+            if (pos == std::string::npos) {
+                tokens.push_back(s.substr(offset));
+                break;
             }
+            tokens.push_back(s.substr(offset, pos - offset));
+            offset = pos + delim_length;
         }
         return tokens;
     }
@@ -217,24 +209,39 @@ namespace json_utils {
         }
     }
 
+    void CheckCommand(nlohmann::json& sub_definition) {
+        CheckContain(sub_definition, COMMAND, "");
+        CheckJsonType(sub_definition, "command_ids", JsonType::STR_ARRAY, "", CAN_SKIP);
+        if (sub_definition[COMMAND].is_string()) {
+            sub_definition[COMMAND] = SplitString(sub_definition[COMMAND], { '%' });
+        } else {
+            CheckJsonType(sub_definition, COMMAND, JsonType::STR_ARRAY);
+        }
+
+        std::vector<std::string> cmd = sub_definition[COMMAND];
+        std::vector<std::string> cmd_ids = std::vector<std::string>(0);
+        std::vector<std::string> splitted_cmd = std::vector<std::string>(0);
+        bool store_ids = false;
+        for (const std::string& token : cmd) {
+            if (store_ids) {
+                cmd_ids.push_back(token);
+            } else {
+                splitted_cmd.push_back(token);
+            }
+            store_ids = !store_ids;
+        }
+        sub_definition["command_ids"] = cmd_ids;
+        sub_definition[COMMAND] = splitted_cmd;
+    }
+
     void CheckSubDefinition(nlohmann::json& sub_definition) {
         // check is_string
         CheckJsonType(sub_definition, "label", JsonType::STRING);
         CheckJsonType(sub_definition, "button", JsonType::STRING, "", CAN_SKIP);
         CheckJsonType(sub_definition, "window_name", JsonType::STRING, "", CAN_SKIP);
 
-        CheckContain(sub_definition, COMMAND, "");
-        CheckJsonType(sub_definition, "command_ids", JsonType::STR_ARRAY, "", CAN_SKIP);
-        if (sub_definition[COMMAND].is_string()) {
-            std::string cmd = sub_definition[COMMAND];
-            sub_definition[COMMAND] = Split(cmd, '%');
-            sub_definition["command_ids"] = Split(cmd, '%', true);
-        } else {
-            CheckJsonType(sub_definition, COMMAND, JsonType::STR_ARRAY);
-            std::vector<std::string> cmd = sub_definition[COMMAND];
-            sub_definition[COMMAND] = Split(cmd);
-            sub_definition["command_ids"] = Split(cmd, true);
-        }
+        // check sub_definition["command"]
+        CheckCommand(sub_definition);
 
         // check is_boolean
         CheckJsonType(sub_definition, "show_last_line", JsonType::BOOLEAN, "", CAN_SKIP);
