@@ -5,7 +5,6 @@ on:
   
 env:
   ZIP_NAME: SimpleCommandRunner
-  CACHE_NAME: main
 
 jobs:
   build:
@@ -37,7 +36,7 @@ jobs:
         id: cache-wx
         with:
           path: "~/wxWidgets-${{ steps.wx-version.outputs.version }}"
-          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}-${{ env.CACHE_NAME }}
+          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}
             
       - name: build wxWidget
         if: steps.cache-wx.outputs.cache-hit != 'true'

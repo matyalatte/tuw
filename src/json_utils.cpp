@@ -141,7 +141,7 @@ namespace json_utils {
     #endif
                 {"command_ids", nlohmann::json::array({})},
                 {"components", nlohmann::json::array({})},
-		        {"component_ids", nlohmann::json::array({})}
+                {"component_ids", nlohmann::json::array({})}
         };
         return def;
     }

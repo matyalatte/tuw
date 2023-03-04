@@ -8,7 +8,6 @@ on:
   
 env:
   ZIP_NAME: SimpleCommandRunner
-  CACHE_NAME: main
 
 jobs:
   setup:
@@ -63,7 +62,7 @@ jobs:
         id: cache-wx
         with:
             path: "C:/wxWidgets-${{ needs.setup.outputs.wx_version }}"
-            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-${{ env.CACHE_NAME }}
+            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}
         
       - name: install wxWidget
         if: steps.cache-wx.outputs.cache-hit != 'true'
@@ -112,7 +111,7 @@ jobs:
         id: cache-wx
         with:
             path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
-            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-${{ env.CACHE_NAME }}
+            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}
             
       - name: install gtk
         if: runner.os=='Linux'
