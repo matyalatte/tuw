@@ -139,7 +139,9 @@ namespace json_utils {
                 {"command", {"ls"} },
                 {"button", "run 'ls'"},
     #endif
-                {"components", nlohmann::json::array({})}
+                {"command_ids", nlohmann::json::array({})},
+                {"components", nlohmann::json::array({})},
+		        {"component_ids", nlohmann::json::array({})}
         };
         return def;
     }
