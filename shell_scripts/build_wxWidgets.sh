@@ -17,21 +17,68 @@ cd ${build_type}
 
 options="--disable-shared\
     --disable-tests\
-    --disable-sys-libs\
     --without-libpng\
     --without-libjpeg\
     --without-libtiff\
     --without-expat\
     --without-liblzma\
+    --without-regex\
+    --without-zlib\
     --without-opengl\
     --disable-glcanvasegl\
+    --disable-sound\
+    --disable-tarstream\
+    --disable-zipstream\
+    --disable-docview\
+    --disable-html\
+    --disable-htmlhelp\
+    --disable-mshtmlhelp\
+    --disable-xrc\
+    --disable-aui\
+    --disable-propgrid\
+    --disable-ribbon\
+    --disable-stc\
+    --disable-loggui\
+    --disable-logwin\
+    --disable-logdialog\
+    --disable-mdi\
+    --disable-mdidoc\
     --disable-mediactrl\
+    --disable-richtext\
+    --disable-postscript\
+    --disable-printarch\
+    --disable-svg\
     --disable-webview\
-    --disable-pnm\
+    --disable-addremovectrl\
+    --disable-animatectrl\
+    --disable-bannerwindow\
+    --disable-artstd\
+    --disable-arttango\
+    --disable-calendar\
+    --disable-colourpicker\
+    --disable-datepick\
+    --disable-searchctrl\
+    --disable-richmsgdlg\
+    --disable-richtooltip\
+    --disable-rearrangectrl\
+    --disable-spinbtn\
+    --disable-spinctrl\
+    --disable-joystick\
+    --disable-privatefonts\
+    --disable-dragimage\
+    --disable-timepick\
+    --disable-tbarnative\
+    --disable-toolbar\
+    --disable-toolbook\
+    --disable-prefseditor\
+    --disable-notebook\
+    --disable-treebook\
+    --disable-treelist\
     --disable-gif\
     --disable-pcx\
+    --disable-tga\
     --disable-iff\
-    --disable-svg\
+    --disable-pnm\
     --prefix=$(pwd)"
 
 if [ ${build_type} = "Debug" ];

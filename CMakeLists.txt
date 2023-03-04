@@ -1,3 +1,4 @@
+# Requires cmake3.25 if you will use wxWidgets3.2.x
 cmake_minimum_required(VERSION 3.15)
 
 # options
@@ -22,7 +23,12 @@ endif()
 find_package(wxWidgets REQUIRED COMPONENTS core base)
 include(${wxWidgets_USE_FILE})
 
+
 # fetch json
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+	# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP:
+	cmake_policy(SET CMP0135 NEW)
+endif()
 include(FetchContent)
 FetchContent_Declare(
 	json

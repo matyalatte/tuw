@@ -1,8 +1,9 @@
 ver 0.2.3
-- Fixed errors when using non-ascii characters in labels
+- Fixed errors when using non-ascii characters in labels.
 - Fixed an error when a command requires more components for arguments.
 - Fixed some examples that will raise the command error.
 - Used hash instead of label in gui_config.json
+- Removed unnecessary codes from wxWidgets to reduce the binary size.
 
 ver 0.2.2
 - Added "id" option to all components.
