@@ -15,19 +15,40 @@ pushd ~/wxWidgets-"$wx_version"
 mkdir ${build_type}
 cd ${build_type}
 
+# Options are defined in wxWidgets/configure
 options="--disable-shared\
+    --disable-compat30\
     --disable-tests\
-    --without-libpng\
-    --without-libjpeg\
-    --without-libtiff\
-    --without-expat\
-    --without-liblzma\
     --without-regex\
     --without-zlib\
+    --without-expat\
+    --without-libjpeg\
+    --without-libpng\
+    --without-libtiff\
+    --without-nanosvg\
+    --without-liblzma\
     --without-opengl\
+    --without-sdl\
+    --without-libmspack\
+    --without-gtkprint\
+    --without-gnomevfs\
+    --without-libxpm\
+    --without-libjbig\
     --disable-glcanvasegl\
+    --disable-cmdline\
+    --disable-filehistory\
+    --disable-fontenum\
+    --disable-fontmap\
+    --disable-fs_inet\
+    --disable-fswatcher\
+    --disable-mimetype\
+    --disable-printfposparam\
+    --disable-secretstore\
     --disable-sound\
+    --disable-spellcheck\
+    --disable-sysoptions\
     --disable-tarstream\
+    --disable-webrequest\
     --disable-zipstream\
     --disable-docview\
     --disable-html\
@@ -49,36 +70,69 @@ options="--disable-shared\
     --disable-printarch\
     --disable-svg\
     --disable-webview\
+    --disable-actindicator\
     --disable-addremovectrl\
     --disable-animatectrl\
     --disable-bannerwindow\
     --disable-artstd\
     --disable-arttango\
+    --disable-bmpcombobox\
     --disable-calendar\
+    --disable-choicebook\
     --disable-colourpicker\
+    --disable-commandlinkbutton\
+    --disable-dataviewctrl\
     --disable-datepick\
-    --disable-searchctrl\
+    --disable-editablebox\
+    --disable-fontpicker\
+    --disable-gauge\
+    --disable-grid\
+    --disable-headerctrl\
+    --disable-hyperlink\
+    --disable-infobar\
+    --disable-listbook\
+    --disable-notebook\
+    --disable-odcombobox\
+    --disable-prefseditor\
+    --disable-radiobox\
     --disable-richmsgdlg\
     --disable-richtooltip\
     --disable-rearrangectrl\
+    --disable-searchctrl\
     --disable-spinbtn\
     --disable-spinctrl\
-    --disable-joystick\
-    --disable-privatefonts\
-    --disable-dragimage\
-    --disable-timepick\
+    --disable-taskbaricon\
     --disable-tbarnative\
+    --disable-timepick\
+    --disable-togglebtn\
     --disable-toolbar\
     --disable-toolbook\
-    --disable-prefseditor\
-    --disable-notebook\
     --disable-treebook\
     --disable-treelist\
+    --disable-splash\
+    --disable-coldlg\
+    --disable-creddlg\
+    --disable-finddlg\
+    --disable-fontdlg\
+    --disable-numberdlg\
+    --disable-tipdlg\
+    --disable-progressdlg\
+    --disable-wizarddlg\
+    --disable-busyinfo\
+    --disable-hotkey\
+    --disable-joystick\
+    --disable-metafile\
+    --disable-dragimage\
+    --disable-dctransform\
+    --disable-webviewwebkit\
+    --disable-privatefonts\
     --disable-gif\
     --disable-pcx\
     --disable-tga\
     --disable-iff\
     --disable-pnm\
+    --disable-xpm\
+    --disable-ico_cur\
     --prefix=$(pwd)"
 
 if [ ${build_type} = "Debug" ];
