@@ -39,7 +39,7 @@ Select a version you want to use.
 
 ## 8. Wait until it finishes the workflow
 
-It'll take about 20 minutes.  
+It'll take about 10 minutes.  
 <img src=https://user-images.githubusercontent.com/69258547/154955296-cf3db44b-5fec-4674-91f3-4ddc3c1a4042.png width=500>
 
 ## 9. Go to release page
