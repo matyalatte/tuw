@@ -1,8 +1,8 @@
-# Help URLs
+# Help Documents
 
-![sample](https://user-images.githubusercontent.com/69258547/192090786-11a3f5ef-988e-442f-8ba9-fd1636b9f350.png)
+You can put some documents in menu bar.  
 
-You can put help urls to menu bar.  
+![sample](https://user-images.githubusercontent.com/69258547/222972599-bab3ff85-2c6c-432d-91e7-8244a8a8e514.png)
 
 ```json
 "help": [
@@ -15,6 +15,16 @@ You can put help urls to menu bar.
         "type": "url",
         "label": "Releases",
         "url": "https://github.com/matyalatte/Simple-Command-Runner/releases"
+    },
+    {
+        "type": "file",
+        "label": "Open JSON File",
+        "path": "./gui_definition.json"
     }
 ]
 ```
+
+- `type`: Document type. `url` and `file` are available.  
+- `label`: String that will be shown in menu bar.  
+- `url`: URL for `url` type document. It'll be opened in user's default browser.  
+- `path`: File path for `file` type document. It'll be opened in user's default application.  

@@ -35,6 +35,11 @@
             "type": "url",
             "label": "Releases",
             "url": "https://github.com/matyalatte/Simple-Command-Runner/releases"
+        },
+        {
+            "type": "file",
+            "label": "Open JSON File",
+            "path": "./gui_definition.json"
         }
     ]
 }

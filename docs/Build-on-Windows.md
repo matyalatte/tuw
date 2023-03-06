@@ -33,16 +33,16 @@ The steps are as follows.
 Of course, you can build the exe with Visual Studio.  
 The steps are as follows.
 
-1.  Open `./Simple-Command-Runner` with Visual Studio.
-2.  Select `Manage Configurations` from configuration.
-3.  Add `-D wxWidgets_ROOT_DIR=C:/wxWidgets-3.1.5/Release/Installed -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -D wxWidgets_CONFIGURATION=mswu` to `CMake command arguments` for `x64-Release`.
-4.  Build SimpleCommandRunner.exe.
+1.  Open `./Simple-Command-Runner` with Visual Studio.  
+2.  Select `Manage Configurations` from configuration.  
+3.  Add `-D wxWidgets_ROOT_DIR=C:/wxWidgets-3.2.2/Release/Installed -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -D wxWidgets_CONFIGURATION=mswu` to `CMake command arguments` for `x64-Release`.  
+4.  Build SimpleCommandRunner.exe.  
 
 ## Debug build
 
 If you want a debug build, you need to use `Debug` as an argument for batch files.  
 So, you should type `build_wxWidgets.bat Debug` and `build_exe.bat Debug` on the command prompt.  
-If you will build the exe with Visual Studio, you should add `-D wxWidgets_ROOT_DIR=C:/wxWidgets-3.1.5/Debug/Installed -D wxWidgets_CONFIGURATION=mswud` to `CMake command arguments` for `x64-Debug` in the IDE.
+If you will build the exe with Visual Studio, you should add `-D wxWidgets_ROOT_DIR=C:/wxWidgets-3.2.2/Debug/Installed -D wxWidgets_CONFIGURATION=mswud` to `CMake command arguments` for `x64-Debug` in the IDE.
 
 ## Test
 
