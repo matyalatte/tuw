@@ -8,7 +8,7 @@
 
 namespace json_utils {
     nlohmann::json LoadJson(std::string file);
-    bool SaveJson(nlohmann::json json, std::string file);
+    bool SaveJson(nlohmann::json& json, std::string file);
 
     nlohmann::json GetDefaultDefinition();
     void CheckDefinition(nlohmann::json& definition);

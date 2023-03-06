@@ -12,27 +12,26 @@ void MainFrame::CalcExePath() {
 #endif
 
 // Main window
-MainFrame::MainFrame()
-    : wxFrame(nullptr, wxID_ANY, "Simple Command Runner") {
-#ifndef _WIN32
-    CalcExePath();
-#endif
-    m_definition = json_utils::LoadJson("gui_definition.json");
-    m_config = json_utils::LoadJson("gui_config.json");
-    CreateFrame();
-}
-
 MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
     : wxFrame(nullptr, wxID_ANY, "Simple Command Runner") {
-#ifndef _WIN32
-    CalcExePath();
-#endif
+    if (definition.empty()) {
+        definition = json_utils::LoadJson("gui_definition.json");
+    }
+    if (config.empty()) {
+        config = json_utils::LoadJson("gui_config.json");
+    }
+    SetUp();
+    CheckDefinition(definition);
     this->m_definition = definition;
+    this->m_sub_definition = definition["gui"][0];
     this->m_config = config;
     CreateFrame();
 }
 
-void MainFrame::CreateFrame() {
+void MainFrame::SetUp() {
+#ifndef _WIN32
+    CalcExePath();
+#endif
 #ifdef __linux__
     m_log_frame = new LogFrame(m_exe_path);
     m_ostream = m_log_frame;
@@ -40,9 +39,9 @@ void MainFrame::CreateFrame() {
     m_ostream = &std::cout;
 #endif
     *m_ostream << "Simple Command Runner v" << VERSION << " by matyalatte" << std::endl;
+}
 
-    CheckDefinition();
-
+void MainFrame::CreateFrame() {
     // make menu bar
     wxMenuBar* menu_bar = new wxMenuBar;
     wxMenu* menu_file = new wxMenu;
@@ -94,47 +93,44 @@ void MainFrame::CreateFrame() {
     SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
-void MainFrame::JsonLoadFailed(std::string msg) {
+void MainFrame::JsonLoadFailed(std::string msg, nlohmann::json& definition) {
     *m_ostream << "[LoadDefinition] " << msg << std::endl;
     ShowErrorDialog(msg);
-    m_sub_definition = json_utils::GetDefaultDefinition();
-    m_definition["gui"] = nlohmann::json::array({ m_sub_definition });
+    nlohmann::json sub_definition = json_utils::GetDefaultDefinition();
+    definition["gui"] = nlohmann::json::array({ sub_definition });
 }
 
 // read gui_definition.json
-void MainFrame::CheckDefinition() {
+void MainFrame::CheckDefinition(nlohmann::json& definition) {
     std::string msg;
 
-    if (m_definition == nlohmann::json({})) {
+    if (definition.empty()) {
         msg = "Fialed to load gui_definition.json (Can't read)";
-        m_definition = nlohmann::json({});
-        JsonLoadFailed(msg);
+        JsonLoadFailed(msg, definition);
         return;
     }
 
     // check help urls
-    if (m_definition.contains("help")) {
+    if (definition.contains("help")) {
         try {
-            json_utils::CheckHelpURLs(m_definition);
+            json_utils::CheckHelpURLs(definition);
         }
         catch(std::exception& e) {
             msg = "Fialed to load help URLs (" + std::string(e.what()) + ")";
             *m_ostream << "[LoadDefinition] " << msg << std::endl;
-            m_definition.erase("help");
+            definition.erase("help");
         }
     }
 
     // check panel definitions
     try {
-        json_utils::CheckDefinition(m_definition);
+        json_utils::CheckDefinition(definition);
     }
     catch (std::exception& e) {
         msg = "Fialed to load gui_definition.json (" + std::string(e.what()) + ")";
-        JsonLoadFailed(msg);
+        JsonLoadFailed(msg, definition);
         return;
     }
-
-    m_sub_definition = m_definition["gui"][0];
 
     *m_ostream << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
 }
@@ -257,12 +253,28 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
 }
 
 void MainFrame::OpenURL(wxCommandEvent& event) {
-    wxString url = wxString::FromUTF8(m_definition["help"][event.GetId()
-        - 1 - wxID_HIGHEST - m_definition["gui"].size()]["url"]);
-    *m_ostream << "[OpenURL] " << url << std::endl;
+    size_t id = event.GetId() - 1 - wxID_HIGHEST - m_definition["gui"].size();
+    nlohmann::json help = m_definition["help"][id];
+    std::string type = help["type"];
+    wxString url;
+    std::string tag;
+    if (type == "url") {
+        url = wxString::FromUTF8(help["url"]);
+        tag = "[OpenURL] ";
+    } else if (type == "file") {
+        url = wxString::FromUTF8(help["path"]);
+        tag = "[OpenFile] ";
+    } else {
+        ShowErrorDialog("Unsupported help type.");
+        return;
+    }
+    *m_ostream << tag << url << std::endl;
+    if (type == "file") {
+        url = "file:" + url;
+    }
     bool success = wxLaunchDefaultBrowser(url);
     if (!success) {
-        *m_ostream << "[OpenURL] Failed to open URL by an unexpected error." << std::endl;
+        *m_ostream << tag << "Failed to open " << type << " by an unexpected error." << std::endl;
     }
 }
 

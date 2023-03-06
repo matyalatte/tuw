@@ -1,0 +1,38 @@
+{
+    "gui": [
+        {
+            "label": "Alternate Spellings",
+            "command": "echo folder: %% & echo choice: %% & echo check_array: %% & echo textbox: %%",
+            "title": "Alternate Spellings Sample",
+            "component_array": [
+                {
+                    "type": "static_text",
+                    "label": "Still working with alternate spellings!"
+                },
+                {
+                    "type": "dir",
+                    "label": "Some folder path",
+                    "placeholder": "empty message!",
+                    "add_quote": true
+                },
+                {
+                    "type": "combo",
+                    "label": "combo box",
+                    "item_array": ["value1", "value2", "value3"]
+                },
+                {
+                    "type": "checks",
+                    "label": "options",
+                    "items": ["flag1", "flag2", "flag3", "flag4"],
+                    "values": [" --f1", " --f2", " --f3", " --f4"],
+                    "default_array": [true, false, false, true],
+                    "tooltips": ["falg1!", "flag2!", "flag3!", "flag4!"]
+                },
+                {
+                    "type": "text_box",
+                    "label": "text box"
+                }
+            ]
+        }
+    ]
+}
