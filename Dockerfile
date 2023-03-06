@@ -61,9 +61,10 @@ RUN ../configure --disable-shared\
     --disable-webrequest\
     --disable-zipstream\
     --disable-docview\
+    --disable-help\
+    --disable-mshtmlhelp\
     --disable-html\
     --disable-htmlhelp\
-    --disable-mshtmlhelp\
     --disable-xrc\
     --disable-aui\
     --disable-propgrid\
