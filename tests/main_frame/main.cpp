@@ -156,7 +156,7 @@ TEST(MainFrameTest, DeleteFrame) {
     main_frame->OnClose(event);
 }
 
-void TestConfig(nlohmann::json test_json,std::string config) {
+void TestConfig(nlohmann::json test_json, std::string config) {
     nlohmann::json test_config = json_utils::LoadJson(config);
     MainFrame* main_frame = new MainFrame(test_json, test_config);
     main_frame->SaveConfig();

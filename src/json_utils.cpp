@@ -55,7 +55,7 @@ namespace json_utils {
         BOOL_ARRAY
     };
 
-    void Raise(std::string& msg) {
+    void Raise(std::string msg) {
         throw std::runtime_error(msg);
     }
 
@@ -157,7 +157,7 @@ namespace json_utils {
     void KeyToSingular(nlohmann::json& c, std::string singular) {
         std::vector<std::string> extends = {"s", "_array"};
         std::string plural;
-        for (std::string ext: extends) {
+        for (std::string ext : extends) {
             plural = singular + ext;
             CorrectKey(c, plural, singular);
         }
@@ -190,7 +190,7 @@ namespace json_utils {
         }
 
         size_t offset = std::string::size_type(0);
-        while (s.length() > offset + 1) {
+        while (s.length() > offset) {
             size_t pos = s.find(delimiter, offset);
             if (pos == std::string::npos) {
                 tokens.push_back(s.substr(offset));
@@ -324,6 +324,37 @@ namespace json_utils {
         CheckJsonType(sub_definition, "component_ids", JsonType::STR_ARRAY, "", CAN_SKIP);
         CheckIndexDuplication(comp_ids);
         sub_definition["component_ids"] = comp_ids;
+    }
+
+    // vX.Y.Z -> 10000*X + 100 * Y + Z
+    int VersionStringToInt(std::string string) {
+        try {
+            std::vector<std::string> version_strings = SplitString(string, {"."});
+            int digit = 10000;
+            int version_int = 0;
+            for (std::string str : version_strings) {
+                version_int += digit * std::stoi(str);
+                if (digit == 1) { break; }
+                digit /= 100;
+            }
+            return version_int;
+        }
+        catch(std::exception& e) {
+            Raise("Can NOT convert '" + string + "' to int.");
+        }
+    }
+
+    void CheckVersion(nlohmann::json& definition) {
+        std::vector<std::string> keys = {"recommended", "minimum_required"};
+        for (std::string k : keys) {
+            CorrectKey(definition, k + "_version", k);
+            if (definition.contains(k)) {
+                CheckJsonType(definition, k, JsonType::STRING);
+                std::string version = definition[k];
+                CheckJsonType(definition, k + "_int", JsonType::INTEGER, "", CAN_SKIP);
+                definition[k + "_int"] = VersionStringToInt(version);
+            }
+        }
     }
 
     void CheckDefinition(nlohmann::json& definition) {

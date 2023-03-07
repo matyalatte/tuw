@@ -44,8 +44,9 @@ TEST(JsonCheckTest, checkGUISuccess) {
 
 TEST(JsonCheckTest, checkGUISuccess2) {
     nlohmann::json test_json = GetTestJson();
-    test_json["gui"][0]["components"][5]["item_array"] = test_json["gui"][0]["components"][5]["item"];
-    test_json["gui"][0]["components"][5].erase("item");
+    nlohmann::json comp = test_json["gui"][0]["components"][5];
+    comp["item_array"] = comp["item"];
+    comp.erase("item");
     json_utils::CheckDefinition(test_json);
 }
 

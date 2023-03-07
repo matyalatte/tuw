@@ -11,6 +11,7 @@ namespace json_utils {
     bool SaveJson(nlohmann::json& json, std::string file);
 
     nlohmann::json GetDefaultDefinition();
+    void CheckVersion(nlohmann::json& definition);
     void CheckDefinition(nlohmann::json& definition);
     void CheckSubDefinition(nlohmann::json& sub_definition);
     void CheckHelpURLs(const nlohmann::json& definition);

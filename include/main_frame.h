@@ -44,7 +44,7 @@ class MainFrame : public wxFrame {
     void UpdateConfig();
     void ShowErrorDialog(wxString msg);
     void ShowSuccessDialog(wxString msg);
-    void JsonLoadFailed(std::string msg, nlohmann::json& definition);
+    void JsonLoadFailed(std::string msg);
 
  public:
     MainFrame(nlohmann::json definition = nlohmann::json({}),
