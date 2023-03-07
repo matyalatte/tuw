@@ -1,0 +1,11 @@
+{
+    "recommended": "1.1.0",
+    "minimum_required": "1.0.0",
+    "gui": [
+        {
+            "label": "You can't see this GUI.",
+            "command": "echo Hello!",
+            "components": []
+        }
+    ]
+}

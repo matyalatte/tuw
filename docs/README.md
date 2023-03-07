@@ -1,4 +1,4 @@
-# Simple-Command-Runner ver 0.2.3
+# Simple-Command-Runner ver 0.3.0
 
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/test.yml/badge.svg)

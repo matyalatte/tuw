@@ -23,3 +23,5 @@ You can use them if the standard one is uncomfortable for you.
 |  tooltip  |  tooltips, tooltip_array  |
 |  default  |  defaults, default_array  |
 |  empty_message  |  placeholder  |
+|  recommended  |  recommended_version  |
+|  minimum_required  |  minimum_required_version  |

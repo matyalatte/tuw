@@ -10,5 +10,5 @@ target_link_libraries(json_check
 
 add_test(
     NAME json_check
-    COMMAND $<TARGET_FILE:json_check> "${CMAKE_CURRENT_SOURCE_DIR}/broken.json" "${PROJECT_SOURCE_DIR}/examples/8_all_keys/gui_definition.json"
+    COMMAND $<TARGET_FILE:json_check> "${CMAKE_CURRENT_SOURCE_DIR}/broken.json" "${PROJECT_SOURCE_DIR}/examples/9_all_keys/gui_definition.json"
     )
