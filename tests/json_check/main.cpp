@@ -130,3 +130,35 @@ TEST(JsonCheckTest, checkHelpFail2) {
     test_json["help"][0]["label"] = 3;
     CheckHelpError(test_json, "['label'] should be a string.");
 }
+
+TEST(JsonCheckTest, checkVersionSuccess) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["recommended"] = "0.3.0";
+    json_utils::CheckVersion(test_json);
+    EXPECT_FALSE(test_json["not_recommended"]);
+}
+
+TEST(JsonCheckTest, checkVersionFail) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["recommended"] = "0.2.3";
+    json_utils::CheckVersion(test_json);
+    EXPECT_TRUE(test_json["not_recommended"]);
+}
+
+TEST(JsonCheckTest, checkVersionSuccess2) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["minimum_required"] = "0.3.0";
+    json_utils::CheckVersion(test_json);
+}
+
+TEST(JsonCheckTest, checkVersionFail2) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["minimum_required"] = "1.0.0";
+    try {
+        json_utils::CheckVersion(test_json);
+        FAIL();
+    }
+    catch(std::exception& err) {
+        EXPECT_STREQ("Version 1.0.0 is required.", err.what());
+    }
+}

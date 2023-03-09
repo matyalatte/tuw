@@ -1,8 +1,9 @@
 ver 0.3.0
 - Added "file" type to help menu.
 - Added "tooltip" option to all components.
-- Supported alternate spellings for some json keys and values.
 - Added options to check tool version.
+- Supported alternate spellings for some json keys and values.
+- Fixed a bug that error dialog can't show non-ascii characters.
 - Updated wxWidgets to v3.2.2
 - Removed more codes from wxWidgets to reduce the binary size.
 

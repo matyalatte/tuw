@@ -1,7 +1,6 @@
 #include "main_frame.h"
 
 const char* VERSION = "0.3.0";
-const int VERSION_INT = 300;
 
 #ifndef _WIN32
 void MainFrame::CalcExePath() {
@@ -94,9 +93,12 @@ void MainFrame::CreateFrame() {
     SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
-void MainFrame::JsonLoadFailed(std::string msg) {
-    *m_ostream << "[LoadDefinition] Error: " << msg << std::endl;
-    ShowErrorDialog(msg);
+void MainFrame::JsonLoadFailed(std::string msg, nlohmann::json& definition) {
+    wxString wxmsg = wxString::FromUTF8(msg);
+    *m_ostream << "[LoadDefinition] Error: " << wxmsg << std::endl;
+    ShowErrorDialog(wxmsg);
+    nlohmann::json sub_definition = json_utils::GetDefaultDefinition();
+    definition["gui"] = nlohmann::json::array({ sub_definition });
 }
 
 // read gui_definition.json
@@ -105,40 +107,25 @@ void MainFrame::CheckDefinition(nlohmann::json& definition) {
 
     if (definition.empty()) {
         msg = "Fialed to load gui_definition.json (Can't read)";
-        JsonLoadFailed(msg);
-        nlohmann::json sub_definition = json_utils::GetDefaultDefinition();
-        definition["gui"] = nlohmann::json::array({ sub_definition });
+        JsonLoadFailed(msg, definition);
         return;
     }
 
+    // Check tool version
     try {
         json_utils::CheckVersion(definition);
         std::string key = "recommended";
         if (definition.contains(key)) {
             std::string version = definition[key];
-            int version_int = definition[key + "_int"];
-            if (version_int != VERSION_INT) {
+            if (definition["not_" + key]) {
                 msg = "Version " + version + " is " + key + ".";
                 *m_ostream << "[LoadDefinition] Warning: " << msg << std::endl;
             }
         }
     }
     catch(std::exception& e) {
-        msg = "Invalid version info (" + std::string(e.what()) + ")";
-        JsonLoadFailed(msg);
-    }
-
-    if (definition.contains("minimum_required")) {
-        std::string key = "minimum_required";
-        std::string required = definition[key];
-        int required_int = definition[key + "_int"];
-        if (VERSION_INT < required_int) {
-            msg = "Version " + required + " is required.";
-            JsonLoadFailed(msg);
-            nlohmann::json sub_definition = json_utils::GetDefaultDefinition();
-            definition["gui"] = nlohmann::json::array({ sub_definition });
-            return;
-        }
+        JsonLoadFailed(std::string(e.what()), definition);
+        return;
     }
 
     // check help urls
@@ -148,7 +135,9 @@ void MainFrame::CheckDefinition(nlohmann::json& definition) {
         }
         catch(std::exception& e) {
             msg = "Fialed to load help URLs (" + std::string(e.what()) + ")";
-            JsonLoadFailed(msg);
+            wxString wxmsg = wxString::FromUTF8(msg);
+            *m_ostream << "[LoadDefinition] Error: " << wxmsg << std::endl;
+            ShowErrorDialog(wxmsg);
             definition.erase("help");
         }
     }
@@ -159,9 +148,7 @@ void MainFrame::CheckDefinition(nlohmann::json& definition) {
     }
     catch (std::exception& e) {
         msg = "Fialed to load gui_definition.json (" + std::string(e.what()) + ")";
-        JsonLoadFailed(msg);
-        nlohmann::json sub_definition = json_utils::GetDefaultDefinition();
-        definition["gui"] = nlohmann::json::array({ sub_definition });
+        JsonLoadFailed(msg, definition);
         return;
     }
 

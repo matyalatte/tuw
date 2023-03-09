@@ -1,5 +1,7 @@
 #include "json_utils.h"
 
+const int VERSION_INT = 300;
+
 namespace json_utils {
     nlohmann::json LoadJson(std::string file) {
         std::ifstream istream(file);
@@ -345,14 +347,23 @@ namespace json_utils {
     }
 
     void CheckVersion(nlohmann::json& definition) {
-        std::vector<std::string> keys = {"recommended", "minimum_required"};
-        for (std::string k : keys) {
-            CorrectKey(definition, k + "_version", k);
-            if (definition.contains(k)) {
-                CheckJsonType(definition, k, JsonType::STRING);
-                std::string version = definition[k];
-                CheckJsonType(definition, k + "_int", JsonType::INTEGER, "", CAN_SKIP);
-                definition[k + "_int"] = VersionStringToInt(version);
+        std::string k = "recommended";
+        CorrectKey(definition, k + "_version", k);
+        if (definition.contains(k)) {
+            CheckJsonType(definition, k, JsonType::STRING);
+            int recom_int = VersionStringToInt(definition[k]);
+            CheckJsonType(definition, "not_" + k, JsonType::BOOLEAN, "", CAN_SKIP);
+            definition["not_" + k] = VERSION_INT != recom_int;
+        }
+        k = "minimum_required";
+        CorrectKey(definition, k + "_version", k);
+        if (definition.contains(k)) {
+            CheckJsonType(definition, k, JsonType::STRING);
+            std::string required = definition[k];
+            int required_int = VersionStringToInt(required);
+            if (VERSION_INT < required_int) {
+                std::string msg = "Version " + required + " is required.";
+                Raise(msg);
             }
         }
     }
