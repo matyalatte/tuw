@@ -6,6 +6,7 @@ ver 0.3.0
 - Fixed a bug that error dialog can't show non-ascii characters.
 - Updated wxWidgets to v3.2.2
 - Removed more codes from wxWidgets to reduce the binary size.
+- Refined codes.
 
 ver 0.2.3
 - Fixed errors when using non-ascii characters in labels.

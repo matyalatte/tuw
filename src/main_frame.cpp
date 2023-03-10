@@ -285,7 +285,7 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
         url = wxString::FromUTF8(help["path"]);
         tag = "[OpenFile] ";
     } else {
-        ShowErrorDialog("Unsupported help type.");
+        ShowErrorDialog("Unsupported help type: " + type);
         return;
     }
     *m_ostream << tag << url << std::endl;
@@ -312,31 +312,23 @@ void MainFrame::UpdateFrame(wxCommandEvent& event) {
     Refresh();
 }
 
-// put components
 void MainFrame::UpdatePanel() {
-    std::string str = "Simple Command Runner";
-    str = m_sub_definition["label"];
-    *m_ostream << "[UpdatePanel] " << str.c_str() << std::endl;
-    if (m_sub_definition.contains("window_name")) {
-        SetLabel(wxString::FromUTF8(m_sub_definition["window_name"]));
-    } else {
-        SetLabel("Simple Command Runner");
-    }
+    wxString label = wxString::FromUTF8(m_sub_definition["label"]);
+    *m_ostream << "[UpdatePanel] " << label << std::endl;
+    wxString window_name = wxString::FromUTF8(
+        m_sub_definition.value("window_name", "Simple Command Runner"));
+    SetLabel(window_name);
 
-    if (m_sub_definition["components"].size() == 0) {
-        m_sub_definition["components"] = std::vector<nlohmann::json>();
-    }
     wxBoxSizer* main_sizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer* comp_sizer = new wxBoxSizer(wxVERTICAL);
     comp_sizer->SetMinSize(wxSize(200, 25));
     m_panel = new wxPanel(this);
 
+    // put components
     std::vector<nlohmann::json> comp = m_sub_definition["components"];
     m_components.clear();
     m_components.shrink_to_fit();
     Component* new_comp = nullptr;
-
-    // put components
     for (nlohmann::json c : comp) {
         new_comp = Component::PutComponent(m_panel, comp_sizer, c);
         if (new_comp != nullptr) {
@@ -349,12 +341,7 @@ void MainFrame::UpdatePanel() {
     }
 
     // put a button
-    wxString button;
-    if (m_sub_definition.contains("button")) {
-        button = wxString::FromUTF8(m_sub_definition["button"]);
-    } else {
-        button = "Run";
-    }
+    wxString button = wxString::FromUTF8(m_sub_definition.value("button", "Run"));
     m_run_button = new wxButton(m_panel, wxID_EXECUTE, button);
     comp_sizer->Add(m_run_button, 0, wxFIXED_MINSIZE | wxALIGN_CENTER);
 

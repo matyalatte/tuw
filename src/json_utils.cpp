@@ -1,8 +1,8 @@
 #include "json_utils.h"
 
-const int VERSION_INT = 300;
-
 namespace json_utils {
+    const int VERSION_INT = 300;
+
     nlohmann::json LoadJson(std::string file) {
         std::ifstream istream(file);
         nlohmann::json json;
@@ -302,6 +302,8 @@ namespace json_utils {
                 KeyToSingular(c, "tooltip");
                 CheckJsonType(c, "tooltip", JsonType::STR_ARRAY, label, CAN_SKIP);
                 CheckArraySize(c, "tooltip");
+            } else if (type != "folder" && type != "text" && type != "static_text") {
+                Raise("Unknown component type: " + type);
             }
             if (type == "text" || type == "file" || type == "folder") {
                 CheckJsonType(c, "default", JsonType::STRING, label, CAN_SKIP);
@@ -380,10 +382,13 @@ namespace json_utils {
         for (nlohmann::json h : definition["help"]) {
             CheckJsonType(h, "type", JsonType::STRING);
             CheckJsonType(h, "label", JsonType::STRING);
-            if (h["type"] == "url") {
+            std::string type = h["type"];
+            if (type == "url") {
                 CheckJsonType(h, "url", JsonType::STRING);
-            } else if (h["type"] == "file") {
+            } else if (type == "file") {
                 CheckJsonType(h, "path", JsonType::STRING);
+            } else {
+                Raise("Unsupported help type: " + type);
             }
         }
     }

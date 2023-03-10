@@ -51,7 +51,7 @@ Component* Component::PutComponent(wxWindow* panel, wxBoxSizer* sizer, nlohmann:
     } else if (type == "text") {  // text box
         comp = new TextBox(panel, sizer, j);
     } else {
-        std::cout << "[UpdatePanel] Unknown component type detected. (" << type << ")" << std::endl;
+        std::cout << "Unknown component type detected. (" + type << ")" << std::endl;
     }
     return comp;
 }
@@ -64,9 +64,7 @@ const int DEFAULT_SIZER_FLAG = wxFIXED_MINSIZE | wxALIGN_LEFT | wxBOTTOM;
 StaticText::StaticText(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     : Component(j, NOT_STRING) {
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, m_label);
-    if (j.contains("tooltip")) {
-        text->SetToolTip(wxString::FromUTF8(j["tooltip"]));
-    }
+    text->SetToolTip(wxString::FromUTF8(j.value("tooltip", "")));
     sizer->Add(text, 0, DEFAULT_SIZER_FLAG , 13);
 }
 
@@ -89,12 +87,7 @@ nlohmann::json StringComponentBase::GetConfig() {
 // File Picker
 FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     : StringComponentBase(panel, sizer, j) {
-    wxString ext;
-    if (j.contains("extension")) {
-        ext = wxString::FromUTF8(j["extension"]);
-    } else {
-        ext = "any files (*)|*";
-    }
+    wxString ext = wxString::FromUTF8(j.value("extension", "any files (*)|*"));
     wxString value = wxString::FromUTF8(j.value("default", ""));
     wxString empty_message = wxString::FromUTF8(j.value("empty_message", ""));
     CustomFilePicker* picker = new CustomFilePicker(panel, wxID_ANY,
@@ -104,9 +97,7 @@ FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
 
     sizer->Add(picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
     picker->DragAcceptFiles(true);
-    if (j.contains("tooltip")) {
-        picker->SetToolTip(wxString::FromUTF8(j["tooltip"]));
-    }
+    picker->SetToolTip(wxString::FromUTF8(j.value("tooltip", "")));
     m_widget = picker;
 }
 
@@ -134,9 +125,7 @@ DirPicker::DirPicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
 
     sizer->Add(picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
     picker->DragAcceptFiles(true);
-    if (j.contains("tooltip")) {
-        picker->SetToolTip(wxString::FromUTF8(j["tooltip"]));
-    }
+    picker->SetToolTip(wxString::FromUTF8(j.value("tooltip", "")));
     m_widget = picker;
 }
 
@@ -162,19 +151,14 @@ Choice::Choice(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
         });
     wxChoice* choice = new wxChoice(panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxitems);
     sizer->Add(choice, 0, DEFAULT_SIZER_FLAG, 13);
-    if (j.contains("default") && j["item"].size() > j["default"]) {
-        choice->SetSelection(j["default"]);
-    } else {
-        choice->SetSelection(0);
-    }
+    choice->SetSelection(j.value("default", 0) % items.size());
+
     if (j.contains("value") && j["value"].size() == j["item"].size()) {
         SetValues(j["value"]);
     } else {
         SetValues(j["item"]);
     }
-    if (j.contains("tooltip")) {
-        choice->SetToolTip(wxString::FromUTF8(j["tooltip"]));
-    }
+    choice->SetToolTip(wxString::FromUTF8(j.value("tooltip", "")));
     m_widget = choice;
 }
 
@@ -195,26 +179,14 @@ nlohmann::json Choice::GetConfig() {
     return config;
 }
 
-void SetDefaultForCheckBox(wxCheckBox* check, nlohmann::json j) {
-    if (j.is_boolean()) {
-        check->SetValue(j);
-    } else {
-        check->SetValue(j["default"] != 0);
-    }
-}
-
 // CheckBox
 CheckBox::CheckBox(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     : Component(j, HAS_STRING) {
     wxCheckBox* check = new wxCheckBox(panel, wxID_ANY, m_label);
     sizer->Add(check, 0, DEFAULT_SIZER_FLAG, 13);
     m_value = j.value("value", m_label.ToUTF8());
-    if (j.contains("default")) {
-        SetDefaultForCheckBox(check, j["default"]);
-    }
-    if (j.contains("tooltip")) {
-        check->SetToolTip(wxString::FromUTF8(j["tooltip"]));
-    }
+    check->SetValue(j.value("default", false));
+    check->SetToolTip(wxString::FromUTF8(j.value("tooltip", "")));
     m_widget = check;
 }
 
@@ -244,6 +216,9 @@ CheckArray::CheckArray(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
     for (int i = 0; i < j["item"].size(); i++) {
         wxCheckBox* check = new wxCheckBox(panel, wxID_ANY,
                            wxString::FromUTF8(j["item"][i]));
+        if (j.contains("default")) {
+            check->SetValue(j["default"][i]);
+        }
         if (j.contains("tooltip")) {
             check->SetToolTip(wxString::FromUTF8(j["tooltip"][i]));
         }
@@ -254,11 +229,6 @@ CheckArray::CheckArray(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
         SetValues(j["value"]);
     } else {
         SetValues(j["item"]);
-    }
-    if (j.contains("default")) {
-        for (int i = 0; i < checks->size(); i++) {
-            SetDefaultForCheckBox((*checks)[i], j["default"][i]);
-        }
     }
     m_widget = checks;
 }
@@ -305,9 +275,7 @@ TextBox::TextBox(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
         wxDefaultPosition, wxSize(350, 23));
 
     sizer->Add(textbox, 0, wxALIGN_LEFT | wxBOTTOM, 13);
-    if (j.contains("tooltip")) {
-        textbox->SetToolTip(wxString::FromUTF8(j["tooltip"]));
-    }
+    textbox->SetToolTip(wxString::FromUTF8(j.value("tooltip", "")));
     m_widget = textbox;
 }
 
