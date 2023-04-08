@@ -43,6 +43,7 @@ std::string GetActualText(Picker* picker) {
 
 TEST(CustomWxObjTest, ShowEmptyMessage) {
     TestFrame* frame = new TestFrame();
+    wxYield();
     frame->m_file_picker->GetTextCtrl()->SetFocus();
     wxYield();
     EXPECT_STREQ(GetText(frame->m_file_picker).c_str(), "");

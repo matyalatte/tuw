@@ -24,7 +24,7 @@ You can put some documents in menu bar.
 ]
 ```
 
-- `type`: Document type. `url` and `file` are available.  
-- `label`: String that will be shown in menu bar.  
-- `url`: URL for `url` type document. It'll be opened in user's default browser.  
-- `path`: File path for `file` type document. It'll be opened in user's default application.  
+-   `type`: Document type. `url` and `file` are available.  
+-   `label`: String that will be shown in menu bar.  
+-   `url`: URL for `url` type document. It'll be opened in user's default browser.  
+-   `path`: File path for `file` type document. It'll be opened in user's default application.  

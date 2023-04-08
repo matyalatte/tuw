@@ -3,7 +3,7 @@
 namespace json_utils {
     const int VERSION_INT = 300;
 
-    nlohmann::json LoadJson(std::string file) {
+    nlohmann::json LoadJson(const std::string& file) {
         std::ifstream istream(file);
         nlohmann::json json;
         if (!istream) {
@@ -19,7 +19,7 @@ namespace json_utils {
         return json;
     }
 
-    bool SaveJson(nlohmann::json& json, std::string file) {
+    bool SaveJson(nlohmann::json& json, const std::string& file) {
         std::ofstream ostream(file);
 
         if (!ostream) {
@@ -149,23 +149,21 @@ namespace json_utils {
         return def;
     }
 
-    void CorrectKey(nlohmann::json& j, std::string false_key, std::string true_key) {
+    void CorrectKey(nlohmann::json& j, const std::string& false_key, const std::string& true_key) {
         if (!j.contains(true_key) && j.contains(false_key)) {
             j[true_key] = j[false_key];
             j.erase(false_key);
         }
     }
 
-    void KeyToSingular(nlohmann::json& c, std::string singular) {
+    void KeyToSingular(nlohmann::json& c, const std::string& singular) {
         std::vector<std::string> extends = {"s", "_array"};
-        std::string plural;
         for (std::string ext : extends) {
-            plural = singular + ext;
-            CorrectKey(c, plural, singular);
+            CorrectKey(c, singular + ext, singular);
         }
     }
 
-    void CheckArraySize(nlohmann::json& c, std::string key) {
+    void CheckArraySize(nlohmann::json& c, const std::string& key) {
         if (c.contains(key) && (c[key].size() != c["item"].size())) {
             std::string label = c["label"];
             Raise(GetLabel(label, key) + " and " +
@@ -247,8 +245,8 @@ namespace json_utils {
         sub_definition[COMMAND] = splitted_cmd;
     }
 
-    void CorrectValue(nlohmann::json& j, std::string key,
-                      std::string false_value, std::string true_value) {
+    void CorrectValue(nlohmann::json& j, const std::string& key,
+                      const std::string& false_value, const std::string& true_value) {
         if (j[key] == false_value) {
             j[key] = true_value;
         }
@@ -331,7 +329,7 @@ namespace json_utils {
     }
 
     // vX.Y.Z -> 10000*X + 100 * Y + Z
-    int VersionStringToInt(std::string string) {
+    int VersionStringToInt(const std::string& string) {
         try {
             std::vector<std::string> version_strings = SplitString(string, {"."});
             int digit = 10000;

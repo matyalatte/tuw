@@ -7,8 +7,8 @@
 #include <nlohmann/json.hpp>
 
 namespace json_utils {
-    nlohmann::json LoadJson(std::string file);
-    bool SaveJson(nlohmann::json& json, std::string file);
+    nlohmann::json LoadJson(const std::string& file);
+    bool SaveJson(nlohmann::json& json, const std::string& file);
 
     nlohmann::json GetDefaultDefinition();
     void CheckVersion(nlohmann::json& definition);
