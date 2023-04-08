@@ -1,12 +1,17 @@
 # Building Workflow for Ubuntu and MacOS
 
 Building workflow for Ubuntu and MacOS.  
-If your OS is Ubuntu, note that the workflow will only work on 20.04 or later.  
-And the built executable won't work on old versions like 18.04.
 
-## 0. Setup for Ubuntu
+## 0. Requirements
 
-If your OS is Ubuntu, type `sudo apt install -y wget ca-certificates build-essential libgtk-3-dev git cmake` on the Terminal.
+- xcode (for macOS)
+- build-essential (for linux)
+- libgtk-3-dev (for linux)
+- cmake (**3.25** or later)
+- wget
+
+> CMake should be 3.25 or later.  
+> Or use [v0.2.3](https://github.com/matyalatte/Simple-Command-Runner/tree/v0.2.3) that supports old cmake versions.  
 
 ## 1. Build wxWidgets
 

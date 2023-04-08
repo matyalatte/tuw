@@ -13,8 +13,8 @@ There are more components you can use.
     {
         "type": "choice",
         "label": "num",
-        "items": ["one", "two", "three"],
-        "values": ["1", "2", "3"],
+        "item": ["one", "two", "three"],
+        "value": ["1", "2", "3"],
         "default": 1
     },
     {
@@ -24,13 +24,13 @@ There are more components you can use.
         "default": true
     },
     {
-        "type": "text_box",
+        "type": "text",
         "label": "Some text"
     }
 ]
 ```
 
 -   `static_text` is a string component. You don't need to put `%*%` in command for this component.
--   `choice` is a combo box. `values` will be inputted to command.
+-   `choice` is a combo box. `value` will be inputted to command.
 -   `check` is a check box. `value` will be inputted to command if you check the check box.
--   `text_box` is a text box.
+-   `text` is a text box.

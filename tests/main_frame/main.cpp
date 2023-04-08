@@ -57,10 +57,12 @@ nlohmann::json GetTestJson() {
     return test_json;
 }
 
+nlohmann::json dummy_config = {{"dummy", 0}};
+
 TEST(MainFrameTest, InvalidDefinition) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][1]["components"][4]["default"] = "number";
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     EXPECT_EQ(json_utils::GetDefaultDefinition(), main_frame->GetDefinition()["gui"][0]);
     EXPECT_TRUE(main_frame->GetDefinition().contains("help"));
 }
@@ -68,7 +70,7 @@ TEST(MainFrameTest, InvalidDefinition) {
 TEST(MainFrameTest, InvalidHelp) {
     nlohmann::json test_json = GetTestJson();
     test_json["help"][0]["url"] = 1;
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     EXPECT_FALSE(main_frame->GetDefinition().contains("help"));
     EXPECT_EQ(test_json["gui"][0]["components"],
         main_frame->GetDefinition()["gui"][0]["components"]);
@@ -78,23 +80,23 @@ TEST(MainFrameTest, GetCommand1) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][0] = json_utils::GetDefaultDefinition();
     test_json["gui"][0]["command"] = "command!";
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     EXPECT_STREQ("command!", main_frame->GetCommand().ToUTF8());
 }
 
 TEST(MainFrameTest, GetCommand2) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][0] = test_json["gui"][1];
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     std::string expected = "echo file: \"test.txt\" & echo folder: \"testdir\"";
     expected += " & echo choice: value3 & echo check: flag!";
-    expected += " & echo check_array: falg3 & echo textbox: remove this text!";
+    expected += " & echo check_array:  --f3 & echo textbox: remove this text!";
     EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().ToUTF8());
 }
 
 TEST(MainFrameTest, GetCommand3) {
     nlohmann::json test_json = GetTestJson();
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     std::string expected = "echo file:  & echo folder:  & echo choice: value1";
     expected += " & echo check:  & echo check_array:  & echo textbox: ";
     EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().ToUTF8());
@@ -102,7 +104,7 @@ TEST(MainFrameTest, GetCommand3) {
 
 TEST(MainFrameTest, RunCommandSuccess) {
     nlohmann::json test_json = GetTestJson();
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
 
     // The json file should not be fixed by app.
     ASSERT_EQ(test_json["help"], main_frame->GetDefinition()["help"]);
@@ -118,7 +120,7 @@ TEST(MainFrameTest, RunCommandFail) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][0] = json_utils::GetDefaultDefinition();
     test_json["gui"][0]["command"] = "I'll fail";
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
 
     std::array<std::string, 2> msg = main_frame->RunCommand();
     EXPECT_STREQ("", msg[0].c_str());
@@ -127,21 +129,21 @@ TEST(MainFrameTest, RunCommandFail) {
 
 TEST(MainFrameTest, ClickRunButton) {
     nlohmann::json test_json = GetTestJson();
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     wxCommandEvent event = wxCommandEvent();
     main_frame->ClickButton(event);
 }
 
 TEST(MainFrameTest, UpdateFrame) {
     nlohmann::json test_json = GetTestJson();
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     wxCommandEvent event = wxCommandEvent(wxEVT_NULL, wxID_HIGHEST + 2);
     main_frame->UpdateFrame(event);
 }
 
 TEST(MainFrameTest, ClickRunButtonShowLast) {
     nlohmann::json test_json = GetTestJson();
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     wxCommandEvent event = wxCommandEvent(wxEVT_NULL, wxID_HIGHEST + 3);
     main_frame->UpdateFrame(event);
     main_frame->ClickButton(event);
@@ -149,14 +151,14 @@ TEST(MainFrameTest, ClickRunButtonShowLast) {
 
 TEST(MainFrameTest, DeleteFrame) {
     nlohmann::json test_json = GetTestJson();
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json));
+    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     wxCloseEvent event = wxCloseEvent();
     main_frame->OnClose(event);
 }
 
-void TestConfig(nlohmann::json test_json, nlohmann::json config) {
+void TestConfig(nlohmann::json test_json, std::string config) {
     nlohmann::json test_config = json_utils::LoadJson(config);
-    MainFrame* main_frame = new MainFrame(nlohmann::json(test_json), nlohmann::json(test_config));
+    MainFrame* main_frame = new MainFrame(test_json, test_config);
     main_frame->SaveConfig();
     nlohmann::json saved_config = json_utils::LoadJson("gui_config.json");
     EXPECT_EQ(test_config, saved_config);

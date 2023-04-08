@@ -37,14 +37,14 @@
                     "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
                 },
                 {
-                    "type": "text_box",
+                    "type": "text",
                     "label": "Some text"
                 },
                 {
                     "type": "check_array",
                     "label": "options",
-                    "items": ["option1 ", "option2 ", " flag"],
-                    "values": [" --option1 ", " --option2 ", " -flag"],
+                    "item": ["option1 ", "option2 ", " flag"],
+                    "value": [" --option1 ", " --option2 ", " -flag"],
                     "default": [true, false, false]
                 }
             ]

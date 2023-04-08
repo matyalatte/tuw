@@ -37,17 +37,18 @@ class MainFrame : public wxFrame {
     wxPanel* m_panel;
     wxButton* m_run_button;
 
+    void SetUp();
     void CreateFrame();
-    void CheckDefinition();
+    void CheckDefinition(nlohmann::json& definition);
     void UpdatePanel();
     void UpdateConfig();
     void ShowErrorDialog(wxString msg);
     void ShowSuccessDialog(wxString msg);
-    void JsonLoadFailed(std::string msg);
+    void JsonLoadFailed(std::string msg, nlohmann::json& definition);
 
  public:
-    MainFrame();
-    explicit MainFrame(nlohmann::json definition, nlohmann::json config = nlohmann::json({}));
+    MainFrame(nlohmann::json definition = nlohmann::json({}),
+              nlohmann::json config = nlohmann::json({}));
 
     void OnClose(wxCloseEvent& event);
     void OpenURL(wxCommandEvent& event);

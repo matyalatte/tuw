@@ -70,7 +70,7 @@ class DirPicker : public StringComponentBase {
     void SetConfig(nlohmann::json config) override;
 };
 
-class Choice : public Component, MultipleValuesContainer {
+class Choice : public StringComponentBase, MultipleValuesContainer {
  public:
     wxString GetRawString() override;
     Choice(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
@@ -88,7 +88,7 @@ class CheckBox : public Component {
     void SetConfig(nlohmann::json config) override;
 };
 
-class CheckArray : public Component, MultipleValuesContainer {
+class CheckArray : public StringComponentBase, MultipleValuesContainer {
  public:
     wxString GetRawString() override;
     CheckArray(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);

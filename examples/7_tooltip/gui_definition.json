@@ -1,0 +1,31 @@
+{
+    "gui": [
+        {
+            "label": "Sample GUI",
+            "command": "echo file: %% & echo folder: %% & echo options: %%",
+            "components": [
+                {
+                    "type": "static_text",
+                    "label": "Move the mouse cursor to components to see tooltip messages!"
+                },
+                {
+                    "type": "file",
+                    "label": "Some file path",
+                    "extension": "any files (*)|*",
+                    "tooltip": "tooltip for file path!"
+                },
+                {
+                    "type": "folder",
+                    "label": "Some folder path",
+                    "tooltip": "tooltip for folder path!"
+                },
+                {
+                    "type": "check_array",
+                    "label": "options",
+                    "item": ["flag1", "flag2", "flag3"],
+                    "tooltip": ["tooltip for flag1!", "flag2!", "flag3..."]
+                }
+            ]
+        }
+    ]
+}

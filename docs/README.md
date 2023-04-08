@@ -1,4 +1,4 @@
-# Simple-Command-Runner ver 0.2.3
+# Simple-Command-Runner ver 0.3.0
 
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/test.yml/badge.svg)
@@ -20,20 +20,20 @@ No need to use IDE and manage scripts for GUI.
 
 -   Cross-platform
 -   Portable
--   No need IDE for GUI
 -   Define GUI in .json
 -   Save arguments
 -   Able to input paths by drag and drop
 
 ## Downloads
 
-Download the executable from [here](https://github.com/matyalatte/Simple-Command-Runner/releases)
+You can download executables from [the release page](https://github.com/matyalatte/Simple-Command-Runner/releases)
 
 -   `SimpleCommandRunner*-Windows.zip` is for Windows.  
 -   `SimpleCommandRunner*-macOS.tar.bz2` is for Mac.  
 -   `SimpleCommandRunner*-Linux.tar.bz2` is for Ubuntu (20.04 or later).  
 
-(The Linux build won't work on old Ubuntu versions and other linux distributions due to glibc dependences.)  
+> The linux build only supports Ubuntu due to the glibc dependences.  
+> If you want to use it on other linux distributions, you should get the lib or build the executable by yourself.  
 
 ## Examples
 
@@ -50,7 +50,7 @@ I made sure I can build it with the following platforms and compilers.
 
 -   Windows10 + MSVC 19.31
 -   Ubuntu 20.04 + GCC 9.4
--   MacOS 10.15 + AppleClang 12.0
+-   MacOS 11 + AppleClang 13.0
 
 And I think it supports your environment as well if [wxWidgets library](https://github.com/wxWidgets/wxWidgets) supports.  
 

@@ -1,4 +1,6 @@
 {
+    "recommended": "0.3.0",
+    "minimum_required": "0.3.0",
     "gui": [
         {
             "label": "Components Minimal",
@@ -19,7 +21,7 @@
                 {
                     "type": "choice",
                     "label": "combo box",
-                    "items": ["value1", "value2", "value3"]
+                    "item": ["value1", "value2", "value3"]
                 },
                 {
                     "type": "check",
@@ -28,10 +30,10 @@
                 {
                     "type": "check_array",
                     "label": "options",
-                    "items": ["falg1", "falg2", "falg3", "flag4"]
+                    "item": ["flag1", "flag2", "flag3", "flag4"]
                 },
                 {
-                    "type": "text_box",
+                    "type": "text",
                     "label": "text box"
                 }
             ]
@@ -51,7 +53,8 @@
                     "extension": "png or jpg (*.png;*.jpg)|*.png;*.jpg",
                     "empty_message": "Drop a file here!",
                     "default": "test.txt",
-                    "add_quotes": true
+                    "add_quotes": true,
+                    "tooltip": "Tooltip!"
                 },
                 {
                     "type": "folder",
@@ -59,37 +62,42 @@
                     "id": "folder",
                     "empty_message": "Drop a folder here!",
                     "default": "testdir",
-                    "add_quotes": true
+                    "add_quotes": true,
+                    "tooltip": "Tooltip?"
                 },
                 {
                     "type": "check",
                     "label": "Checkbox",
                     "id": "check",
                     "value": "flag!",
-                    "default": true
+                    "default": true,
+                    "tooltip": "check this flag!"
                 },
                 {
                     "type": "choice",
                     "label": "Combo box",
                     "id": "choice",
-                    "items": ["item1", "item2", "item3"],
-                    "values": ["value1", "value2", "value3"],
-                    "default": 2
+                    "item": ["item1", "item2", "item3"],
+                    "value": ["value1", "value2", "value3"],
+                    "default": 2,
+                    "tooltip": "choose one of items."
                 },
                 {
                     "type": "check_array",
                     "label": "Options",
                     "id": "options",
-                    "items": ["item1", "item2", "item3", "item4"],
-                    "values": ["falg1", "falg2", "falg3", "flag4"],
-                    "default": [false, false, true, false]
+                    "item": ["item1", "item2", "item3", "item4"],
+                    "value": [" --f1", " --f2", " --f3", " --f4"],
+                    "default": [false, false, true, false],
+                    "tooltip": ["flag1", "flag2", "flag3", "flag4"]
                 },
                 {
-                    "type": "text_box",
+                    "type": "text",
                     "label": "Text box",
                     "id": "text",
                     "empty_message": "type here!",
-                    "default": "remove this text!"
+                    "default": "remove this text!",
+                    "tooltip": "text box."
                 }
             ]
         },

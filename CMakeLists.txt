@@ -1,5 +1,5 @@
-# Requires cmake3.25 if you will use wxWidgets3.2.x
-cmake_minimum_required(VERSION 3.15)
+# find_package requires 3.25 for wxWidgets3.2.x
+cmake_minimum_required(VERSION 3.25)
 
 # options
 option(BUILD_TESTS "Build all tests." OFF)

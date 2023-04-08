@@ -44,8 +44,9 @@ TEST(JsonCheckTest, checkGUISuccess) {
 
 TEST(JsonCheckTest, checkGUISuccess2) {
     nlohmann::json test_json = GetTestJson();
-    test_json["gui"][0]["components"][5]["item"] = test_json["gui"][0]["components"][5]["items"];
-    test_json["gui"][0]["components"][5].erase("items");
+    nlohmann::json comp = test_json["gui"][0]["components"][5];
+    comp["item_array"] = comp["item"];
+    comp.erase("item");
     json_utils::CheckDefinition(test_json);
 }
 
@@ -67,8 +68,8 @@ TEST(JsonCheckTest, checkGUIFail) {
 
 TEST(JsonCheckTest, checkGUIFail2) {
     nlohmann::json test_json = GetTestJson();
-    test_json["gui"][0]["components"][5].erase("items");
-    CheckGUIError(test_json, "['options']['items'] not found.");
+    test_json["gui"][0]["components"][5].erase("item");
+    CheckGUIError(test_json, "['options']['item'] not found.");
 }
 
 TEST(JsonCheckTest, checkGUIFail3) {
@@ -91,16 +92,16 @@ TEST(JsonCheckTest, checkGUIFail5) {
 
 TEST(JsonCheckTest, checkGUIFail6) {
     nlohmann::json test_json = GetTestJson();
-    test_json["gui"][1]["components"][4]["values"] = nlohmann::json::array();
+    test_json["gui"][1]["components"][4]["value"] = nlohmann::json::array();
     CheckGUIError(test_json,
-        "['Combo box']['values'] and ['Combo box']['items'] should have the same size.");
+        "['Combo box']['value'] and ['Combo box']['item'] should have the same size.");
 }
 
 TEST(JsonCheckTest, checkGUIFail7) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][0]["components"][5]["default"] = nlohmann::json::array();
     CheckGUIError(test_json,
-        "['options']['default'] and ['options']['items'] should have the same size.");
+        "['options']['default'] and ['options']['item'] should have the same size.");
 }
 
 TEST(JsonCheckTest, checkHelpSuccess) {
@@ -128,4 +129,36 @@ TEST(JsonCheckTest, checkHelpFail2) {
     nlohmann::json test_json = GetTestJson();
     test_json["help"][0]["label"] = 3;
     CheckHelpError(test_json, "['label'] should be a string.");
+}
+
+TEST(JsonCheckTest, checkVersionSuccess) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["recommended"] = "0.3.0";
+    json_utils::CheckVersion(test_json);
+    EXPECT_FALSE(test_json["not_recommended"]);
+}
+
+TEST(JsonCheckTest, checkVersionFail) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["recommended"] = "0.2.3";
+    json_utils::CheckVersion(test_json);
+    EXPECT_TRUE(test_json["not_recommended"]);
+}
+
+TEST(JsonCheckTest, checkVersionSuccess2) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["minimum_required"] = "0.3.0";
+    json_utils::CheckVersion(test_json);
+}
+
+TEST(JsonCheckTest, checkVersionFail2) {
+    nlohmann::json test_json = GetTestJson();
+    test_json["minimum_required"] = "1.0.0";
+    try {
+        json_utils::CheckVersion(test_json);
+        FAIL();
+    }
+    catch(std::exception& err) {
+        EXPECT_STREQ("Version 1.0.0 is required.", err.what());
+    }
 }

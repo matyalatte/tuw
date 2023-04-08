@@ -12,8 +12,8 @@
                 {
                     "type": "choice",
                     "label": "num",
-                    "items": ["one", "two", "three"],
-                    "values": ["1", "2", "3"],
+                    "item": ["one", "two", "three"],
+                    "value": ["1", "2", "3"],
                     "default": 1
                 },
                 {
@@ -23,7 +23,7 @@
                     "default": true
                 },
                 {
-                    "type": "text_box",
+                    "type": "text",
                     "label": "Some text"
                 }
             ]

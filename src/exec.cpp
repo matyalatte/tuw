@@ -61,7 +61,7 @@ inline bool IsReturn(const char& input) {
     return input == '\n' || input == '\r';
 }
 
-std::string LastLine(const std::string& input) {
+std::string GetLastLine(const std::string& input) {
     if (input.length() <= 2) return input;
     size_t position = input.length() - 3;
     while ((!IsReturn(input[position])) && position > 0) position--;
@@ -115,7 +115,7 @@ std::array<std::string, 2> Exec(std::ostream& ostream, wxString& cmd) {
         err_msg += ReadStream(estream, ebuf, size);
     }
     // get last line
-    in_msg = LastLine(in_msg);
+    in_msg = GetLastLine(in_msg);
 
     // print and return error messages
     ostream << err_msg;
