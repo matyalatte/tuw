@@ -90,12 +90,12 @@ jobs:
         with:
           directory: 'archive'
           type: 'zip'
-          filename: '${{ env.ZIP_NAME }}_${{ needs.setup.outputs.tag }}_${{ runner.os }}.zip'
+          filename: '${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.zip'
 
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}_${{ needs.setup.outputs.tag }}_${{ runner.os }}.zip
+        run: gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.zip
 
   build_unix:
     strategy:
@@ -137,9 +137,9 @@ jobs:
           cp changelog.txt archive/${{ env.ZIP_NAME }}
           cp license.txt archive/${{ env.ZIP_NAME }}
           cd archive
-          tar -jcvf ${{ env.ZIP_NAME }}_${{ needs.setup.outputs.tag }}_${{ runner.os }}.tar.bz2 ${{ env.ZIP_NAME }}
+          tar -jcvf ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.tar.bz2 ${{ env.ZIP_NAME }}
 
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}_${{ needs.setup.outputs.tag }}_${{ runner.os }}.tar.bz2
+        run: gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.tar.bz2

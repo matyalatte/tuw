@@ -57,7 +57,7 @@ jobs:
           cp changelog.txt archive/${{ env.ZIP_NAME }}
           cp license.txt archive/${{ env.ZIP_NAME }}
           cd archive
-          tar -jcvf ${{ env.ZIP_NAME }}_${{ runner.os }}.tar.bz2 ${{ env.ZIP_NAME }}
+          tar -jcvf ${{ env.ZIP_NAME }}-${{ runner.os }}.tar.bz2 ${{ env.ZIP_NAME }}
 
       - name: Create Release Draft
         id: create-release
@@ -75,4 +75,4 @@ jobs:
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ steps.check-tag.outputs.tag }} archive/${{ env.ZIP_NAME }}_${{ runner.os }}.tar.bz2
+        run: gh release upload ${{ steps.check-tag.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ runner.os }}.tar.bz2
