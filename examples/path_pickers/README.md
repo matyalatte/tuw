@@ -1,8 +1,8 @@
-# Pickers
+# Path Pickers
 
 You can use file pickers and folder pickers.
 
-![Pikcers](https://user-images.githubusercontent.com/69258547/171440880-5948a7f0-5e26-4c38-ab95-8c6daaf67f93.png)
+![PathPikcers](https://user-images.githubusercontent.com/69258547/171440880-5948a7f0-5e26-4c38-ab95-8c6daaf67f93.png)
 
 ```json
 {

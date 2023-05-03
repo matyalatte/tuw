@@ -8,7 +8,7 @@ target_link_libraries(main_frame
     ${PROJECT_NAME}_lib
     )
 
-set(TEST_JSON1 "${PROJECT_SOURCE_DIR}/examples/9_all_keys/gui_definition.json")
+set(TEST_JSON1 "${PROJECT_SOURCE_DIR}/examples/all_keys/gui_definition.json")
 set(TEST_JSON2 "${CMAKE_CURRENT_SOURCE_DIR}/config_ascii.json")
 set(TEST_JSON3 "${CMAKE_CURRENT_SOURCE_DIR}/config_utf.json")
 
