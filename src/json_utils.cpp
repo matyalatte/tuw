@@ -48,13 +48,15 @@ namespace json_utils {
     }
 
     enum class JsonType {
-        STRING,
-        INTEGER,
         BOOLEAN,
-        JSON_ARRAY,
-        STR_ARRAY,
+        INTEGER,
+        FLOAT,
+        STRING,
+        BOOL_ARRAY,
         INT_ARRAY,
-        BOOL_ARRAY
+        STR_ARRAY,
+        JSON_ARRAY,
+        MAX
     };
 
     void Raise(std::string msg) {
@@ -65,17 +67,17 @@ namespace json_utils {
         if (!j[key].is_array()) { return false; }
         std::function<bool(const nlohmann::json&)> lmd;
         switch (type) {
-        case JsonType::JSON_ARRAY:
-            lmd = [](const nlohmann::json& el){ return el.is_object(); };
-            break;
-        case JsonType::STR_ARRAY:
-            lmd = [](const nlohmann::json& el){ return el.is_string(); };
+        case JsonType::BOOL_ARRAY:
+            lmd = [](const nlohmann::json& el){ return el.is_boolean(); };
             break;
         case JsonType::INT_ARRAY:
             lmd = [](const nlohmann::json& el){ return el.is_number_integer(); };
             break;
-        case JsonType::BOOL_ARRAY:
-            lmd = [](const nlohmann::json& el){ return el.is_boolean(); };
+        case JsonType::STR_ARRAY:
+            lmd = [](const nlohmann::json& el){ return el.is_string(); };
+            break;
+        case JsonType::JSON_ARRAY:
+            lmd = [](const nlohmann::json& el){ return el.is_object(); };
             break;
         default:
             return false;
@@ -95,33 +97,37 @@ namespace json_utils {
         bool valid = false;
         std::string type_name;
         switch (type) {
-        case JsonType::STRING:
-            valid = j[key].is_string();
-            type_name = "a string";
+        case JsonType::BOOLEAN:
+            valid = j[key].is_boolean();
+            type_name = "a boolean";
             break;
         case JsonType::INTEGER:
             valid = j[key].is_number_integer();
             type_name = "an int";
             break;
-        case JsonType::BOOLEAN:
-            valid = j[key].is_boolean();
-            type_name = "a boolean";
+        case JsonType::FLOAT:
+            valid = j[key].is_number_float() || j[key].is_number_integer();
+            type_name = "a float";
             break;
-        case JsonType::JSON_ARRAY:
-            valid = IsArray(j, key, type);
-            type_name = "an array of json objects";
+        case JsonType::STRING:
+            valid = j[key].is_string();
+            type_name = "a string";
             break;
-        case JsonType::STR_ARRAY:
+        case JsonType::BOOL_ARRAY:
             valid = IsArray(j, key, type);
-            type_name = "an array of strings";
+            type_name = "an array of booleans";
             break;
         case JsonType::INT_ARRAY:
             valid = IsArray(j, key, type);
             type_name = "an array of integers";
             break;
-        case JsonType::BOOL_ARRAY:
+        case JsonType::STR_ARRAY:
             valid = IsArray(j, key, type);
-            type_name = "an array of booleans";
+            type_name = "an array of strings";
+            break;
+        case JsonType::JSON_ARRAY:
+            valid = IsArray(j, key, type);
+            type_name = "an array of json objects";
             break;
         default:
             break;
@@ -282,6 +288,7 @@ namespace json_utils {
             CorrectValue(c, "type", "combo", "choice");
             CorrectValue(c, "type", "checks", "check_array");
             CorrectValue(c, "type", "text_box", "text");
+            CorrectValue(c, "type", "integer", "int");
             KeyToSingular(c, "default");
             type = c["type"];
 
@@ -300,6 +307,22 @@ namespace json_utils {
                 KeyToSingular(c, "tooltip");
                 CheckJsonType(c, "tooltip", JsonType::STR_ARRAY, label, CAN_SKIP);
                 CheckArraySize(c, "tooltip");
+            } else if (type == "int" || type == "float") {
+                JsonType jtype;
+                if (type == "int") {
+                    jtype = JsonType::INTEGER;
+                } else {
+                    jtype = JsonType::FLOAT;
+                    CheckJsonType(c, "digits", JsonType::INTEGER, label, CAN_SKIP);
+                    if (c.contains("digits") && c["digits"] < 0) {
+                        Raise(GetLabel(label, "digits") + " should be a non-negative integer.");
+                    }
+                }
+                CheckJsonType(c, "default", jtype, label, CAN_SKIP);
+                CheckJsonType(c, "min", jtype, label, CAN_SKIP);
+                CheckJsonType(c, "max", jtype, label, CAN_SKIP);
+                CheckJsonType(c, "inc", jtype, label, CAN_SKIP);
+                CheckJsonType(c, "wrap", JsonType::BOOLEAN, label, CAN_SKIP);
             } else if (type != "folder" && type != "text" && type != "static_text") {
                 Raise("Unknown component type: " + type);
             }

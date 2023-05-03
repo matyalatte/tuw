@@ -50,6 +50,10 @@ Component* Component::PutComponent(wxWindow* panel, wxBoxSizer* sizer, nlohmann:
         comp = new CheckArray(panel, sizer, j);
     } else if (type == "text") {  // text box
         comp = new TextBox(panel, sizer, j);
+    } else if (type == "int") {  // int picker
+        comp = new IntPicker(panel, sizer, j);
+    } else if (type == "float") {  // int picker
+        comp = new FloatPicker(panel, sizer, j);
     } else {
         std::cout << "Unknown component type detected. (" + type << ")" << std::endl;
     }
@@ -288,4 +292,61 @@ void TextBox::SetConfig(nlohmann::json config) {
         wxString str = wxString::FromUTF8(config["str"]);
         reinterpret_cast<CustomTextCtrl*>(m_widget)->UpdateText(str);
     }
+}
+
+// IntPicker and FloatPicker
+NumPickerBase::NumPickerBase(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
+    : StringComponentBase(panel, sizer, j) {
+    long style = wxSP_ARROW_KEYS;
+    if (j.contains("wrap") && j["wrap"]) {
+        style |= wxSP_WRAP;
+    }
+
+    m_picker = new wxSpinCtrlDouble(panel, wxID_ANY,
+        wxEmptyString, wxDefaultPosition, wxSize(150, 23), style);
+    double min = j.value("min", 0.0);
+    double max = j.value("max", 100.0);
+    m_picker->SetRange(min, max);
+    m_picker->SetToolTip(wxString::FromUTF8(j.value("tooltip", "")));
+
+    sizer->Add(m_picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
+    m_widget = m_picker;
+}
+
+wxString NumPickerBase::GetRawString() {
+    return m_picker->GetTextValue();
+}
+
+nlohmann::json NumPickerBase::GetConfig() {
+    nlohmann::json config = {};
+    config["float"] = m_picker->GetValue();
+    return config;
+}
+
+void NumPickerBase::SetConfig(nlohmann::json config) {
+    if (config.contains("float")
+        && (config["float"].is_number_integer() || config["float"].is_number_float())) {
+        double val = static_cast<double>(config["float"]);
+        m_picker->SetValue(val);
+    }
+}
+
+IntPicker::IntPicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
+    : NumPickerBase(panel, sizer, j) {
+    double inc = j.value("inc", 1);
+    m_picker->SetIncrement(inc);
+    m_picker->SetDigits(0);
+    double val = j.value("default", 0.0);
+    m_picker->SetValue(val);
+}
+
+
+FloatPicker::FloatPicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j)
+    : NumPickerBase(panel, sizer, j) {
+    double inc = j.value("inc", 0.1);
+    m_picker->SetIncrement(inc);
+    double digits = j.value("digits", 1);
+    m_picker->SetDigits(digits);
+    double val = j.value("default", 0.0);
+    m_picker->SetValue(val);
 }

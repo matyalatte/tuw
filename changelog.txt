@@ -1,3 +1,6 @@
+ver 0.3.1
+- Added number pickers to GUI components.
+
 ver 0.3.0
 - Added "file" type to help menu.
 - Added "tooltip" option to all components.

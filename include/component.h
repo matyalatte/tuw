@@ -5,6 +5,7 @@
 #include "wx/wx.h"
 #include "wx/filepicker.h"
 #include "wx/dnd.h"
+#include "wx/spinctrl.h"
 #include "json_utils.h"
 #include "custom_wx_obj.h"
 
@@ -101,4 +102,25 @@ class TextBox : public StringComponentBase {
     wxString GetRawString() override;
     TextBox(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
     void SetConfig(nlohmann::json config) override;
+};
+
+class NumPickerBase : public StringComponentBase {
+ protected:
+    wxSpinCtrlDouble* m_picker;
+    void SetOptions(nlohmann::json j);
+ public:
+    NumPickerBase(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
+    wxString GetRawString() override;
+    nlohmann::json GetConfig() override;
+    void SetConfig(nlohmann::json config) override;
+};
+
+class IntPicker : public NumPickerBase {
+ public:
+    IntPicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
+};
+
+class FloatPicker : public NumPickerBase {
+ public:
+    FloatPicker(wxWindow* panel, wxBoxSizer* sizer, nlohmann::json j);
 };

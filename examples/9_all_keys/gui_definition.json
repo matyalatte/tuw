@@ -4,7 +4,7 @@
     "gui": [
         {
             "label": "Components Minimal",
-            "command": "echo file: %% & echo folder: %% & echo choice: %% & echo check: %% & echo check_array: %% & echo textbox: %%",
+            "command": "echo file: %% & echo folder: %% & echo choice: %% & echo check: %% & echo check_array: %% & echo textbox: %% & echo int: %% & echo float: %%",
             "components": [
                 {
                     "type": "static_text",
@@ -35,12 +35,20 @@
                 {
                     "type": "text",
                     "label": "text box"
+                },
+                {
+                    "type": "int",
+                    "label": "Int picker"
+                },
+                {
+                    "type": "float",
+                    "label": "Float picker"
                 }
             ]
         },
         {
             "label": "Components Optional",
-            "command": "echo file: %file% & echo folder: %folder% & echo choice: %choice% & echo check: %check% & echo check_array: %options% & echo textbox: %text%",
+            "command": "echo file: %file% & echo folder: %folder% & echo choice: %choice% & echo check: %check% & echo check_array: %options% & echo textbox: %text% & echo int: %integer% & echo float: %double%",
             "components": [
                 {
                     "type": "static_text",
@@ -98,6 +106,27 @@
                     "empty_message": "type here!",
                     "default": "remove this text!",
                     "tooltip": "text box."
+                },
+                {
+                    "type": "int",
+                    "label": "Int picker",
+                    "id": "integer",
+                    "default": 10,
+                    "min": -50,
+                    "max": 50,
+                    "inc": 10,
+                    "wrap": true
+                },
+                {
+                    "type": "float",
+                    "label": "Float picker",
+                    "id": "double",
+                    "default": 0.01,
+                    "min": 0,
+                    "max": 1,
+                    "digits": 2,
+                    "inc": 0.01,
+                    "wrap": false
                 }
             ]
         },
