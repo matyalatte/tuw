@@ -213,9 +213,8 @@ namespace json_utils {
 
     void CheckIndexDuplication(const std::vector<std::string>& component_ids) {
         int size = component_ids.size();
-        std::string str;
         for (int i = 0; i < size - 1; i++) {
-            str = component_ids[i];
+            std::string str = component_ids[i];
             if (str == "") { continue; }
             for (int j = i + 1; j < size; j++) {
                 if (str == component_ids[j]) {
@@ -276,13 +275,11 @@ namespace json_utils {
         CheckJsonType(sub_definition, COMPONENTS, JsonType::JSON_ARRAY);
 
         // check components
-        std::string label;
-        std::string type;
         std::vector<std::string> comp_ids;
         for (nlohmann::json& c : sub_definition[COMPONENTS]) {
             // check if type and label exist
             CheckJsonType(c, "label", JsonType::STRING, COMPONENTS);
-            label = c["label"];
+            std::string label = c["label"];
             CheckJsonType(c, "type", JsonType::STRING, label);
             CorrectValue(c, "type", "dir", "folder");
             CorrectValue(c, "type", "combo", "choice");
@@ -290,7 +287,7 @@ namespace json_utils {
             CorrectValue(c, "type", "text_box", "text");
             CorrectValue(c, "type", "integer", "int");
             KeyToSingular(c, "default");
-            type = c["type"];
+            std::string type = c["type"];
 
             if (type == "file") {
                 CheckJsonType(c, "extention", JsonType::STRING, label, CAN_SKIP);

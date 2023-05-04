@@ -199,12 +199,11 @@ wxString MainFrame::GetCommand() {
     }
 
     wxString cmd = wxString::FromUTF8(cmd_ary[0]);
-    std::string id;
     int comp_size = comp_ids.size();
     int j;
     int non_id_comp = 0;
     for (int i = 0; i < cmd_ids.size(); i++) {
-        id = cmd_ids[i];
+        std::string id = cmd_ids[i];
         if (id == "") {
             j = comp_size;
         } else {

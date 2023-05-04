@@ -4,11 +4,11 @@ Building workflow for Ubuntu and MacOS.
 
 ## 0. Requirements
 
-- xcode (for macOS)
-- build-essential (for linux)
-- libgtk-3-dev (for linux)
-- cmake (**3.25** or later)
-- wget
+-   xcode (for macOS)
+-   build-essential (for linux)
+-   libgtk-3-dev (for linux)
+-   cmake (**3.25** or later)
+-   wget
 
 > CMake should be 3.25 or later.  
 > Or use [v0.2.3](https://github.com/matyalatte/Simple-Command-Runner/tree/v0.2.3) that supports old cmake versions.  

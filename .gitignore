@@ -1,10 +1,3 @@
-# built files
-*.exe
-*.zip
-
-SimpleCommandRunner
-*.tar.*
-
 # general
 *.json
 !examples/*/gui_definition.json
@@ -21,6 +14,13 @@ SimpleCommandRunner
 
 *.sh
 !shell_scripts/*.sh
+
+# built files
+*.exe
+*.zip
+
+SimpleCommandRunner
+*.tar.*
 
 # intermediate files
 build

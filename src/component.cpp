@@ -73,7 +73,8 @@ StaticText::StaticText(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json&
 }
 
 // Base Class for strings
-StringComponentBase::StringComponentBase(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j)
+StringComponentBase::StringComponentBase(
+    wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j)
     : Component(j, HAS_STRING) {
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, m_label);
     if (j.contains("tooltip") && !j["tooltip"].is_array()) {
@@ -250,9 +251,8 @@ wxString CheckArray::GetRawString() {
 }
 
 void CheckArray::SetConfig(const nlohmann::json& config) {
-    std::vector<wxCheckBox*> checks;
     if (config.contains("ints") && config["ints"].is_array()) {
-        checks = *(std::vector<wxCheckBox*>*)m_widget;
+        std::vector<wxCheckBox*> checks = *(std::vector<wxCheckBox*>*)m_widget;
         for (int i = 0; i < config["ints"].size() && i < checks.size(); i++) {
             checks[i]->SetValue(config["ints"][i] != 0);
         }
