@@ -367,6 +367,7 @@ namespace json_utils {
         catch(std::exception& e) {
             Raise("Can NOT convert '" + string + "' to int.");
         }
+        return 0;
     }
 
     void CheckVersion(nlohmann::json& definition) {

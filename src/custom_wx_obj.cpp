@@ -90,7 +90,7 @@ bool CustomPickerBase::CustomCreatePickerBase(wxWindow* parent,
         empty_message,
         wxDefaultPosition, wxDefaultSize,
         GetTextCtrlStyle(style));
-    m_text = reinterpret_cast<wxTextCtrl*>(m_custom_text_ctrl);
+    m_text = static_cast<wxTextCtrl*>(m_custom_text_ctrl);
     if (!m_text) {
         wxFAIL_MSG(wxT("wxPickerBase's textctrl creation failed"));
         return false;

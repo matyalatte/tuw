@@ -11,6 +11,7 @@ You can use them if the standard one is uncomfortable for you.
 |  text  |  text_box  |
 |  choice  |  combo  |
 |  check_array  |  checks  |
+|  int  |  integer  |
 
 ## Keys
 

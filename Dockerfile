@@ -110,8 +110,6 @@ RUN ../configure --disable-shared\
     --disable-richtooltip\
     --disable-rearrangectrl\
     --disable-searchctrl\
-    --disable-spinbtn\
-    --disable-spinctrl\
     --disable-taskbaricon\
     --disable-tbarnative\
     --disable-timepick\

@@ -41,16 +41,21 @@ std::string GetActualText(Picker* picker) {
     return std::string(picker->GetTextCtrlValue());
 }
 
+bool Wait(long msec, wxWindow* frame) {
+    wxMilliSleep(msec);
+    return wxSafeYield(frame);
+}
+
 TEST(CustomWxObjTest, ShowEmptyMessage) {
     TestFrame* frame = new TestFrame();
-    wxYield();
+    Wait(30, frame);
     frame->m_file_picker->GetTextCtrl()->SetFocus();
-    wxYield();
+    Wait(30, frame);
     EXPECT_STREQ(GetText(frame->m_file_picker).c_str(), "");
     EXPECT_STREQ(GetText(frame->m_dir_picker).c_str(), "Empty Dir");
     EXPECT_STREQ(GetActualText(frame->m_dir_picker).c_str(), "");
     frame->m_dir_picker->GetTextCtrl()->SetFocus();
-    wxYield();
+    Wait(30, frame);
     EXPECT_STREQ(GetText(frame->m_file_picker).c_str(), "Empty File");
     EXPECT_STREQ(GetActualText(frame->m_file_picker).c_str(), "");
     EXPECT_STREQ(GetText(frame->m_dir_picker).c_str(), "");
@@ -59,13 +64,13 @@ TEST(CustomWxObjTest, ShowEmptyMessage) {
 TEST(CustomWxObjTest, HideEmptyMessage) {
     TestFrame* frame = new TestFrame();
     frame->m_file_picker->GetTextCtrl()->SetFocus();
-    wxYield();
-    reinterpret_cast<CustomTextCtrl*>(frame->m_file_picker->GetTextCtrl())->UpdateText("test");
-    wxYield();
+    Wait(30, frame);
+    static_cast<CustomTextCtrl*>(frame->m_file_picker->GetTextCtrl())->UpdateText("test");
+    Wait(30, frame);
     EXPECT_STREQ(GetText(frame->m_file_picker).c_str(), "test");
     EXPECT_STREQ(GetText(frame->m_dir_picker).c_str(), "Empty Dir");
     frame->m_dir_picker->GetTextCtrl()->SetFocus();
-    wxYield();
+    Wait(30, frame);
     EXPECT_STREQ(GetText(frame->m_file_picker).c_str(), "test");
     EXPECT_STREQ(GetText(frame->m_dir_picker).c_str(), "");
 }

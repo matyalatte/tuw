@@ -93,7 +93,7 @@ void MainFrame::CreateFrame() {
     SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
-void MainFrame::JsonLoadFailed(std::string msg, nlohmann::json& definition) {
+void MainFrame::JsonLoadFailed(const std::string& msg, nlohmann::json& definition) {
     wxString wxmsg = wxString::FromUTF8(msg);
     *m_ostream << "[LoadDefinition] Error: " << wxmsg << std::endl;
     ShowErrorDialog(wxmsg);
@@ -173,14 +173,14 @@ void MainFrame::SaveConfig() {
     }
 }
 
-void MainFrame::ShowErrorDialog(wxString msg) {
+void MainFrame::ShowErrorDialog(const wxString& msg) {
     wxMessageDialog* dialog;
     dialog = new wxMessageDialog(this, msg, "Error", wxICON_ERROR | wxOK | wxCENTRE);
     dialog->ShowModal();
     dialog->Destroy();
 }
 
-void MainFrame::ShowSuccessDialog(wxString msg) {
+void MainFrame::ShowSuccessDialog(const wxString& msg) {
     wxMessageDialog* dialog;
     dialog = new wxMessageDialog(this, msg, "Success");
     dialog->ShowModal();
