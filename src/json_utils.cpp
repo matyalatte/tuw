@@ -7,15 +7,11 @@ namespace json_utils {
         std::ifstream istream(file);
         nlohmann::json json;
         if (!istream) {
-            return nlohmann::json({});
+            std::string msg = "Failed to open " + file;
+            throw std::runtime_error(msg);
         }
-        try {
-            istream >> json;
-            istream.close();
-        }
-        catch (...) {
-            json = nlohmann::json({});
-        }
+        istream >> json;
+        istream.close();
         return json;
     }
 

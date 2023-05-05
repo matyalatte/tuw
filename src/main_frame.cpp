@@ -14,13 +14,13 @@ void MainFrame::CalcExePath() {
 // Main window
 MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
     : wxFrame(nullptr, wxID_ANY, "Simple Command Runner") {
+    SetUp();
     if (definition.empty()) {
-        definition = json_utils::LoadJson("gui_definition.json");
+        definition = LoadJson("gui_definition.json", true);
     }
     if (config.empty()) {
-        config = json_utils::LoadJson("gui_config.json");
+        config = LoadJson("gui_config.json", false);
     }
-    SetUp();
     CheckDefinition(definition);
     this->m_definition = definition;
     this->m_sub_definition = definition["gui"][0];
@@ -39,6 +39,20 @@ void MainFrame::SetUp() {
     m_ostream = &std::cout;
 #endif
     *m_ostream << "Simple Command Runner v" << VERSION << " by matyalatte" << std::endl;
+}
+
+nlohmann::json MainFrame::LoadJson(const std::string& file, bool is_definition) {
+    nlohmann::json json = nlohmann::json({});
+    try {
+        json = json_utils::LoadJson(file);
+    }
+    catch (nlohmann::json::exception& e) {
+        if (is_definition) JsonLoadFailed(e.what(), json);
+    }
+    catch (std::exception& e) {
+        if (is_definition) JsonLoadFailed(e.what(), json);
+    }
+    return json;
 }
 
 void MainFrame::CreateFrame() {
@@ -105,12 +119,6 @@ void MainFrame::JsonLoadFailed(const std::string& msg, nlohmann::json& definitio
 void MainFrame::CheckDefinition(nlohmann::json& definition) {
     std::string msg;
 
-    if (definition.empty()) {
-        msg = "Fialed to load gui_definition.json (Can't read)";
-        JsonLoadFailed(msg, definition);
-        return;
-    }
-
     // Check tool version
     try {
         json_utils::CheckVersion(definition);
@@ -169,7 +177,7 @@ void MainFrame::SaveConfig() {
     if (saved) {
         *m_ostream << "[SaveConfig] Saved gui_config.json" << std::endl;
     } else {
-        *m_ostream << "[SaveConfig] Failed to write gui_config.json" << std::endl;
+        *m_ostream << "[SaveConfig] Error: Failed to write gui_config.json" << std::endl;
     }
 }
 

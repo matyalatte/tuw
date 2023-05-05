@@ -1,5 +1,7 @@
 ver 0.3.1
 - Added number pickers to GUI components.
+- Fixed a bug that it can't open files on macOS.
+- Error messages became more detailed when failed to parse json file.
 - Refined codes.
 
 ver 0.3.0

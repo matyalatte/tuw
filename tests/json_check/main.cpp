@@ -18,13 +18,26 @@ int main(int argc, char * argv[]) {
 }
 
 TEST(JsonCheckTest, LoadJsonFail) {
-    nlohmann::json test_json = json_utils::LoadJson("");
-    EXPECT_EQ(nlohmann::json({}), test_json);
+    try {
+        nlohmann::json test_json = json_utils::LoadJson("fake.json");
+        FAIL();
+    }
+    catch(std::exception& err) {
+        const char* expected = "Failed to open fake.json";
+        EXPECT_STREQ(expected, err.what());
+    }
 }
 
 TEST(JsonCheckTest, LoadJsonFail2) {
-    nlohmann::json test_json = json_utils::LoadJson(broken);
-    EXPECT_EQ(nlohmann::json({}), test_json);
+    try {
+        nlohmann::json test_json = json_utils::LoadJson(broken);
+        FAIL();
+    }
+    catch(std::exception& err) {
+        const char* expected = "[json.exception.parse_error.101] parse error at line 7, column 5:"
+                               " syntax error while parsing object - unexpected ']'; expected '}'";
+        EXPECT_STREQ(expected, err.what());
+    }
 }
 
 nlohmann::json GetTestJson() {
