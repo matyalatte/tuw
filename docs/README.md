@@ -1,4 +1,4 @@
-# Simple-Command-Runner ver 0.3.0
+# Simple-Command-Runner ver 0.3.1
 
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/test.yml/badge.svg)
@@ -38,7 +38,7 @@ You can download executables from [the release page](https://github.com/matyalat
 
 ## Examples
 
-There are some [json files](../examples) to learn how to use.  
+There are some [json files](../examples/README.md) to learn how to use.  
 
 ## FAQ
 

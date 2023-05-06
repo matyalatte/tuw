@@ -2,62 +2,45 @@
 
 You can see some json files to learn how to use Simple Command Runner.
 
-## [1. Minimal](./minimal/)
+## 1. Getting Started
 
-Example for a minimal GUI.  
+-   [Minimal](./get_start/minimal/): Example for a minimal GUI.
+-   [Title and Button](./get_start/title_button/): Options to rename the window title and the execution button.
 
-![minimal](https://user-images.githubusercontent.com/69258547/192091288-72b69003-eafa-41ef-8167-5d0e0fe010d9.png)  
+![minimal](https://user-images.githubusercontent.com/69258547/236601237-38a47373-703c-4bda-a5d9-25a1b0256425.png)  
 
-## [2. Path Pickers](./path_pickers/)
+## 2. Components
 
-File pickers and dir pickers.  
+Examples for GUI components (e.g. file pickers)
+
+-   [Path Pickers](./components/path_pickers/): File pickers and dir pickers.
+-   [Number Pickers](./components/num_pickers/): Int pickers and float pickers.
+-   [Other components](./components/other_components/): There are more components you can use.
 
 ![PathPikcers](https://user-images.githubusercontent.com/69258547/171440880-5948a7f0-5e26-4c38-ab95-8c6daaf67f93.png)  
 
-## [3. Number Pickers](./num_pickers/)
+## 3. Options for Components
 
-Int pickers and float pickers.  
+Examples for component options.
 
-![Num pikcers](https://user-images.githubusercontent.com/69258547/236002847-4c5237db-de77-4065-9d8e-b128979a91b0.png)  
+-   [IDs](./comp_options/id/): An option to set ids. You can use the defined ids in commands.
+-   [Default Values](./comp_options/default/):  An option to set default values of components.
+-   [Tooltip](./comp_options/tooltip/): An option to show a message when the mouse cursor is on a component.
 
-## [4. Other Components](./other_components/)
+![tooltip](https://user-images.githubusercontent.com/69258547/223138605-9a9aa6a7-a5c9-4aa6-b0af-dd674b46160a.png)  
 
-There are more components you can use.  
+## 4. Other Features
 
-![others](https://user-images.githubusercontent.com/69258547/171445898-7b696c95-a081-4a3a-aa66-71b8265f64d8.png)  
+There are more features you can use.
 
-## [5. Id](./id/)
-
-You can use component ids in commands.  
-
-## [6. Help](./help/)
-
-You can put help documents for users.  
+-   [Error Handling](./other_features/error/): How to notify users of errors.
+-   [Help Documents](./other_features/help/): You can put help documents for users.
+-   [Multiple Definition](./other_features/multiple/): You can put multiple definitions in a json file.
+-   [Version Checking](./other_features/version_check/): Constraints on the tool version.
+-   [Alternate Spellings](./other_features/alternate_spellings/): Simple Command Runner supports multiple spellings for some json keys and values.
 
 ![help](https://user-images.githubusercontent.com/69258547/222972599-bab3ff85-2c6c-432d-91e7-8244a8a8e514.png)  
 
-## [7. Multiple Definition](./multiple/)
+## 5. All Keys
 
-It can have multiple definition, and you can select one of them from `MENU`.  
-
-![multiple](https://user-images.githubusercontent.com/69258547/236005224-32eb9c49-b0d3-49a7-9d61-b7dd54da2b92.png)  
-
-## [8. Tooltip](./tooltip/)
-
-It can show a message when the mouse cursor is on a component.  
-
-![tooltip](https://user-images.githubusercontent.com/69258547/223138605-9a9aa6a7-a5c9-4aa6-b0af-dd674b46160a.png)   
-
-## [9. Version Checking](./version_check/)
-
-Constraints on the tool version.
-
-![version_error](https://user-images.githubusercontent.com/69258547/223422466-bcda85bb-90e9-4782-9d94-8aeb443e2441.png)  
-
-## [10. All Keys](./all_keys/)
-
-The json file that has all supported keys.  
-
-## [11. Alternate Spellings](./alternate_spellings/)
-
-Simple Command Runner supports multiple spellings for some json keys and values.  
+[The json file that has all supported keys.](./all_keys/)  

@@ -1,6 +1,6 @@
 # general
 *.json
-!examples/*/gui_definition.json
+!examples/**/gui_definition.json
 !tests/**/*.json
 
 *.txt
