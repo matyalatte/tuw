@@ -1,7 +1,7 @@
 #include "json_utils.h"
 
 namespace json_utils {
-    const int VERSION_INT = 300;
+    const int VERSION_INT = 301;
 
     nlohmann::json LoadJson(const std::string& file) {
         std::ifstream istream(file);
