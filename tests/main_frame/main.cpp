@@ -91,6 +91,7 @@ TEST(MainFrameTest, GetCommand2) {
     std::string expected = "echo file: \"test.txt\" & echo folder: \"testdir\"";
     expected += " & echo choice: value3 & echo check: flag!";
     expected += " & echo check_array:  --f3 & echo textbox: remove this text!";
+    expected += " & echo int: 10 & echo float: 0.01";
     EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().ToUTF8());
 }
 
@@ -99,6 +100,7 @@ TEST(MainFrameTest, GetCommand3) {
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     std::string expected = "echo file:  & echo folder:  & echo choice: value1";
     expected += " & echo check:  & echo check_array:  & echo textbox: ";
+    expected += " & echo int: 0 & echo float: 0.0";
     EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().ToUTF8());
 }
 

@@ -31,6 +31,10 @@
                 {
                     "type": "text_box",
                     "label": "text box"
+                },
+                {
+                    "type": "integer",
+                    "label": "Int picker"
                 }
             ]
         }

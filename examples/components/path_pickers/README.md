@@ -1,8 +1,8 @@
-# Pickers
+# Path Pickers
 
 You can use file pickers and folder pickers.
 
-![Pikcers](https://user-images.githubusercontent.com/69258547/171440880-5948a7f0-5e26-4c38-ab95-8c6daaf67f93.png)
+![PathPikcers](https://user-images.githubusercontent.com/69258547/171440880-5948a7f0-5e26-4c38-ab95-8c6daaf67f93.png)
 
 ```json
 {
@@ -10,13 +10,13 @@ You can use file pickers and folder pickers.
         {
             "label": "Copy file",
             "window_name": "Picker sample",
-            "command": "copy %file% %out_path%",
+            "command": "copy %foo% %bar%",
             "button": "copy",
             "components": [
                 {
                     "type": "file",
-                    "label": "A file you want to copy",
-                    "extension": "any files (*)|*",
+                    "label": "PNG file you want to copy",
+                    "extension": "PNG files (*.png)|*.png",
                     "add_quotes": true
                 },
                 {
@@ -31,13 +31,10 @@ You can use file pickers and folder pickers.
 }
 ```
 
-## "gui"
-
--   `window_name` is an optional key to rename the window title of `SimpleCommandRunner.exe`.
--   `button` is an optional key to rename the execution button.
--   `compoents` is an array of GUI components. Each component will be defined as a dictionary.
-
 ## "components"
+
+`compoents` is an array of GUI components (e.g. file pickers).  
+Each component should be defined as a dictionary.  
 
 -   `type` is component type. `file` for a file picker, and `folder` for a dir picker.
 -   `label` is a string written above the text box of picker.
@@ -49,4 +46,4 @@ You can use file pickers and folder pickers.
 
 Inputs of components will be injected into `command` when executing the command.<br>
 You can specifiy where you inject the inputs with `%*%`.<br>
-In the example, file path will be injected in `%file%`, and folder path will be in `%out_path%`.
+In the example, file path will be injected in `%foo%`, and folder path will be in `%bar%`.

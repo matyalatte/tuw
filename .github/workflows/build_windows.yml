@@ -54,7 +54,7 @@ jobs:
         run: |
           mkdir -p archive
           cp Release/Release/SimpleCommandRunner.exe archive
-          cp examples/4_help/gui_definition.json archive
+          cp examples/other_features/help/gui_definition.json archive
           cp changelog.txt archive
           cp license.txt archive
         shell: bash
@@ -64,7 +64,7 @@ jobs:
         with:
           directory: 'archive'
           type: 'zip'
-          filename: '${{ env.ZIP_NAME }}_${{ runner.os }}.zip'
+          filename: '${{ env.ZIP_NAME }}-${{ runner.os }}.zip'
 
       - name: Create Release Draft
         id: create-release
@@ -82,4 +82,4 @@ jobs:
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ steps.check-tag.outputs.tag }} archive/${{ env.ZIP_NAME }}_${{ runner.os }}.zip
+        run: gh release upload ${{ steps.check-tag.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ runner.os }}.zip

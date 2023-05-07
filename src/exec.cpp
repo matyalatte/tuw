@@ -100,14 +100,13 @@ std::array<std::string, 2> Exec(std::ostream& ostream, wxString& cmd) {
     size_t size = 512;
     char ibuf[512];  // buffer for output
     char ebuf[512];  // buffer for error messages
-    std::string str;
     std::string in_msg = "";
     std::string err_msg = "";
 
     while ((!istream->Eof() && !estream->Eof()) ||
         istream->CanRead() || estream->CanRead()) {  // while process is running
         // print outputs
-        str = ReadStream(istream, ibuf, size);
+        std::string str = ReadStream(istream, ibuf, size);
         ostream << str;
         in_msg += str;
 

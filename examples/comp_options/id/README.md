@@ -1,7 +1,7 @@
 # ID
 
 `id` is an optional key for components.  
-Its value will be used as a veriable name in commands.  
+Its value will be used as a variable name in commands.  
   
 Here is an example.  
 

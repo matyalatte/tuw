@@ -1,32 +1,63 @@
-#general
+# general
 *.json
-!examples/*/gui_definition.json
+!examples/**/gui_definition.json
 !tests/**/*.json
-build
-Release*
-Debug*
-coverage-report
+
 *.txt
 !changelog.txt
 !CMakeLists.txt
 !license.txt
 !WX_VERSION.txt
 
-#for windows
-.vs*
-out
-SimpleCommandRunner-v*
-*.exe
-*.zip
 *.bat
 !batch_files/*.bat
 
-# for unix
 *.sh
 !shell_scripts/*.sh
+
+# built files
+*.exe
+*.zip
+
+SimpleCommandRunner
 *.tar.*
 
-# for test scripts
+# intermediate files
+build
+Release*
+Debug*
+*.log
+*.cmake
+
+.vs*
+out
+*.ilk
+*.pdb
+*.obj
+*.lib
+*.bin
+*.ninja
+*.manifest
+*.rc
+*.res
+*.ninja
+
+*.a
+*.o
+*.o.d
+*.internal
+*.test
+*.make
+
+# python
 python
 *.py
+*.pyd
+*.dll
+*.cat
 
+# coverage report
+coverage-report
+*.png
+*.css
+*.html

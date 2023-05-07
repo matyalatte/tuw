@@ -1,0 +1,15 @@
+{
+    "gui": [
+        {
+            "label": "Error Sample",
+            "command": "notcommand",
+            "components": []
+        },
+        {
+            "label": "show_last_line Sample",
+            "command": "echo Fake Error!",
+            "show_last_line": true,
+            "components": []
+        }
+    ]
+}

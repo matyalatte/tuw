@@ -1,6 +1,6 @@
 #include "main_frame.h"
 
-const char* VERSION = "0.3.0";
+const char* VERSION = "0.3.1";
 
 #ifndef _WIN32
 void MainFrame::CalcExePath() {
@@ -14,13 +14,13 @@ void MainFrame::CalcExePath() {
 // Main window
 MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
     : wxFrame(nullptr, wxID_ANY, "Simple Command Runner") {
+    SetUp();
     if (definition.empty()) {
-        definition = json_utils::LoadJson("gui_definition.json");
+        definition = LoadJson("gui_definition.json", true);
     }
     if (config.empty()) {
-        config = json_utils::LoadJson("gui_config.json");
+        config = LoadJson("gui_config.json", false);
     }
-    SetUp();
     CheckDefinition(definition);
     this->m_definition = definition;
     this->m_sub_definition = definition["gui"][0];
@@ -39,6 +39,20 @@ void MainFrame::SetUp() {
     m_ostream = &std::cout;
 #endif
     *m_ostream << "Simple Command Runner v" << VERSION << " by matyalatte" << std::endl;
+}
+
+nlohmann::json MainFrame::LoadJson(const std::string& file, bool is_definition) {
+    nlohmann::json json = nlohmann::json({});
+    try {
+        json = json_utils::LoadJson(file);
+    }
+    catch (nlohmann::json::exception& e) {
+        if (is_definition) JsonLoadFailed(e.what(), json);
+    }
+    catch (std::exception& e) {
+        if (is_definition) JsonLoadFailed(e.what(), json);
+    }
+    return json;
 }
 
 void MainFrame::CreateFrame() {
@@ -93,7 +107,7 @@ void MainFrame::CreateFrame() {
     SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
-void MainFrame::JsonLoadFailed(std::string msg, nlohmann::json& definition) {
+void MainFrame::JsonLoadFailed(const std::string& msg, nlohmann::json& definition) {
     wxString wxmsg = wxString::FromUTF8(msg);
     *m_ostream << "[LoadDefinition] Error: " << wxmsg << std::endl;
     ShowErrorDialog(wxmsg);
@@ -104,12 +118,6 @@ void MainFrame::JsonLoadFailed(std::string msg, nlohmann::json& definition) {
 // read gui_definition.json
 void MainFrame::CheckDefinition(nlohmann::json& definition) {
     std::string msg;
-
-    if (definition.empty()) {
-        msg = "Fialed to load gui_definition.json (Can't read)";
-        JsonLoadFailed(msg, definition);
-        return;
-    }
 
     // Check tool version
     try {
@@ -169,18 +177,18 @@ void MainFrame::SaveConfig() {
     if (saved) {
         *m_ostream << "[SaveConfig] Saved gui_config.json" << std::endl;
     } else {
-        *m_ostream << "[SaveConfig] Failed to write gui_config.json" << std::endl;
+        *m_ostream << "[SaveConfig] Error: Failed to write gui_config.json" << std::endl;
     }
 }
 
-void MainFrame::ShowErrorDialog(wxString msg) {
+void MainFrame::ShowErrorDialog(const wxString& msg) {
     wxMessageDialog* dialog;
     dialog = new wxMessageDialog(this, msg, "Error", wxICON_ERROR | wxOK | wxCENTRE);
     dialog->ShowModal();
     dialog->Destroy();
 }
 
-void MainFrame::ShowSuccessDialog(wxString msg) {
+void MainFrame::ShowSuccessDialog(const wxString& msg) {
     wxMessageDialog* dialog;
     dialog = new wxMessageDialog(this, msg, "Success");
     dialog->ShowModal();
@@ -199,12 +207,11 @@ wxString MainFrame::GetCommand() {
     }
 
     wxString cmd = wxString::FromUTF8(cmd_ary[0]);
-    std::string id;
     int comp_size = comp_ids.size();
     int j;
     int non_id_comp = 0;
     for (int i = 0; i < cmd_ids.size(); i++) {
-        id = cmd_ids[i];
+        std::string id = cmd_ids[i];
         if (id == "") {
             j = comp_size;
         } else {
