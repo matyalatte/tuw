@@ -1,7 +1,5 @@
 #include "main_frame.h"
 
-const char* VERSION = "0.3.1";
-
 #ifndef _WIN32
 void MainFrame::CalcExePath() {
     wxStandardPaths& path = wxStandardPaths::Get();
@@ -13,7 +11,7 @@ void MainFrame::CalcExePath() {
 
 // Main window
 MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
-    : wxFrame(nullptr, wxID_ANY, "Simple Command Runner") {
+    : wxFrame(nullptr, wxID_ANY, scr_constants::TOOL_NAME) {
     SetUp();
     if (definition.empty()) {
         definition = LoadJson("gui_definition.json", true);
@@ -38,7 +36,8 @@ void MainFrame::SetUp() {
 #else
     m_ostream = &std::cout;
 #endif
-    *m_ostream << "Simple Command Runner v" << VERSION << " by matyalatte" << std::endl;
+    *m_ostream << scr_constants::TOOL_NAME << " v" << scr_constants::VERSION;
+    *m_ostream << " by " << scr_constants::AUTHOR << std::endl;
 }
 
 nlohmann::json MainFrame::LoadJson(const std::string& file, bool is_definition) {

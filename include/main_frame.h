@@ -7,6 +7,7 @@
 #include "component.h"
 #include "exec.h"
 #include "json_utils.h"
+#include "scr_constants.h"
 
 #ifndef _WIN32
 #include <wx/stdpaths.h>

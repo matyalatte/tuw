@@ -1,8 +1,6 @@
 #include "json_utils.h"
 
 namespace json_utils {
-    const int VERSION_INT = 301;
-
     nlohmann::json LoadJson(const std::string& file) {
         std::ifstream istream(file);
         nlohmann::json json;
@@ -370,7 +368,7 @@ namespace json_utils {
             CheckJsonType(definition, k, JsonType::STRING);
             int recom_int = VersionStringToInt(definition[k]);
             CheckJsonType(definition, "not_" + k, JsonType::BOOLEAN, "", CAN_SKIP);
-            definition["not_" + k] = VERSION_INT != recom_int;
+            definition["not_" + k] = scr_constants::VERSION_INT != recom_int;
         }
         k = "minimum_required";
         CorrectKey(definition, k + "_version", k);
@@ -378,7 +376,7 @@ namespace json_utils {
             CheckJsonType(definition, k, JsonType::STRING);
             std::string required = definition[k];
             int required_int = VersionStringToInt(required);
-            if (VERSION_INT < required_int) {
+            if (scr_constants::VERSION_INT < required_int) {
                 std::string msg = "Version " + required + " is required.";
                 Raise(msg);
             }
