@@ -146,7 +146,7 @@ TEST(JsonCheckTest, checkHelpFail2) {
 
 TEST(JsonCheckTest, checkVersionSuccess) {
     nlohmann::json test_json = GetTestJson();
-    test_json["recommended"] = "0.3.0";
+    test_json["recommended"] = "0.3.1";
     json_utils::CheckVersion(test_json);
     EXPECT_FALSE(test_json["not_recommended"]);
 }
@@ -160,7 +160,7 @@ TEST(JsonCheckTest, checkVersionFail) {
 
 TEST(JsonCheckTest, checkVersionSuccess2) {
     nlohmann::json test_json = GetTestJson();
-    test_json["minimum_required"] = "0.3.0";
+    test_json["minimum_required"] = "0.3.1";
     json_utils::CheckVersion(test_json);
 }
 

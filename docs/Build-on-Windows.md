@@ -48,6 +48,10 @@ If you will build the exe with Visual Studio, you should add `-D wxWidgets_ROOT_
 
 If you want to build tests, type `test.bat` or `test.bat Debug` on the command prompt.
 
+## Coverage
+
+`test.bat Debug` will make coverage report if [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage/releases) is installed.  
+
 ## Uninstall wxWidgets
 
 If you want to uninstall wxWidgets, remove `C:/wxWidgets-*`.
