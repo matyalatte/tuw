@@ -3,8 +3,10 @@
 REM Builds SimpleCommandRunner with CMake and Visual Studio.
 REM SimpleCommandRunner.exe will be generated in Simple-Command-Runner/%BUILD_TYPE%/Release
 
+set GENERATOR=Visual Studio 17 2022
+echo Generator: %GENERATOR%
+
 set /p WX_VERSION=< %~dp0\..\WX_VERSION.txt
-set VS_VERSION=Visual Studio 17 2022
 
 REM You can specify build type as an argument like "build_exe.bat Release"
 if /I "%~1"=="Debug" (
@@ -14,7 +16,7 @@ if /I "%~1"=="Debug" (
 )
 echo BUILD_TYPE: %BUILD_TYPE%
 
-set OPTIONS=-G "%VS_VERSION%"^
+set OPTIONS=-G "%GENERATOR%"^
  -A x64^
  -D CMAKE_CONFIGURATION_TYPES=%BUILD_TYPE%^
  -D wxWidgets_ROOT_DIR=C:/wxWidgets-%WX_VERSION%/%BUILD_TYPE%/Installed

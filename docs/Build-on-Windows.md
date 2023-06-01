@@ -6,7 +6,8 @@
 -   CMake (**3.25** or later)
 -   Batch files in [`./Simple-Command-Runner/batch_files`](../batch_files)
 
-> If you won't use Visual Studio 2022, you could need to edit cmake commands in batch files.  
+> Edit the variable `GENERATOR` in batch files, if you won't use Visual Studio 2022.  
+> You can see the list of available generators with the `cmake -G` command.  
 
 > CMake should be 3.25 or later.  
 > Or use [v0.2.3](https://github.com/matyalatte/Simple-Command-Runner/tree/v0.2.3) that supports old cmake versions.  
@@ -14,7 +15,7 @@
 ## 1. Build wxWidgets
 
 wxWidgets is a GUI framework.  
-You can install it with the following steps.
+You can build it with the following steps.
 
 1.  Run `download_wxWidgets.bat` as admin.
 2.  Open the command prompt.
@@ -42,7 +43,7 @@ The steps are as follows.
 
 If you want a debug build, you need to use `Debug` as an argument for batch files.  
 So, you should type `build_wxWidgets.bat Debug` and `build_exe.bat Debug` on the command prompt.  
-If you will build the exe with Visual Studio, you should add `-D wxWidgets_ROOT_DIR=C:/wxWidgets-3.2.2/Debug/Installed` to `CMake command arguments` for `x64-Debug` in the IDE.
+If you will build the exe with Visual Studio, you should add `-D wxWidgets_ROOT_DIR=C:/wxWidgets-3.2.2/Debug/Installed` to `CMake command arguments` for `x64-Debug`.
 
 ## Test
 

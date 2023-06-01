@@ -3,8 +3,10 @@
 REM Builds tests for SimpleCommandRunner.
 REM You can also get coverage report if OpenCppCoverage is installed.
 
+set GENERATOR=Visual Studio 17 2022
+echo Generator: %GENERATOR%
+
 set /p WX_VERSION=< %~dp0\..\WX_VERSION.txt
-set VS_VERSION=Visual Studio 17 2022
 
 if /I "%~1"=="Debug" (
     set BUILD_TYPE=Debug
@@ -13,7 +15,7 @@ if /I "%~1"=="Debug" (
 )
 echo BUILD_TYPE: %BUILD_TYPE%
 
-set OPTIONS=-G "%VS_VERSION%"^
+set OPTIONS=-G "%GENERATOR%"^
  -A x64^
  -D CMAKE_CONFIGURATION_TYPES=%BUILD_TYPE%^
  -D wxWidgets_ROOT_DIR=C:/wxWidgets-%WX_VERSION%/%BUILD_TYPE%/Installed^

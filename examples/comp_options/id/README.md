@@ -1,28 +1,46 @@
 # ID
 
 `id` is an optional key for components.  
-Its value will be used as a variable name in commands.  
-  
-Here is an example.  
+You can use the defined ids as variable names in commands.  
 
 ```json
 {
-    "label": "Sample GUI",
-    "command": "echo y: %something% & echo x: %x% & echo z: %bruh% & echo x: %x%",
+    "label": "IDs",
+    "command": "echo x: %x% & echo y: %y% & echo x: %x%",
     "button": "Echo!",
     "components": [
         {
-            "type": "static_text",
-            "label": "Sample GUI for \"id\" option."
+            "type": "text",
+            "label": "Value of y",
+            "id": "y"
         },
         {
             "type": "text",
             "label": "Value of x",
             "id": "x"
+        }
+    ]
+}
+```
+
+## Undefined IDs
+
+When you put an undefined id in `%*%`, it'll use one of the compoents that have no id.
+
+```json
+{
+    "label": "Undefined IDs",
+    "command": "echo x: %% & echo y: %y% & echo z: %foo%",
+    "button": "Echo!",
+    "components": [
+        {
+            "type": "text",
+            "label": "Value of y",
+            "id": "y"
         },
         {
             "type": "text",
-            "label": "Value of y"
+            "label": "Value of x"
         },
         {
             "type": "text",
@@ -32,9 +50,18 @@ Here is an example.
 }
 ```
 
-In this case, the value of x will be injected into both of `%x%` parts.  
-Because `x` is an ID for the first text box.  
-The value of y will be injected into `%something%`.  
-Because `something` is not any ID for components and the second text box is the first component that have no ID.  
-The value of z will be injected into `%bruh%`.  
-Because the last text box is the second component that have no ID.  
+## Predefined IDs
+
+There are some predefined ids.  
+`%_%` will be replaced with `%` at runtime.  
+`%__CWD__%` will be replaced with the executable directory at runtime.  
+Also, all ids that start with `_` are reserved.  
+
+```json
+{
+    "label": "Reserved IDs",
+    "command": "echo percent: %_% & echo cwd: %__CWD__%",
+    "button": "Echo!",
+    "components": []
+}
+```

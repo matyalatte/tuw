@@ -16,7 +16,7 @@ Building workflow for Ubuntu and MacOS.
 ## 1. Build wxWidgets
 
 wxWidgets is a GUI framework.  
-You can install it with the following steps.
+You can build it with the following steps.
 
 1.  Open the Terminal.
 2.  Move to `./Simple-Command-Runner/shell_scripts`

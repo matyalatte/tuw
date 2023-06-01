@@ -133,7 +133,7 @@
         {
             "label": "GUI Optional",
             "window_name": "Window Title Here",
-            "command": "echo this won't be showed up & echo sample message!",
+            "command": "echo cwd: %__CWD__% & echo percent: %_% & echo sample message!",
             "button": "Run!",
             "show_last_line": true,
             "components": [

@@ -5,13 +5,13 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4aee3ee5172e4c38915d07f9c62725d3)](https://www.codacy.com/gh/matyalatte/Simple-Command-Runner/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matyalatte/Simple-Command-Runner&amp;utm_campaign=Badge_Grade)
 <a href="https://www.buymeacoffee.com/matyalatteQ" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>  
 
-Simple GUI wrapper to execute commands.  
+JSON-based GUI wrapper to execute commands.  
 
 ## About
 
-Simple Command Runner will give very simple GUI to your scripts.  
+Simple Command Runner will give a very simple GUI to your scripts.  
 All you need is write a `.json` file and run an `.exe` file.  
-It can make GUI to run commands of your scripts.  
+It can make a GUI to run commands of your scripts.  
 No need to use IDE and manage scripts for GUI.  
 
 ![sample](https://user-images.githubusercontent.com/69258547/192090786-11a3f5ef-988e-442f-8ba9-fd1636b9f350.png)
@@ -57,6 +57,25 @@ And I think it supports your environment as well if [wxWidgets library](https://
 
 ## How to Build
 
+### Windows
+
+There is a document for Windows users.  
+[Building Workflow for Windows](./Build-on-Windows.md)  
+
+And you can see [batch files](../batch_files/) to understand the workflow.  
+
+### Mac and Ubuntu
+
+There is a document for Mac and Ubuntu users.  
+[Building Workflow for Ubuntu and MacOS](./Build-on-Unix.md)  
+
+And you can see [shell scripts](../shell_scripts/) to understand the workflow.  
+
+### Docker
+
+Ubuntu users can also use a docker file to build the executable.  
+See [the docker file](../Dockerfile) for the instruction.  
+
 ### Github Actions
 
 There are some building workflows for Github Actions.  
@@ -69,39 +88,15 @@ You can make Github build and upload the executable for your platform.
 See here for the details.  
 [How to Build With Github Actions](./Github-Actions.md)
 
-### Windows
-
-There is a document for Windows users.  
-[Building Workflow for Windows](./Build-on-Windows.md)  
-
-It only supports Visual Studio 2022, but you can see [the batch files](../batch_files/) to find a way to build it with your environment.  
-
-### Mac and Ubuntu
-
-There is a document for Mac and Ubuntu users.  
-[Building Workflow for Ubuntu and MacOS](./Build-on-Unix.md)  
-
-And you can see [the shell scripts](../shell_scripts/) to understand the workflow.  
-
-### Docker
-
-Ubuntu users can also use a docker file to build the executable.  
-See [the docker file](../Dockerfile) for the instruction.  
-
 ## License
 
-### Simple Command Runner
+Files in this repository are available under [wxWindows Library Licence](../license.txt).  
 
-Files in this repository are licensed under [wxWindows Library Licence](../license.txt).  
-It is a modified version of LGPL explicitly allowing not distributing
-the sources of an application using the library even in the case of static linking.  
+> It is a modified version of LGPL explicitly allowing not distributing
+> the sources of an application using the library even in the case of static linking.  
 
-### wxWidgets
 
-Simple Command Runner uses [wxWidgets library](https://github.com/wxWidgets/wxWidgets) for the GUI framework.  
-It is licensed under [wxWindows Library Licence](https://github.com/wxWidgets/wxWidgets/blob/master/docs/licence.txt).  
+## External Projects
 
-### nlohmann-json
-
-Simple Command Runner uses [nlohmann's json library](https://github.com/nlohmann/json).  
-It is licensed under [MIT license](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT).
+-   [wxWidgets library](https://github.com/wxWidgets/wxWidgets) for the GUI framework.  
+-   [nlohmann's json library](https://github.com/nlohmann/json) for JSON handling.  
