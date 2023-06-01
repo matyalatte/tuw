@@ -4,14 +4,12 @@
 #include <nlohmann/json.hpp>
 #include "wx/wx.h"
 #include "wx/filepicker.h"
+#include "wx/stdpaths.h"
 #include "component.h"
 #include "exec.h"
 #include "json_utils.h"
 #include "scr_constants.h"
 
-#ifndef _WIN32
-#include <wx/stdpaths.h>
-#endif
 
 // Main window
 class MainFrame : public wxFrame {
@@ -26,12 +24,6 @@ class MainFrame : public wxFrame {
     LogFrame* m_ostream;
 #else
     std::ostream* m_ostream;
-#endif
-
-#ifndef _WIN32
-    // Unix systems need to get current dir to read json files.
-    wxString m_exe_path;
-    void CalcExePath();
 #endif
 
     std::vector<Component*> m_components;

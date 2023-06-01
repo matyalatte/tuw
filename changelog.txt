@@ -1,3 +1,7 @@
+ver 0.3.2
+- Fixed an error when the current directory is not the same as the executable directory. (on Windows)
+- Added predefined ids for "%" and the executable directory.
+
 ver 0.3.1
 - Added number pickers to GUI components.
 - Fixed a bug that it can't open files on macOS.

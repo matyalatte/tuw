@@ -1,14 +1,5 @@
 #include "main_frame.h"
 
-#ifndef _WIN32
-void MainFrame::CalcExePath() {
-    wxStandardPaths& path = wxStandardPaths::Get();
-    path.UseAppInfo(wxStandardPaths::AppInfo_None);
-    m_exe_path = path.GetExecutablePath();
-    wxSetWorkingDirectory(wxPathOnly(m_exe_path));
-}
-#endif
-
 // Main window
 MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
     : wxFrame(nullptr, wxID_ANY, scr_constants::TOOL_NAME) {
@@ -27,11 +18,14 @@ MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
 }
 
 void MainFrame::SetUp() {
-#ifndef _WIN32
-    CalcExePath();
-#endif
+    // Use the executable directory as the working dir.
+    wxStandardPaths& path = wxStandardPaths::Get();
+    path.UseAppInfo(wxStandardPaths::AppInfo_None);
+    wxString exe_path = path.GetExecutablePath();
+    wxSetWorkingDirectory(wxPathOnly(exe_path));
+
 #ifdef __linux__
-    m_log_frame = new LogFrame(m_exe_path);
+    m_log_frame = new LogFrame(exe_path);
     m_ostream = m_log_frame;
 #else
     m_ostream = &std::cout;
@@ -194,6 +188,9 @@ void MainFrame::ShowSuccessDialog(const wxString& msg) {
     dialog->Destroy();
 }
 
+constexpr char* CMD_ID_PERCENT = "_";
+constexpr char* CMD_ID_CURRENT_DIR = "__CWD__";
+
 // Make command string
 wxString MainFrame::GetCommand() {
     std::vector<std::string> cmd_ary = m_sub_definition["command"];
@@ -211,8 +208,13 @@ wxString MainFrame::GetCommand() {
     int non_id_comp = 0;
     for (int i = 0; i < cmd_ids.size(); i++) {
         std::string id = cmd_ids[i];
+        j = -1;
         if (id == "") {
             j = comp_size;
+        } else if (id == CMD_ID_PERCENT) {
+            cmd += "%";
+        } else if (id == CMD_ID_CURRENT_DIR) {
+            cmd += wxGetCwd();
         } else {
             for (j = 0; j < comp_size; j++) {
                 if (id == comp_ids[j]) {
@@ -233,7 +235,7 @@ wxString MainFrame::GetCommand() {
             }
             non_id_comp++;
         }
-        if (j < comp_size) {
+        if (j >= 0 && j < comp_size) {
             cmd += comp_strings[j];
         }
         if (i + 1 < cmd_ary.size()) {

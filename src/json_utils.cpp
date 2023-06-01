@@ -332,6 +332,12 @@ namespace json_utils {
 
 
             if (c.contains("id")) {
+                std::string id = c["id"];
+                if (id == "") {
+                    Raise(GetLabel(label, "id") + " should NOT be an empty string.");
+                } else if (id[0] == "_"[0]) {
+                    Raise(GetLabel(label, "id") + " should NOT start with '_'.");
+                }
                 comp_ids.push_back(c["id"]);
             } else {
                 comp_ids.push_back("");
