@@ -15,14 +15,17 @@ if /I "%~1"=="Debug" (
 )
 echo BUILD_TYPE: %BUILD_TYPE%
 
+set wxDIR=C:/wxWidgets-%WX_VERSION%/%BUILD_TYPE%/Installed
+echo wxWidgets location: %wxDIR%
+
 set OPTIONS=-G "%GENERATOR%"^
  -A x64^
  -D CMAKE_CONFIGURATION_TYPES=%BUILD_TYPE%^
- -D wxWidgets_ROOT_DIR=C:/wxWidgets-%WX_VERSION%/%BUILD_TYPE%/Installed^
+ -D wxWidgets_ROOT_DIR=%wxDIR%^
  -D BUILD_TESTS=ON^
  -D BUILD_EXE=OFF
 
-set WXRC_CMD=C:/wxWidgets-%WX_VERSION%/%BUILD_TYPE%/Installed/bin/wxrc.exe
+set WXRC_CMD=%wxDIR%/bin/wxrc.exe
 
 REM Check if OpenCppCoverage exists
 WHERE OpenCppCoverage >nul 2>nul
@@ -37,9 +40,7 @@ if %ERRORLEVEL% NEQ 0 (
 mkdir %~dp0\..\%BUILD_TYPE%Test
 @pushd %~dp0\..\%BUILD_TYPE%Test
     if "%BUILD_TYPE%"=="Release" (
-        set OPTIONS=%OPTIONS% -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -D wxWidgets_CONFIGURATION=mswu
-    ) else (
-        set OPTIONS=%OPTIONS% -D wxWidgets_CONFIGURATION=mswud
+        set OPTIONS=%OPTIONS% -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
     )
     echo CMake arguments: %OPTIONS%
 

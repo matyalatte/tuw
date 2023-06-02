@@ -9,7 +9,7 @@ option(BUILD_EXE "Build executable." ON)
 set(PROJECT_NAME SimpleCommandRunner)
 project(${PROJECT_NAME})
 
-if (CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	#settings for GCC
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
 	if (BUILD_TESTS)

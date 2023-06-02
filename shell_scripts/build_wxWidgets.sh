@@ -19,6 +19,8 @@ cd ${build_type}
 options="--disable-shared\
     --disable-compat30\
     --disable-tests\
+    --disable-optimise\
+    --enable-no_rtti\
     --without-regex\
     --without-zlib\
     --without-expat\
@@ -35,11 +37,16 @@ options="--disable-shared\
     --without-libxpm\
     --without-libjbig\
     --disable-glcanvasegl\
+    --disable-arcstream
     --disable-cmdline\
+    --disable-debugreport\
+    --disable-dialupman\
     --disable-filehistory\
     --disable-fontenum\
     --disable-fontmap\
+    --disable-fs_archive\
     --disable-fs_inet\
+    --disable-fs_zip\
     --disable-fswatcher\
     --disable-mimetype\
     --disable-printfposparam\
@@ -50,6 +57,7 @@ options="--disable-shared\
     --disable-tarstream\
     --disable-webrequest\
     --disable-zipstream\
+    --disable-dbghelp\
     --disable-docview\
     --disable-help\
     --disable-mshtmlhelp\
@@ -134,12 +142,15 @@ options="--disable-shared\
     --disable-ico_cur\
     --prefix=$(pwd)"
 
-if [ ${build_type} = "Debug" ];
-    then options="${options} --enable-debug" ;
+if [ ${build_type} = "Debug" ]; then
+    options="${options} --enable-debug"
+else
+    export CXXFLAGS="-Os"
+    export CFLAGS="-Os"
 fi
 
 # configure
-../configure ${options};
+../configure ${options}
 
 function nproc_for_mac(){
     if sysctl -n hw.logicalcpu;

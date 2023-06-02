@@ -45,6 +45,7 @@ class MainFrame : public wxFrame {
               nlohmann::json config = nlohmann::json({}));
 
     void OnClose(wxCloseEvent& event);
+    void OnCommandClose(wxCommandEvent& event) { Close(true); }
     void OpenURL(wxCommandEvent& event);
     void UpdateFrame(wxCommandEvent& event);
     void ClickButton(wxCommandEvent& event);

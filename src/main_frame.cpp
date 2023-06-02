@@ -81,7 +81,7 @@ void MainFrame::CreateFrame() {
 
     // set events
     Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
-    Bind(wxEVT_MENU, [this](wxCommandEvent&) { Close(true); }, wxID_EXIT);
+    Bind(wxEVT_MENU, &MainFrame::OnCommandClose, this, wxID_EXIT);
     Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED,
         wxCommandEventHandler(MainFrame::ClickButton));
 
