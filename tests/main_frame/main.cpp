@@ -124,7 +124,7 @@ TEST(MainFrameTest, RunCommandFail) {
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
 
     try {
-        std::string last_line = main_frame->RunCommand();
+        main_frame->RunCommand();
         FAIL();
     }
     catch(std::exception& err) {

@@ -107,7 +107,6 @@ std::string Exec(std::ostream& ostream,
     if (!process) {
         throw std::runtime_error("Failed to open a process.");
     }
-    long pid = process->GetPid();
 
     // get stream
     wxInputStream* istream = process->GetInputStream();
