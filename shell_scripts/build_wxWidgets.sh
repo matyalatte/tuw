@@ -1,14 +1,15 @@
 #!/bin/bash
 # Builds and installs wxWidgets with cmake.
 
-# you need build-essential and libgtk-3-dev for linux
+# You need build-essential and libgtk-3-dev for linux
 # sudo apt -y install build-essential libgtk-3-dev
 
 wx_version="$(cat $(dirname "$0")/../WX_VERSION.txt)"
 
-if [ "$1" = "Debug" ];
-    then build_type="Debug";
-    else build_type="Release";
+if [ "$1" = "Debug" ]; then
+    build_type="Debug"
+else
+    build_type="Release"
 fi
 
 pushd ~/wxWidgets-"$wx_version"
@@ -19,9 +20,8 @@ cd ${build_type}
 options="--disable-shared\
     --disable-compat30\
     --disable-tests\
-    --disable-optimise\
-    --enable-no_rtti\
     --without-regex\
+    --without-subdirs\
     --without-zlib\
     --without-expat\
     --without-libjpeg\
@@ -142,28 +142,31 @@ options="--disable-shared\
     --disable-ico_cur\
     --prefix=$(pwd)"
 
+if [[ "$OSTYPE" != "darwin"* ]]; then
+    # no-rtti option doesn't support OSX
+    options="${options} --enable-no_rtti"
+fi
+
 if [ ${build_type} = "Debug" ]; then
     options="${options} --enable-debug"
 else
+    # Optimize for size
     export CXXFLAGS="-Os"
     export CFLAGS="-Os"
 fi
 
-# configure
+# Configure
 ../configure ${options}
 
-function nproc_for_mac(){
-    if sysctl -n hw.logicalcpu;
-        then num_proc=$(sysctl -n hw.logicalcpu); # use hw.logicalcpu if exists
-        else num_proc=2; echo ${num_proc}; # when sysctl won't work
-    fi
-}
-
-if nproc;
-    then num_proc=$(nproc); # use nproc if exists
-    else num_proc=$(nproc_for_mac); # when nproc doesn't exist
+# Get nproc
+if nproc; then
+    num_proc=$(nproc) # for linux
+elif sysctl -n hw.logicalcpu; then
+    num_proc=$(sysctl -n hw.logicalcpu) # for osx
+else
+    num_proc=2
 fi
 
-# build
+# Build
 make -j"${num_proc}"
 popd
