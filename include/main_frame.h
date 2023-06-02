@@ -49,7 +49,7 @@ class MainFrame : public wxFrame {
     void UpdateFrame(wxCommandEvent& event);
     void ClickButton(wxCommandEvent& event);
     wxString GetCommand();
-    std::array<std::string, 2> RunCommand();
+    std::string RunCommand();
     nlohmann::json GetDefinition();
     void SaveConfig();
 };

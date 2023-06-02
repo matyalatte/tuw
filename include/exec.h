@@ -40,7 +40,11 @@ class LogFrame : public wxFrame {
 
 // run command and return error messages
 #ifdef __linux__
-std::array<std::string, 2> Exec(LogFrame& ostream, wxString& cmd);
+std::string Exec(LogFrame& ostream,
 #else
-std::array<std::string, 2> Exec(std::ostream& ostream, wxString& cmd);
+std::string Exec(std::ostream& ostream,
 #endif
+                 wxString& cmd,
+                 bool check_exit_code = false,
+                 int exit_success = 0,
+                 bool show_last_line = false);

@@ -262,6 +262,8 @@ namespace json_utils {
         // check sub_definition["command"]
         CheckCommand(sub_definition);
 
+        CheckJsonType(sub_definition, "check_exit_code", JsonType::BOOLEAN, "", CAN_SKIP);
+        CheckJsonType(sub_definition, "exit_success", JsonType::INTEGER, "", CAN_SKIP);
         CheckJsonType(sub_definition, "show_last_line", JsonType::BOOLEAN, "", CAN_SKIP);
 
         CorrectKey(sub_definition, "component", COMPONENTS);

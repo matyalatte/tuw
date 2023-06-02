@@ -204,11 +204,10 @@ wxString MainFrame::GetCommand() {
 
     wxString cmd = wxString::FromUTF8(cmd_ary[0]);
     int comp_size = comp_ids.size();
-    int j;
     int non_id_comp = 0;
     for (int i = 0; i < cmd_ids.size(); i++) {
         std::string id = cmd_ids[i];
-        j = -1;
+        int j = -1;
         if (id == "") {
             j = comp_size;
         } else if (id == CMD_ID_PERCENT) {
@@ -245,18 +244,19 @@ wxString MainFrame::GetCommand() {
     return cmd;
 }
 
-std::array<std::string, 2> MainFrame::RunCommand() {
+std::string MainFrame::RunCommand() {
     wxString cmd = GetCommand();
-    wxString text = m_run_button->GetLabel();
-    m_run_button->SetLabel("Processing...");
 
     *m_ostream << "[RunCommand] Command: " << cmd << std::endl;
 #ifdef _WIN32
     cmd = "cmd.exe /c " + cmd;
 #endif
-    std::array<std::string, 2> msg = Exec(*m_ostream, cmd);
-    m_run_button->SetLabel(text);
-    return msg;
+    bool check_exit_code = m_sub_definition.value("check_exit_code", false);
+    int exit_success = m_sub_definition.value("exit_success", 0);
+    bool show_last_line = m_sub_definition.value("show_last_line", false);
+    std::string last_line = Exec(*m_ostream, cmd,
+                                 check_exit_code, exit_success, show_last_line);
+    return last_line;
 }
 
 // run command
@@ -264,19 +264,26 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
     // save config
     SaveConfig();
 
-    std::array<std::string, 2> msg = RunCommand();
+    bool failed = false;
+    wxString text = m_run_button->GetLabel();
+    std::string last_line = "";
+    try {
+        m_run_button->SetLabel("Processing...");
+        last_line = RunCommand();
+    }
+    catch (std::exception& e) {
+        *m_ostream << "[RunCommand] Error: Failed to execute commands." << std::endl;
+        ShowErrorDialog(e.what());
+        failed = true;
+    }
 
-    // show result
-    if (msg[1] != "") {  // if error
-        *m_ostream << "[RunCommand] Failed to execute commands." << std::endl;
-        ShowErrorDialog(msg[1]);
-    } else {  // if success
-        if (m_sub_definition.contains("show_last_line") &&
-            m_sub_definition["show_last_line"] != 0 && msg[0] != "") {
-            ShowSuccessDialog(msg[0]);
-        } else {
-            ShowSuccessDialog("Success!");
-        }
+    m_run_button->SetLabel(text);
+    if (failed) return;
+
+    if (m_sub_definition.value("show_last_line", false) && last_line != "") {
+        ShowSuccessDialog(last_line);
+    } else {
+        ShowSuccessDialog("Success!");
     }
 }
 
@@ -293,7 +300,9 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
         url = wxString::FromUTF8(help["path"]);
         tag = "[OpenFile] ";
     } else {
-        ShowErrorDialog("Unsupported help type: " + type);
+        std::string msg = "Unsupported help type: " + type;
+        *m_ostream << tag << "Error: " << msg << std::endl;
+        ShowErrorDialog(msg);
         return;
     }
     *m_ostream << tag << url << std::endl;
@@ -302,7 +311,9 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
     }
     bool success = wxLaunchDefaultBrowser(url);
     if (!success) {
-        *m_ostream << tag << "Failed to open " << type << " by an unexpected error." << std::endl;
+        std::string msg ="Failed to open " + type + " by an unexpected error.";
+        *m_ostream << tag << "Error: " << msg << std::endl;
+        ShowErrorDialog(msg);
     }
 }
 

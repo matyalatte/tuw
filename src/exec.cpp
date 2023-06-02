@@ -31,23 +31,32 @@ void LogFrame::OnClose(wxCloseEvent& event) {
 #endif
 
 class wxProcessExecute : public wxProcess {
+ private:
+    bool m_running = false;
+    int m_exit_code;
+
  public:
-    explicit wxProcessExecute(int flags) : wxProcess(flags) {}
+    explicit wxProcessExecute(int flags) : wxProcess(flags), m_exit_code(1), m_running(false) {}
 
     long Execute(const wxString cmd) {
-        return wxExecute(cmd, wxEXEC_ASYNC, this);
+        long pid = wxExecute(cmd, wxEXEC_ASYNC, this);
+        if (pid) {
+            m_running = true;
+        }
+        return pid;
     }
 
-    virtual void OnTerminate(int pid, int status) {
+    void OnTerminate(int pid, int status) {
+        m_exit_code = status;
+        m_running = false;
         if (wxProcessExecute::Exists(pid)) {
             wxProcessExecute::Kill(pid);
         }
     }
 
-    static wxProcessExecute* Open(const wxString& cmd, int flags = wxEXEC_ASYNC) {
-        wxASSERT_MSG(!(flags & wxEXEC_SYNC), wxT("wxEXEC_SYNC should not be used."));
+    static wxProcessExecute* Open(const wxString& cmd) {
         wxProcessExecute* process = new wxProcessExecute(wxPROCESS_REDIRECT);
-        long pid = wxExecute(cmd, flags, process);
+        long pid = process->Execute(cmd);
         if (!pid) {
             delete process;
             return NULL;
@@ -55,6 +64,9 @@ class wxProcessExecute : public wxProcess {
         process->SetPid(pid);
         return process;
     }
+
+    int GetExitCode() { return m_exit_code; }
+    void Wait() { while (m_running) { wxYield(); } }
 };
 
 inline bool IsReturn(const char& input) {
@@ -82,15 +94,20 @@ std::string ReadStream(wxInputStream* stream, char* buf, size_t size) {
 
 // run command and return error messages
 #ifdef __linux__
-std::array<std::string, 2> Exec(LogFrame& ostream, wxString& cmd) {
+std::string Exec(LogFrame& ostream,
 #else
-std::array<std::string, 2> Exec(std::ostream& ostream, wxString& cmd) {
+std::string Exec(std::ostream& ostream,
 #endif
+                 wxString& cmd,
+                 bool check_exit_code,
+                 int exit_success,
+                 bool show_last_line) {
     // open process
     wxProcessExecute* process = wxProcessExecute::Open(cmd);
     if (!process) {
-        return { "", "Failed to open a process." };
+        throw std::runtime_error("Failed to open a process.");
     }
+    long pid = process->GetPid();
 
     // get stream
     wxInputStream* istream = process->GetInputStream();
@@ -109,14 +126,34 @@ std::array<std::string, 2> Exec(std::ostream& ostream, wxString& cmd) {
         std::string str = ReadStream(istream, ibuf, size);
         ostream << str;
         in_msg += str;
+        if (in_msg.length() > 2048) {
+            in_msg = in_msg.substr(in_msg.length() - 1024, 1024);
+        }
 
         // store error messages
         err_msg += ReadStream(estream, ebuf, size);
+        if (err_msg.length() > 4096) {
+            err_msg = err_msg.substr(err_msg.length() - 2048, 2048);
+        }
     }
     // get last line
     in_msg = GetLastLine(in_msg);
 
+    process->Wait();
+
     // print and return error messages
-    ostream << err_msg;
-    return {in_msg, err_msg};
+    if (err_msg != "") {
+        throw std::runtime_error(err_msg);
+    }
+
+    int exit_code = process->GetExitCode();
+    if (check_exit_code && (exit_code != exit_success)) {
+        if (show_last_line) {
+            throw std::runtime_error(in_msg);
+        } else {
+            throw std::runtime_error("Invalid exit code (" + std::to_string(exit_code) + ")");
+        }
+    }
+
+    return in_msg;
 }

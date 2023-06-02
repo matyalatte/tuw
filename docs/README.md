@@ -95,7 +95,6 @@ Files in this repository are available under [wxWindows Library Licence](../lice
 > It is a modified version of LGPL explicitly allowing not distributing
 > the sources of an application using the library even in the case of static linking.  
 
-
 ## External Projects
 
 -   [wxWidgets library](https://github.com/wxWidgets/wxWidgets) for the GUI framework.  
