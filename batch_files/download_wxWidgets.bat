@@ -11,4 +11,13 @@ set /p WX_VERSION=< %~dp0\..\WX_VERSION.txt
     del wxWidgets-%WX_VERSION%.zip
 @popd
 
+set SOURCE_DIR=C:\wxWidgets-%WX_VERSION%\src\msw
+
+REM Fix src\msw\dib.cpp
+@pushd %~dp0
+    copy /Y %SOURCE_DIR%\dib.cpp dib.buckup.cpp
+    powershell -ExecutionPolicy Unrestricted ./fix_wxWidgets.ps1
+    copy /Y dib.fixed.cpp %SOURCE_DIR%\dib.cpp
+@popd
+
 PAUSE

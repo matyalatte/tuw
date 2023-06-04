@@ -48,6 +48,7 @@ out
 *.internal
 *.test
 *.make
+batch_files/*.cpp
 
 # python
 python

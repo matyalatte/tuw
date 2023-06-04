@@ -68,3 +68,5 @@ mkdir %~dp0\..\%BUILD_TYPE%Test
     ) else if "%BUILD_TYPE%"=="Release" echo INFO: Coverage report is available with Debug build.
     :testend
 @popd
+
+pause

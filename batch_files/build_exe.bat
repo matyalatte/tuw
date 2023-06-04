@@ -35,3 +35,5 @@ mkdir %~dp0\..\%BUILD_TYPE%
     cmake %OPTIONS% ../
     cmake --build . --config %BUILD_TYPE%
 @popd
+
+pause

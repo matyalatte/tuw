@@ -4,19 +4,26 @@ cmake_minimum_required(VERSION 3.25)
 # options
 option(BUILD_TESTS "Build all tests." OFF)
 option(BUILD_EXE "Build executable." ON)
+# set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # project
 set(PROJECT_NAME SimpleCommandRunner)
 project(${PROJECT_NAME})
 
+# set flags for compilers
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	#settings for GCC
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffunction-sections -fdata-sections")
+	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,--gc-sections")
 	if (BUILD_TESTS)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-		set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 	endif()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffunction-sections -fdata-sections")
+	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,-dead_strip")
 endif()
+
 
 # find wxWidgets
 # set(CMAKE_FIND_DEBUG_MODE TRUE)

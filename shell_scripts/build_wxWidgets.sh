@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds and installs wxWidgets with cmake.
+# Builds and installs wxWidgets.
 
 # You need build-essential and libgtk-3-dev for linux
 # sudo apt -y install build-essential libgtk-3-dev
@@ -17,134 +17,139 @@ mkdir ${build_type}
 cd ${build_type}
 
 # Options are defined in wxWidgets/configure
-options="--disable-shared\
-    --disable-compat30\
-    --disable-tests\
-    --without-regex\
-    --without-subdirs\
-    --without-zlib\
-    --without-expat\
-    --without-libjpeg\
-    --without-libpng\
-    --without-libtiff\
-    --without-nanosvg\
-    --without-liblzma\
-    --without-opengl\
-    --without-sdl\
-    --without-libmspack\
-    --without-gtkprint\
-    --without-gnomevfs\
-    --without-libxpm\
-    --without-libjbig\
-    --disable-glcanvasegl\
-    --disable-arcstream
-    --disable-cmdline\
-    --disable-debugreport\
-    --disable-dialupman\
-    --disable-filehistory\
-    --disable-fontenum\
-    --disable-fontmap\
-    --disable-fs_archive\
-    --disable-fs_inet\
-    --disable-fs_zip\
-    --disable-fswatcher\
-    --disable-mimetype\
-    --disable-printfposparam\
-    --disable-secretstore\
-    --disable-sound\
-    --disable-spellcheck\
-    --disable-sysoptions\
-    --disable-tarstream\
-    --disable-webrequest\
-    --disable-zipstream\
-    --disable-dbghelp\
-    --disable-docview\
-    --disable-help\
-    --disable-mshtmlhelp\
-    --disable-html\
-    --disable-htmlhelp\
-    --disable-xrc\
-    --disable-aui\
-    --disable-propgrid\
-    --disable-ribbon\
-    --disable-stc\
-    --disable-loggui\
-    --disable-logwin\
-    --disable-logdialog\
-    --disable-mdi\
-    --disable-mdidoc\
-    --disable-mediactrl\
-    --disable-richtext\
-    --disable-postscript\
-    --disable-printarch\
-    --disable-svg\
-    --disable-webview\
-    --disable-actindicator\
-    --disable-addremovectrl\
-    --disable-animatectrl\
-    --disable-bannerwindow\
-    --disable-artstd\
-    --disable-arttango\
-    --disable-bmpcombobox\
-    --disable-calendar\
-    --disable-choicebook\
-    --disable-colourpicker\
-    --disable-commandlinkbutton\
-    --disable-dataviewctrl\
-    --disable-datepick\
-    --disable-editablebox\
-    --disable-fontpicker\
-    --disable-gauge\
-    --disable-grid\
-    --disable-headerctrl\
-    --disable-hyperlink\
-    --disable-infobar\
-    --disable-listbook\
-    --disable-notebook\
-    --disable-odcombobox\
-    --disable-prefseditor\
-    --disable-radiobox\
-    --disable-richmsgdlg\
-    --disable-richtooltip\
-    --disable-rearrangectrl\
-    --disable-searchctrl\
-    --disable-taskbaricon\
-    --disable-tbarnative\
-    --disable-timepick\
-    --disable-togglebtn\
-    --disable-toolbar\
-    --disable-toolbook\
-    --disable-treebook\
-    --disable-treelist\
-    --disable-splash\
-    --disable-coldlg\
-    --disable-creddlg\
-    --disable-finddlg\
-    --disable-fontdlg\
-    --disable-numberdlg\
-    --disable-tipdlg\
-    --disable-progressdlg\
-    --disable-wizarddlg\
-    --disable-busyinfo\
-    --disable-hotkey\
-    --disable-joystick\
-    --disable-metafile\
-    --disable-dragimage\
-    --disable-dctransform\
-    --disable-webviewwebkit\
-    --disable-privatefonts\
-    --disable-gif\
-    --disable-pcx\
-    --disable-tga\
-    --disable-iff\
-    --disable-pnm\
-    --disable-xpm\
-    --disable-ico_cur\
-    --prefix=$(pwd)"
+options="--disable-shared
+ --disable-compat30
+ --disable-tests
+ --without-regex
+ --without-subdirs
+ --without-zlib
+ --without-expat
+ --without-libjpeg
+ --without-libpng
+ --without-libtiff
+ --without-nanosvg
+ --without-liblzma
+ --without-libnotify
+ --without-opengl
+ --without-sdl
+ --without-libmspack
+ --without-gtkprint
+ --without-gnomevfs
+ --without-libxpm
+ --without-libjbig
+ --disable-glcanvasegl
+ --disable-config
+ --disable-arcstream
+ --disable-backtrace
+ --disable-cmdline
+ --disable-debugreport
+ --disable-dialupman
+ --disable-filehistory
+ --disable-fontenum
+ --disable-fontmap
+ --disable-fs_archive
+ --disable-fs_inet
+ --disable-fs_zip
+ --disable-fswatcher
+ --disable-mimetype
+ --disable-printfposparam
+ --disable-secretstore
+ --disable-snglinst
+ --disable-sound
+ --disable-spellcheck
+ --disable-sysoptions
+ --disable-tarstream
+ --disable-webrequest
+ --disable-zipstream
+ --disable-dbghelp
+ --disable-docview
+ --disable-help
+ --disable-mshtmlhelp
+ --disable-html
+ --disable-htmlhelp
+ --disable-xrc
+ --disable-aui
+ --disable-propgrid
+ --disable-ribbon
+ --disable-stc
+ --disable-loggui
+ --disable-logwin
+ --disable-logdialog
+ --disable-mdi
+ --disable-mdidoc
+ --disable-mediactrl
+ --disable-richtext
+ --disable-postscript
+ --disable-printarch
+ --disable-svg
+ --disable-webview
+ --disable-actindicator
+ --disable-addremovectrl
+ --disable-animatectrl
+ --disable-bannerwindow
+ --disable-artstd
+ --disable-arttango
+ --disable-bmpcombobox
+ --disable-calendar
+ --disable-choicebook
+ --disable-colourpicker
+ --disable-commandlinkbutton
+ --disable-dataviewctrl
+ --disable-datepick
+ --disable-editablebox
+ --disable-fontpicker
+ --disable-gauge
+ --disable-grid
+ --disable-headerctrl
+ --disable-hyperlink
+ --disable-infobar
+ --disable-listbook
+ --disable-notebook
+ --disable-odcombobox
+ --disable-prefseditor
+ --disable-radiobox
+ --disable-richmsgdlg
+ --disable-richtooltip
+ --disable-rearrangectrl
+ --disable-searchctrl
+ --disable-taskbarbutton
+ --disable-taskbaricon
+ --disable-tbarnative
+ --disable-timepick
+ --disable-togglebtn
+ --disable-toolbar
+ --disable-toolbook
+ --disable-treebook
+ --disable-treelist
+ --disable-splash
+ --disable-coldlg
+ --disable-creddlg
+ --disable-finddlg
+ --disable-fontdlg
+ --disable-numberdlg
+ --disable-tipdlg
+ --disable-progressdlg
+ --disable-wizarddlg
+ --disable-busyinfo
+ --disable-hotkey
+ --disable-joystick
+ --disable-metafile
+ --disable-dragimage
+ --disable-dctransform
+ --disable-webviewwebkit
+ --disable-privatefonts
+ --disable-gif
+ --disable-pcx
+ --disable-tga
+ --disable-iff
+ --disable-pnm
+ --disable-xpm
+ --disable-ico_cur
+ --prefix=$(pwd)"
 
-if [[ "$OSTYPE" != "darwin"* ]]; then
-    # no-rtti option doesn't support OSX
-    options="${options} --enable-no_rtti"
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Some options don't support OSX
+    options="${options} --enable-no_rtti --disable-intl --disable-xlocale"
 fi
 
 if [ ${build_type} = "Debug" ]; then
@@ -153,6 +158,11 @@ else
     # Optimize for size
     export CXXFLAGS="-Os"
     export CFLAGS="-Os"
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        export CXXFLAGS="${CXXFLAGS} -ffunction-sections -fdata-sections"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        export CXXFLAGS="${CXXFLAGS} -ffunction-sections -fdata-sections"
+    fi
 fi
 
 # Configure
