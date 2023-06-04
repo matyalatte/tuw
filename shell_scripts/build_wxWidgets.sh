@@ -1,20 +1,15 @@
 #!/bin/bash
-# Builds and installs wxWidgets.
+# Builds wxWidgets in ~/wxWidgets-${wx_version}/${build_type}
 
-# You need build-essential and libgtk-3-dev for linux
-# sudo apt -y install build-essential libgtk-3-dev
-
-wx_version="$(cat $(dirname "$0")/../WX_VERSION.txt)"
-
+# You can specify build type as an argument like "bash build_wxWidgets.sh Release"
 if [ "$1" = "Debug" ]; then
     build_type="Debug"
 else
     build_type="Release"
 fi
 
-pushd ~/wxWidgets-"$wx_version"
-mkdir ${build_type}
-cd ${build_type}
+# wxWidgets version is defined in ./Simple-Command-Runner/WX_VERSION.txt
+wx_version="$(cat $(dirname "$0")/../WX_VERSION.txt)"
 
 # Options are defined in wxWidgets/configure
 options="--disable-shared
@@ -148,7 +143,7 @@ options="--disable-shared
  --prefix=$(pwd)"
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Some options don't support OSX
+    # no-rtti option doesn't support OSX
     options="${options} --enable-no_rtti --disable-intl --disable-xlocale"
 fi
 
@@ -164,9 +159,7 @@ else
         export CXXFLAGS="${CXXFLAGS} -ffunction-sections -fdata-sections"
     fi
 fi
-
-# Configure
-../configure ${options}
+echo "CMake arguments: ${options}"
 
 # Get nproc
 if nproc; then
@@ -178,5 +171,9 @@ else
 fi
 
 # Build
+pushd ~/wxWidgets-"$wx_version"
+mkdir ${build_type}
+cd ${build_type}
+../configure ${options}
 make -j"${num_proc}"
 popd

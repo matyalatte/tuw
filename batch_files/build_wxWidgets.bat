@@ -1,14 +1,12 @@
 @echo off
+REM Builds wxWidgets with CMake and Visual Studio 2022.
+REM The library will be installed in C:\wxWidgets-%WX_VERSION%\%BUILD_TYPE%\Installed
 
-REM Builds wxWidgets with CMake and Visual Studio.
-
+REM Edit here if you won't use Visual Studio 2022.
 set GENERATOR=Visual Studio 17 2022
 echo Generator: %GENERATOR%
 
-set /p WX_VERSION=< %~dp0\..\WX_VERSION.txt
-
 REM You can specify build type as an argument like "build_wxWidgets.bat Release"
-REM The library will be installed in C:\wxWidgets-%WX_VERSION%\%BUILD_TYPE%\Installed
 if /I "%~1"=="Debug" (
     set BUILD_TYPE=Debug
 ) else (
@@ -16,6 +14,8 @@ if /I "%~1"=="Debug" (
 )
 echo Build type: %BUILD_TYPE%
 
+REM wxWidgets version is defined in ./Simple-Command-Runner/WX_VERSION.txt
+set /p WX_VERSION=< %~dp0\..\WX_VERSION.txt
 set INSTALL_DIR=C:/wxWidgets-%WX_VERSION%/%BUILD_TYPE%/Installed
 echo Install dir: %INSTALL_DIR%
 
@@ -160,6 +160,7 @@ set wxOPTIONS=^
     mkdir %BUILD_TYPE%
     cd %BUILD_TYPE%
     if "%BUILD_TYPE%"=="Release" (
+        REM Edit here if you won't use MSVC.
         set CMAKE_OPTIONS=%CMAKE_OPTIONS% -D CMAKE_CXX_FLAGS_RELEASE="/MT /O1 /DNDEBUG"
         set wxOPTIONS=%wxOPTIONS% -D wxBUILD_USE_STATIC_RUNTIME=ON
     )

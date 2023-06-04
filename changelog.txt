@@ -1,9 +1,9 @@
-ver 0.3.2
+ver 0.4.0
 - Added options for exit code.
 - Added predefined ids for "%" and the executable directory.
 - Fixed an error when the current directory is not the same as the executable directory. (on Windows)
 - Removed more codes from wxWidgets to reduce the binary size.
-- Applied Os level optimization to wxWidgets to reduce the binary size.
+- Applied some optimization options to reduce the binary size.
 - Refined codes.
 
 ver 0.3.1

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Downloads wxWidgets.
 
+# wxWidgets version is defined in ./Simple-Command-Runner/WX_VERSION.txt
 wx_version="$(cat $(dirname "$0")/../WX_VERSION.txt)"
 
 pushd ~/

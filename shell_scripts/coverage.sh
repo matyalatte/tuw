@@ -2,6 +2,7 @@
 # Generate html report for coverage (./Simple-Command-Runner/coverage-report/index.html)
 # It only works with GCC.
 
+# You can specify build type as an argument like "bash coverage.sh Release"
 if [ "$1" = "Debug" ]; then
     build_type="Debug"
 else

@@ -1,4 +1,4 @@
-# Simple-Command-Runner ver 0.3.1
+# Simple-Command-Runner ver 0.4.0
 
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/test.yml/badge.svg)
@@ -19,11 +19,12 @@ No need to use IDE and manage scripts for GUI.
 
 ## Features
 
--   Cross-platform
--   Portable
 -   Define GUI in .json
 -   Save arguments
--   Able to input paths by drag and drop
+-   Input paths by drag and drop
+-   Cross-platform
+-   Native look and feel
+-   Portable
 
 ## Downloads
 
@@ -55,7 +56,7 @@ I made sure I can build it with the following platforms and compilers.
 
 And I think it supports your environment as well if [wxWidgets library](https://github.com/wxWidgets/wxWidgets) supports.  
 
-## How to Build
+## Building
 
 ### Windows
 
@@ -64,17 +65,21 @@ There is a document for Windows users.
 
 And you can see [batch files](../batch_files/) to understand the workflow.  
 
-### Mac and Ubuntu
+### Unix/Linux
 
-There is a document for Mac and Ubuntu users.  
-[Building Workflow for Ubuntu and MacOS](./Build-on-Unix.md)  
+There are documents for macOS and Linux users.  
+[Building Workflow for macOS](./Build-on-Mac.md)  
+[Building Workflow for Linux](./Build-on-Linux.md)  
 
 And you can see [shell scripts](../shell_scripts/) to understand the workflow.  
 
 ### Docker
 
-Ubuntu users can also use a docker file to build the executable.  
-See [the docker file](../Dockerfile) for the instruction.  
+Linux users can use dockerfiles to build the executable.  
+See the dockerfiles for the details.
+
+-   [Dockerfile_Ubuntu](../Dockerfile_Ubuntu): Builds SimpleCommandRunner on Ubuntu20.04  
+-   [Dockerfile_Alpine](../Dockerfile_Alpine): Builds SimpleCommandRunner on Alpine3.16  
 
 ### Github Actions
 

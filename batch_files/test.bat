@@ -1,13 +1,12 @@
 @echo off
-
 REM Builds tests for SimpleCommandRunner.
 REM You can also get coverage report if OpenCppCoverage is installed.
 
+REM Edit here if you won't use Visual Studio 2022.
 set GENERATOR=Visual Studio 17 2022
 echo Generator: %GENERATOR%
 
-set /p WX_VERSION=< %~dp0\..\WX_VERSION.txt
-
+REM You can specify build type as an argument like "test.bat Release"
 if /I "%~1"=="Debug" (
     set BUILD_TYPE=Debug
 ) else (
@@ -15,6 +14,8 @@ if /I "%~1"=="Debug" (
 )
 echo BUILD_TYPE: %BUILD_TYPE%
 
+REM wxWidgets version is defined in ./Simple-Command-Runner/WX_VERSION.txt
+set /p WX_VERSION=< %~dp0\..\WX_VERSION.txt
 set wxDIR=C:/wxWidgets-%WX_VERSION%/%BUILD_TYPE%/Installed
 echo wxWidgets location: %wxDIR%
 
@@ -61,6 +62,7 @@ mkdir %~dp0\..\%BUILD_TYPE%Test
     goto testend
 
     :nocoverage
+    REM Test without OpenCppCoverage
     ctest --verbose --output-on-failure -C %BUILD_TYPE%
     if %GET_COVERAGE% equ 0 (
         echo INFO: Install OpenCppCoverage if you want coverage report.

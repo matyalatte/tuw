@@ -6,8 +6,8 @@
 -   CMake (**3.25** or later)
 -   Batch files in [`./Simple-Command-Runner/batch_files`](../batch_files)
 
-> Edit the variable `GENERATOR` in batch files, if you won't use Visual Studio 2022.  
-> You can see the list of available generators with the `cmake -G` command.  
+> The batch files support only Visual Studio 2022.  
+> If you don't want to use it, edit some variables in `build_wxWidgets.bat` and `build_exe.bat`.  
 
 > CMake should be 3.25 or later.  
 > Or use [v0.2.3](https://github.com/matyalatte/Simple-Command-Runner/tree/v0.2.3) that supports old cmake versions.  
