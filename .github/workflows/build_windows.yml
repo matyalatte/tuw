@@ -43,7 +43,7 @@ jobs:
         run: |
           cd batch_files
           ./download_wxWidgets.bat
-          ./build_wxWidgets.bat
+          ./build_wxWidgets.bat NoTest
 
       - name: build exe
         run: |

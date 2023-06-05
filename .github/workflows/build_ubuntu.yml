@@ -47,7 +47,7 @@ jobs:
         run: |
           cd shell_scripts
           bash download_wxWidgets.sh
-          bash build_wxWidgets.sh
+          bash build_wxWidgets.sh NoTest
           
       - name: build exe
         run: |
