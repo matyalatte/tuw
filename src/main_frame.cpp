@@ -291,20 +291,42 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
     size_t id = event.GetId() - 1 - wxID_HIGHEST - m_definition["gui"].size();
     nlohmann::json help = m_definition["help"][id];
     std::string type = help["type"];
-    wxString url;
+    wxString url = "";
     std::string tag;
-    if (type == "url") {
-        url = wxString::FromUTF8(help["url"]);
-        tag = "[OpenURL] ";
-    } else if (type == "file") {
-        url = wxString::FromUTF8(help["path"]);
-        tag = "[OpenFile] ";
-    } else {
-        std::string msg = "Unsupported help type: " + type;
-        *m_ostream << tag << "Error: " << msg << std::endl;
-        ShowErrorDialog(msg);
+    try {
+        if (type == "url") {
+            url = wxString::FromUTF8(help["url"]);
+            tag = "[OpenURL] ";
+            wxURL wx_url(url);
+            if (wx_url.HasScheme()) {
+                wxString scheme = wx_url.GetScheme();
+                // scheme should be http or https
+                if (scheme.IsSameAs("file", false)) {
+                    wxString msg = "Use 'file' type for a path, not 'url' type. (" + url + ")";
+                    throw std::runtime_error(msg.c_str());
+                } else if (!scheme.IsSameAs("https", false) && !scheme.IsSameAs("http", false)) {
+                    wxString msg = "Unsupported scheme detected. "
+                                      "It should be http or https. (" + scheme + ")";
+                    throw std::runtime_error(msg.c_str());
+                }
+            } else {
+                url = "https://" + url;
+            }
+        } else if (type == "file") {
+            url = wxString::FromUTF8(help["path"]);
+            tag = "[OpenFile] ";
+            if (!wxFileExists(url) && !wxDirExists(url)) {
+                wxString msg = "File does not exist. (" + url + ")";
+                throw std::runtime_error(msg.c_str());
+            }
+        }
+    }
+    catch (std::exception& e) {
+        *m_ostream << tag << "Error: " << e.what() << std::endl;
+        ShowErrorDialog(e.what());
         return;
     }
+
     *m_ostream << tag << url << std::endl;
     if (type == "file") {
         url = "file:" + url;

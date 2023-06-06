@@ -27,7 +27,7 @@ endif()
 
 # find wxWidgets
 # set(CMAKE_FIND_DEBUG_MODE TRUE)
-find_package(wxWidgets REQUIRED COMPONENTS core base)
+find_package(wxWidgets REQUIRED COMPONENTS core base net)
 include(${wxWidgets_USE_FILE})
 
 
