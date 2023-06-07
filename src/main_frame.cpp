@@ -5,7 +5,28 @@ MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
     : wxFrame(nullptr, wxID_ANY, scr_constants::TOOL_NAME) {
     SetUp();
     if (definition.empty()) {
-        definition = LoadJson("gui_definition.json", true);
+        if (wxFileExists("gui_definition.json")) {
+            definition = LoadJson("gui_definition.json", true);
+            *m_ostream << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
+        } else {
+            *m_ostream << "[LoadDefinition] gui_definition.json not found." << std::endl;
+            try {
+                ExeContainer exe;
+                exe.Read(wxStandardPaths::Get().GetExecutablePath());
+                if (!exe.HasJson()) {
+                    *m_ostream << "[LoadDefinition] Embedded JSON not found." << std::endl;
+                    throw std::runtime_error("JSON data not found.");
+                }
+                *m_ostream << "[LoadDefinition] Found JSON in the executable." << std::endl;
+                definition = exe.GetJson();
+            }
+            catch (nlohmann::json::exception& e) {
+                JsonLoadFailed(e.what(), definition);
+            }
+            catch (std::exception& e) {
+                JsonLoadFailed(e.what(), definition);
+            }
+        }
     }
     if (config.empty()) {
         config = LoadJson("gui_config.json", false);
@@ -19,9 +40,7 @@ MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
 
 void MainFrame::SetUp() {
     // Use the executable directory as the working dir.
-    wxStandardPaths& path = wxStandardPaths::Get();
-    path.UseAppInfo(wxStandardPaths::AppInfo_None);
-    wxString exe_path = path.GetExecutablePath();
+    wxString exe_path = wxStandardPaths::Get().GetExecutablePath();
     wxSetWorkingDirectory(wxPathOnly(exe_path));
 
 #ifdef __linux__
@@ -152,8 +171,6 @@ void MainFrame::CheckDefinition(nlohmann::json& definition) {
         JsonLoadFailed(msg, definition);
         return;
     }
-
-    *m_ostream << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
 }
 
 void MainFrame::UpdateConfig() {

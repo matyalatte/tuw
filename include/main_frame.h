@@ -6,9 +6,11 @@
 #include "wx/filepicker.h"
 #include "wx/stdpaths.h"
 #include "wx/url.h"
+#include "wx/stream.h"
 #include "component.h"
 #include "exec.h"
 #include "json_utils.h"
+#include "exe_container.h"
 #include "scr_constants.h"
 
 

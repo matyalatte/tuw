@@ -51,6 +51,7 @@ add_library(${PROJECT_NAME}_lib STATIC
 	"src/component.cpp"
 	"src/json_utils.cpp"
 	"src/custom_wx_obj.cpp"
+	"src/exe_container.cpp"
 )
 target_link_libraries(${PROJECT_NAME}_lib
 	nlohmann_json::nlohmann_json
