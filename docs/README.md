@@ -7,7 +7,7 @@
 
 Small and simple GUI wrapper for command-line tools.  
 
-## Only 3MB for a portable GUI!
+## Only 1MB for a portable GUI!
 
 Simple Command Runner will give a very simple GUI to your scripts.  
 All you need is write a `.json` file and run a small executable.  
@@ -22,22 +22,25 @@ It can make a GUI to run commands of your scripts.
 -   Define GUI in .json
 -   Save arguments
 -   Input paths by drag and drop
--   Merge exe and json into a new exe
 -   Cross-platform
 -   Native look and feel
 -   Portable
--   Small size (2 ~ 3MB)
+-   Small size (under 1MB)
 
 ## Downloads
 
 You can download executables from [the release page](https://github.com/matyalatte/Simple-Command-Runner/releases)
 
--   `SimpleCommandRunner*-Windows.zip` is for Windows.  
--   `SimpleCommandRunner*-macOS.tar.bz2` is for Mac.  
--   `SimpleCommandRunner*-Linux.tar.bz2` is for Ubuntu (20.04 or later).  
+-   `SimpleCommandRunner*-Windows*.zip` is for Windows.  
+-   `SimpleCommandRunner*-macOS*.tar.bz2` is for macOS.  
+-   `SimpleCommandRunner*-Linux*.tar.bz2` is for Ubuntu (20.04 or later).  
 
-> The linux build only supports Ubuntu due to the glibc dependences.  
-> If you want to use it on other linux distributions, you should get the lib or build the executable by yourself.  
+> `*-packed.*` are the 1MB executables that were compressed by [UPX](https://github.com/upx/upx).  
+> But they might cause some problems (e.g. false positives by anti-viruses) on your machine.  
+> Use the uncompressed ones if they won't work.  
+
+> The linux builds only support Ubuntu due to the glibc dependences.  
+> Build the executable by yourself if you want to use it on other linux distros.  
 
 ## Examples
 
@@ -93,12 +96,12 @@ See here for the details.
 
 ## License
 
-Files in this repository are available under [wxWindows Library Licence](../license.txt).  
-
-> It is a modified version of LGPL explicitly allowing not distributing
-> the sources of an application using the library even in the case of static linking.  
+Files in this repository are available under the [GPL2+](../license.txt).  
 
 ## External Projects
 
--   [wxWidgets library](https://github.com/wxWidgets/wxWidgets) for the GUI framework.  
--   [nlohmann's json library](https://github.com/nlohmann/json) for JSON handling.  
+| Project | Used for | License |
+| -- | -- | -- |
+| [wxWidgets library](https://github.com/wxWidgets/wxWidgets) | GUI framework | [Modified LGPL](https://github.com/wxWidgets/wxWidgets/blob/master/docs/licence.txt) | 
+| [nlohmann's json library](https://github.com/nlohmann/json) | JSON handling | [MIT](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT) |
+| [UPX](https://github.com/upx/upx) | EXE compression | [Modified GPL2+](https://github.com/upx/upx/blob/devel/LICENSE) |

@@ -30,11 +30,14 @@ static void WriteUint32(wxFile* io, const wxUint32& num) {
 }
 
 static void ReadStr(wxFile* io, std::string& str, const wxUint32& size) {
-    char buff[1024];
+    // assert str == "";
+    char buff[1025];
+    buff[1024] = 0;
     wxUint32 pos = 0;
     while (pos < size) {
         if (size - pos < 1024) {
             io->Read(buff, size - pos);
+            buff[size - pos] = 0;
             str += buff;
             break;
         }
@@ -42,6 +45,8 @@ static void ReadStr(wxFile* io, std::string& str, const wxUint32& size) {
         str += buff;
         pos += 1024;
     }
+    if (str.length() != size)
+        throw std::runtime_error("Unexpected char detected.");
 }
 
 static void WriteStr(wxFile* io, const std::string& str) {

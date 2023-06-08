@@ -4,38 +4,61 @@ cmake_minimum_required(VERSION 3.25)
 # options
 option(BUILD_TESTS "Build all tests." OFF)
 option(BUILD_EXE "Build executable." ON)
-# set(CMAKE_VERBOSE_MAKEFILE ON)
+option(USE_JSON_EMBEDDING "Use command-line utils to merge JSON into exe." OFF)
+option(VERBOSE "Show optional messages." ON)
+
+if (VERBOSE)
+    set(CMAKE_VERBOSE_MAKEFILE ON)
+    set(CMAKE_MESSAGE_LOG_LEVEL VERBOSE)
+endif()
 
 # project
 set(PROJECT_NAME SimpleCommandRunner)
 project(${PROJECT_NAME})
 
 # set flags for compilers
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffunction-sections -fdata-sections")
+	string(REPLACE "-O2" "-Os" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+	string(REPLACE "-O3" "-Os" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+	if (USE_JSON_EMBEDDING)
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -DUSE_JSON_EMBEDDING=1")
+	endif()
+endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffunction-sections -fdata-sections")
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,--gc-sections")
 	if (BUILD_TESTS)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 	endif()
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffunction-sections -fdata-sections")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,-dead_strip")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	string(REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /OPT:REF /OPT:ICF")
+	if (USE_JSON_EMBEDDING)
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} /DUSE_JSON_EMBEDDING=1")
+	endif()
 endif()
 
+message(VERBOSE "SYSTEM                  : ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
+message(VERBOSE "COMPILER                : ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(VERBOSE "CXX_FLAGS               : ${CMAKE_CXX_FLAGS}")
+message(VERBOSE "CXX_FLAGS_RELEASE       : ${CMAKE_CXX_FLAGS_RELEASE}")
+message(VERBOSE "EXE_LINKER_FLAGS        : ${CMAKE_EXE_LINKER_FLAGS}")
+message(VERBOSE "EXE_LINKER_FLAGS_RELEASE: ${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 
 # find wxWidgets
 # set(CMAKE_FIND_DEBUG_MODE TRUE)
-find_package(wxWidgets REQUIRED COMPONENTS core base net)
+find_package(wxWidgets REQUIRED COMPONENTS core base)
 include(${wxWidgets_USE_FILE})
 
 
+# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP:
+cmake_policy(SET CMP0135 NEW)
+
 # fetch json
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
-	# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP:
-	cmake_policy(SET CMP0135 NEW)
-endif()
 include(FetchContent)
 FetchContent_Declare(
 	json
@@ -45,14 +68,16 @@ FetchContent_MakeAvailable(json)
 
 # make a lib
 include_directories(include)
-add_library(${PROJECT_NAME}_lib STATIC
-	"src/main_frame.cpp"
-	"src/exec.cpp"
-	"src/component.cpp"
-	"src/json_utils.cpp"
-	"src/custom_wx_obj.cpp"
-	"src/exe_container.cpp"
-)
+set(SOURCES
+	src/main_frame.cpp
+	src/exec.cpp
+	src/component.cpp
+	src/json_utils.cpp
+	src/custom_wx_obj.cpp)
+if (USE_JSON_EMBEDDING)
+    set(SOURCES ${SOURCES} src/exe_container.cpp)
+endif()
+add_library(${PROJECT_NAME}_lib STATIC ${SOURCES})
 target_link_libraries(${PROJECT_NAME}_lib
 	nlohmann_json::nlohmann_json
 	${wxWidgets_LIBRARIES}

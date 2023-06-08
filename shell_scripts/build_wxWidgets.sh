@@ -61,6 +61,10 @@ non_gui_options="--disable-config
  --disable-zipstream
  --disable-ftp
  --disable-http
+ --disable-fileproto
+ --disable-sockets
+ --disable-url
+ --disable-protocol
  --disable-protocol-ftp
  --disable-protocol-http
  --disable-protocol-file
@@ -197,7 +201,6 @@ if [ ${build_type} = "Debug" ]; then
 else
     # Optimize for size
     export CXXFLAGS="-Os -ffunction-sections -fdata-sections"
-    export CFLAGS="-Os"
 fi
 echo "CMake arguments: ${options}"
 

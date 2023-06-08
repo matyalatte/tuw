@@ -29,6 +29,16 @@ The steps are as follows.
 4.  An executable file `SimpleCommandRunner` will be generated in `./Simple-Command-Runner/build/Release`.
 5.  Type `bash build_exe.sh Debug` if you want a debug build.
 
+## Compression
+
+The built binary will be 2 or 3 MB.  
+You should use [UPX](https://github.com/upx/upx) if you want smaller exe.  
+
+```
+brew install upx
+upx SimpleCommandRunner --best
+```
+
 ## Test
 
 If you want to build tests, type `bash test.sh` or `bash test.sh Debug` on the terminal.

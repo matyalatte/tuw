@@ -9,6 +9,7 @@ MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
             definition = LoadJson("gui_definition.json", true);
             *m_ostream << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
         } else {
+        #ifdef USE_JSON_EMBEDDING
             *m_ostream << "[LoadDefinition] gui_definition.json not found." << std::endl;
             try {
                 ExeContainer exe;
@@ -26,6 +27,9 @@ MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
             catch (std::exception& e) {
                 JsonLoadFailed(e.what(), definition);
             }
+        #else
+            JsonLoadFailed("gui_definition.json not found.", definition);
+        #endif
         }
     }
     if (config.empty()) {
@@ -314,9 +318,9 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
         if (type == "url") {
             url = wxString::FromUTF8(help["url"]);
             tag = "[OpenURL] ";
-            wxURL wx_url(url);
-            if (wx_url.HasScheme()) {
-                wxString scheme = wx_url.GetScheme();
+            int pos = url.Find("://");
+            if (pos !=wxNOT_FOUND) {
+                wxString scheme = url.Left(pos);
                 // scheme should be http or https
                 if (scheme.IsSameAs("file", false)) {
                     wxString msg = "Use 'file' type for a path, not 'url' type. (" + url + ")";

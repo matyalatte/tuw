@@ -6,6 +6,9 @@ REM Edit here if you won't use Visual Studio 2022.
 set GENERATOR=Visual Studio 17 2022
 echo Generator: %GENERATOR%
 
+set RELEASE_FLAGS=-D CMAKE_CXX_FLAGS_RELEASE="/MT /O1 /DNDEBUG"
+echo CXX_FLAGS_RELEASE: %RELEASE_FLAGS%
+
 REM You can specify build type as an argument like "build_wxWidgets.bat Release"
 if /I "%~1"=="Debug" (
     set BUILD_TYPE=Debug
@@ -68,6 +71,8 @@ set NON_GUI_OPTIONS=-D wxUSE_INTL=OFF^
  -D wxUSE_TEXTFILE=OFF^
  -D wxUSE_WEBREQUEST=OFF^
  -D wxUSE_ZIPSTREAM=OFF^
+ -D wxUSE_URL=OFF^
+ -D wxUSE_PROTOCOL=OFF^
  -D wxUSE_PROTOCOL_FTP=OFF^
  -D wxUSE_PROTOCOL_HTTP=OFF^
  -D wxUSE_PROTOCOL_FILE=OFF^
@@ -193,6 +198,8 @@ set IMG_OPTIONS=-D wxUSE_GIF=OFF^
 
 set MSW_OPTIONS=-D wxUSE_ACTIVEX=OFF^
  -D wxUSE_CRASHREPORT=OFF^
+ -D wxUSE_NATIVE_PROGRESSDLG=OFF^
+ -D wxUSE_NATIVE_STATUSBAR=OFF^
  -D wxUSE_OWNER_DRAWN=OFF^
  -D wxUSE_POSTSCRIPT_ARCHITECTURE_IN_MSW=OFF^
  -D wxUSE_TASKBARICON_BALLOONS=OFF^
@@ -215,8 +222,7 @@ set wxOPTIONS=-D wxBUILD_COMPATIBILITY=3.1^
     mkdir %BUILD_TYPE%
     cd %BUILD_TYPE%
     if "%BUILD_TYPE%"=="Release" (
-        REM Edit here if you won't use MSVC.
-        set CMAKE_OPTIONS=%CMAKE_OPTIONS% -D CMAKE_CXX_FLAGS_RELEASE="/MT /O1 /DNDEBUG"
+        set CMAKE_OPTIONS=%CMAKE_OPTIONS% %RELEASE_FLAGS%
         set wxOPTIONS=%wxOPTIONS% -D wxBUILD_USE_STATIC_RUNTIME=ON
     )
     echo Cmake options: %CMAKE_OPTIONS%

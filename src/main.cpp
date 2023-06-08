@@ -24,6 +24,8 @@ bool MainApp::OnInit() {
 wxDECLARE_APP(MainApp);
 wxIMPLEMENT_APP_NO_MAIN(MainApp);
 
+#ifdef USE_JSON_EMBEDDING
+
 void Merge(const wxString& exe_path, const wxString& json_path, const wxString& new_path) {
     nlohmann::json json = json_utils::LoadJson(json_path.ToStdString());
     if (json.empty()) {
@@ -68,7 +70,7 @@ void PrintUsage() {
         "    new exe: path to a new executable file.\n"
         "\n"
         "Example:\n"
-        "    SimpleCommandRunner import my_definition.json MyGUI.exe\n";
+        "    SimpleCommandRunner merge my_definition.json MyGUI.exe\n";
     std::cout << usage << std::endl;
 }
 
@@ -97,16 +99,18 @@ int CmdToInt(const wxString& command) {
 
 wxString GetFullPath(const wxString& path) {
     wxFileName fn(path);
-    fn.Normalize();
+    fn.MakeAbsolute();
     return fn.GetFullPath();
 }
+#endif
 
 #ifdef _WIN32
-// no need for unix
 int wmain(int argc, wchar_t* argv[]) {
 #else
 int main(int argc, char* argv[]) {
 #endif
+
+#ifdef USE_JSON_EMBEDDING
     // Launch GUI if no args.
     if (argc == 1) return wxEntry(argc, argv);
 
@@ -150,7 +154,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     if (argc > 4)
-        std::cout << "Warning: Command-line mode will use 3 arguments at most, but there are more args." << std::endl;
+        std::cout << "Warning: Command-line mode will use 3 arguments at most,"
+                     " but there are more args." << std::endl;
 
     try {
         switch (command) {
@@ -173,4 +178,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     return 0;
+#else
+    return wxEntry(argc, argv);
+#endif
 }

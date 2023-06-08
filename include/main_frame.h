@@ -5,12 +5,13 @@
 #include "wx/wx.h"
 #include "wx/filepicker.h"
 #include "wx/stdpaths.h"
-#include "wx/url.h"
 #include "wx/stream.h"
 #include "component.h"
 #include "exec.h"
 #include "json_utils.h"
+#ifdef USE_JSON_EMBEDDING
 #include "exe_container.h"
+#endif
 #include "scr_constants.h"
 
 

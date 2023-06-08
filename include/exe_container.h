@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_JSON_EMBEDDING
 #include "wx/wx.h"
 #include "wx/file.h"
 #include "wx/buffer.h"
@@ -13,7 +14,7 @@ class ExeContainer {
  public:
     ExeContainer(): m_exe_path(""),
                     m_exe_size(0),
-                    m_json(nlohmann::json::array({})){}
+                    m_json(nlohmann::json::array({})) {}
     void Read(const wxString& exe_path);
     void Write(const wxString& exe_path);
     bool HasJson() { return !m_json.empty(); }
@@ -21,3 +22,4 @@ class ExeContainer {
     void SetJson(nlohmann::json json) { m_json = json; }
     void RemoveJson() { SetJson(nlohmann::json::array({})); }
 };
+#endif

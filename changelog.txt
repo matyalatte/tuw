@@ -1,11 +1,12 @@
 ver 0.4.0
+- Changed license to GPL
 - Added options for exit code.
 - Added predefined ids for "%" and the executable directory.
-- Added command-line utils to embed JSON data into the executable.
 - Fixed an error when the current directory is not the same as the executable directory. (on Windows)
 - URLs and file paths will be checked before opening.
 - Removed more codes from wxWidgets to reduce the binary size.
 - Applied some optimization options to reduce the binary size.
+- Applied UPX to compress executables.
 - Refined codes.
 
 ver 0.3.1
