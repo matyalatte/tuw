@@ -5,14 +5,14 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4aee3ee5172e4c38915d07f9c62725d3)](https://www.codacy.com/gh/matyalatte/Simple-Command-Runner/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matyalatte/Simple-Command-Runner&amp;utm_campaign=Badge_Grade)
 <a href="https://www.buymeacoffee.com/matyalatteQ" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>  
 
-JSON-based GUI wrapper to execute commands.  
+Small and simple GUI wrapper for command-line tools.  
 
-## About
+## Only 3MB for a portable GUI!
 
 Simple Command Runner will give a very simple GUI to your scripts.  
-All you need is write a `.json` file and run an `.exe` file.  
+All you need is write a `.json` file and run a small executable.  
 It can make a GUI to run commands of your scripts.  
-No need to use IDE and manage scripts for GUI.  
+**No need coding, no need browsers, and no need stupidly large executables**!  
 
 ![sample](https://user-images.githubusercontent.com/69258547/192090786-11a3f5ef-988e-442f-8ba9-fd1636b9f350.png)
 <img src=https://user-images.githubusercontent.com/69258547/192090797-f5e5b52d-59aa-4942-a361-2c8b5c7bd746.png width=387></img>  
@@ -22,9 +22,11 @@ No need to use IDE and manage scripts for GUI.
 -   Define GUI in .json
 -   Save arguments
 -   Input paths by drag and drop
+-   Merge exe and json into a new exe
 -   Cross-platform
 -   Native look and feel
 -   Portable
+-   Small size (2 ~ 3MB)
 
 ## Downloads
 
@@ -39,7 +41,7 @@ You can download executables from [the release page](https://github.com/matyalat
 
 ## Examples
 
-There are some [json files](../examples/README.md) to learn how to use.  
+There are some [json files](../examples/README.md) to learn how to define GUIs.  
 
 ## FAQ
 
@@ -51,27 +53,23 @@ Simple Command Runner uses cross-platform framework.
 I made sure I can build it with the following platforms and compilers.
 
 -   Windows10 + MSVC 19.31
--   Ubuntu 20.04 + GCC 9.4
 -   MacOS 11 + AppleClang 13.0
+-   Ubuntu 20.04 + GCC 9.4
+-   Alpine Linux 3.16 + GCC 11.2
 
-And I think it supports your environment as well if [wxWidgets library](https://github.com/wxWidgets/wxWidgets) supports.  
+And it should support your platform as well if [wxWidgets library](https://github.com/wxWidgets/wxWidgets) supports.  
 
 ## Building
 
-### Windows
+### CMake
 
-There is a document for Windows users.  
-[Building Workflow for Windows](./Build-on-Windows.md)  
+There are platform-specific documents for building the executable with CMake.  
 
-And you can see [batch files](../batch_files/) to understand the workflow.  
+-   [Building Workflow for Windows](./Build-on-Windows.md)  
+-   [Building Workflow for macOS](./Build-on-Mac.md)  
+-   [Building Workflow for Linux](./Build-on-Linux.md)  
 
-### Unix/Linux
-
-There are documents for macOS and Linux users.  
-[Building Workflow for macOS](./Build-on-Mac.md)  
-[Building Workflow for Linux](./Build-on-Linux.md)  
-
-And you can see [shell scripts](../shell_scripts/) to understand the workflow.  
+You can also see [batch files](../batch_files/), [shell scripts](../shell_scripts/), and [CMakePresets.json](../CMakePresets.json) to understand the workflow.  
 
 ### Docker
 

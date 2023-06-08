@@ -1,0 +1,189 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 25,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "Default",
+            "hidden": true,
+            "binaryDir": "${sourceDir}/build/Default",
+            "environment": { "WX_VERSION": "3.2.2" }
+        },
+        {
+            "name": "Default-Windows",
+            "hidden": true,
+            "inherits": "Default",
+            "generator": "Visual Studio 17 2022",
+            "architecture": "x64",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "Default-Unix",
+            "hidden": true,
+            "inherits": "Default",
+            "condition": {
+                "type": "notEquals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "Debug-Windows",
+            "inherits": "Default-Windows",
+            "displayName": "Debug Config for Windows",
+            "binaryDir": "${sourceDir}/build/Debug",
+            "cacheVariables": {
+                "wxWidgets_ROOT_DIR": "$env{USERPROFILE}/wxWidgets-$env{WX_VERSION}/Debug/Installed",
+                "CMAKE_CONFIGURATION_TYPES": "Debug"
+            }
+        },
+        {
+            "name": "Release-Windows",
+            "inherits": "Default-Windows",
+            "displayName": "Release Config for Windows",
+            "binaryDir": "${sourceDir}/build/Release",
+            "cacheVariables": {
+                "wxWidgets_ROOT_DIR": "$env{USERPROFILE}/wxWidgets-$env{WX_VERSION}/Release/Installed",
+                "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded",
+                "CMAKE_CONFIGURATION_TYPES": "Release"
+            }
+        },
+        {
+            "name": "Debug-Unix",
+            "inherits": "Default-Unix",
+            "displayName": "Debug Config for Unix/Linux",
+            "binaryDir": "${sourceDir}/build/Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "BUILD_SHARED_LIBS": "OFF"
+            },
+            "environment": {
+                "WX_CONFIG": "$env{HOME}/wxWidgets-$env{WX_VERSION}/Debug/wx-config"
+            }
+        },
+        {
+            "name": "Release-Unix",
+            "inherits": "Default-Unix",
+            "displayName": "Release Config for Unix/Linux",
+            "binaryDir": "${sourceDir}/build/Release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "BUILD_SHARED_LIBS": "OFF"
+            },
+            "environment": {
+                "WX_CONFIG": "$env{HOME}/wxWidgets-$env{WX_VERSION}/Release/wx-config"
+            }
+        },
+        {
+            "name": "Default-Test",
+            "hidden": true,
+            "inherits": "Default",
+            "cacheVariables": {
+                "BUILD_TESTS": "ON"
+            }
+        },
+        {
+            "name": "Debug-Windows-Test",
+            "displayName": "Debug Config for Tests on Windows",
+            "inherits": ["Debug-Windows", "Default-Test"]
+        },
+        {
+            "name": "Release-Windows-Test",
+            "displayName": "Release Config for Tests on Windows",
+            "inherits": ["Release-Windows", "Default-Test"]
+        },
+        {
+            "name": "Debug-Unix-Test",
+            "displayName": "Debug Config for Tests on Unix/Linux",
+            "inherits": ["Debug-Unix", "Default-Test"]
+        },
+        {
+            "name": "Release-Unix-Test",
+            "displayName": "Release Config for Tests on Unix/Linux",
+            "inherits": ["Release-Unix", "Default-Test"]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "Debug-Windows",
+            "configurePreset": "Debug-Windows",
+            "configuration": "Debug"
+        },
+        {
+            "name": "Release-Windows",
+            "configurePreset": "Release-Windows",
+            "configuration": "Release"
+        },
+        {
+            "name": "Debug-Unix",
+            "configurePreset": "Debug-Unix",
+            "configuration": "Debug"
+        },
+        {
+            "name": "Release-Unix",
+            "configurePreset": "Release-Unix",
+            "configuration": "Release"
+        },
+        {
+            "name": "Debug-Windows-Test",
+            "configurePreset": "Debug-Windows-Test",
+            "configuration": "Debug"
+        },
+        {
+            "name": "Release-Windows-Test",
+            "configurePreset": "Release-Windows-Test",
+            "configuration": "Release"
+        },
+        {
+            "name": "Debug-Unix-Test",
+            "configurePreset": "Debug-Unix-Test",
+            "configuration": "Debug"
+        },
+        {
+            "name": "Release-Unix-Test",
+            "configurePreset": "Release-Unix-Test",
+            "configuration": "Release"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "Default",
+            "configurePreset": "Default",
+            "output": {
+                "outputOnFailure": true,
+                "verbosity": "verbose"
+            }
+        },
+        {
+            "name": "Debug-Windows-Test",
+            "inherits": "Default",
+            "configurePreset": "Debug-Windows-Test",
+            "configuration": "Debug"
+        },
+        {
+            "name": "Release-Windows-Test",
+            "inherits": "Default",
+            "configurePreset": "Release-Windows-Test",
+            "configuration": "Release"
+        },
+        {
+            "name": "Debug-Unix-Test",
+            "inherits": "Default",
+            "configurePreset": "Debug-Unix-Test",
+            "configuration": "Debug"
+        },
+        {
+            "name": "Release-Unix-Test",
+            "inherits": "Default",
+            "configurePreset": "Release-Unix-Test",
+            "configuration": "Release"
+        }
+    ]
+}

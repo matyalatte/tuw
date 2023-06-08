@@ -61,7 +61,7 @@ jobs:
         uses: actions/cache@v3
         id: cache-wx
         with:
-            path: "C:/wxWidgets-${{ needs.setup.outputs.wx_version }}"
+            path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
             key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}
         
       - name: install wxWidget
@@ -79,7 +79,7 @@ jobs:
       - name: copy files
         run: |
           mkdir -p archive
-          cp Release/Release/SimpleCommandRunner.exe archive
+          cp build/Release/SimpleCommandRunner.exe archive
           cp examples/other_features/help/gui_definition.json archive
           cp changelog.txt archive
           cp license.txt archive
@@ -132,7 +132,7 @@ jobs:
       - name: copy files
         run: |
           mkdir -p archive/${{ env.ZIP_NAME }}
-          cp Release/SimpleCommandRunner archive/${{ env.ZIP_NAME }}
+          cp build/Release/SimpleCommandRunner archive/${{ env.ZIP_NAME }}
           cp examples/other_features/help/gui_definition.json archive/${{ env.ZIP_NAME }}
           cp changelog.txt archive/${{ env.ZIP_NAME }}
           cp license.txt archive/${{ env.ZIP_NAME }}

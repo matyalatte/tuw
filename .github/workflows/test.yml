@@ -39,7 +39,7 @@ jobs:
         uses: actions/cache@v3
         id: cache-wx
         with:
-            path: "C:/wxWidgets-${{ needs.setup.outputs.wx_version }}"
+            path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
             key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-Test
         
       - name: install wxWidget

@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v3
         id: cache-wx
         with:
-          path: "C:/wxWidgets-${{ steps.wx-version.outputs.version }}"
+          path: "~/wxWidgets-${{ steps.wx-version.outputs.version }}"
           key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}
         
       - name: install wxWidget
@@ -53,7 +53,7 @@ jobs:
       - name: Copy files
         run: |
           mkdir -p archive
-          cp Release/Release/SimpleCommandRunner.exe archive
+          cp build/Release/SimpleCommandRunner.exe archive
           cp examples/other_features/help/gui_definition.json archive
           cp changelog.txt archive
           cp license.txt archive

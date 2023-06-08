@@ -22,4 +22,4 @@ It could be due to glibc dependences.
 ![GLIBC](https://user-images.githubusercontent.com/69258547/190676422-ae1af3a0-e9c1-4afd-a6ec-62803dc303c0.png)  
 The Linux build only works on Ubuntu 20.04 or later due to the dependences.  
 Or you need to get the libs.  
-Or need to build the executable by your self. (But Idk if it's possible on your environment.)  
+Or need to build the executable by your self.  

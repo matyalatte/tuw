@@ -10,7 +10,7 @@
 #    docker ps -a
 #
 # 4. Use "docker cp" to get the built executable.
-#    docker cp <CONTAINER ID>:/Simple-Command-Runner/Release/SimpleCommandRunner ./
+#    docker cp <CONTAINER ID>:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
 
 # Base image
 FROM matyalatte/ubuntu20.04-cmake3.25:latest

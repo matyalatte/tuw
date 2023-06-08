@@ -10,9 +10,8 @@ else
 fi
 
 pushd $(dirname "$0")/..
-    mkdir ${build_type}Test
-    cd ${build_type}Test
+    cd build/${build_type}
     lcov --capture --directory ./ --output-file ./coverage.info
     lcov -e ./coverage.info '**/Simple-Command-Runner/include/*' '**/Simple-Command-Runner/src/*' --output-file ./coverage_filtered.info
-    genhtml ./coverage_filtered.info --output-directory ../coverage-report
+    genhtml ./coverage_filtered.info --output-directory ../../coverage-report
 popd

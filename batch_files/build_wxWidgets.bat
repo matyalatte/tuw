@@ -16,7 +16,7 @@ echo Build type: %BUILD_TYPE%
 
 REM wxWidgets version is defined in ./Simple-Command-Runner/WX_VERSION.txt
 set /p WX_VERSION=< %~dp0\..\WX_VERSION.txt
-set INSTALL_DIR=C:/wxWidgets-%WX_VERSION%/%BUILD_TYPE%/Installed
+set INSTALL_DIR=%USERPROFILE%/wxWidgets-%WX_VERSION%/%BUILD_TYPE%/Installed
 echo Install dir: %INSTALL_DIR%
 
 set CMAKE_OPTIONS=-G "%GENERATOR%"^
@@ -211,7 +211,7 @@ set wxOPTIONS=-D wxBUILD_COMPATIBILITY=3.1^
  %IMG_OPTIONS%^
  %MSW_OPTIONS%
 
-@pushd C:\wxWidgets-%WX_VERSION%
+@pushd %USERPROFILE%\wxWidgets-%WX_VERSION%
     mkdir %BUILD_TYPE%
     cd %BUILD_TYPE%
     if "%BUILD_TYPE%"=="Release" (

@@ -1,9 +1,9 @@
-# Building Workflow for Ubuntu and MacOS
+# Building Workflow for Linux
 
 ## 0. Requirements
 
--   build-essential (for Ubuntu)
--   libgtk-3-dev (for Ubuntu)
+-   Build tools (e.g. `build-essential` for Ubuntu)
+-   GTK3.0 (e.g. `libgtk-3-dev` for Ubuntu)
 -   cmake (**3.25** or later)
 -   wget
 -   bash
@@ -12,18 +12,16 @@
 > CMake should be 3.25 or later.  
 > Or use [v0.2.3](https://github.com/matyalatte/Simple-Command-Runner/tree/v0.2.3) that supports old cmake versions.  
 
-> Note that I tested only with Ubuntu.  
-> The workflow and the built binary might not work on other linux distros.  
-
 ## 1. Build wxWidgets
 
 wxWidgets is a GUI framework.  
 You can build it with the following steps.
 
 1.  Open the Terminal.
-2.  Move to `./Simple-Command-Runner/shell_scripts`
-3.  Type `bash download_wxWidgets.sh` (Use `bash`. `sh` won't work.)
+2.  Move to `./Simple-Command-Runner/shell_scripts`.
+3.  Type `bash download_wxWidgets.sh`. (Use `bash`. `sh` won't work.)
 4.  Type `bash build_wxWidgets.sh`.
+5.  Type `bash build_wxWidgets.sh Debug` if you want a debug build.
 
 > If you won't use GCC, you could need to edit `CXXFLAGS` in `build_wxWidgets.sh`.  
 
@@ -33,14 +31,10 @@ You can build Simple Command Runner with shell scripts.
 The steps are as follows.
 
 1.  Open the Terminal.
-2.  Move to `./Simple-Command-Runner/shell_scripts`
+2.  Move to `./Simple-Command-Runner/shell_scripts`.
 3.  Type `bash build_exe.sh`.
-4.  An executable file `SimpleCommandRunner` will be generated in `./Simple-Command-Runner/Release`.
-
-## Debug build
-
-If you want a debug build, you need to use `Debug` as an argument for shell scripts.  
-So, you should type `bash build_wxWidgets.sh Debug` and `bash build_exe.sh Debug` on the terminal.  
+4.  An executable file `SimpleCommandRunner` will be generated in `./Simple-Command-Runner/build/Release`.
+5.  Type `bash build_exe.sh Debug` if you want a debug build.
 
 ## Test
 
