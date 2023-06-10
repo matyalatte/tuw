@@ -2,7 +2,9 @@
 
 // Main window
 MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
-    : wxFrame(nullptr, wxID_ANY, scr_constants::TOOL_NAME) {
+    : wxFrame(nullptr, wxID_ANY, scr_constants::TOOL_NAME,
+              wxDefaultPosition, wxDefaultSize,
+              wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX) {
     SetUp();
     if (definition.empty()) {
         if (wxFileExists("gui_definition.json")) {
@@ -119,8 +121,6 @@ void MainFrame::CreateFrame() {
     m_run_button->GetSize(nullptr, &button_height);
     SetSize(GetSize() + wxSize(0, button_height));
 #endif
-
-    SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
 void MainFrame::JsonLoadFailed(const std::string& msg, nlohmann::json& definition) {
