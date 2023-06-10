@@ -214,9 +214,12 @@ constexpr char CMD_ID_CURRENT_DIR[] = "__CWD__";
 
 // Make command string
 wxString MainFrame::GetCommand() {
-    std::vector<std::string> cmd_ary = m_sub_definition["command"].get<std::vector<std::string>>();
-    std::vector<std::string> cmd_ids = m_sub_definition["command_ids"].get<std::vector<std::string>>();
-    std::vector<std::string> comp_ids = m_sub_definition["component_ids"].get<std::vector<std::string>>();
+    std::vector<std::string> cmd_ary =
+        m_sub_definition["command"].get<std::vector<std::string>>();
+    std::vector<std::string> cmd_ids =
+        m_sub_definition["command_ids"].get<std::vector<std::string>>();
+    std::vector<std::string> comp_ids =
+        m_sub_definition["component_ids"].get<std::vector<std::string>>();
 
     std::vector<wxString> comp_strings = std::vector<wxString>(m_components.size());
     for (int i = 0; i < m_components.size(); i++) {
@@ -387,7 +390,8 @@ void MainFrame::UpdatePanel() {
     m_panel = new wxPanel(this);
 
     // put components
-    std::vector<nlohmann::json> comp = m_sub_definition["components"].get<std::vector<nlohmann::json>>();
+    std::vector<nlohmann::json> comp =
+        m_sub_definition["components"].get<std::vector<nlohmann::json>>();
     m_components.clear();
     m_components.shrink_to_fit();
     Component* new_comp = nullptr;

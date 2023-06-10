@@ -24,21 +24,13 @@ namespace json_utils {
         return true;
     }
 
-    std::string GetLabel(const std::string& label, const std::string& key) {
+    static std::string GetLabel(const std::string& label, const std::string& key) {
         // Todo: std::string to wchar for windows
         std::string msg = "['" + key + "']";
         if (label != "") {
             msg = "['" + label + "']" + msg;
         }
         return msg;
-    }
-
-    void CheckContain(const nlohmann::json& j,
-                      const std::string& key, const std::string& label = "") {
-        if (!j.contains(key)) {
-            std::string msg = GetLabel(label, key) + " not found.";
-            throw std::runtime_error(msg);
-        }
     }
 
     enum class JsonType {
@@ -53,11 +45,7 @@ namespace json_utils {
         MAX
     };
 
-    void Raise(std::string msg) {
-        throw std::runtime_error(msg);
-    }
-
-    bool IsArray(const nlohmann::json& j, const std::string& key, const JsonType& type) {
+    static bool IsArray(const nlohmann::json& j, const std::string& key, const JsonType& type) {
         if (!j[key].is_array()) { return false; }
         std::function<bool(const nlohmann::json&)> lmd;
         switch (type) {
@@ -79,15 +67,17 @@ namespace json_utils {
         return std::all_of(j[key].begin(), j[key].end(), lmd);
     }
 
-    const bool CAN_SKIP = true;
+    static const bool CAN_SKIP = true;
 
-    void CheckJsonType(const nlohmann::json& j, const std::string& key,
+    static void CheckJsonType(const nlohmann::json& j, const std::string& key,
         const JsonType& type, const std::string& label = "", const bool& canSkip = false) {
         if (canSkip && !j.contains(key)) {
             return;
         }
-        CheckContain(j, key, label);
-
+        if (!j.contains(key)) {
+            std::string msg = GetLabel(label, key) + " not found.";
+            throw std::runtime_error(msg);
+        }
         bool valid = false;
         std::string type_name;
         switch (type) {
@@ -127,7 +117,7 @@ namespace json_utils {
             break;
         }
         if (!valid) {
-            Raise(GetLabel(label, key) + " should be " + type_name + ".");
+            throw std::runtime_error(GetLabel(label, key) + " should be " + type_name + ".");
         }
     }
 
@@ -149,29 +139,32 @@ namespace json_utils {
         return def;
     }
 
-    void CorrectKey(nlohmann::json& j, const std::string& false_key, const std::string& true_key) {
+    static void CorrectKey(nlohmann::json& j,
+                           const std::string& false_key,
+                           const std::string& true_key) {
         if (!j.contains(true_key) && j.contains(false_key)) {
             j[true_key] = j[false_key];
             j.erase(false_key);
         }
     }
 
-    void KeyToSingular(nlohmann::json& c, const std::string& singular) {
+    static void KeyToSingular(nlohmann::json& c, const std::string& singular) {
         std::vector<std::string> extends = {"s", "_array"};
         for (std::string ext : extends) {
             CorrectKey(c, singular + ext, singular);
         }
     }
 
-    void CheckArraySize(nlohmann::json& c, const std::string& key) {
+    static void CheckArraySize(nlohmann::json& c, const std::string& key) {
         if (c.contains(key) && (c[key].size() != c["item"].size())) {
             std::string label = c["label"].get<std::string>();
-            Raise(GetLabel(label, key) + " and " +
-                GetLabel(label, "item") + " should have the same size.");
+            std::string msg = GetLabel(label, key) + " and " +
+                              GetLabel(label, "item") + " should have the same size.";
+            throw std::runtime_error(msg);
         }
     }
 
-    void CheckItemsValues(nlohmann::json& c) {
+    static void CheckItemsValues(nlohmann::json& c) {
         std::string label = c["label"].get<std::string>();
         KeyToSingular(c, "item");
         CheckJsonType(c, "item", JsonType::STR_ARRAY, label);
@@ -180,7 +173,8 @@ namespace json_utils {
         CheckArraySize(c, "value");
     }
 
-    std::vector<std::string> SplitString(const std::string& s, const std::string& delimiter) {
+    static std::vector<std::string> SplitString(const std::string& s,
+                                                const std::string& delimiter) {
         std::vector<std::string> tokens = std::vector<std::string>(0);
         std::string token;
         size_t delim_length = delimiter.length();
@@ -202,33 +196,28 @@ namespace json_utils {
         return tokens;
     }
 
-    const std::string COMMAND = "command";
-    const std::string COMPONENTS = "components";
-
-    void CheckIndexDuplication(const std::vector<std::string>& component_ids) {
+    static void CheckIndexDuplication(const std::vector<std::string>& component_ids) {
         int size = component_ids.size();
         for (int i = 0; i < size - 1; i++) {
             std::string str = component_ids[i];
             if (str == "") { continue; }
             for (int j = i + 1; j < size; j++) {
                 if (str == component_ids[j]) {
-                    Raise(GetLabel(COMPONENTS, "id")
-                          + " should not be duplicated in a gui definition. (" + str + ")");
+                    std::string msg = GetLabel("components", "id")
+                                      + " should not be duplicated in a gui definition. ("
+                                      + str + ")";
+                    throw std::runtime_error(msg);
                 }
             }
         }
     }
 
-    void CheckCommand(nlohmann::json& sub_definition) {
-        CheckContain(sub_definition, COMMAND, "");
-        CheckJsonType(sub_definition, "command_ids", JsonType::STR_ARRAY, "", CAN_SKIP);
-        if (sub_definition[COMMAND].is_string()) {
-            sub_definition[COMMAND] = SplitString(sub_definition[COMMAND].get<std::string>(), { '%' });
-        } else {
-            CheckJsonType(sub_definition, COMMAND, JsonType::STR_ARRAY);
-        }
+    static void CheckCommand(nlohmann::json& sub_definition) {
+        CheckJsonType(sub_definition, "command", JsonType::STRING);
+        sub_definition["command"] = SplitString(sub_definition["command"].get<std::string>(),
+                                                { '%' });
 
-        std::vector<std::string> cmd = sub_definition[COMMAND].get<std::vector<std::string>>();
+        std::vector<std::string> cmd = sub_definition["command"].get<std::vector<std::string>>();
         std::vector<std::string> cmd_ids = std::vector<std::string>(0);
         std::vector<std::string> splitted_cmd = std::vector<std::string>(0);
         bool store_ids = false;
@@ -241,14 +230,30 @@ namespace json_utils {
             store_ids = !store_ids;
         }
         sub_definition["command_ids"] = cmd_ids;
-        sub_definition[COMMAND] = splitted_cmd;
+        sub_definition["command"] = splitted_cmd;
     }
 
-    void CorrectValue(nlohmann::json& j, const std::string& key,
-                      const std::string& false_value, const std::string& true_value) {
-        if (j[key] == false_value) {
-            j[key] = true_value;
-        }
+    static const std::map<std::string, int> COMPTYPE_TO_INT_MAP = {
+        {"static_text", COMP_STATIC_TEXT},
+        {"file", COMP_FILE},
+        {"folder", COMP_FOLDER},
+        {"dir", COMP_FOLDER},
+        {"choice", COMP_CHOICE},
+        {"combo", COMP_CHOICE},
+        {"check", COMP_CHECK},
+        {"check_array", COMP_CHECK_ARRAY},
+        {"checks", COMP_CHECK_ARRAY},
+        {"text", COMP_TEXT},
+        {"text_box", COMP_TEXT},
+        {"int", COMP_INT},
+        {"integer", COMP_INT},
+        {"float", COMP_FLOAT},
+    };
+
+    static int ComptypeToInt(const std::string& type) {
+        if (COMPTYPE_TO_INT_MAP.count(type) == 0)
+            return COMP_UNKNOWN;
+        return COMPTYPE_TO_INT_MAP.at(type);
     }
 
     void CheckSubDefinition(nlohmann::json& sub_definition) {
@@ -266,61 +271,67 @@ namespace json_utils {
         CheckJsonType(sub_definition, "exit_success", JsonType::INTEGER, "", CAN_SKIP);
         CheckJsonType(sub_definition, "show_last_line", JsonType::BOOLEAN, "", CAN_SKIP);
 
-        CorrectKey(sub_definition, "component", COMPONENTS);
-        CorrectKey(sub_definition, "component_array", COMPONENTS);
-        CheckJsonType(sub_definition, COMPONENTS, JsonType::JSON_ARRAY);
+        CorrectKey(sub_definition, "component", "components");
+        CorrectKey(sub_definition, "component_array", "components");
+        CheckJsonType(sub_definition, "components", JsonType::JSON_ARRAY);
 
         // check components
         std::vector<std::string> comp_ids;
-        for (nlohmann::json& c : sub_definition[COMPONENTS]) {
+        for (nlohmann::json& c : sub_definition["components"]) {
             // check if type and label exist
-            CheckJsonType(c, "label", JsonType::STRING, COMPONENTS);
+            CheckJsonType(c, "label", JsonType::STRING, "components");
             std::string label = c["label"].get<std::string>();
             CheckJsonType(c, "type", JsonType::STRING, label);
-            CorrectValue(c, "type", "dir", "folder");
-            CorrectValue(c, "type", "combo", "choice");
-            CorrectValue(c, "type", "checks", "check_array");
-            CorrectValue(c, "type", "text_box", "text");
-            CorrectValue(c, "type", "integer", "int");
             KeyToSingular(c, "default");
-            std::string type = c["type"].get<std::string>();
+            std::string type_str = c["type"].get<std::string>();
+            int type = ComptypeToInt(type_str);
+            c["type"] = type;
 
-            if (type == "file") {
-                CheckJsonType(c, "extention", JsonType::STRING, label, CAN_SKIP);
-            } else if (type == "choice") {
-                CheckItemsValues(c);
-                CheckJsonType(c, "default", JsonType::INTEGER, label, CAN_SKIP);
-            } else if (type == "check") {
-                CheckJsonType(c, "value", JsonType::STRING, label, CAN_SKIP);
-                CheckJsonType(c, "default", JsonType::BOOLEAN, label, CAN_SKIP);
-            } else if (type == "check_array") {
-                CheckItemsValues(c);
-                CheckJsonType(c, "default", JsonType::BOOL_ARRAY, label, CAN_SKIP);
-                CheckArraySize(c, "default");
-                KeyToSingular(c, "tooltip");
-                CheckJsonType(c, "tooltip", JsonType::STR_ARRAY, label, CAN_SKIP);
-                CheckArraySize(c, "tooltip");
-            } else if (type == "int" || type == "float") {
-                JsonType jtype;
-                if (type == "int") {
-                    jtype = JsonType::INTEGER;
-                } else {
-                    jtype = JsonType::FLOAT;
-                    CheckJsonType(c, "digits", JsonType::INTEGER, label, CAN_SKIP);
-                    if (c.contains("digits") && c["digits"] < 0) {
-                        Raise(GetLabel(label, "digits") + " should be a non-negative integer.");
+            switch (type) {
+                case COMP_FILE:
+                    CheckJsonType(c, "extention", JsonType::STRING, label, CAN_SKIP);
+                case COMP_FOLDER:
+                case COMP_TEXT:
+                    CheckJsonType(c, "default", JsonType::STRING, label, CAN_SKIP);
+                    break;
+                case COMP_CHOICE:
+                    CheckItemsValues(c);
+                    CheckJsonType(c, "default", JsonType::INTEGER, label, CAN_SKIP);
+                    break;
+                case COMP_CHECK:
+                    CheckJsonType(c, "value", JsonType::STRING, label, CAN_SKIP);
+                    CheckJsonType(c, "default", JsonType::BOOLEAN, label, CAN_SKIP);
+                    break;
+                case COMP_CHECK_ARRAY:
+                    CheckItemsValues(c);
+                    CheckJsonType(c, "default", JsonType::BOOL_ARRAY, label, CAN_SKIP);
+                    CheckArraySize(c, "default");
+                    KeyToSingular(c, "tooltip");
+                    CheckJsonType(c, "tooltip", JsonType::STR_ARRAY, label, CAN_SKIP);
+                    CheckArraySize(c, "tooltip");
+                    break;
+                case COMP_INT:
+                case COMP_FLOAT:
+                    JsonType jtype;
+                    if (type == COMP_INT) {
+                        jtype = JsonType::INTEGER;
+                    } else {
+                        jtype = JsonType::FLOAT;
+                        CheckJsonType(c, "digits", JsonType::INTEGER, label, CAN_SKIP);
+                        if (c.contains("digits") && c["digits"] < 0) {
+                            throw std::runtime_error(GetLabel(label, "digits")
+                                                     + " should be a non-negative integer.");
+                        }
                     }
-                }
-                CheckJsonType(c, "default", jtype, label, CAN_SKIP);
-                CheckJsonType(c, "min", jtype, label, CAN_SKIP);
-                CheckJsonType(c, "max", jtype, label, CAN_SKIP);
-                CheckJsonType(c, "inc", jtype, label, CAN_SKIP);
-                CheckJsonType(c, "wrap", JsonType::BOOLEAN, label, CAN_SKIP);
-            } else if (type != "folder" && type != "text" && type != "static_text") {
-                Raise("Unknown component type: " + type);
-            }
-            if (type == "text" || type == "file" || type == "folder") {
-                CheckJsonType(c, "default", JsonType::STRING, label, CAN_SKIP);
+                    CheckJsonType(c, "default", jtype, label, CAN_SKIP);
+                    CheckJsonType(c, "min", jtype, label, CAN_SKIP);
+                    CheckJsonType(c, "max", jtype, label, CAN_SKIP);
+                    CheckJsonType(c, "inc", jtype, label, CAN_SKIP);
+                    CheckJsonType(c, "wrap", JsonType::BOOLEAN, label, CAN_SKIP);
+                    break;
+                case COMP_UNKNOWN:
+                    throw std::runtime_error("Unknown component type: " + type_str);
+                    break;
             }
 
             CorrectKey(c, "add_quote", "add_quotes");
@@ -328,30 +339,30 @@ namespace json_utils {
             CorrectKey(c, "placeholder", "empty_message");
             CheckJsonType(c, "empty_message", JsonType::STRING, label, CAN_SKIP);
             CheckJsonType(c, "id", JsonType::STRING, label, CAN_SKIP);
-            if (type != "check_array") {
+            if (type != COMP_CHECK_ARRAY) {
                 CheckJsonType(c, "tooltip", JsonType::STRING, label, CAN_SKIP);
             }
-
 
             if (c.contains("id")) {
                 std::string id = c["id"].get<std::string>();
                 if (id == "") {
-                    Raise(GetLabel(label, "id") + " should NOT be an empty string.");
+                    throw std::runtime_error(GetLabel(label, "id")
+                                             + " should NOT be an empty string.");
                 } else if (id[0] == "_"[0]) {
-                    Raise(GetLabel(label, "id") + " should NOT start with '_'.");
+                    throw std::runtime_error(GetLabel(label, "id")
+                                             + " should NOT start with '_'.");
                 }
                 comp_ids.push_back(id);
             } else {
                 comp_ids.push_back("");
             }
         }
-        CheckJsonType(sub_definition, "component_ids", JsonType::STR_ARRAY, "", CAN_SKIP);
         CheckIndexDuplication(comp_ids);
         sub_definition["component_ids"] = comp_ids;
     }
 
     // vX.Y.Z -> 10000*X + 100 * Y + Z
-    int VersionStringToInt(const std::string& string) {
+    static int VersionStringToInt(const std::string& string) {
         try {
             std::vector<std::string> version_strings = SplitString(string, {"."});
             int digit = 10000;
@@ -364,7 +375,7 @@ namespace json_utils {
             return version_int;
         }
         catch(std::exception& e) {
-            Raise("Can NOT convert '" + string + "' to int.");
+            throw std::runtime_error("Can NOT convert '" + string + "' to int.");
         }
         return 0;
     }
@@ -386,7 +397,7 @@ namespace json_utils {
             int required_int = VersionStringToInt(required);
             if (scr_constants::VERSION_INT < required_int) {
                 std::string msg = "Version " + required + " is required.";
-                Raise(msg);
+                throw std::runtime_error(msg);
             }
         }
     }
@@ -409,7 +420,7 @@ namespace json_utils {
             } else if (type == "file") {
                 CheckJsonType(h, "path", JsonType::STRING);
             } else {
-                Raise("Unsupported help type: " + type);
+                throw std::runtime_error("Unsupported help type: " + type);
             }
         }
     }

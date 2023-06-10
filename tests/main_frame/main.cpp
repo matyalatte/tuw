@@ -72,8 +72,6 @@ TEST(MainFrameTest, InvalidHelp) {
     test_json["help"][0]["url"] = 1;
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     EXPECT_FALSE(main_frame->GetDefinition().contains("help"));
-    EXPECT_EQ(test_json["gui"][0]["components"],
-        main_frame->GetDefinition()["gui"][0]["components"]);
 }
 
 TEST(MainFrameTest, GetCommand1) {
@@ -108,10 +106,7 @@ TEST(MainFrameTest, RunCommandSuccess) {
     nlohmann::json test_json = GetTestJson();
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
 
-    // The json file should not be fixed by app.
     ASSERT_EQ(test_json["help"], main_frame->GetDefinition()["help"]);
-    ASSERT_EQ(test_json["gui"][0]["components"],
-        main_frame->GetDefinition()["gui"][0]["components"]);
 
     std::string last_line = main_frame->RunCommand();
     EXPECT_STRNE("", last_line.c_str());

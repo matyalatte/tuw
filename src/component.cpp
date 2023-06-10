@@ -35,34 +35,46 @@ bool Component::HasString() {
 
 Component* Component::PutComponent(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j) {
     Component* comp = nullptr;
-    std::string type = j["type"].get<std::string>();
-    if (type == "static_text") {  // statc text
-        comp = new StaticText(panel, sizer, j);
-    } else if (type == "file") {  // file picker
-        comp = new FilePicker(panel, sizer, j);
-    } else if (type == "folder") {  // dir picker
-        comp = new DirPicker(panel, sizer, j);
-    } else if (type == "choice") {  // choice
-        comp = new Choice(panel, sizer, j);
-    } else if (type == "check") {  // checkbox
-        comp = new CheckBox(panel, sizer, j);
-    } else if (type == "check_array") {  // checkArray
-        comp = new CheckArray(panel, sizer, j);
-    } else if (type == "text") {  // text box
-        comp = new TextBox(panel, sizer, j);
-    } else if (type == "int") {  // int picker
-        comp = new IntPicker(panel, sizer, j);
-    } else if (type == "float") {  // int picker
-        comp = new FloatPicker(panel, sizer, j);
-    } else {
-        std::cout << "Unknown component type detected. (" + type << ")" << std::endl;
+    int type = j["type"].get<int>();
+    switch (type) {
+        case COMP_STATIC_TEXT:
+            comp = new StaticText(panel, sizer, j);
+            break;
+        case COMP_FILE:
+            comp = new FilePicker(panel, sizer, j);
+            break;
+        case COMP_FOLDER:
+            comp = new DirPicker(panel, sizer, j);
+            break;
+        case COMP_CHOICE:
+            comp = new Choice(panel, sizer, j);
+            break;
+        case COMP_CHECK:
+            comp = new CheckBox(panel, sizer, j);
+            break;
+        case COMP_CHECK_ARRAY:
+            comp = new CheckArray(panel, sizer, j);
+            break;
+        case COMP_TEXT:
+            comp = new TextBox(panel, sizer, j);
+            break;
+        case COMP_INT:
+            comp = new IntPicker(panel, sizer, j);
+            break;
+        case COMP_FLOAT:
+            comp = new FloatPicker(panel, sizer, j);
+            break;
+        default:
+            std::string msg = "Unknown component type detected. (" + std::to_string(type) + ")";
+            throw std::runtime_error(msg);
+            break;
     }
     return comp;
 }
 
-const bool HAS_STRING = true;
-const bool NOT_STRING = false;
-const int DEFAULT_SIZER_FLAG = wxFIXED_MINSIZE | wxALIGN_LEFT | wxBOTTOM;
+static const bool HAS_STRING = true;
+static const bool NOT_STRING = false;
+static const int DEFAULT_SIZER_FLAG = wxFIXED_MINSIZE | wxALIGN_LEFT | wxBOTTOM;
 
 // Static Text
 StaticText::StaticText(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j)
@@ -339,7 +351,6 @@ IntPicker::IntPicker(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j
     double val = j.value("default", 0.0);
     m_picker->SetValue(val);
 }
-
 
 FloatPicker::FloatPicker(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j)
     : NumPickerBase(panel, sizer, j) {
