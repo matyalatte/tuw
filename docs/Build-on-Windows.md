@@ -43,10 +43,8 @@ The steps are as follows.
 
 The built binary will be 2 or 3 MB.  
 You should use [UPX](https://github.com/upx/upx/releases/latest) if you want smaller exe.  
-
-```
-upx SimpleCommandRunner.exe --best
-```
+  
+`upx SimpleCommandRunner.exe --best`  
 
 ## Test
 

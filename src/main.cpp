@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
     if (argc == 1) return wxEntry(argc, argv);
 
     // Make dummy app
-    wxApp* app = new wxApp();
+    new wxApp();
 
     wxString exe_path =  wxStandardPaths::Get().GetExecutablePath();
 

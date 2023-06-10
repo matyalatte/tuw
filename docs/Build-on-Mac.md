@@ -34,7 +34,7 @@ The steps are as follows.
 The built binary will be 2 or 3 MB.  
 You should use [UPX](https://github.com/upx/upx) if you want smaller exe.  
 
-```
+```bash
 brew install upx
 upx SimpleCommandRunner --best
 ```
