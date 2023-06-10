@@ -81,7 +81,7 @@ void MainFrame::CreateFrame() {
     if (m_definition["gui"].size() > 1) {
         for (int i = 0; i < m_definition["gui"].size(); i++) {
             menu_file->Append(wxID_HIGHEST + i + 1,
-                wxString::FromUTF8(m_definition["gui"][i]["label"]));
+                wxString::FromUTF8(m_definition["gui"][i]["label"].get<std::string>()));
             menu_file->Bind(wxEVT_MENU,
                 &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
         }
@@ -96,7 +96,7 @@ void MainFrame::CreateFrame() {
 
         for (int i = 0; i < m_definition["help"].size(); i++) {
             menu_help->Append(wxID_HIGHEST + i + 1 + m_definition["gui"].size(),
-                wxString::FromUTF8(m_definition["help"][i]["label"]));
+                wxString::FromUTF8(m_definition["help"][i]["label"].get<std::string>()));
             menu_help->Bind(wxEVT_MENU,
                 &MainFrame::OpenURL, this, wxID_HIGHEST + i + 1 + m_definition["gui"].size());
         }
@@ -140,7 +140,7 @@ void MainFrame::CheckDefinition(nlohmann::json& definition) {
         json_utils::CheckVersion(definition);
         std::string key = "recommended";
         if (definition.contains(key)) {
-            std::string version = definition[key];
+            std::string version = definition[key].get<std::string>();
             if (definition["not_" + key]) {
                 msg = "Version " + version + " is " + key + ".";
                 *m_ostream << "[LoadDefinition] Warning: " << msg << std::endl;
@@ -214,9 +214,9 @@ constexpr char CMD_ID_CURRENT_DIR[] = "__CWD__";
 
 // Make command string
 wxString MainFrame::GetCommand() {
-    std::vector<std::string> cmd_ary = m_sub_definition["command"];
-    std::vector<std::string> cmd_ids = m_sub_definition["command_ids"];
-    std::vector<std::string> comp_ids = m_sub_definition["component_ids"];
+    std::vector<std::string> cmd_ary = m_sub_definition["command"].get<std::vector<std::string>>();
+    std::vector<std::string> cmd_ids = m_sub_definition["command_ids"].get<std::vector<std::string>>();
+    std::vector<std::string> comp_ids = m_sub_definition["component_ids"].get<std::vector<std::string>>();
 
     std::vector<wxString> comp_strings = std::vector<wxString>(m_components.size());
     for (int i = 0; i < m_components.size(); i++) {
@@ -311,12 +311,12 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
 void MainFrame::OpenURL(wxCommandEvent& event) {
     size_t id = event.GetId() - 1 - wxID_HIGHEST - m_definition["gui"].size();
     nlohmann::json help = m_definition["help"][id];
-    std::string type = help["type"];
+    std::string type = help["type"].get<std::string>();
     wxString url = "";
     std::string tag;
     try {
         if (type == "url") {
-            url = wxString::FromUTF8(help["url"]);
+            url = wxString::FromUTF8(help["url"].get<std::string>());
             tag = "[OpenURL] ";
             int pos = url.Find("://");
             if (pos !=wxNOT_FOUND) {
@@ -334,7 +334,7 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
                 url = "https://" + url;
             }
         } else if (type == "file") {
-            url = wxString::FromUTF8(help["path"]);
+            url = wxString::FromUTF8(help["path"].get<std::string>());
             tag = "[OpenFile] ";
             if (!wxFileExists(url) && !wxDirExists(url)) {
                 wxString msg = "File does not exist. (" + url + ")";
@@ -375,7 +375,7 @@ void MainFrame::UpdateFrame(wxCommandEvent& event) {
 }
 
 void MainFrame::UpdatePanel() {
-    wxString label = wxString::FromUTF8(m_sub_definition["label"]);
+    wxString label = wxString::FromUTF8(m_sub_definition["label"].get<std::string>());
     *m_ostream << "[UpdatePanel] " << label << std::endl;
     wxString window_name = wxString::FromUTF8(
         m_sub_definition.value("window_name", "Simple Command Runner"));
@@ -387,7 +387,7 @@ void MainFrame::UpdatePanel() {
     m_panel = new wxPanel(this);
 
     // put components
-    std::vector<nlohmann::json> comp = m_sub_definition["components"];
+    std::vector<nlohmann::json> comp = m_sub_definition["components"].get<std::vector<nlohmann::json>>();
     m_components.clear();
     m_components.shrink_to_fit();
     Component* new_comp = nullptr;

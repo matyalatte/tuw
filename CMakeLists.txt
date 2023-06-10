@@ -48,17 +48,21 @@ message(VERBOSE "CXX_FLAGS               : ${CMAKE_CXX_FLAGS}")
 message(VERBOSE "CXX_FLAGS_RELEASE       : ${CMAKE_CXX_FLAGS_RELEASE}")
 message(VERBOSE "EXE_LINKER_FLAGS        : ${CMAKE_EXE_LINKER_FLAGS}")
 message(VERBOSE "EXE_LINKER_FLAGS_RELEASE: ${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
+message(VERBOSE "BUILD_TESTS             : ${BUILD_TESTS}")
+message(VERBOSE "BUILD_EXE               : ${BUILD_EXE}")
+message(VERBOSE "USE_JSON_EMBEDDING      : ${USE_JSON_EMBEDDING}")
 
 # find wxWidgets
 # set(CMAKE_FIND_DEBUG_MODE TRUE)
 find_package(wxWidgets REQUIRED COMPONENTS core base)
 include(${wxWidgets_USE_FILE})
 
-
 # Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP:
 cmake_policy(SET CMP0135 NEW)
 
 # fetch json
+set(JSON_ImplicitConversions OFF)
+set(JSON_DisableEnumSerialization ON)
 include(FetchContent)
 FetchContent_Declare(
 	json

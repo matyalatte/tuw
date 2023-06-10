@@ -165,14 +165,14 @@ namespace json_utils {
 
     void CheckArraySize(nlohmann::json& c, const std::string& key) {
         if (c.contains(key) && (c[key].size() != c["item"].size())) {
-            std::string label = c["label"];
+            std::string label = c["label"].get<std::string>();
             Raise(GetLabel(label, key) + " and " +
                 GetLabel(label, "item") + " should have the same size.");
         }
     }
 
     void CheckItemsValues(nlohmann::json& c) {
-        std::string label = c["label"];
+        std::string label = c["label"].get<std::string>();
         KeyToSingular(c, "item");
         CheckJsonType(c, "item", JsonType::STR_ARRAY, label);
         KeyToSingular(c, "value");
@@ -223,12 +223,12 @@ namespace json_utils {
         CheckContain(sub_definition, COMMAND, "");
         CheckJsonType(sub_definition, "command_ids", JsonType::STR_ARRAY, "", CAN_SKIP);
         if (sub_definition[COMMAND].is_string()) {
-            sub_definition[COMMAND] = SplitString(sub_definition[COMMAND], { '%' });
+            sub_definition[COMMAND] = SplitString(sub_definition[COMMAND].get<std::string>(), { '%' });
         } else {
             CheckJsonType(sub_definition, COMMAND, JsonType::STR_ARRAY);
         }
 
-        std::vector<std::string> cmd = sub_definition[COMMAND];
+        std::vector<std::string> cmd = sub_definition[COMMAND].get<std::vector<std::string>>();
         std::vector<std::string> cmd_ids = std::vector<std::string>(0);
         std::vector<std::string> splitted_cmd = std::vector<std::string>(0);
         bool store_ids = false;
@@ -275,7 +275,7 @@ namespace json_utils {
         for (nlohmann::json& c : sub_definition[COMPONENTS]) {
             // check if type and label exist
             CheckJsonType(c, "label", JsonType::STRING, COMPONENTS);
-            std::string label = c["label"];
+            std::string label = c["label"].get<std::string>();
             CheckJsonType(c, "type", JsonType::STRING, label);
             CorrectValue(c, "type", "dir", "folder");
             CorrectValue(c, "type", "combo", "choice");
@@ -283,7 +283,7 @@ namespace json_utils {
             CorrectValue(c, "type", "text_box", "text");
             CorrectValue(c, "type", "integer", "int");
             KeyToSingular(c, "default");
-            std::string type = c["type"];
+            std::string type = c["type"].get<std::string>();
 
             if (type == "file") {
                 CheckJsonType(c, "extention", JsonType::STRING, label, CAN_SKIP);
@@ -334,13 +334,13 @@ namespace json_utils {
 
 
             if (c.contains("id")) {
-                std::string id = c["id"];
+                std::string id = c["id"].get<std::string>();
                 if (id == "") {
                     Raise(GetLabel(label, "id") + " should NOT be an empty string.");
                 } else if (id[0] == "_"[0]) {
                     Raise(GetLabel(label, "id") + " should NOT start with '_'.");
                 }
-                comp_ids.push_back(c["id"]);
+                comp_ids.push_back(id);
             } else {
                 comp_ids.push_back("");
             }
@@ -374,7 +374,7 @@ namespace json_utils {
         CorrectKey(definition, k + "_version", k);
         if (definition.contains(k)) {
             CheckJsonType(definition, k, JsonType::STRING);
-            int recom_int = VersionStringToInt(definition[k]);
+            int recom_int = VersionStringToInt(definition[k].get<std::string>());
             CheckJsonType(definition, "not_" + k, JsonType::BOOLEAN, "", CAN_SKIP);
             definition["not_" + k] = scr_constants::VERSION_INT != recom_int;
         }
@@ -382,7 +382,7 @@ namespace json_utils {
         CorrectKey(definition, k + "_version", k);
         if (definition.contains(k)) {
             CheckJsonType(definition, k, JsonType::STRING);
-            std::string required = definition[k];
+            std::string required = definition[k].get<std::string>();
             int required_int = VersionStringToInt(required);
             if (scr_constants::VERSION_INT < required_int) {
                 std::string msg = "Version " + required + " is required.";
@@ -403,7 +403,7 @@ namespace json_utils {
         for (nlohmann::json h : definition["help"]) {
             CheckJsonType(h, "type", JsonType::STRING);
             CheckJsonType(h, "label", JsonType::STRING);
-            std::string type = h["type"];
+            std::string type = h["type"].get<std::string>();
             if (type == "url") {
                 CheckJsonType(h, "url", JsonType::STRING);
             } else if (type == "file") {
