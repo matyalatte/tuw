@@ -2,7 +2,7 @@
     "gui": [
         {
             "label": "Sample GUI",
-            "command": "echo file: %% & echo options: %%",
+            "command": "echo file: %-% & echo options: %-%",
             "components": [
                 {
                     "type": "file",

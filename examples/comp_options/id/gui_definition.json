@@ -19,7 +19,7 @@
         },
         {
             "label": "Undefined IDs",
-            "command": "echo x: %% & echo y: %y% & echo z: %foo%",
+            "command": "echo x: %-% & echo y: %y% & echo z: %foo%",
             "button": "Echo!",
             "components": [
                 {
@@ -39,7 +39,7 @@
         },
         {
             "label": "Reserved IDs",
-            "command": "echo percent: %_% & echo cwd: %__CWD__%",
+            "command": "echo percent: %% & echo cwd: %__CWD__%",
             "button": "Echo!",
             "components": []
         }

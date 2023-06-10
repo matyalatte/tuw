@@ -30,7 +30,7 @@ When you put an undefined id in `%*%`, it'll use one of the compoents that have 
 ```json
 {
     "label": "Undefined IDs",
-    "command": "echo x: %% & echo y: %y% & echo z: %foo%",
+    "command": "echo x: %-% & echo y: %y% & echo z: %foo%",
     "button": "Echo!",
     "components": [
         {
@@ -53,14 +53,14 @@ When you put an undefined id in `%*%`, it'll use one of the compoents that have 
 ## Predefined IDs
 
 There are some predefined ids.  
-`%_%` will be replaced with `%` at runtime.  
+`%%` will be replaced with `%` at runtime.  
 `%__CWD__%` will be replaced with the executable directory at runtime.  
 Also, all ids that start with `_` are reserved.  
 
 ```json
 {
     "label": "Reserved IDs",
-    "command": "echo percent: %_% & echo cwd: %__CWD__%",
+    "command": "echo percent: %% & echo cwd: %__CWD__%",
     "button": "Echo!",
     "components": []
 }

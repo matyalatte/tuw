@@ -209,7 +209,7 @@ void MainFrame::ShowSuccessDialog(const wxString& msg) {
     dialog->Destroy();
 }
 
-constexpr char CMD_ID_PERCENT[] = "_";
+constexpr char CMD_ID_PERCENT[] = "";
 constexpr char CMD_ID_CURRENT_DIR[] = "__CWD__";
 
 // Make command string
