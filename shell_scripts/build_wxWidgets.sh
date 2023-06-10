@@ -31,7 +31,8 @@ lib_options="--without-regex
  --without-libiconv
  --disable-glcanvasegl"
 
-non_gui_options="--disable-config
+non_gui_options="--disable-largefile
+ --disable-config
  --disable-ipv6
  --disable-any
  --disable-apple_ieee
@@ -41,6 +42,7 @@ non_gui_options="--disable-config
  --disable-cmdline
  --disable-debugreport
  --disable-dialupman
+ --disable-dynamicloader
  --disable-filehistory
  --disable-filesystem
  --disable-fontenum
@@ -55,6 +57,7 @@ non_gui_options="--disable-config
  --disable-snglinst
  --disable-sound
  --disable-spellcheck
+ --disable-stopwatch
  --disable-sysoptions
  --disable-tarstream
  --disable-webrequest
@@ -90,7 +93,8 @@ big_gui_options="--disable-docview
  --disable-postscript
  --disable-printarch
  --disable-svg
- --disable-webview"
+ --disable-webview
+ --disable-clipboard"
 
 ctrl_options=" --disable-actindicator
  --disable-addremovectrl
@@ -181,6 +185,9 @@ img_options="--disable-gif
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     non_gui_options="${non_gui_options} --enable-no_rtti --disable-intl --disable-xlocale"
     ctrl_options="${ctrl_options} --disable-bmpbutton"
+else
+    lib_options="${lib_options} --without-cairo"
+    big_gui_options="${big_gui_options} --disable-graphics_ctx"
 fi
 
 options="--disable-shared
