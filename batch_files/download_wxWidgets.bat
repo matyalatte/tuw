@@ -13,13 +13,11 @@ REM Download source codes
 @popd
 
 REM Fix src\msw\dib.cpp
-set SOURCE_DIR=%USERPROFILE%\wxWidgets-%WX_VERSION%\src\
+set SOURCE_DIR=%USERPROFILE%\wxWidgets-%WX_VERSION%\src\msw\
 @pushd %~dp0
-    copy /Y %SOURCE_DIR%\msw\dib.cpp dib.cpp
-    copy /Y %SOURCE_DIR%\common\url.cpp url.cpp
+    copy /Y %SOURCE_DIR%\dib.cpp dib.cpp
     powershell -ExecutionPolicy Unrestricted ./fix_wxWidgets.ps1
-    move /Y dib.cpp %SOURCE_DIR%\msw\dib.cpp
-    move /Y url.cpp %SOURCE_DIR%\common\url.cpp
+    move /Y dib.cpp %SOURCE_DIR%\dib.cpp
 @popd
 
 PAUSE
