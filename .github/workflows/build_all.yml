@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.check-tag.outputs.tag }}
-      url: ${{ steps.create-release.outputs.upload_url }}
       wx_version: ${{ steps.wx-version.outputs.version }}
     steps:
     
@@ -45,9 +44,19 @@ jobs:
           tag_name: ${{ steps.check-tag.outputs.tag }}
           name: ${{ steps.check-tag.outputs.tag }}
           body: |
-            Changelog
+            ## Changelog
+
             - First Change
             - Second Change
+
+            ## Notes
+            
+            - `*-packed.*` are the 1MB executables that were compressed by [UPX](https://github.com/upx/upx).
+              But they might cause some problems (e.g. false positives by anti-viruses) on your machine.
+              Use the uncompressed ones if they won't work.
+
+            - The linux builds only support Ubuntu 20.04 or later due to the glibc dependencies.
+              Build the executable by yourself if you want to use it on other linux distros.
           draft: true
           prerelease: false
        
@@ -57,11 +66,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Cache wxWidget
+      - name: Cache wxWidgets
         uses: actions/cache@v3
         id: cache-wx
         with:
-            path: "C:/wxWidgets-${{ needs.setup.outputs.wx_version }}"
+            path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
             key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}
         
       - name: install wxWidget
@@ -69,7 +78,7 @@ jobs:
         run: |
           cd batch_files
           ./download_wxWidgets.bat
-          ./build_wxWidgets.bat
+          ./build_wxWidgets.bat NoTest
 
       - name: build exe
         run: |
@@ -79,12 +88,12 @@ jobs:
       - name: copy files
         run: |
           mkdir -p archive
-          cp Release/Release/SimpleCommandRunner.exe archive
+          cp build/Release/SimpleCommandRunner.exe archive
           cp examples/other_features/help/gui_definition.json archive
           cp changelog.txt archive
           cp license.txt archive
         shell: bash
-        
+
       - name: Archive Release
         uses: thedoctor0/zip-release@master
         with:
@@ -92,54 +101,96 @@ jobs:
           type: 'zip'
           filename: '${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.zip'
 
-      - name: Upload Release Asset
+      - name: copy files
+        run: mv archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.zip ./
+        shell: bash
+
+      - name: Compress exe with UPX
+        uses: crazy-max/ghaction-upx@v2
+        with:
+          version: latest
+          files: ./archive/SimpleCommandRunner.exe
+          args: --best
+
+      - name: Archive Release
+        uses: thedoctor0/zip-release@master
+        with:
+          directory: 'archive'
+          type: 'zip'
+          filename: '${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-packed.zip'
+
+      - name: Upload Release Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.zip
+        run: |
+          gh release upload ${{ needs.setup.outputs.tag }} ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.zip
+          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-packed.zip
 
   build_unix:
     strategy:
       matrix:
         os: [ubuntu-20.04, macos-11]
+
     runs-on: ${{ matrix.os }}
     needs: setup
     steps:
       - uses: actions/checkout@v3
       
-      - name: Cache wxWidget
+      - name: Cache wxWidgets
         uses: actions/cache@v3
         id: cache-wx
         with:
             path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
             key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}
             
-      - name: install gtk
+      - name: install gtk for Linux
         if: runner.os=='Linux'
-        run: |
-          sudo apt -y install libgtk-3-dev
+        run: sudo apt -y install libgtk-3-dev
       
-      - name: build wxWidget
+      - name: build wxWidgets
         if: steps.cache-wx.outputs.cache-hit != 'true'
         run: |
           cd shell_scripts
           bash download_wxWidgets.sh
-          bash build_wxWidgets.sh
+          bash build_wxWidgets.sh NoTest
           
       - name: build exe
-        run: |
-          bash shell_scripts/build_exe.sh
+        run: bash shell_scripts/build_exe.sh
           
-      - name: copy files
+      - name: Archive Release
         run: |
           mkdir -p archive/${{ env.ZIP_NAME }}
-          cp Release/SimpleCommandRunner archive/${{ env.ZIP_NAME }}
+          cp build/Release/SimpleCommandRunner archive/${{ env.ZIP_NAME }}
           cp examples/other_features/help/gui_definition.json archive/${{ env.ZIP_NAME }}
           cp changelog.txt archive/${{ env.ZIP_NAME }}
           cp license.txt archive/${{ env.ZIP_NAME }}
           cd archive
           tar -jcvf ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.tar.bz2 ${{ env.ZIP_NAME }}
+          mv ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.tar.bz2 ../
+
+      - name: Install UPX for Linux
+        if: runner.os=='Linux'
+        uses: crazy-max/ghaction-upx@v2
+        with:
+          install-only: true
+
+      - name: Install UPX for macOS
+        if: runner.os == 'macOS'
+        run: brew install upx
+
+      - name: Compress exe with UPX
+        run: |
+          cd archive/${{ env.ZIP_NAME }}
+          upx SimpleCommandRunner --best
+
+      - name: Archive Release
+        run: |
+          cd archive
+          tar -jcvf ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-packed.tar.bz2 ${{ env.ZIP_NAME }}
 
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.tar.bz2
+        run: |
+          gh release upload ${{ needs.setup.outputs.tag }} ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.tar.bz2
+          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-packed.tar.bz2

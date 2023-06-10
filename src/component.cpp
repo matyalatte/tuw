@@ -8,7 +8,7 @@ Component::Component(const nlohmann::json& j, bool has_string) {
     m_id = j.value("id", "");
     if (m_id == "") {
         size_t hash = std::hash<std::string>()(j["label"]);
-        m_id = std::to_string(hash);
+        m_id = "_" + std::to_string(hash);
     }
     m_add_quotes = j.value("add_quotes", false);
 }

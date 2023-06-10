@@ -1,19 +1,10 @@
 {
     "gui": [
         {
-            "label": "Sample GUI",
-            "command": "echo x: %x% & echo y: %y% & echo z: %z%",
+            "label": "IDs",
+            "command": "echo x: %x% & echo y: %y% & echo x: %x%",
             "button": "Echo!",
             "components": [
-                {
-                    "type": "static_text",
-                    "label": "Sample GUI for \"id\" option."
-                },
-                {
-                    "type": "text",
-                    "label": "Value of z",
-                    "id": "z"
-                },
                 {
                     "type": "text",
                     "label": "Value of y",
@@ -27,24 +18,30 @@
             ]
         },
         {
-            "label": "Sample GUI2",
-            "command": "echo y: %something% & echo x: %x% & echo x: %x%",
+            "label": "Undefined IDs",
+            "command": "echo x: %-% & echo y: %y% & echo z: %foo%",
             "button": "Echo!",
             "components": [
                 {
-                    "type": "static_text",
-                    "label": "Sample GUI for \"id\" option."
+                    "type": "text",
+                    "label": "Value of y",
+                    "id": "y"
                 },
                 {
                     "type": "text",
-                    "label": "Value of x",
-                    "id": "x"
+                    "label": "Value of x"
                 },
                 {
                     "type": "text",
-                    "label": "Value of y"
+                    "label": "Value of z"
                 }
             ]
+        },
+        {
+            "label": "Reserved IDs",
+            "command": "echo percent: %% & echo cwd: %__CWD__%",
+            "button": "Echo!",
+            "components": []
         }
     ]
 }

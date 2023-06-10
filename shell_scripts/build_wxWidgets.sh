@@ -1,158 +1,229 @@
 #!/bin/bash
-# Builds and installs wxWidgets with cmake.
+# Builds wxWidgets in ~/wxWidgets-${wx_version}/${build_type}
 
-# you need build-essential and libgtk-3-dev for linux
-# sudo apt -y install build-essential libgtk-3-dev
-
-wx_version="$(cat $(dirname "$0")/../WX_VERSION.txt)"
-
-if [ "$1" = "Debug" ];
-    then build_type="Debug";
-    else build_type="Release";
+# You can specify build type as an argument like "bash build_wxWidgets.sh Release"
+if [ "$1" = "Debug" ]; then
+    build_type="Debug"
+else
+    build_type="Release"
 fi
 
+# wxWidgets version is defined in ./Simple-Command-Runner/WX_VERSION.txt
+wx_version="$(cat $(dirname "$0")/../WX_VERSION.txt)"
+
+# Options are defined in wxWidgets/configure
+lib_options="--without-regex
+ --without-zlib
+ --without-expat
+ --without-libjpeg
+ --without-libpng
+ --without-libtiff
+ --without-nanosvg
+ --without-liblzma
+ --without-opengl
+ --without-sdl
+ --without-libnotify
+ --without-libmspack
+ --without-gtkprint
+ --without-gnomevfs
+ --without-libxpm
+ --without-libjbig
+ --without-libiconv
+ --disable-glcanvasegl"
+
+non_gui_options="--disable-largefile
+ --disable-config
+ --disable-ipv6
+ --disable-any
+ --disable-apple_ieee
+ --disable-arcstream
+ --disable-base64
+ --disable-backtrace
+ --disable-cmdline
+ --disable-debugreport
+ --disable-dialupman
+ --disable-dynamicloader
+ --disable-filehistory
+ --disable-filesystem
+ --disable-fontenum
+ --disable-fontmap
+ --disable-fs_archive
+ --disable-fs_inet
+ --disable-fs_zip
+ --disable-fswatcher
+ --disable-mimetype
+ --disable-printfposparam
+ --disable-secretstore
+ --disable-snglinst
+ --disable-sound
+ --disable-spellcheck
+ --disable-stopwatch
+ --disable-sysoptions
+ --disable-tarstream
+ --disable-webrequest
+ --disable-zipstream
+ --disable-ftp
+ --disable-http
+ --disable-fileproto
+ --disable-sockets
+ --disable-url
+ --disable-protocol
+ --disable-protocol-ftp
+ --disable-protocol-http
+ --disable-protocol-file
+ --disable-dbghelp"
+
+big_gui_options="--disable-docview
+ --disable-help
+ --disable-mshtmlhelp
+ --disable-html
+ --disable-htmlhelp
+ --disable-xrc
+ --disable-aui
+ --disable-propgrid
+ --disable-ribbon
+ --disable-stc
+ --disable-loggui
+ --disable-logwin
+ --disable-logdialog
+ --disable-mdi
+ --disable-mdidoc
+ --disable-mediactrl
+ --disable-richtext
+ --disable-postscript
+ --disable-printarch
+ --disable-svg
+ --disable-webview
+ --disable-clipboard"
+
+ctrl_options=" --disable-actindicator
+ --disable-addremovectrl
+ --disable-animatectrl
+ --disable-bannerwindow
+ --disable-artstd
+ --disable-arttango
+ --disable-bmpcombobox
+ --disable-calendar
+ --disable-checklst
+ --disable-choicebook
+ --disable-colourpicker
+ --disable-comboctrl
+ --disable-commandlinkbutton
+ --disable-dataviewctrl
+ --disable-nativedvc
+ --disable-datepick
+ --disable-display
+ --disable-editablebox
+ --disable-fontpicker
+ --disable-gauge
+ --disable-grid
+ --disable-headerctrl
+ --disable-hyperlink
+ --disable-infobar
+ --disable-listbook
+ --disable-notebook
+ --disable-notifmsg
+ --disable-odcombobox
+ --disable-prefseditor
+ --disable-radiobox
+ --disable-richmsgdlg
+ --disable-richtooltip
+ --disable-rearrangectrl
+ --disable-searchctrl
+ --disable-slider
+ --disable-splitter
+ --disable-statbmp
+ --disable-statbox
+ --disable-statusbar
+ --disable-taskbarbutton
+ --disable-taskbaricon
+ --disable-tbarnative
+ --disable-timepick
+ --disable-togglebtn
+ --disable-toolbar
+ --disable-toolbook
+ --disable-treebook
+ --disable-treelist"
+
+dlg_options="--disable-splash
+ --disable-coldlg
+ --disable-creddlg
+ --disable-finddlg
+ --disable-fontdlg
+ --disable-numberdlg
+ --disable-textdlg
+ --disable-tipdlg
+ --disable-progressdlg
+ --disable-wizarddlg"
+
+misc_gui_options="--disable-splines
+ --disable-busyinfo
+ --disable-hotkey
+ --disable-joystick
+ --disable-metafile
+ --disable-dragimage
+ --disable-dctransform
+ --disable-webviewwebkit
+ --disable-privatefonts"
+
+# You can remove a test tool from the release build with "bash build_wxWidgets.sh NoTest"
+if [ "$1" = "NoTest" ]; then
+    misc_gui_options="${misc_gui_options} --disable-uiactionsim"
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        ctrl_options="${ctrl_options} --disable-combobox"
+    fi
+fi
+
+img_options="--disable-gif
+ --disable-pcx
+ --disable-tga
+ --disable-iff
+ --disable-pnm
+ --disable-xpm
+ --disable-ico_cur"
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    non_gui_options="${non_gui_options} --enable-no_rtti --disable-intl --disable-xlocale"
+    ctrl_options="${ctrl_options} --disable-bmpbutton"
+else
+    lib_options="${lib_options} --without-cairo"
+    big_gui_options="${big_gui_options} --disable-graphics_ctx"
+fi
+
+options="--disable-shared
+ --disable-compat30
+ --disable-tests
+ --without-subdirs
+ ${lib_options}
+ ${non_gui_options}
+ ${big_gui_options}
+ ${ctrl_options}
+ ${dlg_options}
+ ${misc_gui_options}
+ ${img_options}
+ --prefix=$(pwd)"
+
+if [ ${build_type} = "Debug" ]; then
+    options="${options} --enable-debug"
+else
+    # Optimize for size
+    export CXXFLAGS="-Os -ffunction-sections -fdata-sections"
+fi
+echo "CMake arguments: ${options}"
+
+# Get nproc
+if nproc; then
+    num_proc=$(nproc) # for linux
+elif sysctl -n hw.logicalcpu; then
+    num_proc=$(sysctl -n hw.logicalcpu) # for osx
+else
+    num_proc=2
+fi
+
+# Build
 pushd ~/wxWidgets-"$wx_version"
 mkdir ${build_type}
 cd ${build_type}
-
-# Options are defined in wxWidgets/configure
-options="--disable-shared\
-    --disable-compat30\
-    --disable-tests\
-    --without-regex\
-    --without-zlib\
-    --without-expat\
-    --without-libjpeg\
-    --without-libpng\
-    --without-libtiff\
-    --without-nanosvg\
-    --without-liblzma\
-    --without-opengl\
-    --without-sdl\
-    --without-libmspack\
-    --without-gtkprint\
-    --without-gnomevfs\
-    --without-libxpm\
-    --without-libjbig\
-    --disable-glcanvasegl\
-    --disable-cmdline\
-    --disable-filehistory\
-    --disable-fontenum\
-    --disable-fontmap\
-    --disable-fs_inet\
-    --disable-fswatcher\
-    --disable-mimetype\
-    --disable-printfposparam\
-    --disable-secretstore\
-    --disable-sound\
-    --disable-spellcheck\
-    --disable-sysoptions\
-    --disable-tarstream\
-    --disable-webrequest\
-    --disable-zipstream\
-    --disable-docview\
-    --disable-help\
-    --disable-mshtmlhelp\
-    --disable-html\
-    --disable-htmlhelp\
-    --disable-xrc\
-    --disable-aui\
-    --disable-propgrid\
-    --disable-ribbon\
-    --disable-stc\
-    --disable-loggui\
-    --disable-logwin\
-    --disable-logdialog\
-    --disable-mdi\
-    --disable-mdidoc\
-    --disable-mediactrl\
-    --disable-richtext\
-    --disable-postscript\
-    --disable-printarch\
-    --disable-svg\
-    --disable-webview\
-    --disable-actindicator\
-    --disable-addremovectrl\
-    --disable-animatectrl\
-    --disable-bannerwindow\
-    --disable-artstd\
-    --disable-arttango\
-    --disable-bmpcombobox\
-    --disable-calendar\
-    --disable-choicebook\
-    --disable-colourpicker\
-    --disable-commandlinkbutton\
-    --disable-dataviewctrl\
-    --disable-datepick\
-    --disable-editablebox\
-    --disable-fontpicker\
-    --disable-gauge\
-    --disable-grid\
-    --disable-headerctrl\
-    --disable-hyperlink\
-    --disable-infobar\
-    --disable-listbook\
-    --disable-notebook\
-    --disable-odcombobox\
-    --disable-prefseditor\
-    --disable-radiobox\
-    --disable-richmsgdlg\
-    --disable-richtooltip\
-    --disable-rearrangectrl\
-    --disable-searchctrl\
-    --disable-taskbaricon\
-    --disable-tbarnative\
-    --disable-timepick\
-    --disable-togglebtn\
-    --disable-toolbar\
-    --disable-toolbook\
-    --disable-treebook\
-    --disable-treelist\
-    --disable-splash\
-    --disable-coldlg\
-    --disable-creddlg\
-    --disable-finddlg\
-    --disable-fontdlg\
-    --disable-numberdlg\
-    --disable-tipdlg\
-    --disable-progressdlg\
-    --disable-wizarddlg\
-    --disable-busyinfo\
-    --disable-hotkey\
-    --disable-joystick\
-    --disable-metafile\
-    --disable-dragimage\
-    --disable-dctransform\
-    --disable-webviewwebkit\
-    --disable-privatefonts\
-    --disable-gif\
-    --disable-pcx\
-    --disable-tga\
-    --disable-iff\
-    --disable-pnm\
-    --disable-xpm\
-    --disable-ico_cur\
-    --prefix=$(pwd)"
-
-if [ ${build_type} = "Debug" ];
-    then options="${options} --enable-debug" ;
-fi
-
-# configure
-../configure ${options};
-
-function nproc_for_mac(){
-    if sysctl -n hw.logicalcpu;
-        then num_proc=$(sysctl -n hw.logicalcpu); # use hw.logicalcpu if exists
-        else num_proc=2; echo ${num_proc}; # when sysctl won't work
-    fi
-}
-
-if nproc;
-    then num_proc=$(nproc); # use nproc if exists
-    else num_proc=$(nproc_for_mac); # when nproc doesn't exist
-fi
-
-# build
+../configure ${options}
 make -j"${num_proc}"
 popd

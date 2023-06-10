@@ -113,9 +113,8 @@ TEST(MainFrameTest, RunCommandSuccess) {
     ASSERT_EQ(test_json["gui"][0]["components"],
         main_frame->GetDefinition()["gui"][0]["components"]);
 
-    std::array<std::string, 2> msg = main_frame->RunCommand();
-    EXPECT_STRNE("", msg[0].c_str());
-    EXPECT_STREQ("", msg[1].c_str());
+    std::string last_line = main_frame->RunCommand();
+    EXPECT_STRNE("", last_line.c_str());
 }
 
 TEST(MainFrameTest, RunCommandFail) {
@@ -124,9 +123,13 @@ TEST(MainFrameTest, RunCommandFail) {
     test_json["gui"][0]["command"] = "I'll fail";
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
 
-    std::array<std::string, 2> msg = main_frame->RunCommand();
-    EXPECT_STREQ("", msg[0].c_str());
-    EXPECT_STRNE("", msg[1].c_str());
+    try {
+        main_frame->RunCommand();
+        FAIL();
+    }
+    catch(std::exception& err) {
+        EXPECT_STRNE("", err.what());
+    }
 }
 
 TEST(MainFrameTest, ClickRunButton) {

@@ -1,22 +1,36 @@
 #include "main_frame.h"
 
-const char* VERSION = "0.3.1";
-
-#ifndef _WIN32
-void MainFrame::CalcExePath() {
-    wxStandardPaths& path = wxStandardPaths::Get();
-    path.UseAppInfo(wxStandardPaths::AppInfo_None);
-    m_exe_path = path.GetExecutablePath();
-    wxSetWorkingDirectory(wxPathOnly(m_exe_path));
-}
-#endif
-
 // Main window
 MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
-    : wxFrame(nullptr, wxID_ANY, "Simple Command Runner") {
+    : wxFrame(nullptr, wxID_ANY, scr_constants::TOOL_NAME) {
     SetUp();
     if (definition.empty()) {
-        definition = LoadJson("gui_definition.json", true);
+        if (wxFileExists("gui_definition.json")) {
+            definition = LoadJson("gui_definition.json", true);
+            *m_ostream << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
+        } else {
+        #ifdef USE_JSON_EMBEDDING
+            *m_ostream << "[LoadDefinition] gui_definition.json not found." << std::endl;
+            try {
+                ExeContainer exe;
+                exe.Read(wxStandardPaths::Get().GetExecutablePath());
+                if (!exe.HasJson()) {
+                    *m_ostream << "[LoadDefinition] Embedded JSON not found." << std::endl;
+                    throw std::runtime_error("JSON data not found.");
+                }
+                *m_ostream << "[LoadDefinition] Found JSON in the executable." << std::endl;
+                definition = exe.GetJson();
+            }
+            catch (nlohmann::json::exception& e) {
+                JsonLoadFailed(e.what(), definition);
+            }
+            catch (std::exception& e) {
+                JsonLoadFailed(e.what(), definition);
+            }
+        #else
+            JsonLoadFailed("gui_definition.json not found.", definition);
+        #endif
+        }
     }
     if (config.empty()) {
         config = LoadJson("gui_config.json", false);
@@ -29,16 +43,18 @@ MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
 }
 
 void MainFrame::SetUp() {
-#ifndef _WIN32
-    CalcExePath();
-#endif
+    // Use the executable directory as the working dir.
+    wxString exe_path = wxStandardPaths::Get().GetExecutablePath();
+    wxSetWorkingDirectory(wxPathOnly(exe_path));
+
 #ifdef __linux__
-    m_log_frame = new LogFrame(m_exe_path);
+    m_log_frame = new LogFrame(exe_path);
     m_ostream = m_log_frame;
 #else
     m_ostream = &std::cout;
 #endif
-    *m_ostream << "Simple Command Runner v" << VERSION << " by matyalatte" << std::endl;
+    *m_ostream << scr_constants::TOOL_NAME << " v" << scr_constants::VERSION;
+    *m_ostream << " by " << scr_constants::AUTHOR << std::endl;
 }
 
 nlohmann::json MainFrame::LoadJson(const std::string& file, bool is_definition) {
@@ -88,7 +104,7 @@ void MainFrame::CreateFrame() {
 
     // set events
     Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
-    Bind(wxEVT_MENU, [this](wxCommandEvent&) { Close(true); }, wxID_EXIT);
+    Bind(wxEVT_MENU, &MainFrame::OnCommandClose, this, wxID_EXIT);
     Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED,
         wxCommandEventHandler(MainFrame::ClickButton));
 
@@ -159,8 +175,6 @@ void MainFrame::CheckDefinition(nlohmann::json& definition) {
         JsonLoadFailed(msg, definition);
         return;
     }
-
-    *m_ostream << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
 }
 
 void MainFrame::UpdateConfig() {
@@ -195,6 +209,9 @@ void MainFrame::ShowSuccessDialog(const wxString& msg) {
     dialog->Destroy();
 }
 
+constexpr char CMD_ID_PERCENT[] = "";
+constexpr char CMD_ID_CURRENT_DIR[] = "__CWD__";
+
 // Make command string
 wxString MainFrame::GetCommand() {
     std::vector<std::string> cmd_ary = m_sub_definition["command"];
@@ -208,12 +225,16 @@ wxString MainFrame::GetCommand() {
 
     wxString cmd = wxString::FromUTF8(cmd_ary[0]);
     int comp_size = comp_ids.size();
-    int j;
     int non_id_comp = 0;
     for (int i = 0; i < cmd_ids.size(); i++) {
         std::string id = cmd_ids[i];
+        int j = -1;
         if (id == "") {
             j = comp_size;
+        } else if (id == CMD_ID_PERCENT) {
+            cmd += "%";
+        } else if (id == CMD_ID_CURRENT_DIR) {
+            cmd += wxGetCwd();
         } else {
             for (j = 0; j < comp_size; j++) {
                 if (id == comp_ids[j]) {
@@ -234,7 +255,7 @@ wxString MainFrame::GetCommand() {
             }
             non_id_comp++;
         }
-        if (j < comp_size) {
+        if (j >= 0 && j < comp_size) {
             cmd += comp_strings[j];
         }
         if (i + 1 < cmd_ary.size()) {
@@ -244,18 +265,19 @@ wxString MainFrame::GetCommand() {
     return cmd;
 }
 
-std::array<std::string, 2> MainFrame::RunCommand() {
+std::string MainFrame::RunCommand() {
     wxString cmd = GetCommand();
-    wxString text = m_run_button->GetLabel();
-    m_run_button->SetLabel("Processing...");
 
     *m_ostream << "[RunCommand] Command: " << cmd << std::endl;
 #ifdef _WIN32
     cmd = "cmd.exe /c " + cmd;
 #endif
-    std::array<std::string, 2> msg = Exec(*m_ostream, cmd);
-    m_run_button->SetLabel(text);
-    return msg;
+    bool check_exit_code = m_sub_definition.value("check_exit_code", false);
+    int exit_success = m_sub_definition.value("exit_success", 0);
+    bool show_last_line = m_sub_definition.value("show_last_line", false);
+    std::string last_line = Exec(*m_ostream, cmd,
+                                 check_exit_code, exit_success, show_last_line);
+    return last_line;
 }
 
 // run command
@@ -263,19 +285,26 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
     // save config
     SaveConfig();
 
-    std::array<std::string, 2> msg = RunCommand();
+    bool failed = false;
+    wxString text = m_run_button->GetLabel();
+    std::string last_line = "";
+    try {
+        m_run_button->SetLabel("Processing...");
+        last_line = RunCommand();
+    }
+    catch (std::exception& e) {
+        *m_ostream << "[RunCommand] Error: Failed to execute commands." << std::endl;
+        ShowErrorDialog(e.what());
+        failed = true;
+    }
 
-    // show result
-    if (msg[1] != "") {  // if error
-        *m_ostream << "[RunCommand] Failed to execute commands." << std::endl;
-        ShowErrorDialog(msg[1]);
-    } else {  // if success
-        if (m_sub_definition.contains("show_last_line") &&
-            m_sub_definition["show_last_line"] != 0 && msg[0] != "") {
-            ShowSuccessDialog(msg[0]);
-        } else {
-            ShowSuccessDialog("Success!");
-        }
+    m_run_button->SetLabel(text);
+    if (failed) return;
+
+    if (m_sub_definition.value("show_last_line", false) && last_line != "") {
+        ShowSuccessDialog(last_line);
+    } else {
+        ShowSuccessDialog("Success!");
     }
 }
 
@@ -283,25 +312,51 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
     size_t id = event.GetId() - 1 - wxID_HIGHEST - m_definition["gui"].size();
     nlohmann::json help = m_definition["help"][id];
     std::string type = help["type"];
-    wxString url;
+    wxString url = "";
     std::string tag;
-    if (type == "url") {
-        url = wxString::FromUTF8(help["url"]);
-        tag = "[OpenURL] ";
-    } else if (type == "file") {
-        url = wxString::FromUTF8(help["path"]);
-        tag = "[OpenFile] ";
-    } else {
-        ShowErrorDialog("Unsupported help type: " + type);
+    try {
+        if (type == "url") {
+            url = wxString::FromUTF8(help["url"]);
+            tag = "[OpenURL] ";
+            int pos = url.Find("://");
+            if (pos !=wxNOT_FOUND) {
+                wxString scheme = url.Left(pos);
+                // scheme should be http or https
+                if (scheme.IsSameAs("file", false)) {
+                    wxString msg = "Use 'file' type for a path, not 'url' type. (" + url + ")";
+                    throw std::runtime_error(msg.c_str());
+                } else if (!scheme.IsSameAs("https", false) && !scheme.IsSameAs("http", false)) {
+                    wxString msg = "Unsupported scheme detected. "
+                                      "It should be http or https. (" + scheme + ")";
+                    throw std::runtime_error(msg.c_str());
+                }
+            } else {
+                url = "https://" + url;
+            }
+        } else if (type == "file") {
+            url = wxString::FromUTF8(help["path"]);
+            tag = "[OpenFile] ";
+            if (!wxFileExists(url) && !wxDirExists(url)) {
+                wxString msg = "File does not exist. (" + url + ")";
+                throw std::runtime_error(msg.c_str());
+            }
+        }
+    }
+    catch (std::exception& e) {
+        *m_ostream << tag << "Error: " << e.what() << std::endl;
+        ShowErrorDialog(e.what());
         return;
     }
+
     *m_ostream << tag << url << std::endl;
     if (type == "file") {
         url = "file:" + url;
     }
     bool success = wxLaunchDefaultBrowser(url);
     if (!success) {
-        *m_ostream << tag << "Failed to open " << type << " by an unexpected error." << std::endl;
+        std::string msg ="Failed to open " + type + " by an unexpected error.";
+        *m_ostream << tag << "Error: " << msg << std::endl;
+        ShowErrorDialog(msg);
     }
 }
 

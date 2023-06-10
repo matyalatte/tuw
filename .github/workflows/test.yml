@@ -1,6 +1,9 @@
 name: test
 
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
   
 env:
@@ -39,8 +42,8 @@ jobs:
         uses: actions/cache@v3
         id: cache-wx
         with:
-            path: "C:/wxWidgets-${{ needs.setup.outputs.wx_version }}"
-            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}
+            path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
+            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-Test
         
       - name: install wxWidget
         if: steps.cache-wx.outputs.cache-hit != 'true'
@@ -68,7 +71,7 @@ jobs:
         id: cache-wx
         with:
             path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
-            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}
+            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-Test
             
       - name: install gtk for linux
         if: runner.os=='Linux'

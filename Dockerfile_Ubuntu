@@ -1,0 +1,35 @@
+# Building workflow for ubuntu 20.04 or later.
+#
+# 1. Use this docker file to build the executable.
+#    docker build -t scr_ubuntu ./
+#
+# 2. Run the built image.
+#    docker run scr_ubuntu
+#
+# 3. Check the created container id.
+#    docker ps -a
+#
+# 4. Use "docker cp" to get the built executable.
+#    docker cp <CONTAINER ID>:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
+
+# Base image
+FROM matyalatte/ubuntu20.04-cmake3.25:latest
+
+# Install packages
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libgtk-3-dev git && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Clone the repo
+WORKDIR /
+RUN git clone https://github.com/matyalatte/Simple-Command-Runner.git
+
+# Build wxWidgets
+WORKDIR /Simple-Command-Runner/shell_scripts
+RUN bash download_wxWidgets.sh; \
+    bash build_wxWidgets.sh NoTest
+
+# Build SimpleCommandRunner
+RUN bash build_exe.sh

@@ -2,7 +2,6 @@
 
 [Github Actions](https://docs.github.com/en/actions) is an automation tool for development workflows.  
 It can build and upload the executable from any branches and tags.  
-But please note that the available time for Github Actions is 2000 minutes per month for free account.  
 
 ## 1. Fork the repository
 

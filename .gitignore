@@ -2,6 +2,7 @@
 *.json
 !examples/**/gui_definition.json
 !tests/**/*.json
+!CMakePresets.json
 
 *.txt
 !changelog.txt
@@ -48,6 +49,7 @@ out
 *.internal
 *.test
 *.make
+batch_files/*.cpp
 
 # python
 python

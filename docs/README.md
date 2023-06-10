@@ -1,44 +1,50 @@
-# Simple-Command-Runner ver 0.3.1
+# Simple-Command-Runner ver 0.4.0
 
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/test.yml/badge.svg)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4aee3ee5172e4c38915d07f9c62725d3)](https://www.codacy.com/gh/matyalatte/Simple-Command-Runner/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matyalatte/Simple-Command-Runner&amp;utm_campaign=Badge_Grade)
 <a href="https://www.buymeacoffee.com/matyalatteQ" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>  
 
-Simple GUI wrapper to execute commands.  
+Small and simple GUI wrapper for command-line tools.  
 
-## About
+## Only 1MB for a portable GUI!
 
-Simple Command Runner will give very simple GUI to your scripts.  
-All you need is write a `.json` file and run an `.exe` file.  
-It can make GUI to run commands of your scripts.  
-No need to use IDE and manage scripts for GUI.  
+Simple Command Runner will give a very simple GUI to your scripts.  
+All you need is write a `.json` file and run a small executable.  
+It can make a GUI to run commands of your scripts.  
+**No need coding, no need browsers, and no need stupidly large executables**!  
 
 ![sample](https://user-images.githubusercontent.com/69258547/192090786-11a3f5ef-988e-442f-8ba9-fd1636b9f350.png)
 <img src=https://user-images.githubusercontent.com/69258547/192090797-f5e5b52d-59aa-4942-a361-2c8b5c7bd746.png width=387></img>  
 
 ## Features
 
--   Cross-platform
--   Portable
 -   Define GUI in .json
 -   Save arguments
--   Able to input paths by drag and drop
+-   Input paths by drag and drop
+-   Cross-platform
+-   Native look and feel
+-   Portable
+-   Small size (under 1MB)
 
 ## Downloads
 
 You can download executables from [the release page](https://github.com/matyalatte/Simple-Command-Runner/releases)
 
--   `SimpleCommandRunner*-Windows.zip` is for Windows.  
--   `SimpleCommandRunner*-macOS.tar.bz2` is for Mac.  
--   `SimpleCommandRunner*-Linux.tar.bz2` is for Ubuntu (20.04 or later).  
+-   `SimpleCommandRunner*-Windows*.zip` is for Windows.  
+-   `SimpleCommandRunner*-macOS*.tar.bz2` is for macOS.  
+-   `SimpleCommandRunner*-Linux*.tar.bz2` is for Ubuntu (20.04 or later).  
 
-> The linux build only supports Ubuntu due to the glibc dependences.  
-> If you want to use it on other linux distributions, you should get the lib or build the executable by yourself.  
+> `*-packed.*` are the 1MB executables that were compressed by [UPX](https://github.com/upx/upx).  
+> But they might cause some problems (e.g. false positives by anti-viruses) on your machine.  
+> Use the uncompressed ones if they won't work.  
+
+> The linux builds only support Ubuntu due to the glibc dependences.  
+> Build the executable by yourself if you want to use it on other linux distros.  
 
 ## Examples
 
-There are some [json files](../examples/README.md) to learn how to use.  
+There are some [json files](../examples/README.md) to learn how to define GUIs.  
 
 ## FAQ
 
@@ -50,12 +56,31 @@ Simple Command Runner uses cross-platform framework.
 I made sure I can build it with the following platforms and compilers.
 
 -   Windows10 + MSVC 19.31
--   Ubuntu 20.04 + GCC 9.4
 -   MacOS 11 + AppleClang 13.0
+-   Ubuntu 20.04 + GCC 9.4
+-   Alpine Linux 3.16 + GCC 11.2
 
-And I think it supports your environment as well if [wxWidgets library](https://github.com/wxWidgets/wxWidgets) supports.  
+And it should support your platform as well if [wxWidgets library](https://github.com/wxWidgets/wxWidgets) supports.  
 
-## How to Build
+## Building
+
+### CMake
+
+There are platform-specific documents for building the executable with CMake.  
+
+-   [Building Workflow for Windows](./Build-on-Windows.md)  
+-   [Building Workflow for macOS](./Build-on-Mac.md)  
+-   [Building Workflow for Linux](./Build-on-Linux.md)  
+
+You can also see [batch files](../batch_files/), [shell scripts](../shell_scripts/), and [CMakePresets.json](../CMakePresets.json) to understand the workflow.  
+
+### Docker
+
+Linux users can use dockerfiles to build the executable.  
+See the dockerfiles for the details.
+
+-   [Dockerfile_Ubuntu](../Dockerfile_Ubuntu): Builds SimpleCommandRunner on Ubuntu20.04  
+-   [Dockerfile_Alpine](../Dockerfile_Alpine): Builds SimpleCommandRunner on Alpine3.16  
 
 ### Github Actions
 
@@ -69,39 +94,14 @@ You can make Github build and upload the executable for your platform.
 See here for the details.  
 [How to Build With Github Actions](./Github-Actions.md)
 
-### Windows
-
-There is a document for Windows users.  
-[Building Workflow for Windows](./Build-on-Windows.md)  
-
-It only supports Visual Studio 2022, but you can see [the batch files](../batch_files/) to find a way to build it with your environment.  
-
-### Mac and Ubuntu
-
-There is a document for Mac and Ubuntu users.  
-[Building Workflow for Ubuntu and MacOS](./Build-on-Unix.md)  
-
-And you can see [the shell scripts](../shell_scripts/) to understand the workflow.  
-
-### Docker
-
-Ubuntu users can also use a docker file to build the executable.  
-See [the docker file](../Dockerfile) for the instruction.  
-
 ## License
 
-### Simple Command Runner
+Files in this repository are available under the [GPL2+](../license.txt).  
 
-Files in this repository are licensed under [wxWindows Library Licence](../license.txt).  
-It is a modified version of LGPL explicitly allowing not distributing
-the sources of an application using the library even in the case of static linking.  
+## External Projects
 
-### wxWidgets
-
-Simple Command Runner uses [wxWidgets library](https://github.com/wxWidgets/wxWidgets) for the GUI framework.  
-It is licensed under [wxWindows Library Licence](https://github.com/wxWidgets/wxWidgets/blob/master/docs/licence.txt).  
-
-### nlohmann-json
-
-Simple Command Runner uses [nlohmann's json library](https://github.com/nlohmann/json).  
-It is licensed under [MIT license](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT).
+| Project | Used for | License |
+| -- | -- | -- |
+| [wxWidgets library](https://github.com/wxWidgets/wxWidgets) | GUI framework | [Modified LGPL](https://github.com/wxWidgets/wxWidgets/blob/master/docs/licence.txt) | 
+| [nlohmann's json library](https://github.com/nlohmann/json) | JSON handling | [MIT](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT) |
+| [UPX](https://github.com/upx/upx) | EXE compression | [Modified GPL2+](https://github.com/upx/upx/blob/devel/LICENSE) |

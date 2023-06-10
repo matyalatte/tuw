@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <nlohmann/json.hpp>
+#include "scr_constants.h"
 
 namespace json_utils {
     nlohmann::json LoadJson(const std::string& file);

@@ -1,0 +1,26 @@
+name: docker_test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docker_test:
+    name: Test Dockerfiles
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: Dockerfile_Ubuntu
+            image_name: scr_ubuntu
+          - dockerfile: Dockerfile_Alpine
+            image_name: scr_alpine
+    
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          docker build -t ${{ matrix.image_name }} -f ${{ matrix.dockerfile }} ./
+          docker run ${{ matrix.image_name }}
+          id=$(docker ps -a --filter ancestor=${{ matrix.image_name }} --format "{{.ID}}")
+          docker cp $id:/Simple-Command-Runner/Release/SimpleCommandRunner ./
+          ls -l | grep SimpleCommandRunner

@@ -1,0 +1,32 @@
+# Building workflow for Alpine.
+#
+# 1. Use this docker file to build the executable.
+#    docker build -t scr_alpine -f Dockerfile_Alpine ./
+#
+# 2. Run the built image.
+#    docker run scr_alpine
+#
+# 3. Check the created container id.
+#    docker ps -a
+#
+# 4. Use "docker cp" to get the built executable.
+#    docker cp <CONTAINER ID>:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
+
+# Base image
+FROM matyalatte/alpine3.16-cmake3.25
+
+# Install packages
+RUN apk update && \
+    apk add --no-cache bash gtk+3.0-dev
+
+# Clone the repo
+WORKDIR /
+RUN git clone https://github.com/matyalatte/Simple-Command-Runner.git
+
+# Build wxWidgets
+WORKDIR /Simple-Command-Runner/shell_scripts
+RUN bash download_wxWidgets.sh; \
+    bash build_wxWidgets.sh NoTest
+
+# Build SimpleCommandRunner
+RUN bash build_exe.sh

@@ -4,7 +4,7 @@
     "gui": [
         {
             "label": "Components Minimal",
-            "command": "echo file: %% & echo folder: %% & echo choice: %% & echo check: %% & echo check_array: %% & echo textbox: %% & echo int: %% & echo float: %%",
+            "command": "echo file: %-% & echo folder: %-% & echo choice: %-% & echo check: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-% & echo float: %-%",
             "components": [
                 {
                     "type": "static_text",
@@ -133,7 +133,7 @@
         {
             "label": "GUI Optional",
             "window_name": "Window Title Here",
-            "command": "echo this won't be showed up & echo sample message!",
+            "command": "echo cwd: %__CWD__% & echo percent: %% & echo sample message!",
             "button": "Run!",
             "show_last_line": true,
             "components": [

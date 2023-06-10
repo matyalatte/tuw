@@ -1,20 +1,23 @@
 #!/bin/bash
 # Builds an executable file with cmake.
-# SimpleCommandRunner will be generated in ../build
+# SimpleCommandRunner will be generated in ../build/${build_type}
 
-if [ "$1" = "Debug" ];
-    then build_type="Debug";
-    else build_type="Release";
+# You can specify build type as an argument like "bash build_exe.sh Release"
+if [ "$1" = "Debug" ]; then
+    build_type="Debug"
+else
+    build_type="Release"
 fi
-
-wx_version="$(cat $(dirname "$0")/../WX_VERSION.txt)"
-install_dir="$HOME/wxWidgets-${wx_version}/${build_type}"
-export PATH="${install_dir}"/bin:$PATH
-export WX_CONFIG="${install_dir}"/wx-config
+echo "Build type: ${build_type}"
 
 pushd $(dirname "$0")/..
-    mkdir ${build_type}
-    cd ${build_type}
-    cmake -D CMAKE_BUILD_TYPE=${build_type} -D BUILD_SHARED_LIBS=OFF ../
-    cmake --build .
+    cmake --preset ${build_type}-Unix
+    cmake --build --preset ${build_type}-Unix
+
+    # Strip symbols to reduce the binary size
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        strip --strip-all ./build/${build_type}/SimpleCommandRunner
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        strip ./build/${build_type}/SimpleCommandRunner
+    fi
 popd

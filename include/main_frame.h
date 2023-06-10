@@ -4,13 +4,16 @@
 #include <nlohmann/json.hpp>
 #include "wx/wx.h"
 #include "wx/filepicker.h"
+#include "wx/stdpaths.h"
+#include "wx/stream.h"
 #include "component.h"
 #include "exec.h"
 #include "json_utils.h"
-
-#ifndef _WIN32
-#include <wx/stdpaths.h>
+#ifdef USE_JSON_EMBEDDING
+#include "exe_container.h"
 #endif
+#include "scr_constants.h"
+
 
 // Main window
 class MainFrame : public wxFrame {
@@ -25,12 +28,6 @@ class MainFrame : public wxFrame {
     LogFrame* m_ostream;
 #else
     std::ostream* m_ostream;
-#endif
-
-#ifndef _WIN32
-    // Unix systems need to get current dir to read json files.
-    wxString m_exe_path;
-    void CalcExePath();
 #endif
 
     std::vector<Component*> m_components;
@@ -52,11 +49,12 @@ class MainFrame : public wxFrame {
               nlohmann::json config = nlohmann::json({}));
 
     void OnClose(wxCloseEvent& event);
+    void OnCommandClose(wxCommandEvent& event) { Close(true); }
     void OpenURL(wxCommandEvent& event);
     void UpdateFrame(wxCommandEvent& event);
     void ClickButton(wxCommandEvent& event);
     wxString GetCommand();
-    std::array<std::string, 2> RunCommand();
+    std::string RunCommand();
     nlohmann::json GetDefinition();
     void SaveConfig();
 };

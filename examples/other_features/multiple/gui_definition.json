@@ -2,7 +2,7 @@
     "gui": [
         {
             "label": "Sample GUI",
-            "command": "echo file: %file% & echo folder: %folder% & echo checkbox: %check%",
+            "command": "echo file: %-% & echo folder: %-% & echo checkbox: %-%",
             "button": "Echo!",
             "components": [
                 {
@@ -29,7 +29,7 @@
         },
         {
             "label": "Sample GUI2",
-            "command": "echo text_box: %t% & echo options:%%",
+            "command": "echo text_box: %-% & echo options:%-%",
             "button": "Echo!",
             "components": [
                 {

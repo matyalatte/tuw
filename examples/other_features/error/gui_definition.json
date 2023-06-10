@@ -6,6 +6,13 @@
             "components": []
         },
         {
+            "label": "check_exit_code Sample",
+            "command": "echo exit_code_is_zero",
+            "check_exit_code": true,
+            "exit_success": 10,
+            "components": []
+        },
+        {
             "label": "show_last_line Sample",
             "command": "echo Fake Error!",
             "show_last_line": true,
