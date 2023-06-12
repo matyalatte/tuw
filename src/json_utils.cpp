@@ -233,7 +233,7 @@ namespace json_utils {
         sub_definition["command"] = splitted_cmd;
     }
 
-    static const std::map<std::string, int> COMPTYPE_TO_INT_MAP = {
+    static const matya::map_as_vec<int> COMPTYPE_TO_INT = {
         {"static_text", COMP_STATIC_TEXT},
         {"file", COMP_FILE},
         {"folder", COMP_FOLDER},
@@ -249,12 +249,6 @@ namespace json_utils {
         {"integer", COMP_INT},
         {"float", COMP_FLOAT},
     };
-
-    static int ComptypeToInt(const std::string& type) {
-        if (COMPTYPE_TO_INT_MAP.count(type) == 0)
-            return COMP_UNKNOWN;
-        return COMPTYPE_TO_INT_MAP.at(type);
-    }
 
     void CheckSubDefinition(nlohmann::json& sub_definition) {
         // check is_string
@@ -284,7 +278,7 @@ namespace json_utils {
             CheckJsonType(c, "type", JsonType::STRING, label);
             KeyToSingular(c, "default");
             std::string type_str = c["type"].get<std::string>();
-            int type = ComptypeToInt(type_str);
+            int type = COMPTYPE_TO_INT.get(type_str, COMP_UNKNOWN);
             c["type"] = type;
 
             switch (type) {

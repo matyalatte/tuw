@@ -4,9 +4,9 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <map>
 #include <nlohmann/json.hpp>
 #include "scr_constants.h"
+#include "map_as_vec.hpp"
 
 enum ComponentType: int {
     COMP_UNKNOWN = 0,

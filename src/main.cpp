@@ -81,7 +81,7 @@ enum Commands: int {
     CMD_MAX
 };
 
-const std::map<wxString, int> CMD_TO_INT_MAP = {
+const matya::map_as_vec<int> CMD_TO_INT = {
     {"merge", CMD_MERGE},
     {"m", CMD_MERGE},
     {"split", CMD_SPLIT},
@@ -89,12 +89,6 @@ const std::map<wxString, int> CMD_TO_INT_MAP = {
     {"help", CMD_HELP},
     {"h", CMD_HELP},
 };
-
-int CmdToInt(const wxString& command) {
-    if (CMD_TO_INT_MAP.count(command) == 0)
-        return CMD_UNKNOWN;
-    return CMD_TO_INT_MAP.at(command);
-}
 
 wxString GetFullPath(const wxString& path) {
     wxFileName fn(path);
@@ -120,7 +114,7 @@ int main(int argc, char* argv[]) {
 
     wxString command_str = (argv[1]);
     command_str.Replace("-", "");
-    int command = CmdToInt(command_str);
+    int command = CMD_TO_INT.get(command_str.c_str(), CMD_UNKNOWN);
     if (command == CMD_UNKNOWN) {
         PrintUsage();
         std::cerr << "Error: Unsupported command detected. (" << command_str << ")" << std::endl;

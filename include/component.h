@@ -6,7 +6,6 @@
 #include "wx/filepicker.h"
 #include "wx/dnd.h"
 #include "wx/spinctrl.h"
-#include "json_utils.h"
 #include "custom_wx_obj.h"
 
 // Base class for GUI components (file picker, combo box, etc.)
