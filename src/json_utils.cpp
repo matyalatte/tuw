@@ -254,8 +254,10 @@ namespace json_utils {
                            || comp_ids[non_id_comp] != "")) {
                     non_id_comp++;
                 }
-                if (non_id_comp >= comp_size)
-                    throw std::runtime_error("The command requires more components for arguments; " + cmd_str);
+                if (non_id_comp >= comp_size) {
+                    throw std::runtime_error(
+                        "The command requires more components for arguments; " + cmd_str);
+                }
                 j = non_id_comp;
                 non_id_comp++;
             }
@@ -269,7 +271,7 @@ namespace json_utils {
             if (sub_definition["components"][j]["type_int"] == COMP_STATIC_TEXT)
                 continue;
             bool found = false;
-            for (int id: cmd_int_ids)
+            for (int id : cmd_int_ids)
                 if (id == j) { found = true; break; }
             if (!found) {
                 throw std::runtime_error("[\"commponents\"][" + std::to_string(j)
@@ -296,7 +298,7 @@ namespace json_utils {
         {"float", COMP_FLOAT},
     };
 
-    // validate one of definitions (["gui"][i]) and edit them to 
+    // validate one of definitions (["gui"][i]) and store parsed info
     void CheckSubDefinition(nlohmann::json& sub_definition) {
         // check is_string
         CheckJsonType(sub_definition, "label", JsonType::STRING);
