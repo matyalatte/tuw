@@ -212,12 +212,11 @@ namespace json_utils {
         }
     }
 
-    static void CheckCommand(nlohmann::json& sub_definition) {
-        CheckJsonType(sub_definition, "command", JsonType::STRING);
-        sub_definition["command"] = SplitString(sub_definition["command"].get<std::string>(),
-                                                { '%' });
-
-        std::vector<std::string> cmd = sub_definition["command"].get<std::vector<std::string>>();
+    // split command by "%" symbol, and calculate which component should be inserted there.
+    static void CompileCommand(nlohmann::json& sub_definition,
+                             const std::vector<std::string>& comp_ids) {
+        std::vector<std::string> cmd = SplitString(sub_definition["command"].get<std::string>(),
+                                                   { '%' });
         std::vector<std::string> cmd_ids = std::vector<std::string>(0);
         std::vector<std::string> splitted_cmd = std::vector<std::string>(0);
         bool store_ids = false;
@@ -229,8 +228,55 @@ namespace json_utils {
             }
             store_ids = !store_ids;
         }
-        sub_definition["command_ids"] = cmd_ids;
-        sub_definition["command"] = splitted_cmd;
+        sub_definition["command_splitted"] = splitted_cmd;
+
+        std::vector<int> cmd_int_ids = std::vector<int>(0);
+        std::string cmd_str = "";
+        int comp_size = comp_ids.size();
+        int non_id_comp = 0;
+        for (int i = 0; i < cmd_ids.size(); i++) {
+            cmd_str += splitted_cmd[i];
+            std::string id = cmd_ids[i];
+            int j;
+            if (id == CMD_TOKEN_PERCENT) {
+                j = CMD_ID_PERCENT;
+                cmd_str += "%";
+            } else if (id == CMD_TOKEN_CURRENT_DIR) {
+                j = CMD_ID_CURRENT_DIR;
+                cmd_str += "\"" + id + "\"";
+            } else {
+                for (j = 0; j < comp_size; j++)
+                    if (id == comp_ids[j]) break;
+            }
+            if (j >= comp_size) {
+                while (non_id_comp < comp_size
+                       && (sub_definition["components"][non_id_comp]["type_int"] == COMP_STATIC_TEXT
+                           || comp_ids[non_id_comp] != "")) {
+                    non_id_comp++;
+                }
+                if (non_id_comp >= comp_size)
+                    throw std::runtime_error("The command requires more components for arguments; " + cmd_str);
+                j = non_id_comp;
+                non_id_comp++;
+            }
+            cmd_int_ids.push_back(j);
+            if (j >= 0)
+                cmd_str += "\"" + sub_definition["components"][j]["type"].get<std::string>() + "\"";
+        }
+        if (cmd_ids.size() < splitted_cmd.size())
+            cmd_str += splitted_cmd.back();
+        for (int j = 0; j < comp_size; j++) {
+            if (sub_definition["components"][j]["type_int"] == COMP_STATIC_TEXT)
+                continue;
+            bool found = false;
+            for (int id: cmd_int_ids)
+                if (id == j) { found = true; break; }
+            if (!found) {
+                throw std::runtime_error("[\"commponents\"][" + std::to_string(j)
+                                         + "] is unused in the command; " + cmd_str);
+            }
+        }
+        sub_definition["command_ids"] = cmd_int_ids;
     }
 
     static const matya::map_as_vec<int> COMPTYPE_TO_INT = {
@@ -250,6 +296,7 @@ namespace json_utils {
         {"float", COMP_FLOAT},
     };
 
+    // validate one of definitions (["gui"][i]) and edit them to 
     void CheckSubDefinition(nlohmann::json& sub_definition) {
         // check is_string
         CheckJsonType(sub_definition, "label", JsonType::STRING);
@@ -257,9 +304,6 @@ namespace json_utils {
         CorrectKey(sub_definition, "window_title", "window_name");
         CorrectKey(sub_definition, "title", "window_name");
         CheckJsonType(sub_definition, "window_name", JsonType::STRING, "", CAN_SKIP);
-
-        // check sub_definition["command"]
-        CheckCommand(sub_definition);
 
         CheckJsonType(sub_definition, "check_exit_code", JsonType::BOOLEAN, "", CAN_SKIP);
         CheckJsonType(sub_definition, "exit_success", JsonType::INTEGER, "", CAN_SKIP);
@@ -275,11 +319,13 @@ namespace json_utils {
             // check if type and label exist
             CheckJsonType(c, "label", JsonType::STRING, "components");
             std::string label = c["label"].get<std::string>();
-            CheckJsonType(c, "type", JsonType::STRING, label);
             KeyToSingular(c, "default");
+
+            // convert ["type"] from string to enum.
+            CheckJsonType(c, "type", JsonType::STRING, label);
             std::string type_str = c["type"].get<std::string>();
             int type = COMPTYPE_TO_INT.get(type_str, COMP_UNKNOWN);
-            c["type"] = type;
+            c["type_int"] = type;
 
             switch (type) {
                 case COMP_FILE:
@@ -352,7 +398,10 @@ namespace json_utils {
             }
         }
         CheckIndexDuplication(comp_ids);
-        sub_definition["component_ids"] = comp_ids;
+
+        // check sub_definition["command"] and convert it to more useful format.
+        CheckJsonType(sub_definition, "command", JsonType::STRING);
+        CompileCommand(sub_definition, comp_ids);
     }
 
     // vX.Y.Z -> 10000*X + 100 * Y + Z

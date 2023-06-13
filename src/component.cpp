@@ -35,7 +35,7 @@ bool Component::HasString() {
 
 Component* Component::PutComponent(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j) {
     Component* comp = nullptr;
-    int type = j["type"].get<int>();
+    int type = j["type_int"].get<int>();
     switch (type) {
         case COMP_STATIC_TEXT:
             comp = new StaticText(panel, sizer, j);

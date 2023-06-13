@@ -6,21 +6,16 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include "scr_constants.h"
+#include "component.h"
 #include "map_as_vec.hpp"
 
-enum ComponentType: int {
-    COMP_UNKNOWN = 0,
-    COMP_STATIC_TEXT,
-    COMP_FILE,
-    COMP_FOLDER,
-    COMP_CHOICE,
-    COMP_CHECK,
-    COMP_CHECK_ARRAY,
-    COMP_TEXT,
-    COMP_INT,
-    COMP_FLOAT,
-    COMP_MAX
+enum CmdPredefinedIds: int {
+    CMD_ID_PERCENT = -1,
+    CMD_ID_CURRENT_DIR = -2
 };
+
+constexpr char CMD_TOKEN_PERCENT[] = "";
+constexpr char CMD_TOKEN_CURRENT_DIR[] = "__CWD__";
 
 namespace json_utils {
     nlohmann::json LoadJson(const std::string& file);

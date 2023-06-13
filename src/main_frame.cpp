@@ -209,17 +209,12 @@ void MainFrame::ShowSuccessDialog(const wxString& msg) {
     dialog->Destroy();
 }
 
-constexpr char CMD_ID_PERCENT[] = "";
-constexpr char CMD_ID_CURRENT_DIR[] = "__CWD__";
-
 // Make command string
 wxString MainFrame::GetCommand() {
     std::vector<std::string> cmd_ary =
-        m_sub_definition["command"].get<std::vector<std::string>>();
-    std::vector<std::string> cmd_ids =
-        m_sub_definition["command_ids"].get<std::vector<std::string>>();
-    std::vector<std::string> comp_ids =
-        m_sub_definition["component_ids"].get<std::vector<std::string>>();
+        m_sub_definition["command_splitted"].get<std::vector<std::string>>();
+    std::vector<int> cmd_ids =
+        m_sub_definition["command_ids"].get<std::vector<int>>();
 
     std::vector<wxString> comp_strings = std::vector<wxString>(m_components.size());
     for (int i = 0; i < m_components.size(); i++) {
@@ -227,39 +222,14 @@ wxString MainFrame::GetCommand() {
     }
 
     wxString cmd = wxString::FromUTF8(cmd_ary[0]);
-    int comp_size = comp_ids.size();
-    int non_id_comp = 0;
     for (int i = 0; i < cmd_ids.size(); i++) {
-        std::string id = cmd_ids[i];
-        int j = -1;
-        if (id == "") {
-            j = comp_size;
-        } else if (id == CMD_ID_PERCENT) {
+        int id = cmd_ids[i];
+        if (id == CMD_ID_PERCENT) {
             cmd += "%";
         } else if (id == CMD_ID_CURRENT_DIR) {
             cmd += wxGetCwd();
         } else {
-            for (j = 0; j < comp_size; j++) {
-                if (id == comp_ids[j]) {
-                    break;
-                }
-            }
-        }
-        if (j >= comp_size) {
-            while (non_id_comp < comp_size &&
-                  (!m_components[non_id_comp]->HasString() || comp_ids[non_id_comp] != "")) {
-                non_id_comp++;
-            }
-            j = non_id_comp;
-            if (non_id_comp >= comp_size) {
-                *m_ostream << "[RunCommand] Warning: "
-                           << "The command requires more components for arguments."
-                           << std::endl;
-            }
-            non_id_comp++;
-        }
-        if (j >= 0 && j < comp_size) {
-            cmd += comp_strings[j];
+            cmd += comp_strings[id];
         }
         if (i + 1 < cmd_ary.size()) {
             cmd += wxString::FromUTF8(cmd_ary[i + 1]);
