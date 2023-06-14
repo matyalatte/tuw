@@ -23,7 +23,7 @@ Examples for GUI components (e.g. file pickers)
 
 Examples for component options.
 
--   [IDs](./comp_options/id/): An option to set ids. You can use the defined ids in commands.
+-   [IDs](./comp_options/id/): An option to set ids. You can use them as variable names in commands.
 -   [Default Values](./comp_options/default/):  An option to set default values of components.
 -   [Tooltip](./comp_options/tooltip/): An option to show a message when the mouse cursor is on a component.
 
@@ -44,3 +44,9 @@ There are more features you can use.
 ## 5. All Keys
 
 [The json file that has all supported keys.](./all_keys/)  
+
+## 6. Tips
+
+Not about the features of the tool, but they might help you.
+
+-   [Multiple Lines](./tips/multi_lines): How to run multiple commands in a process.

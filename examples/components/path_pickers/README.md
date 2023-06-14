@@ -44,6 +44,7 @@ Each component should be defined as a dictionary.
 
 ## "command"
 
-Inputs of components will be injected into `command` when executing the command.<br>
-You can specifiy where you inject the inputs with `%*%`.<br>
-In the example, file path will be injected in `%foo%`, and folder path will be in `%bar%`.
+Inputs of components will be injected into `command` when executing the command.  
+You can specify where you inject the inputs with `%*%`.  
+In the example, the file path will be injected in `%foo%`, and the folder path will be in `%bar%`.  
+You can also use [`id`](../../comp_options/id) option to insert an input into multiple places.

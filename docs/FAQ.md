@@ -1,8 +1,22 @@
 # Frequently Asked Questions
 
-## Can I distribute the exe with my scripts?
+## Can I redistribute the exe with my scripts?
 
 Yes, and you can rename it to `GUI.exe`, `'project name'-GUI.exe`, or `'project name'_GUI.exe`.  
+But note that it's licensed under GPL.  
+You should inform users of the license and the link to the source code.  
+
+## How can I insert an input into multiple places in commands?
+
+Use the [`id`](../examples/comp_options/id/) option for components.  
+You can use the defined IDs as variable names in commands.  
+
+## How can I run multiple commands at the same time?
+
+Simple Command Runner will execute a single line command on the command prompt (or the terminal.)  
+So, it's the same question as "How can I run multiple commands as a single line on the command prompt (or the terminal?)"  
+It's a little complicated task, but you can find tons of websites that explain about it.  
+Also, you can see [some examples](../examples/tips/multi_lines/) about it.
 
 ## What's `gui_config.json` for?
 

@@ -64,10 +64,10 @@ nlohmann::json MainFrame::LoadJson(const std::string& file, bool is_definition) 
     try {
         json = json_utils::LoadJson(file);
     }
-    catch (nlohmann::json::exception& e) {
+    catch (const nlohmann::json::exception& e) {
         if (is_definition) JsonLoadFailed(e.what(), json);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
         if (is_definition) JsonLoadFailed(e.what(), json);
     }
     return json;
@@ -147,7 +147,7 @@ void MainFrame::CheckDefinition(nlohmann::json& definition) {
             }
         }
     }
-    catch(std::exception& e) {
+    catch(const std::exception& e) {
         JsonLoadFailed(std::string(e.what()), definition);
         return;
     }
@@ -157,8 +157,8 @@ void MainFrame::CheckDefinition(nlohmann::json& definition) {
         try {
             json_utils::CheckHelpURLs(definition);
         }
-        catch(std::exception& e) {
-            msg = "Fialed to load help URLs (" + std::string(e.what()) + ")";
+        catch(const std::exception& e) {
+            msg = "Failed to load help URLs (" + std::string(e.what()) + ")";
             wxString wxmsg = wxString::FromUTF8(msg);
             *m_ostream << "[LoadDefinition] Error: " << wxmsg << std::endl;
             ShowErrorDialog(wxmsg);
@@ -170,8 +170,8 @@ void MainFrame::CheckDefinition(nlohmann::json& definition) {
     try {
         json_utils::CheckDefinition(definition);
     }
-    catch (std::exception& e) {
-        msg = "Fialed to load gui_definition.json (" + std::string(e.what()) + ")";
+    catch (const std::exception& e) {
+        msg = "Failed to load gui_definition.json (" + std::string(e.what()) + ")";
         JsonLoadFailed(msg, definition);
         return;
     }

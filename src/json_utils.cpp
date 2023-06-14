@@ -126,15 +126,16 @@ namespace json_utils {
         nlohmann::json def = {
                 {"label", "Default GUI"},
     #ifdef _WIN32
-                {"command", {"dir"} },
+                {"command", "dir" },
+                {"command_splitted", { "dir" } },
                 {"button", "run 'dir'"},
     #else
-                {"command", {"ls"} },
+                {"command", "ls" },
+                {"command_splitted", { "ls" } },
                 {"button", "run 'ls'"},
     #endif
-                {"command_ids", nlohmann::json::array({})},
                 {"components", nlohmann::json::array({})},
-                {"component_ids", nlohmann::json::array({})}
+                {"command_ids", nlohmann::json::array({})}
         };
         return def;
     }
