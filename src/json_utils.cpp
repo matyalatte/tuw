@@ -233,6 +233,7 @@ namespace json_utils {
         }
         sub_definition["command_splitted"] = splitted_cmd;
 
+        nlohmann::json components = sub_definition["components"];
         std::vector<int> cmd_int_ids = std::vector<int>(0);
         std::string cmd_str = "";
         int comp_size = comp_ids.size();
@@ -252,7 +253,7 @@ namespace json_utils {
                     if (id == comp_ids[j]) break;
                 if (j == comp_size) {
                     while (non_id_comp < comp_size
-                        && (sub_definition["components"][non_id_comp]["type_int"] == COMP_STATIC_TEXT
+                        && (components[non_id_comp]["type_int"] == COMP_STATIC_TEXT
                             || comp_ids[non_id_comp] != "")) {
                         non_id_comp++;
                     }
@@ -272,7 +273,7 @@ namespace json_utils {
 
         // Check if the command requires more arguments or ignores some arguments.
         for (int j = 0; j < comp_size; j++) {
-            if (sub_definition["components"][j]["type_int"] == COMP_STATIC_TEXT)
+            if (components[j]["type_int"] == COMP_STATIC_TEXT)
                 continue;
             bool found = false;
             for (int id : cmd_int_ids)
