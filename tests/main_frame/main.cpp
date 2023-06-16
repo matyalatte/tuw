@@ -62,6 +62,7 @@ nlohmann::json dummy_config = {{"dummy", 0}};
 TEST(MainFrameTest, InvalidDefinition) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][1]["components"][4]["default"] = "number";
+    std::cout << test_json["gui"][1]["components"][4] << std::endl;
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     EXPECT_EQ(json_utils::GetDefaultDefinition(), main_frame->GetDefinition()["gui"][0]);
     EXPECT_TRUE(main_frame->GetDefinition().contains("help"));
@@ -88,7 +89,7 @@ TEST(MainFrameTest, GetCommand2) {
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     std::string expected = "echo file: \"test.txt\" & echo folder: \"testdir\"";
     expected += " & echo choice: value3 & echo check: flag!";
-    expected += " & echo check_array:  --f3 & echo textbox: remove this text!";
+    expected += " & echo check_array:  --f2 & echo textbox: remove this text!";
     expected += " & echo int: 10 & echo float: 0.01";
     EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().ToUTF8());
 }

@@ -93,8 +93,8 @@ TEST(JsonCheckTest, checkGUIFail) {
 
 TEST(JsonCheckTest, checkGUIFail2) {
     nlohmann::json test_json = GetTestJson();
-    test_json["gui"][0]["components"][5].erase("item");
-    CheckGUIError(test_json, "['options']['item'] not found.");
+    test_json["gui"][0]["components"][5].erase("items");
+    CheckGUIError(test_json, "['options']['items'] not found.");
 }
 
 TEST(JsonCheckTest, checkGUIFail3) {
@@ -117,20 +117,6 @@ TEST(JsonCheckTest, checkGUIFail5) {
 
 TEST(JsonCheckTest, checkGUIFail6) {
     nlohmann::json test_json = GetTestJson();
-    test_json["gui"][1]["components"][4]["value"] = nlohmann::json::array();
-    CheckGUIError(test_json,
-        "['Combo box']['value'] and ['Combo box']['item'] should have the same size.");
-}
-
-TEST(JsonCheckTest, checkGUIFail7) {
-    nlohmann::json test_json = GetTestJson();
-    test_json["gui"][0]["components"][5]["default"] = nlohmann::json::array();
-    CheckGUIError(test_json,
-        "['options']['default'] and ['options']['item'] should have the same size.");
-}
-
-TEST(JsonCheckTest, checkGUIFail8) {
-    nlohmann::json test_json = GetTestJson();
     test_json["gui"][0]["components"].erase(1);
     CheckGUIError(test_json,
         "The command requires more components for arguments;"
@@ -139,7 +125,7 @@ TEST(JsonCheckTest, checkGUIFail8) {
         " echo int: __comp7__ & echo float: __comp???__");
 }
 
-TEST(JsonCheckTest, checkGUIFail9) {
+TEST(JsonCheckTest, checkGUIFail7) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][0]["components"][1]["id"] = "aaa";
     CheckGUIError(test_json,

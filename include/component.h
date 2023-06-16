@@ -51,10 +51,10 @@ class Component {
 // containers for Choice and CheckArray
 class MultipleValuesContainer {
  protected:
-    std::vector<std::string> m_values;
+    wxArrayString m_values;
 
  public:
-    void SetValues(std::vector<std::string> values){
+    void SetValues(wxArrayString values){
         m_values = values;
     }
 };

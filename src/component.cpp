@@ -162,26 +162,29 @@ void DirPicker::SetConfig(const nlohmann::json& config) {
 Choice::Choice(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j)
     : StringComponentBase(panel, sizer, j) {
     wxArrayString wxitems;
-    std::vector<std::string> items = j["item"].get<std::vector<std::string>>();
-    std::for_each(items.begin(), items.end(), [&](std::string i) {
-        wxitems.Add(wxString::FromUTF8(i));
-        });
+    wxArrayString values;
+    for (const nlohmann::json& i : j["items"]) {
+        wxString label = wxString::FromUTF8(i["label"].get<std::string>());
+        wxitems.Add(label);
+        wxString value;
+        if (i.contains("value"))
+            value = wxString::FromUTF8(i["value"].get<std::string>());
+        else
+            value = label;
+        values.Add(value);
+    }
     wxChoice* choice = new wxChoice(panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxitems);
     sizer->Add(choice, 0, DEFAULT_SIZER_FLAG, 13);
-    choice->SetSelection(j.value("default", 0) % items.size());
+    choice->SetSelection(j.value("default", 0) % j["items"].size());
 
-    if (j.contains("value") && j["value"].size() == j["item"].size()) {
-        SetValues(j["value"].get<std::vector<std::string>>());
-    } else {
-        SetValues(j["item"].get<std::vector<std::string>>());
-    }
+    SetValues(values);
     choice->SetToolTip(wxString::FromUTF8(j.value("tooltip", "")));
     m_widget = choice;
 }
 
 wxString Choice::GetRawString() {
     int sel = static_cast<wxChoice*>(m_widget)->GetSelection();
-    return wxString::FromUTF8(m_values[sel]);
+    return m_values[sel];
 }
 
 void Choice::SetConfig(const nlohmann::json& config) {
@@ -230,23 +233,26 @@ nlohmann::json CheckBox::GetConfig() {
 CheckArray::CheckArray(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j)
     : StringComponentBase(panel, sizer, j) {
     std::vector<wxCheckBox*>* checks = new std::vector<wxCheckBox*>();
-    for (int i = 0; i < j["item"].size(); i++) {
-        wxCheckBox* check = new wxCheckBox(panel, wxID_ANY,
-                           wxString::FromUTF8(j["item"][i].get<std::string>()));
-        if (j.contains("default")) {
-            check->SetValue(j["default"][i].get<bool>());
-        }
-        if (j.contains("tooltip")) {
-            check->SetToolTip(wxString::FromUTF8(j["tooltip"][i].get<std::string>()));
-        }
+    wxArrayString values;
+    size_t id = 0;
+    for (const nlohmann::json& i : j["items"]) {
+        wxString label = wxString::FromUTF8(i["label"].get<std::string>());
+        wxCheckBox* check = new wxCheckBox(panel, wxID_ANY, label);
+        if (i.contains("default"))
+            check->SetValue(i["default"].get<bool>());
+        if (i.contains("tooltip"))
+            check->SetToolTip(wxString::FromUTF8(i["tooltip"].get<std::string>()));
         checks->push_back(check);
-        sizer->Add(check, 0, DEFAULT_SIZER_FLAG, 3 + 10 * (i + 1 == j["item"].size()));
+        sizer->Add(check, 0, DEFAULT_SIZER_FLAG, 3 + 10 * (id + 1 == j["items"].size()));
+        wxString value;
+        if (i.contains("value"))
+            value = wxString::FromUTF8(i["value"].get<std::string>());
+        else
+            value = label;
+        values.Add(value);
+        id++;
     }
-    if (j.contains("value")) {
-        SetValues(j["value"].get<std::vector<std::string>>());
-    } else {
-        SetValues(j["item"].get<std::vector<std::string>>());
-    }
+    SetValues(values);
     m_widget = checks;
 }
 
@@ -256,7 +262,7 @@ wxString CheckArray::GetRawString() {
     checks = *(std::vector<wxCheckBox*>*)m_widget;
     for (int i = 0; i < checks.size(); i++) {
         if (checks[i]->GetValue()) {
-            str += wxString::FromUTF8(m_values[i]);
+            str += m_values[i];
         }
     }
     return str;

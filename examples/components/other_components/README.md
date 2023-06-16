@@ -13,8 +13,20 @@ There are more components you can use.
     {
         "type": "choice",
         "label": "num",
-        "item": ["one", "two", "three"],
-        "value": ["1", "2", "3"],
+        "items": [
+            {
+                "label": "one",
+                "value": "1"
+            },
+            {
+                "label": "two",
+                "value": "2"
+            },
+            {
+                "label": "three",
+                "value": "3"
+            }
+        ],
         "default": 1
     },
     {

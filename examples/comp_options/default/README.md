@@ -14,7 +14,19 @@
 {
     "type": "check_array",
     "label": "options",
-    "item": ["flag1", "flag2", "flag3"],
-    "default": [true, false, true]
+    "items": [
+        {
+            "label": "falg1",
+            "default": true
+        },
+        {
+            "label": "falg2",
+            "default": false
+        },
+        {
+            "label": "falg3",
+            "default": true
+        }
+    ]
 }
 ```

@@ -22,8 +22,20 @@
                 {
                     "type": "check_array",
                     "label": "options",
-                    "item": ["flag1", "flag2", "flag3"],
-                    "tooltip": ["tooltip for flag1!", "flag2!", "flag3..."]
+                    "items": [
+                        {
+                            "label": "falg1",
+                            "tooltip": "tooltip for flag1!"
+                        },
+                        {
+                            "label": "falg2",
+                            "tooltip": "flag2!"
+                        },
+                        {
+                            "label": "falg3",
+                            "tooltip": "flag3..."
+                        }
+                    ]
                 }
             ]
         }

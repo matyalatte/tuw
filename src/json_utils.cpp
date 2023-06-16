@@ -38,9 +38,6 @@ namespace json_utils {
         INTEGER,
         FLOAT,
         STRING,
-        BOOL_ARRAY,
-        INT_ARRAY,
-        STR_ARRAY,
         JSON_ARRAY,
         MAX
     };
@@ -49,15 +46,6 @@ namespace json_utils {
         if (!j[key].is_array()) { return false; }
         std::function<bool(const nlohmann::json&)> lmd;
         switch (type) {
-        case JsonType::BOOL_ARRAY:
-            lmd = [](const nlohmann::json& el){ return el.is_boolean(); };
-            break;
-        case JsonType::INT_ARRAY:
-            lmd = [](const nlohmann::json& el){ return el.is_number_integer(); };
-            break;
-        case JsonType::STR_ARRAY:
-            lmd = [](const nlohmann::json& el){ return el.is_string(); };
-            break;
         case JsonType::JSON_ARRAY:
             lmd = [](const nlohmann::json& el){ return el.is_object(); };
             break;
@@ -96,18 +84,6 @@ namespace json_utils {
         case JsonType::STRING:
             valid = j[key].is_string();
             type_name = "a string";
-            break;
-        case JsonType::BOOL_ARRAY:
-            valid = IsArray(j, key, type);
-            type_name = "an array of booleans";
-            break;
-        case JsonType::INT_ARRAY:
-            valid = IsArray(j, key, type);
-            type_name = "an array of integers";
-            break;
-        case JsonType::STR_ARRAY:
-            valid = IsArray(j, key, type);
-            type_name = "an array of strings";
             break;
         case JsonType::JSON_ARRAY:
             valid = IsArray(j, key, type);
@@ -156,24 +132,6 @@ namespace json_utils {
         for (std::string ext : extends) {
             CorrectKey(c, singular + ext, singular);
         }
-    }
-
-    static void CheckArraySize(nlohmann::json& c, const std::string& key) {
-        if (c.contains(key) && (c[key].size() != c["item"].size())) {
-            std::string label = c["label"].get<std::string>();
-            std::string msg = GetLabel(label, key) + " and " +
-                              GetLabel(label, "item") + " should have the same size.";
-            throw std::runtime_error(msg);
-        }
-    }
-
-    static void CheckItemsValues(nlohmann::json& c) {
-        std::string label = c["label"].get<std::string>();
-        KeyToSingular(c, "item");
-        CheckJsonType(c, "item", JsonType::STR_ARRAY, label);
-        KeyToSingular(c, "value");
-        CheckJsonType(c, "value", JsonType::STR_ARRAY, label, CAN_SKIP);
-        CheckArraySize(c, "value");
     }
 
     static std::vector<std::string> SplitString(const std::string& s,
@@ -335,7 +293,6 @@ namespace json_utils {
             // check if type and label exist
             CheckJsonType(c, "label", JsonType::STRING, "components");
             std::string label = c["label"].get<std::string>();
-            KeyToSingular(c, "default");
 
             // convert ["type"] from string to enum.
             CheckJsonType(c, "type", JsonType::STRING, label);
@@ -351,20 +308,26 @@ namespace json_utils {
                     CheckJsonType(c, "default", JsonType::STRING, label, CAN_SKIP);
                     break;
                 case COMP_CHOICE:
-                    CheckItemsValues(c);
-                    CheckJsonType(c, "default", JsonType::INTEGER, label, CAN_SKIP);
+                    CorrectKey(sub_definition, "item_array", "items");
+                    CheckJsonType(c, "items", JsonType::JSON_ARRAY, label);
+                    for (nlohmann::json& i : c["items"]) {
+                        CheckJsonType(i, "label", JsonType::STRING, "items");
+                        CheckJsonType(i, "value", JsonType::STRING, "items", CAN_SKIP);
+                    }
                     break;
                 case COMP_CHECK:
                     CheckJsonType(c, "value", JsonType::STRING, label, CAN_SKIP);
                     CheckJsonType(c, "default", JsonType::BOOLEAN, label, CAN_SKIP);
                     break;
                 case COMP_CHECK_ARRAY:
-                    CheckItemsValues(c);
-                    CheckJsonType(c, "default", JsonType::BOOL_ARRAY, label, CAN_SKIP);
-                    CheckArraySize(c, "default");
-                    KeyToSingular(c, "tooltip");
-                    CheckJsonType(c, "tooltip", JsonType::STR_ARRAY, label, CAN_SKIP);
-                    CheckArraySize(c, "tooltip");
+                    CorrectKey(sub_definition, "item_array", "items");
+                    CheckJsonType(c, "items", JsonType::JSON_ARRAY, label);
+                    for (nlohmann::json& i : c["items"]) {
+                        CheckJsonType(i, "label", JsonType::STRING, "items");
+                        CheckJsonType(i, "value", JsonType::STRING, "items", CAN_SKIP);
+                        CheckJsonType(i, "default", JsonType::BOOLEAN, "items", CAN_SKIP);
+                        CheckJsonType(i, "tooltip", JsonType::STRING, "items", CAN_SKIP);
+                    }
                     break;
                 case COMP_INT:
                 case COMP_FLOAT:
@@ -395,9 +358,7 @@ namespace json_utils {
             CorrectKey(c, "placeholder", "empty_message");
             CheckJsonType(c, "empty_message", JsonType::STRING, label, CAN_SKIP);
             CheckJsonType(c, "id", JsonType::STRING, label, CAN_SKIP);
-            if (type != COMP_CHECK_ARRAY) {
-                CheckJsonType(c, "tooltip", JsonType::STRING, label, CAN_SKIP);
-            }
+            CheckJsonType(c, "tooltip", JsonType::STRING, label, CAN_SKIP);
 
             if (c.contains("id")) {
                 std::string id = c["id"].get<std::string>();
