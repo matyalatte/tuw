@@ -173,6 +173,9 @@ TEST(MainFrameTest, LoadSaveConfigAscii) {
 TEST(MainFrameTest, LoadSaveConfigUTF) {
     nlohmann::json test_json = GetTestJson();
     test_json["gui"][0] = test_json["gui"][1];
+    std::string cmd = test_json["gui"][0]["command"].get<std::string>();
+    cmd.replace(12, 4, "ファイル");
+    test_json["gui"][0]["command"] = cmd;
     test_json["gui"][0]["components"][1]["id"] = "ファイル";
     TestConfig(test_json, config_utf);
 }

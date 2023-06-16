@@ -127,10 +127,12 @@ namespace json_utils {
                 {"label", "Default GUI"},
     #ifdef _WIN32
                 {"command", "dir" },
+                {"command_str", "dir" },
                 {"command_splitted", { "dir" } },
                 {"button", "run 'dir'"},
     #else
                 {"command", "ls" },
+                {"command_str", "ls" },
                 {"command_splitted", { "ls" } },
                 {"button", "run 'ls'"},
     #endif
@@ -244,30 +246,31 @@ namespace json_utils {
                 cmd_str += "%";
             } else if (id == CMD_TOKEN_CURRENT_DIR) {
                 j = CMD_ID_CURRENT_DIR;
-                cmd_str += "\"" + id + "\"";
+                cmd_str += id;
             } else {
                 for (j = 0; j < comp_size; j++)
                     if (id == comp_ids[j]) break;
-            }
-            if (j >= comp_size) {
-                while (non_id_comp < comp_size
-                       && (sub_definition["components"][non_id_comp]["type_int"] == COMP_STATIC_TEXT
-                           || comp_ids[non_id_comp] != "")) {
+                if (j == comp_size) {
+                    while (non_id_comp < comp_size
+                        && (sub_definition["components"][non_id_comp]["type_int"] == COMP_STATIC_TEXT
+                            || comp_ids[non_id_comp] != "")) {
+                        non_id_comp++;
+                    }
+                    j = non_id_comp;
                     non_id_comp++;
                 }
-                if (non_id_comp >= comp_size) {
-                    throw std::runtime_error(
-                        "The command requires more components for arguments; " + cmd_str);
-                }
-                j = non_id_comp;
-                non_id_comp++;
             }
-            cmd_int_ids.push_back(j);
-            if (j >= 0)
-                cmd_str += "\"" + sub_definition["components"][j]["type"].get<std::string>() + "\"";
+            if (j < comp_size)
+                cmd_int_ids.push_back(j);
+            if (j >= comp_size)
+                cmd_str += "__comp???__";
+            else if (j >= 0)
+                cmd_str += "__comp" + std::to_string(j) + "__";
         }
         if (cmd_ids.size() < splitted_cmd.size())
             cmd_str += splitted_cmd.back();
+
+        // Check if the command requires more arguments or ignores some arguments.
         for (int j = 0; j < comp_size; j++) {
             if (sub_definition["components"][j]["type_int"] == COMP_STATIC_TEXT)
                 continue;
@@ -275,10 +278,19 @@ namespace json_utils {
             for (int id : cmd_int_ids)
                 if (id == j) { found = true; break; }
             if (!found) {
-                throw std::runtime_error("[\"commponents\"][" + std::to_string(j)
-                                         + "] is unused in the command; " + cmd_str);
+                std::string msg = "[\"commponents\"][" + std::to_string(j)
+                                  + "] is unused in the command; " + cmd_str;
+                if (comp_ids[j] != "")
+                    msg = "The ID of " + msg;
+                throw std::runtime_error(msg);
             }
         }
+        if (non_id_comp > comp_size) {
+            throw std::runtime_error(
+                "The command requires more components for arguments; " + cmd_str);
+        }
+
+        sub_definition["command_str"] = cmd_str;
         sub_definition["command_ids"] = cmd_int_ids;
     }
 

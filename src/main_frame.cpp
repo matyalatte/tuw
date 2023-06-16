@@ -349,7 +349,9 @@ void MainFrame::UpdateFrame(wxCommandEvent& event) {
 
 void MainFrame::UpdatePanel() {
     wxString label = wxString::FromUTF8(m_sub_definition["label"].get<std::string>());
-    *m_ostream << "[UpdatePanel] " << label << std::endl;
+    *m_ostream << "[UpdatePanel] Lable: " << label << std::endl;
+    wxString cmd_str = wxString::FromUTF8(m_sub_definition["command_str"].get<std::string>());
+    *m_ostream << "[UpdatePanel] Command: " << cmd_str << std::endl;
     wxString window_name = wxString::FromUTF8(
         m_sub_definition.value("window_name", "Simple Command Runner"));
     SetLabel(window_name);
