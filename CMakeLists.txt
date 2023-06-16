@@ -40,25 +40,39 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	if (USE_JSON_EMBEDDING)
 		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} /DUSE_JSON_EMBEDDING=1")
 	endif()
+else()
+    message(WARNING "${PROJECT_NAME} does NOT support your compiler. You might get some problems.")
 endif()
 
+# check OS
+if (NOT ((${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+		OR (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		OR (${CMAKE_SYSTEM_NAME} MATCHES "Linux")))
+	message(WARNING "${PROJECT_NAME} does NOT support your OS. You might get some problems.")
+endif()
+
+# Show settings
 message(VERBOSE "SYSTEM                  : ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
 message(VERBOSE "COMPILER                : ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(VERBOSE "CXX_FLAGS               : ${CMAKE_CXX_FLAGS}")
 message(VERBOSE "CXX_FLAGS_RELEASE       : ${CMAKE_CXX_FLAGS_RELEASE}")
 message(VERBOSE "EXE_LINKER_FLAGS        : ${CMAKE_EXE_LINKER_FLAGS}")
 message(VERBOSE "EXE_LINKER_FLAGS_RELEASE: ${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
+message(VERBOSE "BUILD_TESTS             : ${BUILD_TESTS}")
+message(VERBOSE "BUILD_EXE               : ${BUILD_EXE}")
+message(VERBOSE "USE_JSON_EMBEDDING      : ${USE_JSON_EMBEDDING}")
 
 # find wxWidgets
 # set(CMAKE_FIND_DEBUG_MODE TRUE)
 find_package(wxWidgets REQUIRED COMPONENTS core base)
 include(${wxWidgets_USE_FILE})
 
-
 # Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP:
 cmake_policy(SET CMP0135 NEW)
 
 # fetch json
+set(JSON_ImplicitConversions OFF)
+set(JSON_DisableEnumSerialization ON)
 include(FetchContent)
 FetchContent_Declare(
 	json

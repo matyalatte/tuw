@@ -4,10 +4,10 @@
 Component::Component(const nlohmann::json& j, bool has_string) {
     m_widget = nullptr;
     m_has_string = has_string;
-    m_label = wxString::FromUTF8(j["label"]);
+    m_label = wxString::FromUTF8(j["label"].get<std::string>());
     m_id = j.value("id", "");
     if (m_id == "") {
-        size_t hash = std::hash<std::string>()(j["label"]);
+        size_t hash = std::hash<std::string>()(j["label"].get<std::string>());
         m_id = "_" + std::to_string(hash);
     }
     m_add_quotes = j.value("add_quotes", false);
@@ -35,34 +35,46 @@ bool Component::HasString() {
 
 Component* Component::PutComponent(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j) {
     Component* comp = nullptr;
-    std::string type = j["type"];
-    if (type == "static_text") {  // statc text
-        comp = new StaticText(panel, sizer, j);
-    } else if (type == "file") {  // file picker
-        comp = new FilePicker(panel, sizer, j);
-    } else if (type == "folder") {  // dir picker
-        comp = new DirPicker(panel, sizer, j);
-    } else if (type == "choice") {  // choice
-        comp = new Choice(panel, sizer, j);
-    } else if (type == "check") {  // checkbox
-        comp = new CheckBox(panel, sizer, j);
-    } else if (type == "check_array") {  // checkArray
-        comp = new CheckArray(panel, sizer, j);
-    } else if (type == "text") {  // text box
-        comp = new TextBox(panel, sizer, j);
-    } else if (type == "int") {  // int picker
-        comp = new IntPicker(panel, sizer, j);
-    } else if (type == "float") {  // int picker
-        comp = new FloatPicker(panel, sizer, j);
-    } else {
-        std::cout << "Unknown component type detected. (" + type << ")" << std::endl;
+    int type = j["type_int"].get<int>();
+    switch (type) {
+        case COMP_STATIC_TEXT:
+            comp = new StaticText(panel, sizer, j);
+            break;
+        case COMP_FILE:
+            comp = new FilePicker(panel, sizer, j);
+            break;
+        case COMP_FOLDER:
+            comp = new DirPicker(panel, sizer, j);
+            break;
+        case COMP_CHOICE:
+            comp = new Choice(panel, sizer, j);
+            break;
+        case COMP_CHECK:
+            comp = new CheckBox(panel, sizer, j);
+            break;
+        case COMP_CHECK_ARRAY:
+            comp = new CheckArray(panel, sizer, j);
+            break;
+        case COMP_TEXT:
+            comp = new TextBox(panel, sizer, j);
+            break;
+        case COMP_INT:
+            comp = new IntPicker(panel, sizer, j);
+            break;
+        case COMP_FLOAT:
+            comp = new FloatPicker(panel, sizer, j);
+            break;
+        default:
+            std::string msg = "Unknown component type detected. (" + std::to_string(type) + ")";
+            throw std::runtime_error(msg);
+            break;
     }
     return comp;
 }
 
-const bool HAS_STRING = true;
-const bool NOT_STRING = false;
-const int DEFAULT_SIZER_FLAG = wxFIXED_MINSIZE | wxALIGN_LEFT | wxBOTTOM;
+static const bool HAS_STRING = true;
+static const bool NOT_STRING = false;
+static const int DEFAULT_SIZER_FLAG = wxFIXED_MINSIZE | wxALIGN_LEFT | wxBOTTOM;
 
 // Static Text
 StaticText::StaticText(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j)
@@ -78,7 +90,7 @@ StringComponentBase::StringComponentBase(
     : Component(j, HAS_STRING) {
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, m_label);
     if (j.contains("tooltip") && !j["tooltip"].is_array()) {
-        text->SetToolTip(wxString::FromUTF8(j["tooltip"]));
+        text->SetToolTip(wxString::FromUTF8(j["tooltip"].get<std::string>()));
     }
     sizer->Add(text, 0, DEFAULT_SIZER_FLAG, 3);
 }
@@ -112,7 +124,7 @@ wxString FilePicker::GetRawString() {
 
 void FilePicker::SetConfig(const nlohmann::json& config) {
     if (config.contains("str") && config["str"].is_string()) {
-        wxString str = wxString::FromUTF8(config["str"]);
+        wxString str = wxString::FromUTF8(config["str"].get<std::string>());
         static_cast<CustomFilePicker*>(m_widget)->SetPath(str);
         static_cast<CustomFilePicker*>(m_widget)->SetInitialDirectory(wxPathOnly(str));
     }
@@ -140,7 +152,7 @@ wxString DirPicker::GetRawString() {
 
 void DirPicker::SetConfig(const nlohmann::json& config) {
     if (config.contains("str") && config["str"].is_string()) {
-        wxString str = wxString::FromUTF8(config["str"]);
+        wxString str = wxString::FromUTF8(config["str"].get<std::string>());
         static_cast<CustomDirPicker*>(m_widget)->SetPath(str);
         static_cast<CustomDirPicker*>(m_widget)->SetInitialDirectory(str);
     }
@@ -150,7 +162,7 @@ void DirPicker::SetConfig(const nlohmann::json& config) {
 Choice::Choice(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j)
     : StringComponentBase(panel, sizer, j) {
     wxArrayString wxitems;
-    std::vector<std::string> items = j["item"];
+    std::vector<std::string> items = j["item"].get<std::vector<std::string>>();
     std::for_each(items.begin(), items.end(), [&](std::string i) {
         wxitems.Add(wxString::FromUTF8(i));
         });
@@ -159,9 +171,9 @@ Choice::Choice(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j)
     choice->SetSelection(j.value("default", 0) % items.size());
 
     if (j.contains("value") && j["value"].size() == j["item"].size()) {
-        SetValues(j["value"]);
+        SetValues(j["value"].get<std::vector<std::string>>());
     } else {
-        SetValues(j["item"]);
+        SetValues(j["item"].get<std::vector<std::string>>());
     }
     choice->SetToolTip(wxString::FromUTF8(j.value("tooltip", "")));
     m_widget = choice;
@@ -174,7 +186,7 @@ wxString Choice::GetRawString() {
 
 void Choice::SetConfig(const nlohmann::json& config) {
     if (config.contains("int") && config["int"].is_number() && config["int"] < m_values.size()) {
-        static_cast<wxChoice*>(m_widget)->SetSelection(config["int"]);
+        static_cast<wxChoice*>(m_widget)->SetSelection(config["int"].get<int>());
     }
 }
 
@@ -220,20 +232,20 @@ CheckArray::CheckArray(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json&
     std::vector<wxCheckBox*>* checks = new std::vector<wxCheckBox*>();
     for (int i = 0; i < j["item"].size(); i++) {
         wxCheckBox* check = new wxCheckBox(panel, wxID_ANY,
-                           wxString::FromUTF8(j["item"][i]));
+                           wxString::FromUTF8(j["item"][i].get<std::string>()));
         if (j.contains("default")) {
-            check->SetValue(j["default"][i]);
+            check->SetValue(j["default"][i].get<bool>());
         }
         if (j.contains("tooltip")) {
-            check->SetToolTip(wxString::FromUTF8(j["tooltip"][i]));
+            check->SetToolTip(wxString::FromUTF8(j["tooltip"][i].get<std::string>()));
         }
         checks->push_back(check);
         sizer->Add(check, 0, DEFAULT_SIZER_FLAG, 3 + 10 * (i + 1 == j["item"].size()));
     }
     if (j.contains("value")) {
-        SetValues(j["value"]);
+        SetValues(j["value"].get<std::vector<std::string>>());
     } else {
-        SetValues(j["item"]);
+        SetValues(j["item"].get<std::vector<std::string>>());
     }
     m_widget = checks;
 }
@@ -289,7 +301,7 @@ wxString TextBox::GetRawString() {
 
 void TextBox::SetConfig(const nlohmann::json& config) {
     if (config.contains("str") && config["str"].is_string()) {
-        wxString str = wxString::FromUTF8(config["str"]);
+        wxString str = wxString::FromUTF8(config["str"].get<std::string>());
         static_cast<CustomTextCtrl*>(m_widget)->UpdateText(str);
     }
 }
@@ -339,7 +351,6 @@ IntPicker::IntPicker(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j
     double val = j.value("default", 0.0);
     m_picker->SetValue(val);
 }
-
 
 FloatPicker::FloatPicker(wxWindow* panel, wxBoxSizer* sizer, const nlohmann::json& j)
     : NumPickerBase(panel, sizer, j) {

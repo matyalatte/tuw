@@ -6,8 +6,21 @@
 #include "wx/filepicker.h"
 #include "wx/dnd.h"
 #include "wx/spinctrl.h"
-#include "json_utils.h"
 #include "custom_wx_obj.h"
+
+enum ComponentType: int {
+    COMP_UNKNOWN = 0,
+    COMP_STATIC_TEXT,
+    COMP_FILE,
+    COMP_FOLDER,
+    COMP_CHOICE,
+    COMP_CHECK,
+    COMP_CHECK_ARRAY,
+    COMP_TEXT,
+    COMP_INT,
+    COMP_FLOAT,
+    COMP_MAX
+};
 
 // Base class for GUI components (file picker, combo box, etc.)
 class Component {

@@ -1,3 +1,12 @@
+ver 0.4.1
+- Raise errors when the command requires more components or there are unused components.
+- Error messages bacame more detailed when failed to parse commands.
+- Commands will be shown in the log when loading definitions.
+- Fixed a bug that "%%" won't escsape the "%" symbol.
+- Fixed a bug that the window is resizable on macOS and Linux.
+- Fixed typos.
+- Refined codes.
+
 ver 0.4.0
 - Changed license to GPL
 - Added options for exit code.

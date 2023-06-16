@@ -2,7 +2,9 @@
 
 // Main window
 MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
-    : wxFrame(nullptr, wxID_ANY, scr_constants::TOOL_NAME) {
+    : wxFrame(nullptr, wxID_ANY, scr_constants::TOOL_NAME,
+              wxDefaultPosition, wxDefaultSize,
+              wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX) {
     SetUp();
     if (definition.empty()) {
         if (wxFileExists("gui_definition.json")) {
@@ -62,10 +64,10 @@ nlohmann::json MainFrame::LoadJson(const std::string& file, bool is_definition) 
     try {
         json = json_utils::LoadJson(file);
     }
-    catch (nlohmann::json::exception& e) {
+    catch (const nlohmann::json::exception& e) {
         if (is_definition) JsonLoadFailed(e.what(), json);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
         if (is_definition) JsonLoadFailed(e.what(), json);
     }
     return json;
@@ -79,7 +81,7 @@ void MainFrame::CreateFrame() {
     if (m_definition["gui"].size() > 1) {
         for (int i = 0; i < m_definition["gui"].size(); i++) {
             menu_file->Append(wxID_HIGHEST + i + 1,
-                wxString::FromUTF8(m_definition["gui"][i]["label"]));
+                wxString::FromUTF8(m_definition["gui"][i]["label"].get<std::string>()));
             menu_file->Bind(wxEVT_MENU,
                 &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
         }
@@ -94,7 +96,7 @@ void MainFrame::CreateFrame() {
 
         for (int i = 0; i < m_definition["help"].size(); i++) {
             menu_help->Append(wxID_HIGHEST + i + 1 + m_definition["gui"].size(),
-                wxString::FromUTF8(m_definition["help"][i]["label"]));
+                wxString::FromUTF8(m_definition["help"][i]["label"].get<std::string>()));
             menu_help->Bind(wxEVT_MENU,
                 &MainFrame::OpenURL, this, wxID_HIGHEST + i + 1 + m_definition["gui"].size());
         }
@@ -119,8 +121,6 @@ void MainFrame::CreateFrame() {
     m_run_button->GetSize(nullptr, &button_height);
     SetSize(GetSize() + wxSize(0, button_height));
 #endif
-
-    SetWindowStyleFlag(wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX);
 }
 
 void MainFrame::JsonLoadFailed(const std::string& msg, nlohmann::json& definition) {
@@ -140,14 +140,14 @@ void MainFrame::CheckDefinition(nlohmann::json& definition) {
         json_utils::CheckVersion(definition);
         std::string key = "recommended";
         if (definition.contains(key)) {
-            std::string version = definition[key];
+            std::string version = definition[key].get<std::string>();
             if (definition["not_" + key]) {
                 msg = "Version " + version + " is " + key + ".";
                 *m_ostream << "[LoadDefinition] Warning: " << msg << std::endl;
             }
         }
     }
-    catch(std::exception& e) {
+    catch(const std::exception& e) {
         JsonLoadFailed(std::string(e.what()), definition);
         return;
     }
@@ -157,8 +157,8 @@ void MainFrame::CheckDefinition(nlohmann::json& definition) {
         try {
             json_utils::CheckHelpURLs(definition);
         }
-        catch(std::exception& e) {
-            msg = "Fialed to load help URLs (" + std::string(e.what()) + ")";
+        catch(const std::exception& e) {
+            msg = "Failed to load help URLs (" + std::string(e.what()) + ")";
             wxString wxmsg = wxString::FromUTF8(msg);
             *m_ostream << "[LoadDefinition] Error: " << wxmsg << std::endl;
             ShowErrorDialog(wxmsg);
@@ -170,8 +170,8 @@ void MainFrame::CheckDefinition(nlohmann::json& definition) {
     try {
         json_utils::CheckDefinition(definition);
     }
-    catch (std::exception& e) {
-        msg = "Fialed to load gui_definition.json (" + std::string(e.what()) + ")";
+    catch (const std::exception& e) {
+        msg = "Failed to load gui_definition.json (" + std::string(e.what()) + ")";
         JsonLoadFailed(msg, definition);
         return;
     }
@@ -209,14 +209,12 @@ void MainFrame::ShowSuccessDialog(const wxString& msg) {
     dialog->Destroy();
 }
 
-constexpr char CMD_ID_PERCENT[] = "";
-constexpr char CMD_ID_CURRENT_DIR[] = "__CWD__";
-
 // Make command string
 wxString MainFrame::GetCommand() {
-    std::vector<std::string> cmd_ary = m_sub_definition["command"];
-    std::vector<std::string> cmd_ids = m_sub_definition["command_ids"];
-    std::vector<std::string> comp_ids = m_sub_definition["component_ids"];
+    std::vector<std::string> cmd_ary =
+        m_sub_definition["command_splitted"].get<std::vector<std::string>>();
+    std::vector<int> cmd_ids =
+        m_sub_definition["command_ids"].get<std::vector<int>>();
 
     std::vector<wxString> comp_strings = std::vector<wxString>(m_components.size());
     for (int i = 0; i < m_components.size(); i++) {
@@ -224,39 +222,14 @@ wxString MainFrame::GetCommand() {
     }
 
     wxString cmd = wxString::FromUTF8(cmd_ary[0]);
-    int comp_size = comp_ids.size();
-    int non_id_comp = 0;
     for (int i = 0; i < cmd_ids.size(); i++) {
-        std::string id = cmd_ids[i];
-        int j = -1;
-        if (id == "") {
-            j = comp_size;
-        } else if (id == CMD_ID_PERCENT) {
+        int id = cmd_ids[i];
+        if (id == CMD_ID_PERCENT) {
             cmd += "%";
         } else if (id == CMD_ID_CURRENT_DIR) {
             cmd += wxGetCwd();
         } else {
-            for (j = 0; j < comp_size; j++) {
-                if (id == comp_ids[j]) {
-                    break;
-                }
-            }
-        }
-        if (j >= comp_size) {
-            while (non_id_comp < comp_size &&
-                  (!m_components[non_id_comp]->HasString() || comp_ids[non_id_comp] != "")) {
-                non_id_comp++;
-            }
-            j = non_id_comp;
-            if (non_id_comp >= comp_size) {
-                *m_ostream << "[RunCommand] Warning: "
-                           << "The command requires more components for arguments."
-                           << std::endl;
-            }
-            non_id_comp++;
-        }
-        if (j >= 0 && j < comp_size) {
-            cmd += comp_strings[j];
+            cmd += comp_strings[id];
         }
         if (i + 1 < cmd_ary.size()) {
             cmd += wxString::FromUTF8(cmd_ary[i + 1]);
@@ -311,12 +284,12 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
 void MainFrame::OpenURL(wxCommandEvent& event) {
     size_t id = event.GetId() - 1 - wxID_HIGHEST - m_definition["gui"].size();
     nlohmann::json help = m_definition["help"][id];
-    std::string type = help["type"];
+    std::string type = help["type"].get<std::string>();
     wxString url = "";
     std::string tag;
     try {
         if (type == "url") {
-            url = wxString::FromUTF8(help["url"]);
+            url = wxString::FromUTF8(help["url"].get<std::string>());
             tag = "[OpenURL] ";
             int pos = url.Find("://");
             if (pos !=wxNOT_FOUND) {
@@ -334,7 +307,7 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
                 url = "https://" + url;
             }
         } else if (type == "file") {
-            url = wxString::FromUTF8(help["path"]);
+            url = wxString::FromUTF8(help["path"].get<std::string>());
             tag = "[OpenFile] ";
             if (!wxFileExists(url) && !wxDirExists(url)) {
                 wxString msg = "File does not exist. (" + url + ")";
@@ -375,8 +348,10 @@ void MainFrame::UpdateFrame(wxCommandEvent& event) {
 }
 
 void MainFrame::UpdatePanel() {
-    wxString label = wxString::FromUTF8(m_sub_definition["label"]);
-    *m_ostream << "[UpdatePanel] " << label << std::endl;
+    wxString label = wxString::FromUTF8(m_sub_definition["label"].get<std::string>());
+    *m_ostream << "[UpdatePanel] Lable: " << label << std::endl;
+    wxString cmd_str = wxString::FromUTF8(m_sub_definition["command_str"].get<std::string>());
+    *m_ostream << "[UpdatePanel] Command: " << cmd_str << std::endl;
     wxString window_name = wxString::FromUTF8(
         m_sub_definition.value("window_name", "Simple Command Runner"));
     SetLabel(window_name);
@@ -387,7 +362,8 @@ void MainFrame::UpdatePanel() {
     m_panel = new wxPanel(this);
 
     // put components
-    std::vector<nlohmann::json> comp = m_sub_definition["components"];
+    std::vector<nlohmann::json> comp =
+        m_sub_definition["components"].get<std::vector<nlohmann::json>>();
     m_components.clear();
     m_components.shrink_to_fit();
     Component* new_comp = nullptr;
