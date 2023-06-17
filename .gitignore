@@ -3,7 +3,7 @@
 !examples/**/gui_definition.json
 !tests/**/*.json
 !CMakePresets.json
-!scr_schema.json
+!schema/*.json
 
 *.txt
 !changelog.txt

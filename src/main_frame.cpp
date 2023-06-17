@@ -91,7 +91,7 @@ void MainFrame::CreateFrame() {
     menu_bar->Append(menu_file, "Menu");
 
     // put help urls to menu bar
-    if (m_definition.contains("help")) {
+    if (m_definition.contains("help") && m_definition["help"].size() > 0) {
         wxMenu* menu_help = new wxMenu;
 
         for (int i = 0; i < m_definition["help"].size(); i++) {

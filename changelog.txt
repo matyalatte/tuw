@@ -1,5 +1,6 @@
 ver 0.4.2
 - Changed the json formats for "choice" and "check_array"
+- Fixed a bug that help menu will be shown even if the length of ["help"] is 0.
 
 ver 0.4.1
 - Raise errors when the command requires more components or there are unused components.
