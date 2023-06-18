@@ -11,7 +11,6 @@ MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
             definition = LoadJson("gui_definition.json", true);
             *m_ostream << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
         } else {
-        #ifdef USE_JSON_EMBEDDING
             *m_ostream << "[LoadDefinition] gui_definition.json not found." << std::endl;
             try {
                 ExeContainer exe;
@@ -29,9 +28,6 @@ MainFrame::MainFrame(nlohmann::json definition, nlohmann::json config)
             catch (std::exception& e) {
                 JsonLoadFailed(e.what(), definition);
             }
-        #else
-            JsonLoadFailed("gui_definition.json not found.", definition);
-        #endif
         }
     }
     if (config.empty()) {

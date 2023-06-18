@@ -1,5 +1,4 @@
 #pragma once
-#ifdef USE_JSON_EMBEDDING
 #include "wx/wx.h"
 #include "wx/file.h"
 #include "wx/buffer.h"
@@ -22,4 +21,3 @@ class ExeContainer {
     void SetJson(nlohmann::json json) { m_json = json; }
     void RemoveJson() { SetJson(nlohmann::json::array({})); }
 };
-#endif

@@ -125,7 +125,7 @@ void ExeContainer::Read(const wxString& exe_path) {
 
     // Read exe size
     file_io->Seek(-8, wxFromCurrent);
-    m_exe_size = ReadUint32(file_io);
+    m_exe_size = end_off + ReadUint32(file_io);
     if (EXE_SIZE_MAX <= m_exe_size || end_off < m_exe_size) {
         wxString num;
         num << m_exe_size;
@@ -187,7 +187,7 @@ void ExeContainer::Write(const wxString& exe_path) {
     WriteUint32(new_io, json_size);
     WriteUint32(new_io, Fnv1Hash32(json_str));
     WriteStr(new_io, json_str);
-    WriteUint32(new_io, m_exe_size);
+    WriteUint32(new_io, m_exe_size - new_io->Tell() - 8);
     new_io->Write("JSON", 4);
     CloseFileIO(new_io);
 }

@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.25)
 # options
 option(BUILD_TESTS "Build all tests." OFF)
 option(BUILD_EXE "Build executable." ON)
-option(USE_JSON_EMBEDDING "Use command-line utils to merge JSON into exe." OFF)
 option(VERBOSE "Show optional messages." ON)
 
 if (VERBOSE)
@@ -21,9 +20,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffunction-sections -fdata-sections")
 	string(REPLACE "-O2" "-Os" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 	string(REPLACE "-O3" "-Os" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-	if (USE_JSON_EMBEDDING)
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -DUSE_JSON_EMBEDDING=1")
-	endif()
 endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
@@ -37,9 +33,6 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	string(REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /OPT:REF /OPT:ICF")
-	if (USE_JSON_EMBEDDING)
-		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} /DUSE_JSON_EMBEDDING=1")
-	endif()
 else()
     message(WARNING "${PROJECT_NAME} does NOT support your compiler. You might get some problems.")
 endif()
@@ -60,7 +53,6 @@ message(VERBOSE "EXE_LINKER_FLAGS        : ${CMAKE_EXE_LINKER_FLAGS}")
 message(VERBOSE "EXE_LINKER_FLAGS_RELEASE: ${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 message(VERBOSE "BUILD_TESTS             : ${BUILD_TESTS}")
 message(VERBOSE "BUILD_EXE               : ${BUILD_EXE}")
-message(VERBOSE "USE_JSON_EMBEDDING      : ${USE_JSON_EMBEDDING}")
 
 # find wxWidgets
 # set(CMAKE_FIND_DEBUG_MODE TRUE)
@@ -87,10 +79,8 @@ set(SOURCES
 	src/exec.cpp
 	src/component.cpp
 	src/json_utils.cpp
-	src/custom_wx_obj.cpp)
-if (USE_JSON_EMBEDDING)
-    set(SOURCES ${SOURCES} src/exe_container.cpp)
-endif()
+	src/custom_wx_obj.cpp
+	src/exe_container.cpp)
 add_library(${PROJECT_NAME}_lib STATIC ${SOURCES})
 target_link_libraries(${PROJECT_NAME}_lib
 	nlohmann_json::nlohmann_json

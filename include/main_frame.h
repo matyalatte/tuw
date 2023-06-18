@@ -9,9 +9,7 @@
 #include "component.h"
 #include "exec.h"
 #include "json_utils.h"
-#ifdef USE_JSON_EMBEDDING
 #include "exe_container.h"
-#endif
 #include "scr_constants.h"
 
 
