@@ -1,6 +1,8 @@
-ver 0.4.2
+ver 0.5.0
 - Changed the json formats for "choice" and "check_array"
 - Added command-line utils to embed json into exe.
+- Changed the json library from nlohmann/json to RapidJSON.
+- Changed the format of gui_config.json
 - Fixed a bug that help menu will be shown even if the length of ["help"] is 0.
 
 ver 0.4.1

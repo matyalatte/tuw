@@ -62,15 +62,20 @@ include(${wxWidgets_USE_FILE})
 # Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP:
 cmake_policy(SET CMP0135 NEW)
 
-# fetch json
-set(JSON_ImplicitConversions OFF)
-set(JSON_DisableEnumSerialization ON)
+# fetch json lib
 include(FetchContent)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)  # avoid to reset cmake_args
+set(RAPIDJSON_BUILD_DOC OFF)
+set(RAPIDJSON_BUILD_EXAMPLES OFF)
+set(RAPIDJSON_BUILD_TESTS OFF)
+set(RAPIDJSON_BUILD_CXX17 ON)
+add_definitions(-DRAPIDJSON_HAS_STDSTRING=1)
 FetchContent_Declare(
-	json
-	URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz
+	rapidjson
+	GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
 )
-FetchContent_MakeAvailable(json)
+FetchContent_MakeAvailable(rapidjson)
+include_directories(${rapidjson_SOURCE_DIR}/include)
 
 # make a lib
 include_directories(include)
@@ -83,7 +88,6 @@ set(SOURCES
 	src/exe_container.cpp)
 add_library(${PROJECT_NAME}_lib STATIC ${SOURCES})
 target_link_libraries(${PROJECT_NAME}_lib
-	nlohmann_json::nlohmann_json
 	${wxWidgets_LIBRARIES}
 )
 

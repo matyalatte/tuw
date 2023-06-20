@@ -1,27 +1,63 @@
 #include "json_utils.h"
 
 namespace json_utils {
-    nlohmann::json LoadJson(const std::string& file) {
-        std::ifstream istream(file);
-        nlohmann::json json;
-        if (!istream) {
+    void LoadJson(const std::string& file, rapidjson::Document& json) {
+        std::ifstream ifs(file);
+        if (!ifs) {
             std::string msg = "Failed to open " + file;
             throw std::runtime_error(msg);
         }
-        istream >> json;
-        istream.close();
-        return json;
+        rapidjson::IStreamWrapper isw(ifs);
+        rapidjson::ParseResult ok = json.ParseStream(isw);
+        if (!ok) {
+            std::string msg("Failed to parse JSON: ");
+            msg += std::string(rapidjson::GetParseError_En(ok.Code()))
+                   + " (offset: " + std::to_string(ok.Offset()) + ")";
+            throw std::runtime_error(msg);
+        }
+        if (!json.IsObject())
+            json.SetObject();
     }
 
-    bool SaveJson(nlohmann::json& json, const std::string& file) {
-        std::ofstream ostream(file);
-
-        if (!ostream) {
+    bool SaveJson(rapidjson::Document& json, const std::string& file) {
+        std::ofstream ofs(file);
+        if (!ofs)
             return false;
-        }
-        ostream << std::setw(4) << json << std::endl;
-        ostream.close();
+        rapidjson::OStreamWrapper osw(ofs);
+        rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer(osw);
+        json.Accept(writer);
         return true;
+    }
+
+    std::string JsonToString(rapidjson::Document& json) {
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        json.Accept(writer);
+        return std::string(buffer.GetString());
+    }
+
+    std::string GetString(const rapidjson::Value& json, const char* key, const char* def) {
+        if (json.HasMember(key))
+            return json[key].GetString();
+        return std::string(def);
+    }
+
+    bool GetBool(const rapidjson::Value& json, const char* key, bool def) {
+        if (json.HasMember(key))
+            return json[key].GetBool();
+        return def;
+    }
+
+    int GetInt(const rapidjson::Value& json, const char* key, int def) {
+        if (json.HasMember(key))
+            return json[key].GetInt();
+        return def;
+    }
+
+    double GetDouble(const rapidjson::Value& json, const char* key, double def) {
+        if (json.HasMember(key))
+            return json[key].GetDouble();
+        return def;
     }
 
     static std::string GetLabel(const std::string& label, const std::string& key) {
@@ -42,27 +78,21 @@ namespace json_utils {
         MAX
     };
 
-    static bool IsArray(const nlohmann::json& j, const std::string& key, const JsonType& type) {
-        if (!j[key].is_array()) { return false; }
-        std::function<bool(const nlohmann::json&)> lmd;
-        switch (type) {
-        case JsonType::JSON_ARRAY:
-            lmd = [](const nlohmann::json& el){ return el.is_object(); };
-            break;
-        default:
-            return false;
+    static bool IsJsonArray(const rapidjson::Value& j, const std::string& key) {
+        if (!j[key].IsArray()) { return false; }
+        for (const rapidjson::Value& el : j[key].GetArray()) {
+            if (!el.IsObject())
+                return false;
         }
-        return std::all_of(j[key].begin(), j[key].end(), lmd);
+        return true;
     }
 
     static const bool CAN_SKIP = true;
 
-    static void CheckJsonType(const nlohmann::json& j, const std::string& key,
+    static void CheckJsonType(const rapidjson::Value& j, const std::string& key,
         const JsonType& type, const std::string& label = "", const bool& canSkip = false) {
-        if (canSkip && !j.contains(key)) {
-            return;
-        }
-        if (!j.contains(key)) {
+        if (!j.HasMember(key)) {
+            if (canSkip) return;
             std::string msg = GetLabel(label, key) + " not found.";
             throw std::runtime_error(msg);
         }
@@ -70,23 +100,23 @@ namespace json_utils {
         std::string type_name;
         switch (type) {
         case JsonType::BOOLEAN:
-            valid = j[key].is_boolean();
+            valid = j[key].IsBool();
             type_name = "a boolean";
             break;
         case JsonType::INTEGER:
-            valid = j[key].is_number_integer();
+            valid = j[key].IsInt();
             type_name = "an int";
             break;
         case JsonType::FLOAT:
-            valid = j[key].is_number_float() || j[key].is_number_integer();
+            valid = j[key].IsDouble() || j[key].IsInt();
             type_name = "a float";
             break;
         case JsonType::STRING:
-            valid = j[key].is_string();
+            valid = j[key].IsString();
             type_name = "a string";
             break;
         case JsonType::JSON_ARRAY:
-            valid = IsArray(j, key, type);
+            valid = IsJsonArray(j, key);
             type_name = "an array of json objects";
             break;
         default:
@@ -98,39 +128,35 @@ namespace json_utils {
     }
 
     // get default definition of gui
-    nlohmann::json GetDefaultDefinition() {
-        nlohmann::json def = {
-                {"label", "Default GUI"},
+    void GetDefaultDefinition(rapidjson::Document& definition) {
+        std::string def_str = "{\"gui\":[{"
+            "\"label\":\"Default GUI\","
     #ifdef _WIN32
-                {"command", "dir" },
-                {"command_str", "dir" },
-                {"command_splitted", { "dir" } },
-                {"button", "run 'dir'"},
+            "\"command\":\"dir\","
+            "\"command_str\":\"dir\","
+            "\"command_splitted\":[\"dir\"],"
+            "\"button\":\"run 'dir'\","
     #else
-                {"command", "ls" },
-                {"command_str", "ls" },
-                {"command_splitted", { "ls" } },
-                {"button", "run 'ls'"},
+            "\"command\":\"ls\","
+            "\"command_str\":\"ls\","
+            "\"command_splitted\":[\"ls\"],"
+            "\"button\":\"run 'ls'\","
     #endif
-                {"components", nlohmann::json::array({})},
-                {"command_ids", nlohmann::json::array({})}
-        };
-        return def;
+            "\"components\":[],"
+            "\"command_ids\":[]"
+            "}]}";
+        rapidjson::ParseResult ok = definition.Parse(def_str);
+        assert(ok);
     }
 
-    static void CorrectKey(nlohmann::json& j,
+    static void CorrectKey(rapidjson::Value& j,
                            const std::string& false_key,
-                           const std::string& true_key) {
-        if (!j.contains(true_key) && j.contains(false_key)) {
-            j[true_key] = j[false_key];
-            j.erase(false_key);
-        }
-    }
-
-    static void KeyToSingular(nlohmann::json& c, const std::string& singular) {
-        std::vector<std::string> extends = {"s", "_array"};
-        for (std::string ext : extends) {
-            CorrectKey(c, singular + ext, singular);
+                           const std::string& true_key,
+                           rapidjson::Document::AllocatorType& alloc) {
+        if (!j.HasMember(true_key) && j.HasMember(false_key)) {
+            rapidjson::Value n(true_key.c_str(), alloc);
+            j.AddMember(n, j[false_key], alloc);
+            j.RemoveMember(false_key);
         }
     }
 
@@ -174,25 +200,32 @@ namespace json_utils {
     }
 
     // split command by "%" symbol, and calculate which component should be inserted there.
-    static void CompileCommand(nlohmann::json& sub_definition,
-                             const std::vector<std::string>& comp_ids) {
-        std::vector<std::string> cmd = SplitString(sub_definition["command"].get<std::string>(),
+    static void CompileCommand(rapidjson::Value& sub_definition,
+                               const std::vector<std::string>& comp_ids,
+                               rapidjson::Document::AllocatorType& alloc) {
+        std::vector<std::string> cmd = SplitString(sub_definition["command"].GetString(),
                                                    { '%' });
         std::vector<std::string> cmd_ids = std::vector<std::string>(0);
         std::vector<std::string> splitted_cmd = std::vector<std::string>(0);
+        if (sub_definition.HasMember("command_splitted"))
+            sub_definition.RemoveMember("command_splitted");
+        rapidjson::Value splitted_cmd_json(rapidjson::kArrayType);
+
         bool store_ids = false;
         for (const std::string& token : cmd) {
             if (store_ids) {
                 cmd_ids.push_back(token);
             } else {
                 splitted_cmd.push_back(token);
+                rapidjson::Value n(token.c_str(), alloc);
+                splitted_cmd_json.PushBack(n, alloc);
             }
             store_ids = !store_ids;
         }
-        sub_definition["command_splitted"] = splitted_cmd;
+        sub_definition.AddMember("command_splitted", splitted_cmd_json, alloc);
 
-        nlohmann::json components = sub_definition["components"];
-        std::vector<int> cmd_int_ids = std::vector<int>(0);
+        rapidjson::Value& components = sub_definition["components"];;
+        rapidjson::Value cmd_int_ids(rapidjson::kArrayType);
         std::string cmd_str = "";
         int comp_size = comp_ids.size();
         int non_id_comp = 0;
@@ -220,7 +253,7 @@ namespace json_utils {
                 }
             }
             if (j < comp_size)
-                cmd_int_ids.push_back(j);
+                cmd_int_ids.PushBack(j, alloc);
             if (j >= comp_size)
                 cmd_str += "__comp???__";
             else if (j >= 0)
@@ -231,11 +264,11 @@ namespace json_utils {
 
         // Check if the command requires more arguments or ignores some arguments.
         for (int j = 0; j < comp_size; j++) {
-            if (components[j]["type_int"] == COMP_STATIC_TEXT)
+            if (components[j]["type_int"].GetInt() == COMP_STATIC_TEXT)
                 continue;
             bool found = false;
-            for (int id : cmd_int_ids)
-                if (id == j) { found = true; break; }
+            for (rapidjson::Value& id : cmd_int_ids.GetArray())
+                if (id.GetInt() == j) { found = true; break; }
             if (!found) {
                 std::string msg = "[\"commponents\"][" + std::to_string(j)
                                   + "] is unused in the command; " + cmd_str;
@@ -248,9 +281,12 @@ namespace json_utils {
             throw std::runtime_error(
                 "The command requires more components for arguments; " + cmd_str);
         }
-
-        sub_definition["command_str"] = cmd_str;
-        sub_definition["command_ids"] = cmd_int_ids;
+        if (sub_definition.HasMember("command_str"))
+            sub_definition.RemoveMember("command_str");
+        sub_definition.AddMember("command_str", cmd_str, alloc);
+        if (sub_definition.HasMember("command_ids"))
+            sub_definition.RemoveMember("command_ids");
+        sub_definition.AddMember("command_ids", cmd_int_ids, alloc);
     }
 
     static const matya::map_as_vec<int> COMPTYPE_TO_INT = {
@@ -271,34 +307,37 @@ namespace json_utils {
     };
 
     // validate one of definitions (["gui"][i]) and store parsed info
-    void CheckSubDefinition(nlohmann::json& sub_definition) {
+    void CheckSubDefinition(rapidjson::Value& sub_definition,
+                            rapidjson::Document::AllocatorType& alloc) {
         // check is_string
         CheckJsonType(sub_definition, "label", JsonType::STRING);
         CheckJsonType(sub_definition, "button", JsonType::STRING, "", CAN_SKIP);
-        CorrectKey(sub_definition, "window_title", "window_name");
-        CorrectKey(sub_definition, "title", "window_name");
+        CorrectKey(sub_definition, "window_title", "window_name", alloc);
+        CorrectKey(sub_definition, "title", "window_name", alloc);
         CheckJsonType(sub_definition, "window_name", JsonType::STRING, "", CAN_SKIP);
 
         CheckJsonType(sub_definition, "check_exit_code", JsonType::BOOLEAN, "", CAN_SKIP);
         CheckJsonType(sub_definition, "exit_success", JsonType::INTEGER, "", CAN_SKIP);
         CheckJsonType(sub_definition, "show_last_line", JsonType::BOOLEAN, "", CAN_SKIP);
 
-        CorrectKey(sub_definition, "component", "components");
-        CorrectKey(sub_definition, "component_array", "components");
+        CorrectKey(sub_definition, "component", "components", alloc);
+        CorrectKey(sub_definition, "component_array", "components", alloc);
         CheckJsonType(sub_definition, "components", JsonType::JSON_ARRAY);
 
         // check components
         std::vector<std::string> comp_ids;
-        for (nlohmann::json& c : sub_definition["components"]) {
+        for (rapidjson::Value& c : sub_definition["components"].GetArray()) {
             // check if type and label exist
             CheckJsonType(c, "label", JsonType::STRING, "components");
-            std::string label = c["label"].get<std::string>();
+            std::string label = c["label"].GetString();
 
             // convert ["type"] from string to enum.
             CheckJsonType(c, "type", JsonType::STRING, label);
-            std::string type_str = c["type"].get<std::string>();
+            std::string type_str = c["type"].GetString();
             int type = COMPTYPE_TO_INT.get(type_str, COMP_UNKNOWN);
-            c["type_int"] = type;
+            if (c.HasMember("type_int"))
+                c.RemoveMember("type_int");
+            c.AddMember("type_int", type, alloc);
 
             switch (type) {
                 case COMP_FILE:
@@ -308,9 +347,9 @@ namespace json_utils {
                     CheckJsonType(c, "default", JsonType::STRING, label, CAN_SKIP);
                     break;
                 case COMP_CHOICE:
-                    CorrectKey(sub_definition, "item_array", "items");
+                    CorrectKey(c, "item_array", "items", alloc);
                     CheckJsonType(c, "items", JsonType::JSON_ARRAY, label);
-                    for (nlohmann::json& i : c["items"]) {
+                    for (rapidjson::Value& i : c["items"].GetArray()) {
                         CheckJsonType(i, "label", JsonType::STRING, "items");
                         CheckJsonType(i, "value", JsonType::STRING, "items", CAN_SKIP);
                     }
@@ -320,9 +359,9 @@ namespace json_utils {
                     CheckJsonType(c, "default", JsonType::BOOLEAN, label, CAN_SKIP);
                     break;
                 case COMP_CHECK_ARRAY:
-                    CorrectKey(sub_definition, "item_array", "items");
+                    CorrectKey(c, "item_array", "items", alloc);
                     CheckJsonType(c, "items", JsonType::JSON_ARRAY, label);
-                    for (nlohmann::json& i : c["items"]) {
+                    for (rapidjson::Value& i : c["items"].GetArray()) {
                         CheckJsonType(i, "label", JsonType::STRING, "items");
                         CheckJsonType(i, "value", JsonType::STRING, "items", CAN_SKIP);
                         CheckJsonType(i, "default", JsonType::BOOLEAN, "items", CAN_SKIP);
@@ -337,7 +376,7 @@ namespace json_utils {
                     } else {
                         jtype = JsonType::FLOAT;
                         CheckJsonType(c, "digits", JsonType::INTEGER, label, CAN_SKIP);
-                        if (c.contains("digits") && c["digits"] < 0) {
+                        if (c.HasMember("digits") && c["digits"].GetInt() < 0) {
                             throw std::runtime_error(GetLabel(label, "digits")
                                                      + " should be a non-negative integer.");
                         }
@@ -353,15 +392,15 @@ namespace json_utils {
                     break;
             }
 
-            CorrectKey(c, "add_quote", "add_quotes");
+            CorrectKey(c, "add_quote", "add_quotes", alloc);
             CheckJsonType(c, "add_quotes", JsonType::BOOLEAN, label, CAN_SKIP);
-            CorrectKey(c, "placeholder", "empty_message");
+            CorrectKey(c, "placeholder", "empty_message", alloc);
             CheckJsonType(c, "empty_message", JsonType::STRING, label, CAN_SKIP);
             CheckJsonType(c, "id", JsonType::STRING, label, CAN_SKIP);
             CheckJsonType(c, "tooltip", JsonType::STRING, label, CAN_SKIP);
 
-            if (c.contains("id")) {
-                std::string id = c["id"].get<std::string>();
+            if (c.HasMember("id")) {
+                std::string id = c["id"].GetString();
                 if (id == "") {
                     throw std::runtime_error(GetLabel(label, "id")
                                              + " should NOT be an empty string.");
@@ -378,7 +417,7 @@ namespace json_utils {
 
         // check sub_definition["command"] and convert it to more useful format.
         CheckJsonType(sub_definition, "command", JsonType::STRING);
-        CompileCommand(sub_definition, comp_ids);
+        CompileCommand(sub_definition, comp_ids, alloc);
     }
 
     // vX.Y.Z -> 10000*X + 100 * Y + Z
@@ -400,20 +439,22 @@ namespace json_utils {
         return 0;
     }
 
-    void CheckVersion(nlohmann::json& definition) {
-        std::string k = "recommended";
-        CorrectKey(definition, k + "_version", k);
-        if (definition.contains(k)) {
-            CheckJsonType(definition, k, JsonType::STRING);
-            int recom_int = VersionStringToInt(definition[k].get<std::string>());
-            CheckJsonType(definition, "not_" + k, JsonType::BOOLEAN, "", CAN_SKIP);
-            definition["not_" + k] = scr_constants::VERSION_INT != recom_int;
+    void CheckVersion(rapidjson::Document& definition) {
+        CorrectKey(definition, "recommended_version", "recommended", definition.GetAllocator());
+        if (definition.HasMember("recommended")) {
+            CheckJsonType(definition, "recommended", JsonType::STRING);
+            int recom_int = VersionStringToInt(definition["recommended"].GetString());
+            CheckJsonType(definition, "not_recommended", JsonType::BOOLEAN, "", CAN_SKIP);
+            if (definition.HasMember("not_recommended")) definition.RemoveMember("not_recommended");
+            definition.AddMember("not_recommended",
+                                 scr_constants::VERSION_INT != recom_int,
+                                 definition.GetAllocator());
         }
-        k = "minimum_required";
-        CorrectKey(definition, k + "_version", k);
-        if (definition.contains(k)) {
-            CheckJsonType(definition, k, JsonType::STRING);
-            std::string required = definition[k].get<std::string>();
+        CorrectKey(definition, "minimum_required_version",
+                   "minimum_required", definition.GetAllocator());
+        if (definition.HasMember("minimum_required")) {
+            CheckJsonType(definition, "minimum_required", JsonType::STRING);
+            std::string required = definition["minimum_required"].GetString();
             int required_int = VersionStringToInt(required);
             if (scr_constants::VERSION_INT < required_int) {
                 std::string msg = "Version " + required + " is required.";
@@ -422,19 +463,19 @@ namespace json_utils {
         }
     }
 
-    void CheckDefinition(nlohmann::json& definition) {
+    void CheckDefinition(rapidjson::Document& definition) {
         CheckJsonType(definition, "gui", JsonType::JSON_ARRAY);
-        for (nlohmann::json& sub_d : definition["gui"]) {
-            CheckSubDefinition(sub_d);
+        for (rapidjson::Value& sub_d : definition["gui"].GetArray()) {
+            CheckSubDefinition(sub_d, definition.GetAllocator());
         }
     }
 
-    void CheckHelpURLs(const nlohmann::json& definition) {
+    void CheckHelpURLs(const rapidjson::Document& definition) {
         CheckJsonType(definition, "help", JsonType::JSON_ARRAY);
-        for (nlohmann::json h : definition["help"]) {
+        for (const rapidjson::Value& h : definition["help"].GetArray()) {
             CheckJsonType(h, "type", JsonType::STRING);
             CheckJsonType(h, "label", JsonType::STRING);
-            std::string type = h["type"].get<std::string>();
+            std::string type = h["type"].GetString();
             if (type == "url") {
                 CheckJsonType(h, "url", JsonType::STRING);
             } else if (type == "file") {

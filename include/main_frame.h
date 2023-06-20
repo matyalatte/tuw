@@ -1,7 +1,8 @@
 #pragma once
 #include <vector>
 #include <string>
-#include <nlohmann/json.hpp>
+#include "rapidjson/document.h"
+#include "rapidjson/error/en.h"
 #include "wx/wx.h"
 #include "wx/filepicker.h"
 #include "wx/stdpaths.h"
@@ -16,9 +17,9 @@
 // Main window
 class MainFrame : public wxFrame {
  private:
-    nlohmann::json m_definition;
-    nlohmann::json m_sub_definition;
-    nlohmann::json m_config;
+    rapidjson::Document m_definition;
+    size_t m_definition_id;
+    rapidjson::Document m_config;
 
 #ifdef __linux__
     // Linux needs a window to show outputs
@@ -34,17 +35,17 @@ class MainFrame : public wxFrame {
 
     void SetUp();
     void CreateFrame();
-    void CheckDefinition(nlohmann::json& definition);
+    void CheckDefinition(rapidjson::Document& definition);
     void UpdatePanel();
     void UpdateConfig();
     void ShowErrorDialog(const wxString& msg);
     void ShowSuccessDialog(const wxString& msg);
-    nlohmann::json LoadJson(const std::string& file, bool is_definition = false);
-    void JsonLoadFailed(const std::string& msg, nlohmann::json& definition);
+    void LoadJson(const std::string& file, rapidjson::Document& json, bool is_definition = false);
+    void JsonLoadFailed(const std::string& msg, rapidjson::Document& definition);
 
  public:
-    MainFrame(nlohmann::json definition = nlohmann::json({}),
-              nlohmann::json config = nlohmann::json({}));
+    MainFrame(const rapidjson::Document& definition = rapidjson::Document(rapidjson::kObjectType),
+              const rapidjson::Document& config = rapidjson::Document(rapidjson::kObjectType));
 
     void OnClose(wxCloseEvent& event);
     void OnCommandClose(wxCommandEvent& event) { Close(true); }
@@ -53,6 +54,6 @@ class MainFrame : public wxFrame {
     void ClickButton(wxCommandEvent& event);
     wxString GetCommand();
     std::string RunCommand();
-    nlohmann::json GetDefinition();
+    void GetDefinition(rapidjson::Document& json);
     void SaveConfig();
 };

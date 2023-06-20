@@ -26,6 +26,7 @@ It can make a GUI to run commands of your scripts.
 -   Native look and feel
 -   Portable
 -   Small size (under 1MB)
+-   UTF-8 support
 
 ## Downloads
 
@@ -85,5 +86,5 @@ Files in this repository are available under the [GPL2+](../license.txt).
 | Project | Used for | License |
 | -- | -- | -- |
 | [wxWidgets library](https://github.com/wxWidgets/wxWidgets) | GUI framework | [Modified LGPL](https://github.com/wxWidgets/wxWidgets/blob/master/docs/licence.txt) | 
-| [nlohmann's json library](https://github.com/nlohmann/json) | JSON handling | [MIT](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT) |
+| [RapidJSON](https://github.com/Tencent/rapidjson) | JSON handling | [MIT](http://opensource.org/licenses/MIT) |
 | [UPX](https://github.com/upx/upx) | EXE compression | [Modified GPL2+](https://github.com/upx/upx/blob/devel/LICENSE) |

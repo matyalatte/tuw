@@ -151,7 +151,14 @@ void ExeContainer::Read(const wxString& exe_path) {
         num << stored_hash;
         throw std::runtime_error(std::string("Invalid JSON hash. (") + num + ")");
     }
-    m_json = nlohmann::json::parse(json_str);
+
+    rapidjson::ParseResult ok = m_json.Parse(json_str);
+    if (!ok) {
+        std::string msg("Failed to parse JSON: ");
+        msg += std::string(rapidjson::GetParseError_En(ok.Code()))
+                + " (offset: " + std::to_string(ok.Offset()) + ")";
+        throw std::runtime_error(msg);
+    }
 
     CloseFileIO(file_io);
 }
@@ -159,7 +166,12 @@ void ExeContainer::Read(const wxString& exe_path) {
 void ExeContainer::Write(const wxString& exe_path) {
     assert(m_exe_path != "");
     std::string json_str = "";
-    if (!m_json.empty()) json_str = m_json.dump();
+    if (m_json.Size() != 0) {
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        m_json.Accept(writer);
+        json_str = buffer.GetString();
+    }
     wxUint32 json_size = json_str.length();
     if (JSON_SIZE_MAX <= json_size) {
         wxString num;

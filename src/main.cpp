@@ -1,3 +1,4 @@
+#include <iomanip>
 #include "main_frame.h"
 
 // Main
@@ -36,8 +37,9 @@ bool AskOverwrite(const wxString& path) {
 
 void Merge(const wxString& exe_path, const wxString& json_path, const wxString& new_path,
            const bool force) {
-    nlohmann::json json = json_utils::LoadJson(json_path.ToStdString());
-    if (json.empty()) {
+    rapidjson::Document json;
+    json_utils::LoadJson(json_path.ToStdString(), json);
+    if (json.Size() == 0) {
         std::cout << "JSON file loaded but it has no data." << std::endl;
         return;
     }
@@ -62,7 +64,8 @@ void Split(const wxString& exe_path, const wxString& json_path, const wxString& 
         return;
     }
     std::cout << "Extracting JSON data from the executable..." << std::endl;
-    nlohmann::json json = exe.GetJson();
+    rapidjson::Document json;
+    exe.GetJson(json);
     exe.RemoveJson();
     if (!force && (!AskOverwrite(new_path) || !AskOverwrite(json_path))) {
         std::cout << "The operation has been cancelled." << std::endl;
@@ -244,10 +247,6 @@ int main(int argc, char* argv[]) {
             default:
                 break;
         }
-    }
-    catch (nlohmann::json::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
     }
     catch (std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
