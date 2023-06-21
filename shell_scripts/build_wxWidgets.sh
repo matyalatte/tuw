@@ -31,7 +31,9 @@ lib_options="--without-regex
  --without-libiconv
  --disable-glcanvasegl"
 
-non_gui_options="--disable-largefile
+non_gui_options="--disable-intl
+ --disable-xlocale
+ --disable-largefile
  --disable-config
  --disable-ipv6
  --disable-any
@@ -51,6 +53,7 @@ non_gui_options="--disable-largefile
  --disable-fs_inet
  --disable-fs_zip
  --disable-fswatcher
+ --disable-log
  --disable-mimetype
  --disable-printfposparam
  --disable-secretstore
@@ -104,6 +107,7 @@ ctrl_options=" --disable-actindicator
  --disable-arttango
  --disable-bmpcombobox
  --disable-calendar
+ --disable-caret
  --disable-checklst
  --disable-choicebook
  --disable-colourpicker
@@ -129,6 +133,8 @@ ctrl_options=" --disable-actindicator
  --disable-richmsgdlg
  --disable-richtooltip
  --disable-rearrangectrl
+ --disable-sash
+ --disable-scrollbar
  --disable-searchctrl
  --disable-slider
  --disable-splitter
@@ -156,7 +162,8 @@ dlg_options="--disable-splash
  --disable-progressdlg
  --disable-wizarddlg"
 
-misc_gui_options="--disable-splines
+misc_gui_options="--disable-miniframe
+ --disable-splines
  --disable-busyinfo
  --disable-hotkey
  --disable-joystick
@@ -183,11 +190,11 @@ img_options="--disable-gif
  --disable-ico_cur"
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    non_gui_options="${non_gui_options} --enable-no_rtti --disable-intl --disable-xlocale"
+    non_gui_options="${non_gui_options} --enable-no_rtti"
     ctrl_options="${ctrl_options} --disable-bmpbutton"
 else
-    lib_options="${lib_options} --without-cairo"
-    big_gui_options="${big_gui_options} --disable-graphics_ctx"
+    # Somehow OSX will use gnu++11 without the 'with-cxx' option
+    lib_options="${lib_options} --without-cairo --with-cxx=17"
 fi
 
 options="--disable-shared
@@ -208,6 +215,10 @@ if [ ${build_type} = "Debug" ]; then
 else
     # Optimize for size
     export CXXFLAGS="-Os -ffunction-sections -fdata-sections"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # for .mm files
+        export OBJCXXFLAGS="-Os -ffunction-sections -fdata-sections"
+    fi
 fi
 echo "CMake arguments: ${options}"
 

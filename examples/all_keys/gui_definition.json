@@ -163,7 +163,8 @@
                     "min": -50,
                     "max": 50,
                     "inc": 10,
-                    "wrap": true
+                    "wrap": true,
+                    "tooltip": "int!"
                 },
                 {
                     "type": "float",
@@ -174,7 +175,8 @@
                     "max": 1,
                     "digits": 2,
                     "inc": 0.01,
-                    "wrap": false
+                    "wrap": false,
+                    "tooltip": "float!"
                 }
             ]
         },
