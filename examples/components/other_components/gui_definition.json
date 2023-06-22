@@ -2,7 +2,7 @@
     "gui": [
         {
             "label": "Component Sample",
-            "command": "echo choice: %a% & echo checkbox: %b% & echo textbox: %c%",
+            "command": "echo choice: %a% & echo textbox: %c%",
             "button": "Echo!",
             "components": [
                 {
@@ -25,14 +25,7 @@
                             "label": "three",
                             "value": "3"
                         }
-                    ],
-                    "default": 1
-                },
-                {
-                    "type": "check",
-                    "label": "checkbox",
-                    "value": "checked!",
-                    "default": true
+                    ]
                 },
                 {
                     "type": "text",

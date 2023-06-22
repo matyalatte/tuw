@@ -255,7 +255,7 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
         last_line = RunCommand();
     }
     catch (std::exception& e) {
-        *m_ostream << "[RunCommand] Error: Failed to execute commands." << std::endl;
+        *m_ostream << "[RunCommand] Error: " << e.what() << std::endl;
         ShowErrorDialog(e.what());
         failed = true;
     }

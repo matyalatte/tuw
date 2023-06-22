@@ -15,6 +15,7 @@ Examples for GUI components (e.g. file pickers)
 
 -   [Path Pickers](./components/path_pickers/): File pickers and dir pickers.
 -   [Number Pickers](./components/num_pickers/): Int pickers and float pickers.
+-   [Check Boxes](./components/check_boxes/): Check box and check array.
 -   [Other components](./components/other_components/): There are more components you can use.
 
 ![PathPikcers](https://user-images.githubusercontent.com/69258547/171440880-5948a7f0-5e26-4c38-ab95-8c6daaf67f93.png)  
@@ -47,6 +48,7 @@ There are more features you can use.
 
 ## 6. Tips
 
-Not about the features of the tool, but they might help you.
+Not about the json format, but they might help you.
 
+-   [Json Embedding](./tips/json_embed): You can embed json into exe!
 -   [Multiple Lines](./tips/multi_lines): How to run multiple commands in a process.

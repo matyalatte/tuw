@@ -98,6 +98,7 @@ void PrintUsage() {
         "\n"
         "Example:\n"
         "    SimpleCommandRunner merge -f -j my_definition.json -e MyGUI.exe\n";
+
     std::cout << usage << std::endl;
 }
 

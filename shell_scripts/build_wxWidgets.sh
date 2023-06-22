@@ -99,7 +99,8 @@ big_gui_options="--disable-docview
  --disable-webview
  --disable-clipboard"
 
-ctrl_options=" --disable-actindicator
+ctrl_options="--disable-accel
+ --disable-actindicator
  --disable-addremovectrl
  --disable-animatectrl
  --disable-bannerwindow
@@ -164,6 +165,7 @@ dlg_options="--disable-splash
 
 misc_gui_options="--disable-miniframe
  --disable-splines
+ --disable-mousewheel
  --disable-busyinfo
  --disable-hotkey
  --disable-joystick
@@ -176,9 +178,6 @@ misc_gui_options="--disable-miniframe
 # You can remove a test tool from the release build with "bash build_wxWidgets.sh NoTest"
 if [ "$1" = "NoTest" ]; then
     misc_gui_options="${misc_gui_options} --disable-uiactionsim"
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        ctrl_options="${ctrl_options} --disable-combobox"
-    fi
 fi
 
 img_options="--disable-gif
@@ -191,7 +190,7 @@ img_options="--disable-gif
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     non_gui_options="${non_gui_options} --enable-no_rtti"
-    ctrl_options="${ctrl_options} --disable-bmpbutton"
+    ctrl_options="${ctrl_options} --disable-bmpbutton --disable-radiobtn --disable-combobox"
 else
     # Somehow OSX will use gnu++11 without the 'with-cxx' option
     lib_options="${lib_options} --without-cairo --with-cxx=17"

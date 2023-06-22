@@ -19,7 +19,7 @@ It can make a GUI to run commands of your scripts.
 
 ## Features
 
--   Define GUI in .json
+-   [Define GUI in JSON](../examples/)
 -   Save arguments
 -   Input paths by drag and drop
 -   Cross-platform
@@ -27,6 +27,7 @@ It can make a GUI to run commands of your scripts.
 -   Portable
 -   Small size (under 1MB)
 -   UTF-8 support
+-   [Embed JSON into exe](../examples/tips/json_embed/)
 
 ## Downloads
 
