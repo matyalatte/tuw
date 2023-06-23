@@ -31,11 +31,13 @@ lib_options="--without-regex
  --without-libiconv
  --disable-glcanvasegl"
 
-non_gui_options="--disable-intl
+non_gui_options="--disable-plugins
+ --disable-intl
  --disable-xlocale
  --disable-largefile
  --disable-config
  --disable-ipv6
+ --disable-ipc
  --disable-any
  --disable-apple_ieee
  --disable-arcstream
@@ -65,6 +67,7 @@ non_gui_options="--disable-intl
  --disable-tarstream
  --disable-webrequest
  --disable-zipstream
+ --disable-variant
  --disable-ftp
  --disable-http
  --disable-fileproto
@@ -74,6 +77,7 @@ non_gui_options="--disable-intl
  --disable-protocol-ftp
  --disable-protocol-http
  --disable-protocol-file
+ --disable-threads
  --disable-dbghelp"
 
 big_gui_options="--disable-docview
@@ -193,6 +197,8 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     ctrl_options="${ctrl_options} --disable-bmpbutton --disable-radiobtn --disable-combobox"
 else
     # Somehow OSX will use gnu++11 without the 'with-cxx' option
+    non_gui_options="${non_gui_options} --disable-datetime"
+    ctrl_options="${ctrl_options} --disable-filectrl"
     lib_options="${lib_options} --without-cairo --with-cxx=17"
 fi
 
