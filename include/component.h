@@ -10,6 +10,7 @@
 
 enum ComponentType: int {
     COMP_UNKNOWN = 0,
+    COMP_EMPTY,
     COMP_STATIC_TEXT,
     COMP_FILE,
     COMP_FOLDER,
@@ -43,7 +44,7 @@ class Component {
     virtual void SetConfig(const rapidjson::Value& config) {}
     virtual void GetConfig(rapidjson::Document& config) {}
 
-    bool HasString();
+    bool HasString(){ return m_has_string; }
 
     static Component* PutComponent(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j);
 };
@@ -57,6 +58,12 @@ class MultipleValuesContainer {
     void SetValues(wxArrayString values){
         m_values = values;
     }
+};
+
+class EmptyComponent : public Component {
+ public:
+    EmptyComponent(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
+        : Component(j, false) {}
 };
 
 class StaticText : public Component {

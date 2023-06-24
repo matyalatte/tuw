@@ -1,5 +1,6 @@
 #include <iomanip>
 #include "main_frame.h"
+#include "stdpath_min.h"
 
 // Main
 class MainApp : public wxApp {
@@ -151,7 +152,6 @@ int wmain(int argc, wchar_t* argv[]) {
 #else
 int main(int argc, char* argv[]) {
 #endif
-
     // Launch GUI if no args.
     if (argc == 1) return wxEntry(argc, argv);
 
@@ -159,10 +159,7 @@ int main(int argc, char* argv[]) {
     cmd_str.Replace("-", "");
     int cmd_int = CMD_TO_INT.get(cmd_str.c_str(), CMD_UNKNOWN);
 
-    // Make dummy app
-    new wxApp();
-
-    wxString exe_path =  wxStandardPaths::Get().GetExecutablePath();
+    wxString exe_path =  stdpath::GetExecutablePath(argv[0]);
 
     wxString json_path = "";
     wxString new_exe_path = "";

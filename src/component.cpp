@@ -25,14 +25,13 @@ std::string const Component::GetID() {
     return m_id;
 }
 
-bool Component::HasString() {
-    return m_has_string;
-}
-
 Component* Component::PutComponent(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j) {
     Component* comp = nullptr;
     int type = j["type_int"].GetInt();
     switch (type) {
+        case COMP_EMPTY:
+            comp = new EmptyComponent(panel, sizer, j);
+            break;
         case COMP_STATIC_TEXT:
             comp = new StaticText(panel, sizer, j);
             break;
@@ -121,8 +120,8 @@ wxString FilePicker::GetRawString() {
 }
 
 void FilePicker::SetConfig(const rapidjson::Value& config) {
-    if (config.IsString()) {
-        wxString str = wxString::FromUTF8(config.GetString());
+    if (config.HasMember(m_id) && config[m_id].IsString()) {
+        wxString str = wxString::FromUTF8(config[m_id].GetString());
         static_cast<CustomFilePicker*>(m_widget)->SetPath(str);
         static_cast<CustomFilePicker*>(m_widget)->SetInitialDirectory(wxPathOnly(str));
     }
@@ -149,8 +148,8 @@ wxString DirPicker::GetRawString() {
 }
 
 void DirPicker::SetConfig(const rapidjson::Value& config) {
-    if (config.IsString()) {
-        wxString str = wxString::FromUTF8(config.GetString());
+    if (config.HasMember(m_id) && config[m_id].IsString()) {
+        wxString str = wxString::FromUTF8(config[m_id].GetString());
         static_cast<CustomDirPicker*>(m_widget)->SetPath(str);
         static_cast<CustomDirPicker*>(m_widget)->SetInitialDirectory(str);
     }
@@ -186,8 +185,10 @@ wxString Choice::GetRawString() {
 }
 
 void Choice::SetConfig(const rapidjson::Value& config) {
-    if (config.IsInt() && config.GetInt() < m_values.size()) {
-        static_cast<wxChoice*>(m_widget)->SetSelection(config.GetInt());
+    if (config.HasMember(m_id) && config[m_id].IsInt()) {
+        int  i = config[m_id].GetInt();
+        if (i < m_values.size())
+            static_cast<wxChoice*>(m_widget)->SetSelection(i);
     }
 }
 
@@ -220,8 +221,8 @@ wxString CheckBox::GetRawString() {
 }
 
 void CheckBox::SetConfig(const rapidjson::Value& config) {
-    if (config.IsBool())
-        static_cast<wxCheckBox*>(m_widget)->SetValue(config.GetBool());
+    if (config.HasMember(m_id) && config[m_id].IsBool())
+        static_cast<wxCheckBox*>(m_widget)->SetValue(config[m_id].GetBool());
 }
 
 void CheckBox::GetConfig(rapidjson::Document& config) {
@@ -272,10 +273,10 @@ wxString CheckArray::GetRawString() {
 }
 
 void CheckArray::SetConfig(const rapidjson::Value& config) {
-    if (config.IsArray()) {
+    if (config.HasMember(m_id) && config[m_id].IsArray()) {
         std::vector<wxCheckBox*> checks = *(std::vector<wxCheckBox*>*)m_widget;
-        for (int i = 0; i < config.Size() && i < checks.size(); i++) {
-            checks[i]->SetValue(config[i].GetBool());
+        for (int i = 0; i < config[m_id].Size() && i < checks.size(); i++) {
+            checks[i]->SetValue(config[m_id][i].GetBool());
         }
     }
 }
@@ -312,8 +313,8 @@ wxString TextBox::GetRawString() {
 }
 
 void TextBox::SetConfig(const rapidjson::Value& config) {
-    if (config.IsString()) {
-        wxString str = wxString::FromUTF8(config.GetString());
+    if (config.HasMember(m_id) && config[m_id].IsString()) {
+        wxString str = wxString::FromUTF8(config[m_id].GetString());
         static_cast<CustomTextCtrl*>(m_widget)->UpdateText(str);
     }
 }
@@ -348,8 +349,8 @@ void NumPickerBase::GetConfig(rapidjson::Document& config) {
 }
 
 void NumPickerBase::SetConfig(const rapidjson::Value& config) {
-    if (config.IsInt() || config.IsDouble()) {
-        double val = config.GetDouble();
+    if (config.HasMember(m_id) && (config[m_id].IsInt() || config[m_id].IsDouble())) {
+        double val = config[m_id].GetDouble();
         m_picker->SetValue(val);
     }
 }

@@ -260,7 +260,7 @@ namespace json_utils {
                     while (non_id_comp < comp_size
                         && (components[non_id_comp]["type_int"] == COMP_STATIC_TEXT
                             || comp_ids[non_id_comp] != ""
-                            || components[non_id_comp]["ignore"].GetBool())) {
+                            || components[non_id_comp]["type_int"] == COMP_EMPTY)) {
                         non_id_comp++;
                     }
                     j = non_id_comp;
@@ -279,8 +279,8 @@ namespace json_utils {
 
         // Check if the command requires more arguments or ignores some arguments.
         for (int j = 0; j < comp_size; j++) {
-            if ((components[j]["type_int"].GetInt() == COMP_STATIC_TEXT) ||
-                components[j]["ignore"].GetBool())
+            int type_int = components[j]["type_int"].GetInt();
+            if (type_int == COMP_STATIC_TEXT || type_int == COMP_EMPTY)
                 continue;
             bool found = false;
             for (rapidjson::Value& id : cmd_int_ids.GetArray())
@@ -428,15 +428,6 @@ namespace json_utils {
                 }
             }
 
-            if (c.HasMember("ignore"))
-                c.RemoveMember("ignore");
-            c.AddMember("ignore", ignore, alloc);
-
-            if (ignore) {
-                comp_ids.push_back("");
-                continue;
-            }
-
             std::string id = "";
             if (c.HasMember("id")) {
                 id = c["id"].GetString();
@@ -448,7 +439,13 @@ namespace json_utils {
                                              + " should NOT start with '_'.");
                 }
             }
-            comp_ids.push_back(id);
+
+            if (ignore) {
+                comp_ids.push_back("");
+                c["type_int"].SetInt(COMP_EMPTY);
+            } else {
+                comp_ids.push_back(id);
+            }
         }
         CheckIndexDuplication(comp_ids);
 

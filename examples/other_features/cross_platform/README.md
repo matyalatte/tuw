@@ -1,11 +1,11 @@
 # Cross-platform Support
 
 There are optional keys to make platfrom specific GUIs.  
-No need to make JSON files for each platforms.  
+No need to write JSON files for each platform.  
 
 ## "command_'os'"
 
-There are optional keys to overwrite the command.  
+There are optional keys to overwrite commands.  
 `command_win` is for Windows, `command_mac` is for macOS, and `command_linux` is for Linux.  
 Simple Command Runner will use the platform specific commands instead of the value of `command`.  
 

@@ -7,6 +7,7 @@
 #include "wx/filepicker.h"
 #include "wx/stdpaths.h"
 #include "wx/stream.h"
+#include "wx/app.h"
 #include "component.h"
 #include "exec.h"
 #include "json_utils.h"

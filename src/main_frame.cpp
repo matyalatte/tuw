@@ -1,4 +1,5 @@
 #include "main_frame.h"
+#include "stdpath_min.h"
 
 // Main window
 MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Document& config)
@@ -17,7 +18,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
             *m_ostream << "[LoadDefinition] gui_definition.json not found." << std::endl;
             try {
                 ExeContainer exe;
-                exe.Read(wxStandardPaths::Get().GetExecutablePath());
+                exe.Read(stdpath::GetExecutablePath(wxTheApp->argv[0]));
                 if (!exe.HasJson()) {
                     *m_ostream << "[LoadDefinition] Embedded JSON not found." << std::endl;
                     throw std::runtime_error("JSON data not found.");
@@ -41,7 +42,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
 void MainFrame::SetUp() {
     // Use the executable directory as the working dir.
-    wxString exe_path = wxStandardPaths::Get().GetExecutablePath();
+    wxString exe_path = stdpath::GetExecutablePath(wxTheApp->argv[0]);
     wxSetWorkingDirectory(wxPathOnly(exe_path));
 
 #ifdef __linux__
@@ -358,13 +359,9 @@ void MainFrame::UpdatePanel() {
     Component* new_comp = nullptr;
     if (sub_definition["components"].Size() > 0) {
         for (rapidjson::Value& c : sub_definition["components"].GetArray()) {
-            if (c["ignore"].GetBool()) continue;
             new_comp = Component::PutComponent(m_panel, comp_sizer, c);
             if (new_comp != nullptr) {
-                std::string const id = new_comp->GetID();
-                if (m_config.HasMember(id)) {
-                    new_comp->SetConfig(m_config[id]);
-                }
+                new_comp->SetConfig(m_config);
                 m_components.push_back(new_comp);
             }
         }

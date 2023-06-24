@@ -62,6 +62,7 @@ non_gui_options="--disable-plugins
  --disable-snglinst
  --disable-sound
  --disable-spellcheck
+ --disable-stdpaths
  --disable-stopwatch
  --disable-sysoptions
  --disable-tarstream
