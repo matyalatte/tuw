@@ -509,6 +509,8 @@ namespace json_utils {
 
     void CheckDefinition(rapidjson::Document& definition) {
         CheckJsonType(definition, "gui", JsonType::JSON_ARRAY);
+        if (definition["gui"].Size() == 0)
+            throw std::runtime_error("The size of [\"gui\"] should NOT be zero.");
         for (rapidjson::Value& sub_d : definition["gui"].GetArray()) {
             CheckSubDefinition(sub_d, definition.GetAllocator());
         }

@@ -26,7 +26,8 @@
         {
             "window_name": "Split EXE into JSON and EXE",
             "label": "Split EXE into JSON and EXE",
-            "command": "\"%merged_exe% split -j %json% -e %orig_exe% -f\"",
+            "command": "%merged_exe% split -j %json% -e %orig_exe% -f",
+            "command_win": "\"%merged_exe% split -j %json% -e %orig_exe% -f\"",
             "show_last_line": true,
             "components": [
                 {

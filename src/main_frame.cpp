@@ -37,6 +37,11 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
     CheckDefinition(m_definition);
     m_definition_id = 0;
+    if (m_config.HasMember("_mode") && m_config["_mode"].IsInt()) {
+        int mode = m_config["_mode"].GetInt();
+        if (mode < m_definition["gui"].Size())
+            m_definition_id = mode;
+    }
     CreateFrame();
 }
 
@@ -169,6 +174,9 @@ void MainFrame::CheckDefinition(rapidjson::Document& definition) {
 void MainFrame::UpdateConfig() {
     for (Component *c : m_components)
         c->GetConfig(m_config);
+    if (m_config.HasMember("_mode"))
+        m_config.RemoveMember("_mode");
+    m_config.AddMember("_mode", m_definition_id, m_config.GetAllocator());
 }
 
 void MainFrame::SaveConfig() {

@@ -44,7 +44,7 @@ class Component {
     virtual void SetConfig(const rapidjson::Value& config) {}
     virtual void GetConfig(rapidjson::Document& config) {}
 
-    bool HasString(){ return m_has_string; }
+    bool HasString() { return m_has_string; }
 
     static Component* PutComponent(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j);
 };
