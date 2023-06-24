@@ -74,6 +74,7 @@ namespace json_utils {
         INTEGER,
         FLOAT,
         STRING,
+        STRING_ARRAY,
         JSON_ARRAY,
         MAX
     };
@@ -82,6 +83,15 @@ namespace json_utils {
         if (!j[key].IsArray()) { return false; }
         for (const rapidjson::Value& el : j[key].GetArray()) {
             if (!el.IsObject())
+                return false;
+        }
+        return true;
+    }
+
+    static bool IsStringArray(const rapidjson::Value& j, const std::string& key) {
+        if (!j[key].IsArray()) { return false; }
+        for (const rapidjson::Value& el : j[key].GetArray()) {
+            if (!el.IsString())
                 return false;
         }
         return true;
@@ -114,6 +124,10 @@ namespace json_utils {
         case JsonType::STRING:
             valid = j[key].IsString();
             type_name = "a string";
+            break;
+        case JsonType::STRING_ARRAY:
+            valid = IsStringArray(j, key);
+            type_name = "an array of strings";
             break;
         case JsonType::JSON_ARRAY:
             valid = IsJsonArray(j, key);
@@ -245,7 +259,8 @@ namespace json_utils {
                 if (j == comp_size) {
                     while (non_id_comp < comp_size
                         && (components[non_id_comp]["type_int"] == COMP_STATIC_TEXT
-                            || comp_ids[non_id_comp] != "")) {
+                            || comp_ids[non_id_comp] != ""
+                            || components[non_id_comp]["ignore"].GetBool())) {
                         non_id_comp++;
                     }
                     j = non_id_comp;
@@ -264,7 +279,8 @@ namespace json_utils {
 
         // Check if the command requires more arguments or ignores some arguments.
         for (int j = 0; j < comp_size; j++) {
-            if (components[j]["type_int"].GetInt() == COMP_STATIC_TEXT)
+            if ((components[j]["type_int"].GetInt() == COMP_STATIC_TEXT) ||
+                components[j]["ignore"].GetBool())
                 continue;
             bool found = false;
             for (rapidjson::Value& id : cmd_int_ids.GetArray())
@@ -338,7 +354,8 @@ namespace json_utils {
             if (c.HasMember("type_int"))
                 c.RemoveMember("type_int");
             c.AddMember("type_int", type, alloc);
-
+            CorrectKey(c, "item", "items", alloc);
+            CorrectKey(c, "item_array", "items", alloc);
             switch (type) {
                 case COMP_FILE:
                     CheckJsonType(c, "extention", JsonType::STRING, label, CAN_SKIP);
@@ -347,7 +364,6 @@ namespace json_utils {
                     CheckJsonType(c, "default", JsonType::STRING, label, CAN_SKIP);
                     break;
                 case COMP_CHOICE:
-                    CorrectKey(c, "item_array", "items", alloc);
                     CheckJsonType(c, "items", JsonType::JSON_ARRAY, label);
                     for (rapidjson::Value& i : c["items"].GetArray()) {
                         CheckJsonType(i, "label", JsonType::STRING, "items");
@@ -359,7 +375,6 @@ namespace json_utils {
                     CheckJsonType(c, "default", JsonType::BOOLEAN, label, CAN_SKIP);
                     break;
                 case COMP_CHECK_ARRAY:
-                    CorrectKey(c, "item_array", "items", alloc);
                     CheckJsonType(c, "items", JsonType::JSON_ARRAY, label);
                     for (rapidjson::Value& i : c["items"].GetArray()) {
                         CheckJsonType(i, "label", JsonType::STRING, "items");
@@ -399,8 +414,32 @@ namespace json_utils {
             CheckJsonType(c, "id", JsonType::STRING, label, CAN_SKIP);
             CheckJsonType(c, "tooltip", JsonType::STRING, label, CAN_SKIP);
 
+            bool ignore = false;
+            CorrectKey(c, "platform", "platforms", alloc);
+            CorrectKey(c, "platform_array", "platforms", alloc);
+            CheckJsonType(c, "platforms", JsonType::STRING_ARRAY, label, CAN_SKIP);
+            if (c.HasMember("platforms")) {
+                ignore = true;
+                for (rapidjson::Value& v : c["platforms"].GetArray()) {
+                    if (v.GetString() == std::string(scr_constants::OS)) {
+                        ignore = false;
+                        break;
+                    }
+                }
+            }
+
+            if (c.HasMember("ignore"))
+                c.RemoveMember("ignore");
+            c.AddMember("ignore", ignore, alloc);
+
+            if (ignore) {
+                comp_ids.push_back("");
+                continue;
+            }
+
+            std::string id = "";
             if (c.HasMember("id")) {
-                std::string id = c["id"].GetString();
+                id = c["id"].GetString();
                 if (id == "") {
                     throw std::runtime_error(GetLabel(label, "id")
                                              + " should NOT be an empty string.");
@@ -408,12 +447,20 @@ namespace json_utils {
                     throw std::runtime_error(GetLabel(label, "id")
                                              + " should NOT start with '_'.");
                 }
-                comp_ids.push_back(id);
-            } else {
-                comp_ids.push_back("");
             }
+            comp_ids.push_back(id);
         }
         CheckIndexDuplication(comp_ids);
+
+        // Overwrite ["command"] with ["command_'os'"] if exists.
+        std::string command_os_key = std::string("command_") + scr_constants::OS;
+        if (sub_definition.HasMember(command_os_key)) {
+            CheckJsonType(sub_definition, command_os_key, JsonType::STRING);
+            std::string command_os = sub_definition[command_os_key].GetString();
+            if (sub_definition.HasMember("command"))
+                sub_definition.RemoveMember("command");
+            sub_definition.AddMember("command", command_os, alloc);
+        }
 
         // check sub_definition["command"] and convert it to more useful format.
         CheckJsonType(sub_definition, "command", JsonType::STRING);

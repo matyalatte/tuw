@@ -37,6 +37,7 @@ There are more features you can use.
 -   [Error Handling](./other_features/error/): How to notify users of errors.
 -   [Help Documents](./other_features/help/): You can put help documents for users.
 -   [Multiple Definition](./other_features/multiple/): You can put multiple definitions in a json file.
+-   [Cross-platform Support](./other_features/cross_platform): You can make platform specific GUIs.
 -   [Version Checking](./other_features/version_check/): Constraints on the tool version.
 -   [Alternate Spellings](./other_features/alternate_spellings/): Simple Command Runner supports multiple spellings for some json keys and values.
 

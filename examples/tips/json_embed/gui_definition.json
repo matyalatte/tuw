@@ -3,7 +3,8 @@
         {
             "window_name": "Embed JSON into EXE",
             "label": "Embed JSON into EXE",
-            "command": "SimpleCommandRunner merge -j %json% -e %merged_exe% -f",
+            "command": "./SimpleCommandRunner merge -j %json% -e %merged_exe% -f",
+            "command_win": "SimpleCommandRunner.exe merge -j %json% -e %merged_exe% -f",
             "show_last_line": true,
             "components": [
                 {

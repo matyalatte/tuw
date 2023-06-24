@@ -358,6 +358,7 @@ void MainFrame::UpdatePanel() {
     Component* new_comp = nullptr;
     if (sub_definition["components"].Size() > 0) {
         for (rapidjson::Value& c : sub_definition["components"].GetArray()) {
+            if (c["ignore"].GetBool()) continue;
             new_comp = Component::PutComponent(m_panel, comp_sizer, c);
             if (new_comp != nullptr) {
                 std::string const id = new_comp->GetID();

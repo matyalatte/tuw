@@ -20,6 +20,7 @@ You can use them if the standard one is uncomfortable for you.
 |  window_name  |  window_title, title  |
 |  components  |  component_array  |
 |  items  |  item_array  |
+|  platforms  |  platform_array  |
 |  empty_message  |  placeholder  |
 |  recommended  |  recommended_version  |
 |  minimum_required  |  minimum_required_version  |

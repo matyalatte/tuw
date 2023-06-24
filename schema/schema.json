@@ -13,6 +13,9 @@
         "properties": {
           "label": { "type": "string" },
           "command": { "type": "string" },
+          "command_win": { "type": "string" },
+          "command_mac": { "type": "string" },
+          "command_linux": { "type": "string" },
           "window_name": { "type": "string" },
           "window_tile": { "type": "string" },
           "title": { "type": "string" },
@@ -24,17 +27,34 @@
           "component_array": { "$ref": "#/definitions/types/components" }
         },
         "required": [
-          "label",
-          "command"
+          "label"
         ],
-        "if": {
-          "not": {
-            "required": [ "component_array" ]
+        "allOf": [
+          {
+            "if": {
+              "not": {
+                "required": [ "component_array" ]
+              }
+            },
+            "then": {
+              "required": [ "components" ]
+            }
+          },
+          {
+            "if": {
+              "not": {
+                "required": [
+                  "command_win",
+                  "command_mac",
+                  "command_linux"
+                ]
+              }
+            },
+            "then": {
+              "required": [ "command" ]
+            }
           }
-        },
-        "then": {
-          "required": [ "components" ]
-        }
+        ]
       }
     },
     "help": {
@@ -115,7 +135,21 @@
             },
             "label": { "type": "string" },
             "id": { "type": "string" },
-            "add_quotes": { "type": "boolean" }
+            "add_quotes": { "type": "boolean" },
+            "platforms": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [ "win", "mac", "linux" ]
+              }
+            },
+            "platform_array": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [ "win", "mac", "linux" ]
+              }
+            }
           },
           "allOf": [
             { "$ref": "#/definitions/components/file" },

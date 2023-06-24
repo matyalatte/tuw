@@ -2,8 +2,6 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "recommended": { "$ref": "#/definitions/types/version" },
-    "minimum_required": { "$ref": "#/definitions/types/version" },
     "gui": {
       "type": "array",
       "items": {
@@ -14,8 +12,6 @@
           "window_name": { "type": "string" },
           "button": { "type": "string" },
           "show_last_line": { "type": "boolean" },
-          "check_exit_code": { "type": "boolean" },
-          "exit_success": { "type": "integer" },
           "components": {
             "type": "array",
             "items": {
@@ -104,14 +100,6 @@
   },
   "required": [ "gui" ],
   "definitions": {
-    "types": {
-      "version": {
-        "type": "string",
-        "pattern": "^[.0-9]+$",
-        "minLength": 1,
-        "maxLength": 8
-      }
-    },
     "components": {
       "file": {
         "if": {
