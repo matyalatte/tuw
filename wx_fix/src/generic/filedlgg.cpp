@@ -11,7 +11,7 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if defined(__WXUNIVERSAL__) || defined(__WXGTK__)
+#if defined(__WXUNIVERSAL__)
 
 #if wxUSE_FILEDLG
 

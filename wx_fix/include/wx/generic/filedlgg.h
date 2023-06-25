@@ -11,14 +11,14 @@
 #ifndef _WX_FILEDLGG_H_
 #define _WX_FILEDLGG_H_
 
+#if defined(__WXUNIVERSAL__)
+
 #include "wx/listctrl.h"
 #include "wx/datetime.h"
 #include "wx/filefn.h"
 #include "wx/artprov.h"
 #include "wx/filedlg.h"
 #include "wx/generic/filectrlg.h"
-
-#if defined(__WXUNIVERSAL__) || defined(__WXGTK__)
 
 //-----------------------------------------------------------------------------
 // classes

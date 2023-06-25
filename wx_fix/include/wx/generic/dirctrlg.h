@@ -14,12 +14,9 @@
 #ifndef _WX_DIRCTRL_H_
 #define _WX_DIRCTRL_H_
 
-#if wxUSE_DIRDLG || wxUSE_FILEDLG
+#if defined(__WXUNIVERSAL__)
 
-#ifndef wxUSE_DIRCTRL
-#define wxUSE_DIRCTRL 0
-#endif
-#if wxUSE_DIRCTRL || defined(__WXUNIVERSAL__) || defined(__WXGTK__)
+#if wxUSE_DIRDLG || wxUSE_FILEDLG
 
 #include "wx/treectrl.h"
 #include "wx/dialog.h"

@@ -47,6 +47,7 @@ non_gui_options="--disable-plugins
  --disable-debugreport
  --disable-dialupman
  --disable-dynamicloader
+ --disable-ffile
  --disable-filehistory
  --disable-filesystem
  --disable-fontenum
@@ -129,6 +130,7 @@ ctrl_options="--disable-accel
  --disable-grid
  --disable-headerctrl
  --disable-hyperlink
+ --disable-imaglist
  --disable-infobar
  --disable-listbook
  --disable-notebook
@@ -157,12 +159,13 @@ ctrl_options="--disable-accel
  --disable-treebook
  --disable-treelist"
 
-dlg_options="--disable-splash
+dlg_options="--disable-choicedlg
  --disable-coldlg
  --disable-creddlg
  --disable-finddlg
  --disable-fontdlg
  --disable-numberdlg
+ --disable-splash
  --disable-textdlg
  --disable-tipdlg
  --disable-progressdlg
@@ -185,7 +188,9 @@ if [ "$1" = "NoTest" ]; then
     misc_gui_options="${misc_gui_options} --disable-uiactionsim"
 fi
 
-img_options="--disable-gif
+img_options="--disable-palette
+ --disable-image
+ --disable-gif
  --disable-pcx
  --disable-tga
  --disable-iff

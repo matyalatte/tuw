@@ -50,7 +50,9 @@ out
 *.internal
 *.test
 *.make
-batch_files/*.cpp
+
+!wx_fix/build
+!wx_fix/build/cmake/*.cmake
 
 # python
 python

@@ -2424,11 +2424,13 @@ void wxMacCoreGraphicsContext::Rotate( wxDouble angle )
 void wxMacCoreGraphicsContext::DrawBitmap( const wxBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h )
 {
 #if wxOSX_USE_COCOA
+#if wxUSE_IMAGE
     if (EnsureIsValid())
     {
         CGRect r = CGRectMake( (CGFloat) x , (CGFloat) y , (CGFloat) w , (CGFloat) h );
         wxOSXDrawNSImage( m_cgContext, &r, bmp.GetNSImage());
     }
+#endif
 #else
     wxGraphicsBitmap bitmap = GetRenderer()->CreateBitmap(bmp);
     DrawBitmap(bitmap, x, y, w, h);
@@ -2488,10 +2490,12 @@ void wxMacCoreGraphicsContext::DrawIcon( const wxIcon &icon, wxDouble x, wxDoubl
         return;
 
 #if wxOSX_USE_COCOA
+#if wxUSE_IMAGE
     {
         CGRect r = CGRectMake( (CGFloat) x , (CGFloat) y , (CGFloat) w , (CGFloat) h );
         wxOSXDrawNSImage( m_cgContext, &r, icon.GetNSImage());
     }
+#endif
 #endif
 
     CheckInvariants();

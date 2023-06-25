@@ -19,7 +19,7 @@
 class MainFrame : public wxFrame {
  private:
     rapidjson::Document m_definition;
-    size_t m_definition_id;
+    int m_definition_id;
     rapidjson::Document m_config;
 
 #ifdef __linux__

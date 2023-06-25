@@ -10,6 +10,10 @@ REM Download source codes
     curl -OL https://github.com/wxWidgets/wxWidgets/releases/download/v%WX_VERSION%/wxWidgets-%WX_VERSION%.zip
     powershell Expand-Archive -Path wxWidgets-%WX_VERSION%.zip
     del wxWidgets-%WX_VERSION%.zip
+
+    REM Remove unnecessary headers
+    cd wxWidgets-%WX_VERSION%\include\wx
+    rmdir /s /q android dfb gtk gtk1 motif osx qt univ unix x11
 @popd
 
 @pushd %~dp0\..

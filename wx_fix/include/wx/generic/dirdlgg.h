@@ -14,7 +14,7 @@
 #ifndef _WX_DIRDLGG_H_
 #define _WX_DIRDLGG_H_
 
-#if defined(__WXUNIVERSAL__) || defined(__WXGTK__)
+#if defined(__WXUNIVERSAL__)
 
 class WXDLLIMPEXP_FWD_CORE wxGenericDirCtrl;
 class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
