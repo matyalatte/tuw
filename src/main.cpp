@@ -1,6 +1,7 @@
+#ifdef __linux__
 #include <iomanip>
+#endif
 #include "main_frame.h"
-#include "stdpath_min.h"
 
 // Main
 class MainApp : public wxApp {
@@ -25,35 +26,55 @@ bool MainApp::OnInit() {
 wxDECLARE_APP(MainApp);
 wxIMPLEMENT_APP_NO_MAIN(MainApp);
 
+#ifdef __linux__
+#define PRINT(str) std::cout << str
+#define PRINT_ERR(str) std::cerr << str
+#else
+#define PRINT(str) wxPrintf("%s", str)
+#define PRINT_ERR(str) wxFprintf(stderr, "%s", str)
+#endif
+
 bool AskOverwrite(const wxString& path) {
     if (!wxFileExists(path)) {
         return true;
     }
-    std::cout << "Overwrite " << path << "? (y/n)" << std::endl;
+    PRINT("Overwrite ");
+    PRINT(path.c_str());
+    PRINT("? (y/n)\n");
+#ifdef __linux__
     char ans[8];
     std::cin >> std::setw(8) >> ans;
     std::cin.ignore(1024, '\n');
     return (ans[0] == "y"[0] || ans[0] == "Y"[0]);
+#else
+    char ans;
+    scanf("%c", &ans);
+    return (ans == "y"[0] || ans == "Y"[0]);
+#endif
 }
 
 void Merge(const wxString& exe_path, const wxString& json_path, const wxString& new_path,
            const bool force) {
     rapidjson::Document json;
-    json_utils::LoadJson(json_path.ToStdString(), json);
+    json_utils::LoadJson(WxToStd(json_path), json);
     if (json.Size() == 0) {
-        std::cout << "JSON file loaded but it has no data." << std::endl;
+        PRINT("JSON file loaded but it has no data.\n");
         return;
     }
     ExeContainer exe;
     exe.Read(exe_path);
-    std::cout << "Importing a json file... (" << json_path << ")" << std::endl;
+    PRINT("Importing a json file... (");
+    PRINT(json_path.c_str());
+    PRINT(")\n");
     exe.SetJson(json);
     if (!force && !AskOverwrite(new_path)) {
-        std::cout << "The operation has been cancelled." << std::endl;
+        PRINT("The operation has been cancelled.\n");
         return;
     }
     exe.Write(new_path);
-    std::cout << "Generated an executable. (" << new_path << ")" << std::endl;
+    PRINT("Generated an executable. (");
+    PRINT(new_path.c_str());
+    PRINT(")\n");
 }
 
 void Split(const wxString& exe_path, const wxString& json_path, const wxString& new_path,
@@ -61,23 +82,27 @@ void Split(const wxString& exe_path, const wxString& json_path, const wxString& 
     ExeContainer exe;
     exe.Read(exe_path);
     if (!exe.HasJson()) {
-        std::cout << "The executable has no json data." << std::endl;
+        PRINT("The executable has no json data.\n");
         return;
     }
-    std::cout << "Extracting JSON data from the executable..." << std::endl;
+    PRINT("Extracting JSON data from the executable...\n");
     rapidjson::Document json;
     exe.GetJson(json);
     exe.RemoveJson();
     if (!force && (!AskOverwrite(new_path) || !AskOverwrite(json_path))) {
-        std::cout << "The operation has been cancelled." << std::endl;
+        PRINT("The operation has been cancelled.\n");
         return;
     }
     exe.Write(new_path);
-    bool saved = json_utils::SaveJson(json, json_path.ToStdString());
+    bool saved = json_utils::SaveJson(json, WxToStd(json_path));
     if (!saved)
         throw std::runtime_error("Failed to save json file.");
-    std::cout << "Generated an executable. (" << new_path << ")" << std::endl;
-    std::cout << "Exported a json file. (" << json_path << ")" << std::endl;
+    PRINT("Generated an executable. (");
+    PRINT(new_path.c_str());
+    PRINT(")\n");
+    PRINT("Exported a json file. (");
+    PRINT(json_path.c_str());
+    PRINT(")\n");
 }
 
 void PrintUsage() {
@@ -98,9 +123,10 @@ void PrintUsage() {
         "       -f     : Force to overwrite files."
         "\n"
         "Example:\n"
-        "    SimpleCommandRunner merge -f -j my_definition.json -e MyGUI.exe\n";
+        "    SimpleCommandRunner merge -f -j my_definition.json -e MyGUI.exe\n"
+        "\n";
 
-    std::cout << usage << std::endl;
+    PRINT(usage);
 }
 
 enum Commands: int {
@@ -199,7 +225,9 @@ int main(int argc, char* argv[]) {
     }
     catch (std::exception& e) {
         PrintUsage();
-        std::cerr << "Error: " << e.what() << std::endl;
+        PRINT_ERR("Error: ");
+        PRINT_ERR(e.what());
+        PRINT_ERR("\n");
         return 1;
     }
 
@@ -218,7 +246,7 @@ int main(int argc, char* argv[]) {
 
     if (json_path == exe_path || new_exe_path == exe_path) {
         PrintUsage();
-        std::cerr << "Error: Can NOT overwrite the executable itself." << std::endl;
+        PRINT_ERR("Error: Can NOT overwrite the executable itself.\n");
         return 1;
     }
 
@@ -237,7 +265,8 @@ int main(int argc, char* argv[]) {
                 Split(exe_path, json_path, new_exe_path, force);
                 break;
             case CMD_VERSION:
-                std::cout << scr_constants::VERSION << std::endl;
+                PRINT(scr_constants::VERSION);
+                PRINT("\n");
                 break;
             case CMD_HELP:
                 PrintUsage();
@@ -247,8 +276,13 @@ int main(int argc, char* argv[]) {
         }
     }
     catch (std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        PRINT_ERR("Error: ");
+        PRINT_ERR(e.what());
+        PRINT_ERR("\n");
         return 1;
     }
     return 0;
 }
+
+#undef PRINT
+#undef PRINT_ERR

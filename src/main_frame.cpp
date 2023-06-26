@@ -1,5 +1,10 @@
 #include "main_frame.h"
-#include "stdpath_min.h"
+
+#ifdef __linux__
+#define PRINT(str) *m_ostream << str
+#else
+#define PRINT(str) wxPrintf("%s", str)
+#endif
 
 // Main window
 MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Document& config)
@@ -13,17 +18,17 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     if (m_definition.Size() == 0) {
         if (wxFileExists("gui_definition.json")) {
             LoadJson("gui_definition.json", m_definition, true);
-            *m_ostream << "[LoadDefinition] Loaded gui_definition.json" << std::endl;
+            PRINT("[LoadDefinition] Loaded gui_definition.json\n");
         } else {
-            *m_ostream << "[LoadDefinition] gui_definition.json not found." << std::endl;
+            PRINT("[LoadDefinition] gui_definition.json not found.\n");
             try {
                 ExeContainer exe;
                 exe.Read(stdpath::GetExecutablePath(wxTheApp->argv[0]));
                 if (!exe.HasJson()) {
-                    *m_ostream << "[LoadDefinition] Embedded JSON not found." << std::endl;
+                    PRINT("[LoadDefinition] Embedded JSON not found.\n");
                     throw std::runtime_error("JSON data not found.");
                 }
-                *m_ostream << "[LoadDefinition] Found JSON in the executable." << std::endl;
+                PRINT("[LoadDefinition] Found JSON in the executable.\n");
                 exe.GetJson(m_definition);
             }
             catch (std::exception& e) {
@@ -53,11 +58,13 @@ void MainFrame::SetUp() {
 #ifdef __linux__
     m_log_frame = new LogFrame(exe_path);
     m_ostream = m_log_frame;
-#else
-    m_ostream = &std::cout;
 #endif
-    *m_ostream << scr_constants::TOOL_NAME << " v" << scr_constants::VERSION;
-    *m_ostream << " by " << scr_constants::AUTHOR << std::endl;
+    PRINT(scr_constants::TOOL_NAME);
+    PRINT(" v");
+    PRINT(scr_constants::VERSION);
+    PRINT(" by ");
+    PRINT(scr_constants::AUTHOR);
+    PRINT("\n");
 }
 
 void MainFrame::LoadJson(const std::string& file, rapidjson::Document& json, bool is_definition) {
@@ -122,8 +129,10 @@ void MainFrame::CreateFrame() {
 }
 
 void MainFrame::JsonLoadFailed(const std::string& msg, rapidjson::Document& definition) {
-    wxString wxmsg = wxString::FromUTF8(msg);
-    *m_ostream << "[LoadDefinition] Error: " << wxmsg << std::endl;
+    PRINT("[LoadDefinition] Error: ");
+    wxString wxmsg = wxString::FromUTF8(msg.c_str());
+    PRINT(wxmsg.c_str());
+    PRINT("\n");
     ShowErrorDialog(wxmsg);
     json_utils::GetDefaultDefinition(definition);
 }
@@ -137,7 +146,9 @@ void MainFrame::CheckDefinition(rapidjson::Document& definition) {
             std::string version = definition["recommended"].GetString();
             if (definition["not_recommended"].GetBool()) {
                 std::string msg = "Version " + version + " is recommended.";
-                *m_ostream << "[LoadDefinition] Warning: " << msg << std::endl;
+                PRINT("[LoadDefinition] Warning: ");
+                PRINT(msg.c_str());
+                PRINT("\n");
             }
         }
     }
@@ -153,8 +164,10 @@ void MainFrame::CheckDefinition(rapidjson::Document& definition) {
         }
         catch(const std::exception& e) {
             std::string msg = "Failed to load help URLs (" + std::string(e.what()) + ")";
-            wxString wxmsg = wxString::FromUTF8(msg);
-            *m_ostream << "[LoadDefinition] Error: " << wxmsg << std::endl;
+            wxString wxmsg = wxString::FromUTF8(msg.c_str());
+            PRINT("[LoadDefinition] Error: ");
+            PRINT(wxmsg.c_str());
+            PRINT("\n");
             ShowErrorDialog(wxmsg);
             definition.RemoveMember("help");
         }
@@ -183,9 +196,9 @@ void MainFrame::SaveConfig() {
     UpdateConfig();
     bool saved = json_utils::SaveJson(m_config, "gui_config.json");
     if (saved) {
-        *m_ostream << "[SaveConfig] Saved gui_config.json" << std::endl;
+        PRINT("[SaveConfig] Saved gui_config.json\n");
     } else {
-        *m_ostream << "[SaveConfig] Error: Failed to write gui_config.json" << std::endl;
+        PRINT("[SaveConfig] Error: Failed to write gui_config.json\n");
     }
 }
 
@@ -218,7 +231,7 @@ wxString MainFrame::GetCommand() {
         comp_strings[i] = m_components[i]->GetString();
     }
 
-    wxString cmd = wxString::FromUTF8(cmd_ary[0]);
+    wxString cmd = wxString::FromUTF8(cmd_ary[0].c_str());
     for (int i = 0; i < cmd_ids.size(); i++) {
         int id = cmd_ids[i];
         if (id == CMD_ID_PERCENT) {
@@ -229,7 +242,7 @@ wxString MainFrame::GetCommand() {
             cmd += comp_strings[id];
         }
         if (i + 1 < cmd_ary.size()) {
-            cmd += wxString::FromUTF8(cmd_ary[i + 1]);
+            cmd += wxString::FromUTF8(cmd_ary[i + 1].c_str());
         }
     }
     return cmd;
@@ -238,7 +251,9 @@ wxString MainFrame::GetCommand() {
 std::string MainFrame::RunCommand() {
     wxString cmd = GetCommand();
 
-    *m_ostream << "[RunCommand] Command: " << cmd << std::endl;
+    PRINT("[RunCommand] Command: ");
+    PRINT(cmd.c_str());
+    PRINT("\n");
 #ifdef _WIN32
     cmd = "cmd.exe /c " + cmd;
 #endif
@@ -246,7 +261,11 @@ std::string MainFrame::RunCommand() {
     bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);
     int exit_success = json_utils::GetInt(sub_definition, "exit_success", 0);
     bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
+#ifdef __linux__
     std::string last_line = Exec(*m_ostream, cmd,
+#else
+    std::string last_line = Exec(cmd,
+#endif
                                  check_exit_code, exit_success, show_last_line);
     return last_line;
 }
@@ -264,7 +283,9 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
         last_line = RunCommand();
     }
     catch (std::exception& e) {
-        *m_ostream << "[RunCommand] Error: " << e.what() << std::endl;
+        PRINT("[RunCommand] Error: ");
+        PRINT(e.what());
+        PRINT("\n");
         ShowErrorDialog(e.what());
         failed = true;
     }
@@ -274,7 +295,7 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
 
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     if (json_utils::GetBool(sub_definition, "show_last_line", false) && last_line != "") {
-        ShowSuccessDialog(last_line);
+        ShowSuccessDialog(last_line.c_str());
     } else {
         ShowSuccessDialog("Success!");
     }
@@ -315,20 +336,28 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
         }
     }
     catch (std::exception& e) {
-        *m_ostream << tag << "Error: " << e.what() << std::endl;
+        PRINT(tag.c_str());
+        PRINT("Error: ");
+        PRINT(e.what());
+        PRINT("\n");
         ShowErrorDialog(e.what());
         return;
     }
 
-    *m_ostream << tag << url << std::endl;
+    PRINT(tag.c_str());
+    PRINT(url.c_str());
+    PRINT("\n");
     if (type == "file") {
         url = "file:" + url;
     }
     bool success = wxLaunchDefaultBrowser(url);
     if (!success) {
         std::string msg ="Failed to open " + type + " by an unexpected error.";
-        *m_ostream << tag << "Error: " << msg << std::endl;
-        ShowErrorDialog(msg);
+        PRINT(tag.c_str());
+        PRINT("Error: ");
+        PRINT(msg.c_str());
+        PRINT("\n");
+        ShowErrorDialog(msg.c_str());
     }
 }
 
@@ -349,11 +378,15 @@ void MainFrame::UpdateFrame(wxCommandEvent& event) {
 void MainFrame::UpdatePanel() {
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     wxString label = wxString::FromUTF8(sub_definition["label"].GetString());
-    *m_ostream << "[UpdatePanel] Lable: " << label << std::endl;
+    PRINT("[UpdatePanel] Lable: ");
+    PRINT(label.c_str());
+    PRINT("\n");
     wxString cmd_str = wxString::FromUTF8(sub_definition["command_str"].GetString());
-    *m_ostream << "[UpdatePanel] Command: " << cmd_str << std::endl;
+    PRINT("[UpdatePanel] Command: ");
+    PRINT(cmd_str.c_str());
+    PRINT("\n");
     wxString window_name = wxString::FromUTF8(
-        json_utils::GetString(sub_definition, "window_name", "Simple Command Runner"));
+        json_utils::GetString(sub_definition, "window_name", "Simple Command Runner").c_str());
     SetLabel(window_name);
 
     wxBoxSizer* main_sizer = new wxBoxSizer(wxVERTICAL);
@@ -377,7 +410,7 @@ void MainFrame::UpdatePanel() {
 
     // put a button
     wxString button = wxString::FromUTF8(
-        json_utils::GetString(sub_definition, "button", "Run"));
+        json_utils::GetString(sub_definition, "button", "Run").c_str());
     m_run_button = new wxButton(m_panel, wxID_EXECUTE, button);
     comp_sizer->Add(m_run_button, 0, wxFIXED_MINSIZE | wxALIGN_CENTER);
 
@@ -396,3 +429,5 @@ void MainFrame::OnClose(wxCloseEvent& event) {
 void MainFrame::GetDefinition(rapidjson::Document& json) {
     json.CopyFrom(m_definition, json.GetAllocator());
 }
+
+#undef PRINT

@@ -29,7 +29,9 @@ lib_options="--without-regex
  --without-libxpm
  --without-libjbig
  --without-libiconv
- --disable-glcanvasegl"
+ --disable-glcanvasegl
+ --disable-std_iostreams
+ --disable-std_string_conv_in_wxstring"
 
 non_gui_options="--disable-plugins
  --disable-intl
@@ -67,6 +69,8 @@ non_gui_options="--disable-plugins
  --disable-stopwatch
  --disable-sysoptions
  --disable-tarstream
+ --disable-textbuf
+ --disable-textfile
  --disable-webrequest
  --disable-zipstream
  --disable-variant
@@ -105,7 +109,8 @@ big_gui_options="--disable-docview
  --disable-webview
  --disable-clipboard"
 
-ctrl_options="--disable-accel
+ctrl_options="--disable-markup
+ --disable-accel
  --disable-actindicator
  --disable-addremovectrl
  --disable-animatectrl
@@ -117,6 +122,7 @@ ctrl_options="--disable-accel
  --disable-caret
  --disable-checklst
  --disable-choicebook
+ --disable-collpane
  --disable-colourpicker
  --disable-comboctrl
  --disable-commandlinkbutton
@@ -159,7 +165,8 @@ ctrl_options="--disable-accel
  --disable-treebook
  --disable-treelist"
 
-dlg_options="--disable-choicedlg
+dlg_options="--disable-aboutdlg
+ --disable-choicedlg
  --disable-coldlg
  --disable-creddlg
  --disable-finddlg
@@ -225,10 +232,10 @@ if [ ${build_type} = "Debug" ]; then
     options="${options} --enable-debug"
 else
     # Optimize for size
-    export CXXFLAGS="-Os -ffunction-sections -fdata-sections"
+    export CXXFLAGS="-Os -ffunction-sections -fdata-sections -flto"
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # for .mm files
-        export OBJCXXFLAGS="-Os -ffunction-sections -fdata-sections"
+        export OBJCXXFLAGS="-Os -ffunction-sections -fdata-sections -flto"
     fi
 fi
 echo "CMake arguments: ${options}"

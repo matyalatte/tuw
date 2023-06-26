@@ -3,7 +3,7 @@
 static wxFile* OpenFileIO(const wxString& path, wxFile::OpenMode mode) {
     wxFile* io = new wxFile(path, mode);
     if (!io->IsOpened()) {
-        throw std::runtime_error(std::string("Failed to open a file. (") + path + ")");
+        throw std::runtime_error(std::string("Failed to open a file. (") + WxToStd(path) + ")");
     }
     return io;
 }
@@ -91,7 +91,7 @@ static wxString ReadMagic(wxFile* io) {
 static void CheckMagic(wxFile* io, const wxString& true_magic) {
     wxString magic = ReadMagic(io);
     if (magic != true_magic)
-        throw std::runtime_error(std::string("Invalid magic. (") + true_magic + ")");
+        throw std::runtime_error(std::string("Invalid magic. (") + WxToStd(true_magic) + ")");
 }
 
 static const wxUint32 FNV_OFFSET_BASIS_32 = 2166136261U;
@@ -129,7 +129,7 @@ void ExeContainer::Read(const wxString& exe_path) {
     if (EXE_SIZE_MAX <= m_exe_size || end_off < m_exe_size) {
         wxString num;
         num << m_exe_size;
-        throw std::runtime_error(std::string("Unexpected exe size. (") + num + ")");
+        throw std::runtime_error(std::string("Unexpected exe size. (") + WxToStd(num) + ")");
     }
     file_io->Seek(m_exe_size);
 
@@ -140,7 +140,7 @@ void ExeContainer::Read(const wxString& exe_path) {
     if (JSON_SIZE_MAX <= json_size || end_off < m_exe_size + json_size + 20) {
         wxString num;
         num << json_size;
-        throw std::runtime_error(std::string("Unexpected json size. (") + num + ")");
+        throw std::runtime_error(std::string("Unexpected json size. (") + WxToStd(num) + ")");
     }
 
     // Read json data
@@ -149,7 +149,7 @@ void ExeContainer::Read(const wxString& exe_path) {
     if (stored_hash != Fnv1Hash32(json_str)) {
         wxString num;
         num << stored_hash;
-        throw std::runtime_error(std::string("Invalid JSON hash. (") + num + ")");
+        throw std::runtime_error(std::string("Invalid JSON hash. (") + WxToStd(num) + ")");
     }
 
     rapidjson::ParseResult ok = m_json.Parse(json_str);
@@ -176,7 +176,7 @@ void ExeContainer::Write(const wxString& exe_path) {
     if (JSON_SIZE_MAX <= json_size) {
         wxString num;
         num << json_size;
-        throw std::runtime_error(std::string("Json file is too large. (") + num + ")");
+        throw std::runtime_error(std::string("Json file is too large. (") + WxToStd(num) + ")");
     }
 
     wxFile* old_io = OpenFileIO(m_exe_path, wxFile::read);

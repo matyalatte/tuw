@@ -8,7 +8,9 @@ ver 0.5.0
 - Fixed a bug that help menu will be shown even if the size of ["help"] is zero.
 - Fixed an error when the size of ["gui"] is zero.
 - Removed more codes from wxWidgets.
-- Applied optimazation for objective-c++.
+- Applied optimazation for objective-c++ files.
+- Applied link time optimization.
+- Used cstdio instead of iostream.
 
 ver 0.4.1
 - Raise errors when the command requires more components or there are unused components.

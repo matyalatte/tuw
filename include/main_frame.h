@@ -11,9 +11,9 @@
 #include "component.h"
 #include "exec.h"
 #include "json_utils.h"
-#include "exe_container.h"
 #include "scr_constants.h"
-
+#include "exe_container.h"
+#include "stdpath_min.h"
 
 // Main window
 class MainFrame : public wxFrame {
@@ -26,8 +26,6 @@ class MainFrame : public wxFrame {
     // Linux needs a window to show outputs
     LogFrame* m_log_frame;
     LogFrame* m_ostream;
-#else
-    std::ostream* m_ostream;
 #endif
 
     std::vector<Component*> m_components;

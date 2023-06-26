@@ -195,7 +195,7 @@ if(NOT wxBUILD_DEBUG_LEVEL STREQUAL "Default")
 endif()
 
 # Constants for setup.h creation
-set(wxUSE_STD_DEFAULT ON)
+set(wxUSE_STD_DEFAULT OFF)
 if(NOT wxUSE_EXPAT)
     set(wxUSE_XRC OFF)
 endif()

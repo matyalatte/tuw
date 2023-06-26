@@ -75,7 +75,7 @@ static const int DEFAULT_SIZER_FLAG = wxFIXED_MINSIZE | wxALIGN_LEFT | wxBOTTOM;
 StaticText::StaticText(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
     : Component(j, NOT_STRING) {
     wxStaticText* text = new wxStaticText(panel, wxID_ANY, m_label);
-    text->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "")));
+    text->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
     sizer->Add(text, 0, DEFAULT_SIZER_FLAG , 13);
 }
 
@@ -101,9 +101,9 @@ void StringComponentBase::GetConfig(rapidjson::Document& config) {
 // File Picker
 FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
     : StringComponentBase(panel, sizer, j) {
-    wxString ext = wxString::FromUTF8(json_utils::GetString(j, "extension", "any files (*)|*"));
-    wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", ""));
-    wxString empty_message = wxString::FromUTF8(json_utils::GetString(j, "empty_message", ""));
+    wxString ext = wxString::FromUTF8(json_utils::GetString(j, "extension", "any files (*)|*").c_str());
+    wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", "").c_str());
+    wxString empty_message = wxString::FromUTF8(json_utils::GetString(j, "empty_message", "").c_str());
     CustomFilePicker* picker = new CustomFilePicker(panel, wxID_ANY,
                                                     value, "", ext, empty_message,
                                                     wxDefaultPosition, wxSize(350, 25),
@@ -111,7 +111,7 @@ FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Valu
 
     sizer->Add(picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
     picker->DragAcceptFiles(true);
-    picker->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "")));
+    picker->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
     m_widget = picker;
 }
 
@@ -130,8 +130,8 @@ void FilePicker::SetConfig(const rapidjson::Value& config) {
 // Dir Picker
 DirPicker::DirPicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
     : StringComponentBase(panel, sizer, j) {
-    wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", ""));
-    wxString empty_message = wxString::FromUTF8(json_utils::GetString(j, "empty_message", ""));
+    wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", "").c_str());
+    wxString empty_message = wxString::FromUTF8(json_utils::GetString(j, "empty_message", "").c_str());
     CustomDirPicker* picker = new CustomDirPicker(panel, wxID_ANY,
                                                   value, "", empty_message,
                                                   wxDefaultPosition, wxSize(350, 25),
@@ -139,7 +139,7 @@ DirPicker::DirPicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value&
 
     sizer->Add(picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
     picker->DragAcceptFiles(true);
-    picker->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "")));
+    picker->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
     m_widget = picker;
 }
 
@@ -175,7 +175,7 @@ Choice::Choice(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
     choice->SetSelection(json_utils::GetInt(j, "default", 0) % j["items"].Size());
 
     SetValues(values);
-    choice->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "")));
+    choice->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
     m_widget = choice;
 }
 
@@ -210,7 +210,7 @@ CheckBox::CheckBox(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j
     else
         m_value = m_label;
     check->SetValue(json_utils::GetBool(j, "default", false));
-    check->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "")));
+    check->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
     m_widget = check;
 }
 
@@ -297,14 +297,14 @@ void CheckArray::GetConfig(rapidjson::Document& config) {
 // TextBox
 TextBox::TextBox(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
     : StringComponentBase(panel, sizer, j) {
-    wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", ""));
-    wxString empty_message = wxString::FromUTF8(json_utils::GetString(j, "empty_message", ""));
+    wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", "").c_str());
+    wxString empty_message = wxString::FromUTF8(json_utils::GetString(j, "empty_message", "").c_str());
     CustomTextCtrl* textbox = new CustomTextCtrl(panel, wxID_ANY,
         value, empty_message,
         wxDefaultPosition, wxSize(350, 23));
 
     sizer->Add(textbox, 0, wxALIGN_LEFT | wxBOTTOM, 13);
-    textbox->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "")));
+    textbox->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
     m_widget = textbox;
 }
 
@@ -331,7 +331,7 @@ NumPickerBase::NumPickerBase(wxWindow* panel, wxBoxSizer* sizer, const rapidjson
     double min = json_utils::GetDouble(j, "min", 0.0);
     double max = json_utils::GetDouble(j, "max", 100.0);
     m_picker->SetRange(min, max);
-    m_picker->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "")));
+    m_picker->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
 
     sizer->Add(m_picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
     m_widget = m_picker;

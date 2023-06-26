@@ -1,4 +1,5 @@
 #pragma once
+#include <stdexcept>
 #include "wx/wx.h"
 #include "wx/file.h"
 #include "wx/buffer.h"
@@ -6,6 +7,10 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/error/en.h"
+
+inline std::string WxToStd(const wxString str) {
+    return std::string(str.c_str());
+}
 
 class ExeContainer {
  private:

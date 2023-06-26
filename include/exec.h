@@ -1,5 +1,10 @@
 #pragma once
+#ifdef __linux__
 #include <iostream>
+#else
+#include <cstdio>
+#include <stdexcept>
+#endif
 #include <array>
 #include <string>
 #include "wx/wx.h"
@@ -42,7 +47,7 @@ class LogFrame : public wxFrame {
 #ifdef __linux__
 std::string Exec(LogFrame& ostream,
 #else
-std::string Exec(std::ostream& ostream,
+std::string Exec(
 #endif
                  wxString& cmd,
                  bool check_exit_code = false,
