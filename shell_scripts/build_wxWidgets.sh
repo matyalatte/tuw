@@ -231,6 +231,7 @@ options="--disable-shared
 if [ ${build_type} = "Debug" ]; then
     options="${options} --enable-debug"
 else
+    options="${options} --disable-debug --disable-debug_flag --disable-debug_info"
     # Optimize for size
     export CXXFLAGS="-Os -ffunction-sections -fdata-sections -flto"
     if [[ "$OSTYPE" == "darwin"* ]]; then

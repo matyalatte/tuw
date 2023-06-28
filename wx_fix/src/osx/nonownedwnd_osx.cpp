@@ -225,6 +225,7 @@ void wxNonOwnedWindow::WillBeDestroyed()
 // wxNonOwnedWindow misc
 // ----------------------------------------------------------------------------
 
+#if !wxUSE_WINDOW_MINIMAL
 bool wxNonOwnedWindow::OSXShowWithEffect(bool show,
                                          wxShowEffect effect,
                                          unsigned timeout)
@@ -242,6 +243,7 @@ bool wxNonOwnedWindow::OSXShowWithEffect(bool show,
 
     return true;
 }
+#endif
 
 wxPoint wxNonOwnedWindow::GetClientAreaOrigin() const
 {

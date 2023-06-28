@@ -2,6 +2,7 @@
 #include <iomanip>
 #endif
 #include "main_frame.h"
+#include <locale.h>
 
 // Main
 class MainApp : public wxApp {
@@ -178,6 +179,8 @@ int wmain(int argc, wchar_t* argv[]) {
 #else
 int main(int argc, char* argv[]) {
 #endif
+    setlocale(LC_CTYPE, "");
+
     // Launch GUI if no args.
     if (argc == 1) return wxEntry(argc, argv);
 

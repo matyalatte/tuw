@@ -1,5 +1,27 @@
 Changes that don't exist in the official wxWidgets
 
+- disabled scroll window and show effect with wxUSE_WINDOW_MINIMAL
+  - include/wx/window.h
+              /scrolwin.h
+              /dialog.h
+              /vscroll.h
+              /vlbox.h
+              /msw/window.h
+              /osx/window.h
+                  /nonownedwnd.h
+                  /cocoa/private.h
+                  /core/private.h
+  - src/generic/scrlwing.cpp
+               /vscroll.cpp
+               /vlbox.cpp
+       /common/wincmn.cpp
+              /dlgcmn.cpp
+       /msw/window.cpp
+       /osx/nonownedwnd_osx.cpp
+           /window_osx.cpp
+           /cocoa/nonownedwnd.mm
+           /cocoa/window.mm
+
 - disabled wxUSE_STD_DEFAULT
   - build/cmake/init.cmake
 

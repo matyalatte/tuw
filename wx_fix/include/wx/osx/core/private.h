@@ -262,12 +262,14 @@ public :
     // set the visibility of this widget (maybe latent)
     virtual void        SetVisibility( bool visible ) = 0;
 
+#if !wxUSE_WINDOW_MINIMAL
     virtual bool ShowWithEffect(bool WXUNUSED(show),
                                 wxShowEffect WXUNUSED(effect),
                                 unsigned WXUNUSED(timeout))
     {
         return false;
     }
+#endif
 
     virtual void        Raise() = 0;
 
@@ -900,10 +902,12 @@ public :
         return false;
     }
 
+#if !wxUSE_WINDOW_MINIMAL
     virtual bool ShowWithEffect(bool show, wxShowEffect WXUNUSED(effect), unsigned WXUNUSED(timeout))
     {
         return Show(show);
     }
+#endif
 
     virtual void Update()
     {

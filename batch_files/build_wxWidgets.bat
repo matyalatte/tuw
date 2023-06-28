@@ -253,7 +253,7 @@ set wxOPTIONS=-D wxBUILD_COMPATIBILITY=3.1^
     cd %BUILD_TYPE%
     if "%BUILD_TYPE%"=="Release" (
         set CMAKE_OPTIONS=%CMAKE_OPTIONS% %RELEASE_FLAGS%
-        set wxOPTIONS=%wxOPTIONS% -D wxBUILD_USE_STATIC_RUNTIME=ON
+        set wxOPTIONS=%wxOPTIONS% -D wxBUILD_USE_STATIC_RUNTIME=ON -D wxBUILD_DEBUG_LEVEL=0
     )
     echo Cmake options: %CMAKE_OPTIONS%
     echo wxOptions: %wxOPTIONS%
