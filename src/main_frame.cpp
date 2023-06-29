@@ -151,31 +151,8 @@ void MainFrame::CheckDefinition(rapidjson::Document& definition) {
                 PRINT("\n");
             }
         }
-    }
-    catch(const std::exception& e) {
-        JsonLoadFailed(std::string(e.what()), definition);
-        return;
-    }
-
-    // check help urls
-    if (definition.HasMember("help")) {
-        try {
-            json_utils::CheckHelpURLs(definition);
-        }
-        catch(const std::exception& e) {
-            std::string msg = "Failed to load help URLs (" + std::string(e.what()) + ")";
-            wxString wxmsg = wxString::FromUTF8(msg.c_str());
-            PRINT("[LoadDefinition] Error: ");
-            PRINT(wxmsg.c_str());
-            PRINT("\n");
-            ShowErrorDialog(wxmsg);
-            definition.RemoveMember("help");
-        }
-    }
-
-    // check panel definitions
-    try {
         json_utils::CheckDefinition(definition);
+        json_utils::CheckHelpURLs(definition);
     }
     catch (const std::exception& e) {
         std::string msg = "Failed to load gui_definition.json (" + std::string(e.what()) + ")";

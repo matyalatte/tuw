@@ -1,13 +1,13 @@
 // Functions related to json.
 
 #pragma once
-#include <fstream>
-#include <iostream>
+#include <cstdio>
+#include <stdexcept>
 #include <string>
 #include <cassert>
 #include "rapidjson/document.h"
-#include "rapidjson/istreamwrapper.h"
-#include "rapidjson/ostreamwrapper.h"
+#include "rapidjson/filereadstream.h"
+#include "rapidjson/filewritestream.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/error/en.h"

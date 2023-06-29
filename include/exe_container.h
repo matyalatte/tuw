@@ -7,6 +7,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/error/en.h"
+#include "json_utils.h"
 
 inline std::string WxToStd(const wxString str) {
     return std::string(str.c_str());

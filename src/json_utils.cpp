@@ -2,13 +2,17 @@
 
 namespace json_utils {
     void LoadJson(const std::string& file, rapidjson::Document& json) {
-        std::ifstream ifs(file);
-        if (!ifs) {
+        FILE* fp = fopen(file.c_str(), "rb");
+        if (!fp) {
             std::string msg = "Failed to open " + file;
             throw std::runtime_error(msg);
         }
-        rapidjson::IStreamWrapper isw(ifs);
-        rapidjson::ParseResult ok = json.ParseStream(isw);
+        char readBuffer[65536];
+        rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+        
+        rapidjson::ParseResult ok = json.ParseStream(is);
+        fclose(fp);
+
         if (!ok) {
             std::string msg("Failed to parse JSON: ");
             msg += std::string(rapidjson::GetParseError_En(ok.Code()))
@@ -20,12 +24,15 @@ namespace json_utils {
     }
 
     bool SaveJson(rapidjson::Document& json, const std::string& file) {
-        std::ofstream ofs(file);
-        if (!ofs)
+        FILE* fp = fopen(file.c_str(), "wb"); // non-Windows use "w"
+        if (!fp)
             return false;
-        rapidjson::OStreamWrapper osw(ofs);
-        rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer(osw);
+ 
+        char writeBuffer[65536];
+        rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+        rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);
         json.Accept(writer);
+        fclose(fp);
         return true;
     }
 
@@ -517,6 +524,7 @@ namespace json_utils {
     }
 
     void CheckHelpURLs(const rapidjson::Document& definition) {
+        if (!definition.HasMember("help")) return;
         CheckJsonType(definition, "help", JsonType::JSON_ARRAY);
         for (const rapidjson::Value& h : definition["help"].GetArray()) {
             CheckJsonType(h, "type", JsonType::STRING);
