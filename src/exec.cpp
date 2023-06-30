@@ -126,7 +126,7 @@ std::string Exec(
     #ifdef __linux__
         ostream << str;
     #else
-        wxPrintf("%s", str.c_str());
+        wxPrintf(str.c_str());
     #endif
         in_msg += str;
         if (in_msg.length() > 2048) {

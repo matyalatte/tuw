@@ -37,7 +37,7 @@ TEST(JsonCheckTest, LoadJsonFail2) {
     }
     catch(std::exception& err) {
         const char* expected = "Failed to parse JSON: Missing a comma or '}'"
-                               " after an object member. (offset: 122)";
+                               " after an object member. (offset: 128)";
         EXPECT_STREQ(expected, err.what());
     }
 }

@@ -30,7 +30,8 @@ lib_options="--without-regex
  --without-libjbig
  --without-libiconv
  --disable-glcanvasegl
- --disable-std_iostreams
+ --disable-std_string
+ --disable-std_containers_compat
  --disable-std_string_conv_in_wxstring"
 
 non_gui_options="--disable-plugins
@@ -57,6 +58,7 @@ non_gui_options="--disable-plugins
  --disable-fs_archive
  --disable-fs_inet
  --disable-fs_zip
+ --disable-fsvolume
  --disable-fswatcher
  --disable-log
  --disable-mimetype
@@ -212,7 +214,7 @@ else
     # Somehow OSX will use gnu++11 without the 'with-cxx' option
     non_gui_options="${non_gui_options} --disable-datetime"
     ctrl_options="${ctrl_options} --disable-filectrl"
-    lib_options="${lib_options} --without-cairo --with-cxx=17"
+    lib_options="${lib_options} --without-cairo --with-cxx=17 --disable-std_iostreams"
 fi
 
 options="--disable-shared

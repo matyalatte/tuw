@@ -1,9 +1,11 @@
 #include "main_frame.h"
 
 #ifdef __linux__
+#define PRINT_FMT(fmt, ...) *m_ostream << wxString::Format(fmt, __VA_ARGS__)
 #define PRINT(str) *m_ostream << str
 #else
-#define PRINT(str) wxPrintf("%s", str)
+#define PRINT_FMT(fmt, ...) wxPrintf(fmt, __VA_ARGS__)
+#define PRINT(str) wxPrintf(str)
 #endif
 
 // Main window
@@ -58,13 +60,10 @@ void MainFrame::SetUp() {
 #ifdef __linux__
     m_log_frame = new LogFrame(exe_path);
     m_ostream = m_log_frame;
+#else
+    PRINT_FMT("%s v%s by %s\n", scr_constants::TOOL_NAME,
+              scr_constants::VERSION, scr_constants::AUTHOR);
 #endif
-    PRINT(scr_constants::TOOL_NAME);
-    PRINT(" v");
-    PRINT(scr_constants::VERSION);
-    PRINT(" by ");
-    PRINT(scr_constants::AUTHOR);
-    PRINT("\n");
 }
 
 void MainFrame::LoadJson(const std::string& file, rapidjson::Document& json, bool is_definition) {
@@ -129,26 +128,20 @@ void MainFrame::CreateFrame() {
 }
 
 void MainFrame::JsonLoadFailed(const std::string& msg, rapidjson::Document& definition) {
-    PRINT("[LoadDefinition] Error: ");
     wxString wxmsg = wxString::FromUTF8(msg.c_str());
-    PRINT(wxmsg.c_str());
-    PRINT("\n");
+    PRINT_FMT("[LoadDefinition] Error: %s\n", wxmsg);
     ShowErrorDialog(wxmsg);
     json_utils::GetDefaultDefinition(definition);
 }
 
 // read gui_definition.json
 void MainFrame::CheckDefinition(rapidjson::Document& definition) {
-    // Check tool version
     try {
         json_utils::CheckVersion(definition);
         if (definition.HasMember("recommended")) {
-            std::string version = definition["recommended"].GetString();
             if (definition["not_recommended"].GetBool()) {
-                std::string msg = "Version " + version + " is recommended.";
-                PRINT("[LoadDefinition] Warning: ");
-                PRINT(msg.c_str());
-                PRINT("\n");
+                PRINT_FMT("[LoadDefinition] Warning: Version %s is recommended.\n",
+                           definition["recommended"].GetString());
             }
         }
         json_utils::CheckDefinition(definition);
@@ -228,9 +221,7 @@ wxString MainFrame::GetCommand() {
 std::string MainFrame::RunCommand() {
     wxString cmd = GetCommand();
 
-    PRINT("[RunCommand] Command: ");
-    PRINT(cmd.c_str());
-    PRINT("\n");
+    PRINT_FMT("[RunCommand] Command: %s\n", cmd);
 #ifdef _WIN32
     cmd = "cmd.exe /c " + cmd;
 #endif
@@ -260,9 +251,7 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
         last_line = RunCommand();
     }
     catch (std::exception& e) {
-        PRINT("[RunCommand] Error: ");
-        PRINT(e.what());
-        PRINT("\n");
+        PRINT_FMT("[RunCommand] Error: %s\n", e.what());
         ShowErrorDialog(e.what());
         failed = true;
     }
@@ -313,27 +302,19 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
         }
     }
     catch (std::exception& e) {
-        PRINT(tag.c_str());
-        PRINT("Error: ");
-        PRINT(e.what());
-        PRINT("\n");
+        PRINT_FMT("%sError: %s\n", tag.c_str(), e.what());
         ShowErrorDialog(e.what());
         return;
     }
 
-    PRINT(tag.c_str());
-    PRINT(url.c_str());
-    PRINT("\n");
+    PRINT_FMT("%s%s\n", tag.c_str(), url);
     if (type == "file") {
         url = "file:" + url;
     }
     bool success = wxLaunchDefaultBrowser(url);
     if (!success) {
-        std::string msg ="Failed to open " + type + " by an unexpected error.";
-        PRINT(tag.c_str());
-        PRINT("Error: ");
-        PRINT(msg.c_str());
-        PRINT("\n");
+        std::string msg = "Failed to open " + type + " by an unexpected error.";
+        PRINT_FMT("%sError: %s\n", tag.c_str(), msg.c_str());
         ShowErrorDialog(msg.c_str());
     }
 }
@@ -355,13 +336,9 @@ void MainFrame::UpdateFrame(wxCommandEvent& event) {
 void MainFrame::UpdatePanel() {
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     wxString label = wxString::FromUTF8(sub_definition["label"].GetString());
-    PRINT("[UpdatePanel] Lable: ");
-    PRINT(label.c_str());
-    PRINT("\n");
+    PRINT_FMT("[UpdatePanel] Lable: %s\n", label);
     wxString cmd_str = wxString::FromUTF8(sub_definition["command_str"].GetString());
-    PRINT("[UpdatePanel] Command: ");
-    PRINT(cmd_str.c_str());
-    PRINT("\n");
+    PRINT_FMT("[UpdatePanel] Command: %s\n", cmd_str);
     wxString window_name = wxString::FromUTF8(
         json_utils::GetString(sub_definition, "window_name", "Simple Command Runner").c_str());
     SetLabel(window_name);
@@ -407,4 +384,5 @@ void MainFrame::GetDefinition(rapidjson::Document& json) {
     json.CopyFrom(m_definition, json.GetAllocator());
 }
 
+#undef PRINT_FMT
 #undef PRINT

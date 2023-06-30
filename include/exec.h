@@ -1,10 +1,6 @@
 #pragma once
-#ifdef __linux__
-#include <iostream>
-#else
 #include <cstdio>
 #include <stdexcept>
-#endif
 #include <array>
 #include <string>
 #include "wx/wx.h"
@@ -22,7 +18,7 @@ class LogFrame : public wxFrame {
     explicit LogFrame(wxString exepath);
     void OnClose(wxCloseEvent& event);
     LogFrame& operator <<(std::string& str) {
-        m_log_box->AppendText(wxString::FromUTF8(str));
+        m_log_box->AppendText(wxString::FromUTF8(str.c_str()));
         return *this;
     }
     LogFrame& operator <<(wxString& str) {
@@ -31,12 +27,6 @@ class LogFrame : public wxFrame {
     }
     LogFrame& operator <<(const char* str) {
         m_log_box->AppendText(wxString::FromUTF8(str));
-        return *this;
-    }
-    typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
-    typedef CoutType& (*StandardEndLine)(CoutType&);
-    LogFrame& operator <<(StandardEndLine endl) {
-        *this << "\n";
         return *this;
     }
 };

@@ -1,6 +1,3 @@
-#ifdef __linux__
-#include <iomanip>
-#endif
 #include "main_frame.h"
 #include <locale.h>
 
@@ -27,31 +24,14 @@ bool MainApp::OnInit() {
 wxDECLARE_APP(MainApp);
 wxIMPLEMENT_APP_NO_MAIN(MainApp);
 
-#ifdef __linux__
-#define PRINT(str) std::cout << str
-#define PRINT_ERR(str) std::cerr << str
-#else
-#define PRINT(str) wxPrintf("%s", str)
-#define PRINT_ERR(str) wxFprintf(stderr, "%s", str)
-#endif
-
 bool AskOverwrite(const wxString& path) {
     if (!wxFileExists(path)) {
         return true;
     }
-    PRINT("Overwrite ");
-    PRINT(path.c_str());
-    PRINT("? (y/n)\n");
-#ifdef __linux__
-    char ans[8];
-    std::cin >> std::setw(8) >> ans;
-    std::cin.ignore(1024, '\n');
-    return (ans[0] == "y"[0] || ans[0] == "Y"[0]);
-#else
+    wxPrintf("Overwrite %s? (y/n)\n", path);
     char ans;
     scanf("%c", &ans);
     return (ans == "y"[0] || ans == "Y"[0]);
-#endif
 }
 
 void Merge(const wxString& exe_path, const wxString& json_path, const wxString& new_path,
@@ -59,23 +39,19 @@ void Merge(const wxString& exe_path, const wxString& json_path, const wxString& 
     rapidjson::Document json;
     json_utils::LoadJson(WxToStd(json_path), json);
     if (json.Size() == 0) {
-        PRINT("JSON file loaded but it has no data.\n");
+        wxPrintf("JSON file loaded but it has no data.\n");
         return;
     }
     ExeContainer exe;
     exe.Read(exe_path);
-    PRINT("Importing a json file... (");
-    PRINT(json_path.c_str());
-    PRINT(")\n");
+    wxPrintf("Importing a json file... (%s)\n", json_path);
     exe.SetJson(json);
     if (!force && !AskOverwrite(new_path)) {
-        PRINT("The operation has been cancelled.\n");
+        wxPrintf("The operation has been cancelled.\n");
         return;
     }
     exe.Write(new_path);
-    PRINT("Generated an executable. (");
-    PRINT(new_path.c_str());
-    PRINT(")\n");
+    wxPrintf("Generated an executable. (%s)\n", new_path);
 }
 
 void Split(const wxString& exe_path, const wxString& json_path, const wxString& new_path,
@@ -83,27 +59,23 @@ void Split(const wxString& exe_path, const wxString& json_path, const wxString& 
     ExeContainer exe;
     exe.Read(exe_path);
     if (!exe.HasJson()) {
-        PRINT("The executable has no json data.\n");
+        wxPrintf("The executable has no json data.\n");
         return;
     }
-    PRINT("Extracting JSON data from the executable...\n");
+    wxPrintf("Extracting JSON data from the executable...\n");
     rapidjson::Document json;
     exe.GetJson(json);
     exe.RemoveJson();
     if (!force && (!AskOverwrite(new_path) || !AskOverwrite(json_path))) {
-        PRINT("The operation has been cancelled.\n");
+        wxPrintf("The operation has been cancelled.\n");
         return;
     }
     exe.Write(new_path);
     bool saved = json_utils::SaveJson(json, WxToStd(json_path));
     if (!saved)
         throw std::runtime_error("Failed to save json file.");
-    PRINT("Generated an executable. (");
-    PRINT(new_path.c_str());
-    PRINT(")\n");
-    PRINT("Exported a json file. (");
-    PRINT(json_path.c_str());
-    PRINT(")\n");
+    wxPrintf("Generated an executable. (%s)\n", new_path);
+    wxPrintf("Exported a json file. (%s)\n", json_path);
 }
 
 void PrintUsage() {
@@ -127,7 +99,7 @@ void PrintUsage() {
         "    SimpleCommandRunner merge -f -j my_definition.json -e MyGUI.exe\n"
         "\n";
 
-    PRINT(usage);
+    wxPrintf(usage);
 }
 
 enum Commands: int {
@@ -194,44 +166,37 @@ int main(int argc, char* argv[]) {
     wxString new_exe_path = "";
     bool force = false;
 
-    try {
-        for (size_t i = 2; i < argc; i++) {
-            wxString opt_str = wxString(argv[i]);
-            opt_str.Replace("-", "");
-            int opt_int = OPT_TO_INT.get(opt_str.c_str(), OPT_UNKNOWN);
-            if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && argc <= i + 1) {
-                wxString msg = "This option requires a file path. (" + opt_str + ")";
-                throw std::runtime_error(msg.c_str());
-            }
-            switch (opt_int) {
-                case OPT_UNKNOWN:
-                    {
-                        wxString msg = "Unknown option detected. (" + opt_str + ")";
-                        throw std::runtime_error(msg.c_str());
-                    }
-                    break;
-                case OPT_JSON:
-                    i++;
-                    json_path = wxString(argv[i]);
-                    break;
-                case OPT_EXE:
-                    i++;
-                    new_exe_path = wxString(argv[i]);
-                    break;
-                case OPT_FORCE:
-                    force = true;
-                    break;
-                default:
-                    break;
-            }
+    for (size_t i = 2; i < argc; i++) {
+        wxString opt_str = wxString(argv[i]);
+        opt_str.Replace("-", "");
+        int opt_int = OPT_TO_INT.get(opt_str.c_str(), OPT_UNKNOWN);
+        if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && argc <= i + 1) {
+            PrintUsage();
+            wxFprintf(stderr, "Error: This option requires a file path. (%s)\n", opt_str);
+            return 1;
         }
-    }
-    catch (std::exception& e) {
-        PrintUsage();
-        PRINT_ERR("Error: ");
-        PRINT_ERR(e.what());
-        PRINT_ERR("\n");
-        return 1;
+        switch (opt_int) {
+            case OPT_UNKNOWN:
+                {
+                    PrintUsage();
+                    wxFprintf(stderr, "Error: Unknown option detected. (%s)\n", opt_str);
+                    return 1;
+                }
+                break;
+            case OPT_JSON:
+                i++;
+                json_path = wxString(argv[i]);
+                break;
+            case OPT_EXE:
+                i++;
+                new_exe_path = wxString(argv[i]);
+                break;
+            case OPT_FORCE:
+                force = true;
+                break;
+            default:
+                break;
+        }
     }
 
     if (json_path == "") {
@@ -249,7 +214,7 @@ int main(int argc, char* argv[]) {
 
     if (json_path == exe_path || new_exe_path == exe_path) {
         PrintUsage();
-        PRINT_ERR("Error: Can NOT overwrite the executable itself.\n");
+        wxFprintf(stderr, "Error: Can NOT overwrite the executable itself.\n");
         return 1;
     }
 
@@ -268,8 +233,7 @@ int main(int argc, char* argv[]) {
                 Split(exe_path, json_path, new_exe_path, force);
                 break;
             case CMD_VERSION:
-                PRINT(scr_constants::VERSION);
-                PRINT("\n");
+                wxPrintf("%s\n", scr_constants::VERSION);
                 break;
             case CMD_HELP:
                 PrintUsage();
@@ -279,13 +243,8 @@ int main(int argc, char* argv[]) {
         }
     }
     catch (std::exception& e) {
-        PRINT_ERR("Error: ");
-        PRINT_ERR(e.what());
-        PRINT_ERR("\n");
+        wxFprintf(stderr, "Error: %s\n", e.what());
         return 1;
     }
     return 0;
 }
-
-#undef PRINT
-#undef PRINT_ERR
