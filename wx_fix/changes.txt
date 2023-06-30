@@ -1,5 +1,15 @@
 Changes that don't exist in the official wxWidgets
 
+- disabled some cursor icons
+  - include/wx/gdicmn.h
+  - src/common/gdicmn.cpp
+    src/msw/cursor.cpp
+
+- disabled wxGetLibraryVersionInfo
+  - include/wx/utils.h
+  - src/common/utilscmn.cpp
+              /wincmn.cpp
+
 - disabled scroll window and show effect with wxUSE_WINDOW_MINIMAL
   - include/wx/window.h
               /scrolwin.h

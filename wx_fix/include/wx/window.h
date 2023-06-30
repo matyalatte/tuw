@@ -103,7 +103,11 @@ enum wxWindowVariant
 #endif
 
 #ifndef wxUSE_WINDOW_MINIMAL
-#define wxUSE_WINDOW_MINIMAL defined(_WIN32)
+#ifdef __linux__
+#define wxUSE_WINDOW_MINIMAL 0
+#else
+#define wxUSE_WINDOW_MINIMAL 1
+#endif
 #endif
 #if !wxUSE_WINDOW_MINIMAL
 // valid values for Show/HideWithEffect()

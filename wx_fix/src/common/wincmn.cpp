@@ -3242,8 +3242,10 @@ void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
 #endif // __WXDEBUG__
         {
 #if wxUSE_MSGDLG
+#if wxUSE_PLAT_STRINGS
             // just Ctrl-Alt-middle click shows information about wx version
             ::wxInfoMessageBox((wxWindow*)this);
+#endif
 #endif // wxUSE_MSGDLG
         }
     }

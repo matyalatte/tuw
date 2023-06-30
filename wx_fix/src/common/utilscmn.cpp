@@ -1382,23 +1382,18 @@ int wxMessageBox(const wxString& message, const wxString& caption, long style,
     return wxCANCEL;
 }
 
+#if wxUSE_PLAT_STRINGS
 wxVersionInfo wxGetLibraryVersionInfo()
 {
     // don't translate these strings, they're for diagnostics purposes only
     wxString msg;
-#if wxUSE_PLAT_STRINGS
     msg.Printf(wxS("wxWidgets Library (%s port)\n")
-#else
-    msg.Printf(wxS("wxWidgets Library\n")
-#endif
                wxS("Version %d.%d.%d (Unicode: %s, debug level: %d),\n")
 #if !wxUSE_REPRODUCIBLE_BUILD
                wxS("compiled at %s %s\n\n")
 #endif
                wxS("Runtime version of toolkit used is %d.%d.\n"),
-#if wxUSE_PLAT_STRINGS
                wxPlatformInfo::Get().GetPortIdName(),
-#endif
                wxMAJOR_VERSION,
                wxMINOR_VERSION,
                wxRELEASE_NUMBER,
@@ -1455,6 +1450,7 @@ void wxInfoMessageBox(wxWindow* parent)
                  wxICON_INFORMATION | wxOK,
                  parent);
 }
+#endif
 
 #endif // wxUSE_MSGDLG
 

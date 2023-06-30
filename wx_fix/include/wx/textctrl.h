@@ -35,7 +35,11 @@ class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
 class WXDLLIMPEXP_FWD_CORE wxTextCtrlBase;
 
 #ifndef wxUSE_TEXTCTRL_MINIMAL
-#define wxUSE_TEXTCTRL_MINIMAL !defined(__linux__)
+#ifdef __linux__
+#define wxUSE_TEXTCTRL_MINIMAL 0
+#else
+#define wxUSE_TEXTCTRL_MINIMAL 1
+#endif
 #endif
 
 // ----------------------------------------------------------------------------
