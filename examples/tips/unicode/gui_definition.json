@@ -1,0 +1,25 @@
+{
+    "gui": [
+        {
+            "label": "Unicode Sample",
+            "command": "echo file: %รหัส% & echo folder: %-% & echo checkbox: %-%",
+            "button": "こんにちは！",
+            "components": [
+                {
+                    "type": "file",
+                    "label": "文件",
+                    "extension": "any files | *",
+                    "id": "รหัส"
+                },
+                {
+                    "type": "folder",
+                    "label": "폴더"
+                },
+                {
+                    "type": "check",
+                    "label": "вариант"
+                }
+            ]
+        }
+    ]
+}

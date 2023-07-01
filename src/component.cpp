@@ -101,9 +101,11 @@ void StringComponentBase::GetConfig(rapidjson::Document& config) {
 // File Picker
 FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
     : StringComponentBase(panel, sizer, j) {
-    wxString ext = wxString::FromUTF8(json_utils::GetString(j, "extension", "any files (*)|*").c_str());
+    wxString ext = wxString::FromUTF8(
+                       json_utils::GetString(j, "extension", "any files (*)|*").c_str());
     wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", "").c_str());
-    wxString empty_message = wxString::FromUTF8(json_utils::GetString(j, "empty_message", "").c_str());
+    wxString empty_message = wxString::FromUTF8(
+                                 json_utils::GetString(j, "empty_message", "").c_str());
     CustomFilePicker* picker = new CustomFilePicker(panel, wxID_ANY,
                                                     value, "", ext, empty_message,
                                                     wxDefaultPosition, wxSize(350, 25),
@@ -131,7 +133,8 @@ void FilePicker::SetConfig(const rapidjson::Value& config) {
 DirPicker::DirPicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
     : StringComponentBase(panel, sizer, j) {
     wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", "").c_str());
-    wxString empty_message = wxString::FromUTF8(json_utils::GetString(j, "empty_message", "").c_str());
+    wxString empty_message = wxString::FromUTF8(
+                                 json_utils::GetString(j, "empty_message", "").c_str());
     CustomDirPicker* picker = new CustomDirPicker(panel, wxID_ANY,
                                                   value, "", empty_message,
                                                   wxDefaultPosition, wxSize(350, 25),
@@ -298,7 +301,8 @@ void CheckArray::GetConfig(rapidjson::Document& config) {
 TextBox::TextBox(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
     : StringComponentBase(panel, sizer, j) {
     wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", "").c_str());
-    wxString empty_message = wxString::FromUTF8(json_utils::GetString(j, "empty_message", "").c_str());
+    wxString empty_message = wxString::FromUTF8(
+                                 json_utils::GetString(j, "empty_message", "").c_str());
     CustomTextCtrl* textbox = new CustomTextCtrl(panel, wxID_ANY,
         value, empty_message,
         wxDefaultPosition, wxSize(350, 23));

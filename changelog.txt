@@ -10,7 +10,9 @@ ver 0.5.0
 - Removed more codes from wxWidgets.
 - Applied optimazation for objective-c++ files.
 - Applied link time optimization.
+- Removed RTTI for msvc.
 - Used cstdio instead of iostream.
+- Removed compressed version from releases.
 
 ver 0.4.1
 - Raise errors when the command requires more components or there are unused components.

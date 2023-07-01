@@ -1,5 +1,6 @@
 #pragma once
 #include <stdexcept>
+#include <string>
 #include "wx/wx.h"
 #include "wx/file.h"
 #include "wx/buffer.h"

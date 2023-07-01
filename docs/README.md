@@ -25,7 +25,7 @@ It can make a GUI to run commands of your scripts.
 -   Cross-platform
 -   Native look and feel
 -   Portable
--   Small size (under 1MB)
+-   Small size
 -   UTF-8 support
 -   [Embed JSON into exe](../examples/tips/json_embed/)
 
@@ -36,10 +36,6 @@ You can download executables from [the release page](https://github.com/matyalat
 -   `SimpleCommandRunner*-Windows*.zip` is for Windows.  
 -   `SimpleCommandRunner*-macOS*.tar.bz2` is for macOS.  
 -   `SimpleCommandRunner*-Linux*.tar.bz2` is for Ubuntu (20.04 or later).  
-
-> `*-packed.*` are the 1MB executables that were compressed by [UPX](https://github.com/upx/upx).  
-> But they might cause some problems (e.g. false positives by anti-viruses) on your machine.  
-> Use the uncompressed ones if they won't work.  
 
 > The linux builds only support Ubuntu due to the glibc dependences.  
 > Build the executable by yourself if you want to use it on other linux distros.  
@@ -78,6 +74,11 @@ You can also make `gui_definition.json` with [web forms](https://rjsf-team.githu
 
 [Building Executables](./Building.md)
 
+## Want Smaller Executables?
+
+You can use [UPX to compress the executables](./UPX.md).  
+They will be **under 500KB**!  
+
 ## License
 
 Files in this repository are available under the [GPL2+](../license.txt).  
@@ -88,4 +89,3 @@ Files in this repository are available under the [GPL2+](../license.txt).
 | -- | -- | -- |
 | [wxWidgets library](https://github.com/wxWidgets/wxWidgets) | GUI framework | [Modified LGPL](https://github.com/wxWidgets/wxWidgets/blob/master/docs/licence.txt) | 
 | [RapidJSON](https://github.com/Tencent/rapidjson) | JSON handling | [MIT](http://opensource.org/licenses/MIT) |
-| [UPX](https://github.com/upx/upx) | EXE compression | [Modified GPL2+](https://github.com/upx/upx/blob/devel/LICENSE) |

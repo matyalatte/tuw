@@ -23,6 +23,11 @@ So, it's the same question as "How can I run multiple commands as a single line 
 It's a little complicated task, but you can find tons of websites that explain about it.  
 Also, you can see [some examples](../examples/tips/multi_lines/) about it.
 
+## 1MB is not small for me...
+
+I mean, it's small as a cross-platform and native looking GUI.  
+Well, you can use [UPX](./UPX.md) if you want smaller executables.  
+
 ## What's `gui_config.json` for?
 
 It saves the previously executed arguments.  

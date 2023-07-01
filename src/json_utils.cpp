@@ -9,7 +9,7 @@ namespace json_utils {
         }
         char readBuffer[65536];
         rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-        
+
         rapidjson::ParseResult ok = json.ParseStream(is);
         fclose(fp);
 
@@ -24,10 +24,10 @@ namespace json_utils {
     }
 
     bool SaveJson(rapidjson::Document& json, const std::string& file) {
-        FILE* fp = fopen(file.c_str(), "wb"); // non-Windows use "w"
+        FILE* fp = fopen(file.c_str(), "wb");
         if (!fp)
             return false;
- 
+
         char writeBuffer[65536];
         rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
         rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);

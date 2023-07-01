@@ -50,13 +50,11 @@ jobs:
             - Second Change
 
             ## Notes
-            
-            - `*-packed.*` are the 1MB executables that were compressed by [UPX](https://github.com/upx/upx).
-              But they might cause some problems (e.g. false positives by anti-viruses) on your machine.
-              Use the uncompressed ones if they won't work.
 
             - The linux builds only support Ubuntu 20.04 or later due to the glibc dependencies.
               Build the executable by yourself if you want to use it on other linux distros.
+            
+            - ARM is not supported.
           draft: true
           prerelease: false
        
@@ -101,30 +99,11 @@ jobs:
           type: 'zip'
           filename: '${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.zip'
 
-      - name: copy files
-        run: mv archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.zip ./
-        shell: bash
-
-      - name: Compress exe with UPX
-        uses: crazy-max/ghaction-upx@v2
-        with:
-          version: latest
-          files: ./archive/SimpleCommandRunner.exe
-          args: --best
-
-      - name: Archive Release
-        uses: thedoctor0/zip-release@master
-        with:
-          directory: 'archive'
-          type: 'zip'
-          filename: '${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-packed.zip'
-
       - name: Upload Release Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ needs.setup.outputs.tag }} ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.zip
-          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-packed.zip
+          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.zip
 
   build_unix:
     strategy:
@@ -166,31 +145,9 @@ jobs:
           cp license.txt archive/${{ env.ZIP_NAME }}
           cd archive
           tar -jcvf ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.tar.bz2 ${{ env.ZIP_NAME }}
-          mv ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.tar.bz2 ../
-
-      - name: Install UPX for Linux
-        if: runner.os=='Linux'
-        uses: crazy-max/ghaction-upx@v2
-        with:
-          install-only: true
-
-      - name: Install UPX for macOS
-        if: runner.os == 'macOS'
-        run: brew install upx
-
-      - name: Compress exe with UPX
-        run: |
-          cd archive/${{ env.ZIP_NAME }}
-          upx SimpleCommandRunner --best
-
-      - name: Archive Release
-        run: |
-          cd archive
-          tar -jcvf ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-packed.tar.bz2 ${{ env.ZIP_NAME }}
 
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ needs.setup.outputs.tag }} ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.tar.bz2
-          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-packed.tar.bz2
+          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.tar.bz2

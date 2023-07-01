@@ -53,3 +53,4 @@ Not about the json format, but they might help you.
 
 -   [Json Embedding](./tips/json_embed): You can embed json into exe!
 -   [Multiple Lines](./tips/multi_lines): How to run multiple commands in a process.
+-   [Unicode Characters](./tips/unicode): Simple Command Runner supports UTF-8!
