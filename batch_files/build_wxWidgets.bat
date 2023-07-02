@@ -258,8 +258,11 @@ set wxOPTIONS=-D wxBUILD_COMPATIBILITY=3.1^
     echo Cmake options: %CMAKE_OPTIONS%
     echo wxOptions: %wxOPTIONS%
     cmake %CMAKE_OPTIONS% %wxOPTIONS% ../
+    if %ERRORLEVEL% neq 0 goto :buildend
     cmake --build . --config %BUILD_TYPE%
+    if %ERRORLEVEL% neq 0 goto :buildend
     cmake --install . --config %BUILD_TYPE%
+    :buildend
 @popd
 
 pause

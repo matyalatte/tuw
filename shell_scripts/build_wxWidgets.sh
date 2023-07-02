@@ -256,6 +256,6 @@ fi
 pushd ~/wxWidgets-"$wx_version"
 mkdir ${build_type}
 cd ${build_type}
-../configure ${options}
+../configure ${options} || exit 1
 make -j"${num_proc}"
 popd

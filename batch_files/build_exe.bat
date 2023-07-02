@@ -12,9 +12,12 @@ echo Build type: %BUILD_TYPE%
 
 @pushd %~dp0\..
     cmake --preset %BUILD_TYPE%-Windows
+    if %ERRORLEVEL% neq 0 goto :buildend
     cmake --build --preset %BUILD_TYPE%-Windows
+    if %ERRORLEVEL% neq 0 goto :buildend
     cd build/%BUILD_TYPE%/Release
     copy /Y SimpleCommandRunner.exe ..\
+    :buildend
 @popd
 
 pause

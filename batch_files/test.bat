@@ -25,6 +25,7 @@ if %ERRORLEVEL% NEQ 0 (
     set PRESET=--preset %BUILD_TYPE%-Windows-Test
     cmake %PRESET% -D BUILD_TESTS=ON
     cmake --build %PRESET%
+    if %ERRORLEVEL% neq 0 goto :testend
 
     if "%BUILD_TYPE%"=="Release" goto nocoverage
     if %GET_COVERAGE% equ 0 goto nocoverage
@@ -48,3 +49,4 @@ if %ERRORLEVEL% NEQ 0 (
 @popd
 
 pause
+if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%

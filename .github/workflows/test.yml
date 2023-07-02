@@ -1,9 +1,9 @@
 name: test
 
 on:
-  push:
-    tags:
-      - "v*"
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
   
 env:
@@ -59,6 +59,7 @@ jobs:
           
   test_unix:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-20.04, macos-11]
     runs-on: ${{ matrix.os }}

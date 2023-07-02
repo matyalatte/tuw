@@ -11,7 +11,7 @@ fi
 # Build and test
 pushd $(dirname "$0")/..
     preset="--preset ${build_type}-Unix-Test"
-    cmake ${preset}
-    cmake --build ${preset}
-    ctest ${preset}
+    cmake ${preset} || exit 1
+    cmake --build ${preset} || exit 1
+    ctest ${preset} || exit 1
 popd
