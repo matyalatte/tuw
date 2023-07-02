@@ -53,63 +53,25 @@ jobs:
 
             - The linux builds only support Ubuntu 20.04 or later due to the glibc dependencies.
               Build the executable by yourself if you want to use it on other linux distros.
-            
-            - ARM is not supported.
+
+            - The released builds does NOT support ARM devices.
           draft: true
           prerelease: false
-       
-  build_windows:
-    runs-on: windows-2022
-    needs: setup
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Cache wxWidgets
-        uses: actions/cache@v3
-        id: cache-wx
-        with:
-            path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
-            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-Release
-        
-      - name: install wxWidget
-        if: steps.cache-wx.outputs.cache-hit != 'true'
-        run: |
-          cd batch_files
-          ./download_wxWidgets.bat
-          ./build_wxWidgets.bat NoTest
 
-      - name: build exe
-        run: |
-          cd batch_files
-          ./build_exe.bat
-          
-      - name: copy files
-        run: |
-          mkdir -p archive
-          cp build/Release/SimpleCommandRunner.exe archive
-          cp examples/other_features/help/gui_definition.json archive
-          cp changelog.txt archive
-          cp license.txt archive
-        shell: bash
-
-      - name: Archive Release
-        uses: thedoctor0/zip-release@master
-        with:
-          directory: 'archive'
-          type: 'zip'
-          filename: '${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.zip'
-
-      - name: Upload Release Assets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.zip
-
-  build_unix:
+  build:
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-11]
-
+        include:
+          - os: windows-2022
+            exe_ext: .exe
+            zip_ext: zip
+          - os: ubuntu-20.04
+            exe_ext: ""
+            zip_ext: tar.bz2
+          - os: macos-11
+            exe_ext: ""
+            zip_ext: tar.bz2
     runs-on: ${{ matrix.os }}
     needs: setup
     steps:
@@ -122,32 +84,59 @@ jobs:
             path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
             key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-Release
             
-      - name: install gtk for Linux
-        if: runner.os=='Linux'
+      - name: Install gtk for Linux
+        if: runner.os == 'Linux'
         run: sudo apt -y install libgtk-3-dev
-      
-      - name: build wxWidgets
-        if: steps.cache-wx.outputs.cache-hit != 'true'
+
+      - name: Build wxWidgets for Windows
+        if: (steps.cache-wx.outputs.cache-hit != 'true') && (runner.os == 'Windows')
+        run: |
+          cd batch_files
+          ./download_wxWidgets.bat
+          ./build_wxWidgets.bat NoTest
+
+      - name: Build wxWidgets for Unix
+        if: (steps.cache-wx.outputs.cache-hit != 'true') && (runner.os != 'Windows')
         run: |
           cd shell_scripts
           bash download_wxWidgets.sh
           bash build_wxWidgets.sh NoTest
           
-      - name: build exe
-        run: bash shell_scripts/build_exe.sh
+      - name: Build exe for Windows
+        if: runner.os == 'Windows'
+        run: batch_files/build_exe.bat
           
-      - name: Archive Release
+      - name: Build exe for Unix
+        if: runner.os != 'Windows'
+        run: bash shell_scripts/build_exe.sh
+
+      - name: Show info about exe
+        run: bash shell_scripts/exe_info.sh
+        shell: bash
+
+      - name: Copy files
         run: |
           mkdir -p archive/${{ env.ZIP_NAME }}
-          cp build/Release/SimpleCommandRunner archive/${{ env.ZIP_NAME }}
+          cp build/Release/SimpleCommandRunner${{ matrix.exe_ext }} archive/${{ env.ZIP_NAME }}
           cp examples/other_features/help/gui_definition.json archive/${{ env.ZIP_NAME }}
           cp changelog.txt archive/${{ env.ZIP_NAME }}
           cp license.txt archive/${{ env.ZIP_NAME }}
+        shell: bash
+
+      - name: Archive release for Windows
+        if: runner.os == 'Windows'
+        run: |
+          cd archive/${{ env.ZIP_NAME }}
+          powershell Compress-Archive -Force -Path * -Destination ../${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.${{ matrix.zip_ext }}
+
+      - name: Archive release for Unix
+        if: runner.os != 'Windows'
+        run: |
           cd archive
-          tar -jcvf ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.tar.bz2 ${{ env.ZIP_NAME }}
+          tar -jcvf ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.${{ matrix.zip_ext }} ${{ env.ZIP_NAME }}
 
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.tar.bz2
+          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.${{ matrix.zip_ext }}
