@@ -23,18 +23,16 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
             PRINT("[LoadDefinition] Loaded gui_definition.json\n");
         } else {
             PRINT("[LoadDefinition] gui_definition.json not found.\n");
-            try {
-                ExeContainer exe;
-                exe.Read(stdpath::GetExecutablePath(wxTheApp->argv[0]));
+            ExeContainer exe;
+            if (exe.Read(stdpath::GetExecutablePath(wxTheApp->argv[0]))) {
                 if (!exe.HasJson()) {
                     PRINT("[LoadDefinition] Embedded JSON not found.\n");
-                    throw std::runtime_error("JSON data not found.");
+                    JsonLoadFailed("JSON data not found.", m_definition);
                 }
                 PRINT("[LoadDefinition] Found JSON in the executable.\n");
                 exe.GetJson(m_definition);
-            }
-            catch (std::exception& e) {
-                JsonLoadFailed(e.what(), m_definition);
+            } else {
+                JsonLoadFailed(exe.GetErrorMsg(), m_definition);
             }
         }
     }
@@ -73,7 +71,7 @@ void MainFrame::LoadJson(const std::string& file, rapidjson::Document& json, boo
     catch (const std::exception& e) {
         json.SetObject();
         if (is_definition)
-            JsonLoadFailed(e.what(), json);
+            JsonLoadFailed(wxString::FromUTF8(e.what()), json);
     }
 }
 
@@ -127,10 +125,9 @@ void MainFrame::CreateFrame() {
 #endif
 }
 
-void MainFrame::JsonLoadFailed(const std::string& msg, rapidjson::Document& definition) {
-    wxString wxmsg = wxString::FromUTF8(msg.c_str());
-    PRINT_FMT("[LoadDefinition] Error: %s\n", wxmsg);
-    ShowErrorDialog(wxmsg);
+void MainFrame::JsonLoadFailed(const wxString& msg, rapidjson::Document& definition) {
+    PRINT_FMT("[LoadDefinition] Error: %s\n", msg);
+    ShowErrorDialog(msg);
     json_utils::GetDefaultDefinition(definition);
 }
 
@@ -148,7 +145,7 @@ void MainFrame::CheckDefinition(rapidjson::Document& definition) {
         json_utils::CheckHelpURLs(definition);
     }
     catch (const std::exception& e) {
-        std::string msg = "Failed to load gui_definition.json (" + std::string(e.what()) + ")";
+        wxString msg = "Failed to load gui_definition.json (" + wxString::FromUTF8(e.what()) + ")";
         JsonLoadFailed(msg, definition);
         return;
     }

@@ -1943,7 +1943,9 @@ wxPoint wxTextCtrl::DoPositionToCoords(long pos) const
                         static_cast<short>(HIWORD(rc)));
     }
 
+#if wxUSE_RICHEDIT
     return wxDefaultPosition;
+#endif
 }
 
 

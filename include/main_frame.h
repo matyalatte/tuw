@@ -40,7 +40,7 @@ class MainFrame : public wxFrame {
     void ShowErrorDialog(const wxString& msg);
     void ShowSuccessDialog(const wxString& msg);
     void LoadJson(const std::string& file, rapidjson::Document& json, bool is_definition = false);
-    void JsonLoadFailed(const std::string& msg, rapidjson::Document& definition);
+    void JsonLoadFailed(const wxString& msg, rapidjson::Document& definition);
 
  public:
     MainFrame(const rapidjson::Document& definition = rapidjson::Document(rapidjson::kObjectType),
