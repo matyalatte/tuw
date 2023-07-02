@@ -37,14 +37,18 @@ TEST(JsonCheckTest, LoadJsonFail2) {
     }
     catch(std::exception& err) {
         const char* expected = "Failed to parse JSON: Missing a comma or '}'"
+        #ifdef _WIN32
                                " after an object member. (offset: 128)";
+        #else
+                               " after an object member. (offset: 122)";
+        #endif
         EXPECT_STREQ(expected, err.what());
     }
 }
 
 void GetTestJson(rapidjson::Document& json) {
     json_utils::LoadJson(json_file, json);
-    EXPECT_NE(json.Size(), 0);
+    EXPECT_FALSE(json.ObjectEmpty());
 }
 
 TEST(JsonCheckTest, LoadJsonSuccess) {
@@ -62,8 +66,8 @@ TEST(JsonCheckTest, checkGUISuccess2) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     rapidjson::Value& comp = test_json["gui"][0]["components"][5];
-    comp.AddMember("item_array", comp["item"], test_json.GetAllocator());
-    comp.RemoveMember("item");
+    comp.AddMember("item_array", comp["items"], test_json.GetAllocator());
+    comp.RemoveMember("items");
     json_utils::CheckDefinition(test_json);
 }
 

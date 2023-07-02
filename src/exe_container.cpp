@@ -166,7 +166,7 @@ void ExeContainer::Read(const wxString& exe_path) {
 void ExeContainer::Write(const wxString& exe_path) {
     assert(m_exe_path != "");
     std::string json_str = "";
-    if (m_json.Size() != 0) {
+    if (HasJson()) {
         json_str = json_utils::JsonToString(m_json);
     }
     wxUint32 json_size = json_str.length();

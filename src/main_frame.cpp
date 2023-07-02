@@ -17,7 +17,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
 
-    if (m_definition.Size() == 0) {
+    if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
         if (wxFileExists("gui_definition.json")) {
             LoadJson("gui_definition.json", m_definition, true);
             PRINT("[LoadDefinition] Loaded gui_definition.json\n");
@@ -38,7 +38,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
             }
         }
     }
-    if (config.Size() == 0) {
+    if (!config.IsObject() || config.ObjectEmpty()) {
         LoadJson("gui_config.json", m_config, false);
     }
 

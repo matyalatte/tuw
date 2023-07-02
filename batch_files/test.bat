@@ -30,11 +30,10 @@ if %ERRORLEVEL% NEQ 0 (
     if %GET_COVERAGE% equ 0 goto nocoverage
 
     REM Test and get coverage report from tests.
-    cd ..
     set MODULES=--modules %cd%\build\%BUILD_TYPE%\tests
     set SOURCES=--sources %cd%\src
     set EXPORT_TYPE=--export_type html:%cd%\coverage-report
-    set WORKDIR=--working_dir %cd%\build\%BUILD_TYPE%
+    set WORKDIR=--working_dir %cd%
     OpenCppCoverage --cover_children %WORKDIR% %EXPORT_TYPE% %MODULES% %SOURCES% -- ctest %PRESET%
     goto testend
 

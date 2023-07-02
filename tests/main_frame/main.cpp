@@ -57,7 +57,7 @@ TEST(MainFrameTest, MakeDefaultMainFrame) {
 
 void GetTestJson(rapidjson::Document& test_json) {
     json_utils::LoadJson(json_file, test_json);
-    EXPECT_NE(test_json.Size(), 0);
+    EXPECT_FALSE(test_json.ObjectEmpty());
 }
 
 void GetDummyConfig(rapidjson::Document& dummy_config) {
