@@ -108,7 +108,7 @@ FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Valu
                                  json_utils::GetString(j, "empty_message", "").c_str());
     CustomFilePicker* picker = new CustomFilePicker(panel, wxID_ANY,
                                                     value, "", ext, empty_message,
-                                                    wxDefaultPosition, wxSize(350, 25),
+                                                    wxDefaultPosition, wxSize(350, -1),
                                                     wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
 
     sizer->Add(picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
@@ -137,7 +137,7 @@ DirPicker::DirPicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value&
                                  json_utils::GetString(j, "empty_message", "").c_str());
     CustomDirPicker* picker = new CustomDirPicker(panel, wxID_ANY,
                                                   value, "", empty_message,
-                                                  wxDefaultPosition, wxSize(350, 25),
+                                                  wxDefaultPosition, wxSize(350, -1),
                                                   wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
 
     sizer->Add(picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
@@ -305,7 +305,7 @@ TextBox::TextBox(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
                                  json_utils::GetString(j, "empty_message", "").c_str());
     CustomTextCtrl* textbox = new CustomTextCtrl(panel, wxID_ANY,
         value, empty_message,
-        wxDefaultPosition, wxSize(350, 23));
+        wxDefaultPosition, wxSize(350, -1));
 
     sizer->Add(textbox, 0, wxALIGN_LEFT | wxBOTTOM, 13);
     textbox->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
@@ -331,7 +331,7 @@ NumPickerBase::NumPickerBase(wxWindow* panel, wxBoxSizer* sizer, const rapidjson
         style |= wxSP_WRAP;
 
     m_picker = new wxSpinCtrlDouble(panel, wxID_ANY,
-        wxEmptyString, wxDefaultPosition, wxSize(150, 23), style);
+        wxEmptyString, wxDefaultPosition, wxSize(150, -1), style);
     double min = json_utils::GetDouble(j, "min", 0.0);
     double max = json_utils::GetDouble(j, "max", 100.0);
     m_picker->SetRange(min, max);

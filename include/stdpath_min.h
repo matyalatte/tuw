@@ -24,6 +24,7 @@ namespace stdpath {
 
         // Search PATH.environment variable...
         wxPathList pathlist;
+        pathlist.Add(wxGetCwd());
         pathlist.AddEnvList(wxT("PATH"));
         wxString path = pathlist.FindAbsoluteValidPath(argv0);
         if ( path.empty() )

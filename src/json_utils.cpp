@@ -150,7 +150,7 @@ namespace json_utils {
 
     // get default definition of gui
     void GetDefaultDefinition(rapidjson::Document& definition) {
-        std::string def_str = "{\"gui\":[{"
+        static const char* def_str = "{\"gui\":[{"
             "\"label\":\"Default GUI\","
     #ifdef _WIN32
             "\"command\":\"dir\","

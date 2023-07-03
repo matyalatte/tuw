@@ -13,7 +13,20 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     : wxFrame(nullptr, wxID_ANY, scr_constants::TOOL_NAME,
               wxDefaultPosition, wxDefaultSize,
               wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX) {
-    SetUp();
+
+    // Use the executable directory as the working dir.
+    wxString exe_path = stdpath::GetExecutablePath(wxTheApp->argv[0]);
+    wxSetWorkingDirectory(wxPathOnly(exe_path));
+
+#ifdef __linux__
+    // Make console window for Linux
+    m_log_frame = new LogFrame(exe_path);
+    m_ostream = m_log_frame;
+#endif
+
+    PRINT_FMT("%s v%s by %s\n", scr_constants::TOOL_NAME,
+              scr_constants::VERSION, scr_constants::AUTHOR);
+
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
 
@@ -24,13 +37,14 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
         } else {
             PRINT("[LoadDefinition] gui_definition.json not found.\n");
             ExeContainer exe;
-            if (exe.Read(stdpath::GetExecutablePath(wxTheApp->argv[0]))) {
+            if (exe.Read(exe_path)) {
                 if (!exe.HasJson()) {
                     PRINT("[LoadDefinition] Embedded JSON not found.\n");
                     JsonLoadFailed("JSON data not found.", m_definition);
+                } else {
+                    PRINT("[LoadDefinition] Found JSON in the executable.\n");
+                    exe.GetJson(m_definition);
                 }
-                PRINT("[LoadDefinition] Found JSON in the executable.\n");
-                exe.GetJson(m_definition);
             } else {
                 JsonLoadFailed(exe.GetErrorMsg(), m_definition);
             }
@@ -48,20 +62,6 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
             m_definition_id = mode;
     }
     CreateFrame();
-}
-
-void MainFrame::SetUp() {
-    // Use the executable directory as the working dir.
-    wxString exe_path = stdpath::GetExecutablePath(wxTheApp->argv[0]);
-    wxSetWorkingDirectory(wxPathOnly(exe_path));
-
-#ifdef __linux__
-    m_log_frame = new LogFrame(exe_path);
-    m_ostream = m_log_frame;
-#else
-    PRINT_FMT("%s v%s by %s\n", scr_constants::TOOL_NAME,
-              scr_constants::VERSION, scr_constants::AUTHOR);
-#endif
 }
 
 void MainFrame::LoadJson(const std::string& file, rapidjson::Document& json, bool is_definition) {
@@ -363,9 +363,9 @@ void MainFrame::UpdatePanel() {
     wxString button = wxString::FromUTF8(
         json_utils::GetString(sub_definition, "button", "Run").c_str());
     m_run_button = new wxButton(m_panel, wxID_EXECUTE, button);
-    comp_sizer->Add(m_run_button, 0, wxFIXED_MINSIZE | wxALIGN_CENTER);
+    comp_sizer->Add(m_run_button, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_HORIZONTAL);
 
-    main_sizer->Add(comp_sizer, 0, wxALIGN_CENTER | wxALL, 15);
+    main_sizer->Add(comp_sizer, 0, wxALL, 15);
     m_panel->SetSizerAndFit(main_sizer);
     m_panel->Show();
 }
