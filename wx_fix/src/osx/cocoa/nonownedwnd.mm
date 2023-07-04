@@ -613,6 +613,7 @@ extern int wxOSXGetIdFromSelector(SEL action );
         return editor;
     }
 #endif // wxUSE_SEARCHCTRL
+#if wxUSE_COMBOBOX
     else if ([anObject isKindOfClass:[wxNSComboBox class]])
     {
         wxNSComboBox * cb = (wxNSComboBox*) anObject;
@@ -626,8 +627,9 @@ extern int wxOSXGetIdFromSelector(SEL action );
             [editor release];
         }
         return editor;
-    }    
- 
+    }
+#endif
+
     return nil;
 }
 

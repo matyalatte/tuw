@@ -2464,8 +2464,10 @@ void wxWidgetCocoaImpl::controlTextDidChange()
             tc->MarkDirty();
             tc->SendTextUpdatedEventIfAllowed();
         }
+    #if wxUSE_COMBOBOX
         else if ( wxComboBox *cb = wxDynamicCast( wxpeer , wxComboBox ) )
             cb->SendTextUpdatedEventIfAllowed();
+    #endif
         else 
         {
             wxFAIL_MSG("Unexpected class for controlTextDidChange event");
@@ -3727,11 +3729,13 @@ void wxWidgetCocoaImpl::InstallEventHandler( WXWidget control )
     if ([c respondsToSelector:@selector(setAction:)])
     {
         [c setTarget: c];
+    #if wxUSE_RADIOBTN
         if ( dynamic_cast<wxRadioButton*>(GetWXPeer()) )
         {
             // everything already set up
         }
         else
+    #endif
             [c setAction: @selector(controlAction:)];
         
         if ([c respondsToSelector:@selector(setDoubleAction:)])

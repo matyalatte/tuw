@@ -464,6 +464,7 @@ public:
 
     @end
 
+#if wxUSE_COMBOBOX
     @interface wxNSComboBox : NSComboBox
     {
         wxNSTextFieldEditor* fieldEditor;
@@ -473,7 +474,7 @@ public:
     - (void) setFieldEditor:(wxNSTextFieldEditor*) fieldEditor;
 
     @end
-
+#endif
 
 
     @interface wxNSMenu : NSMenu

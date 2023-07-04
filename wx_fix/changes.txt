@@ -1,5 +1,18 @@
 Changes that don't exist in the official wxWidgets
 
+- allow to disable combobox and radiobtn on macOS
+  - include/wx/osx/cocoa/private.h
+  - src/osx/cocoa/window.mm
+                 /nonownedwnd.mm
+
+- disabled debug related functions for wxApp
+  - include/wx/app.h
+              /build.h
+  - src/common/appbase.cpp
+
+- disabled some macros for RTTI system
+  - include/wx/rtti.h
+
 - disabled some cursor icons
   - include/wx/gdicmn.h
   - src/common/gdicmn.cpp
@@ -108,4 +121,3 @@ Changes that don't exist in the official wxWidgets
   - include/wx/dynlib.h
   - src/common/dynlib.cpp
   - src/common/rendcmn.cpp
-

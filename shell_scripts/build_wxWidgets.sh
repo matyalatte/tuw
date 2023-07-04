@@ -32,7 +32,8 @@ lib_options="--without-regex
  --disable-glcanvasegl
  --disable-std_string
  --disable-std_containers_compat
- --disable-std_string_conv_in_wxstring"
+ --disable-std_string_conv_in_wxstring
+ --disable-unsafe_conv_in_wxstring"
 
 non_gui_options="--disable-plugins
  --disable-intl
@@ -98,6 +99,7 @@ big_gui_options="--disable-docview
  --disable-propgrid
  --disable-ribbon
  --disable-stc
+ --disable-constraints
  --disable-loggui
  --disable-logwin
  --disable-logdialog
@@ -119,6 +121,7 @@ ctrl_options="--disable-markup
  --disable-bannerwindow
  --disable-artstd
  --disable-arttango
+ --disable-bmpbutton
  --disable-bmpcombobox
  --disable-calendar
  --disable-caret
@@ -126,6 +129,7 @@ ctrl_options="--disable-markup
  --disable-choicebook
  --disable-collpane
  --disable-colourpicker
+ --disable-combobox
  --disable-comboctrl
  --disable-commandlinkbutton
  --disable-dataviewctrl
@@ -146,6 +150,7 @@ ctrl_options="--disable-markup
  --disable-odcombobox
  --disable-prefseditor
  --disable-radiobox
+ --disable-radiobtn
  --disable-richmsgdlg
  --disable-richtooltip
  --disable-rearrangectrl
@@ -209,7 +214,6 @@ img_options="--disable-palette
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     non_gui_options="${non_gui_options} --enable-no_rtti"
-    ctrl_options="${ctrl_options} --disable-bmpbutton --disable-radiobtn --disable-combobox"
 else
     # Somehow OSX will use gnu++11 without the 'with-cxx' option
     non_gui_options="${non_gui_options} --disable-datetime"
