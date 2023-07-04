@@ -13,7 +13,6 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     : wxFrame(nullptr, wxID_ANY, scr_constants::TOOL_NAME,
               wxDefaultPosition, wxDefaultSize,
               wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX) {
-
     // Use the executable directory as the working dir.
     wxString exe_path = stdpath::GetExecutablePath(wxTheApp->argv[0]);
     wxSetWorkingDirectory(wxPathOnly(exe_path));
