@@ -33,12 +33,12 @@ class TestFrame: public wxFrame{
 
 template <typename Picker>
 std::string GetText(Picker* picker) {
-    return std::string(picker->GetTextCtrl()->GetValue());
+    return std::string(picker->GetTextCtrl()->GetValue().c_str());
 }
 
 template <typename Picker>
 std::string GetActualText(Picker* picker) {
-    return std::string(picker->GetTextCtrlValue());
+    return std::string(picker->GetTextCtrlValue().c_str());
 }
 
 bool Wait(long msec, wxWindow* frame) {

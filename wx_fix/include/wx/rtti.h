@@ -137,7 +137,7 @@ WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxString& name);
 // Dynamic class macros
 // ----------------------------------------------------------------------------
 
-#ifndef wxNO_RTTI
+#if !defined(wxNO_RTTI) || !defined(_WIN32)
 #define wxDECLARE_ABSTRACT_CLASS(name)                                        \
     public:                                                                   \
         wxWARNING_SUPPRESS_MISSING_OVERRIDE()                                 \
@@ -169,7 +169,7 @@ WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxString& name);
 
 
 // common part of the macros below
-#ifndef wxNO_RTTI
+#if !defined(wxNO_RTTI) || !defined(_WIN32)
 #define wxIMPLEMENT_CLASS_COMMON(name, basename, baseclsinfo2, func)          \
     wxClassInfo name::ms_classInfo(wxT(#name),                                \
             &basename::ms_classInfo,                                          \

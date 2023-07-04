@@ -17,11 +17,11 @@ class LogFrame : public wxFrame {
  public:
     explicit LogFrame(wxString exepath);
     void OnClose(wxCloseEvent& event);
-    LogFrame& operator <<(std::string& str) {
+    LogFrame& operator <<(const std::string& str) {
         m_log_box->AppendText(wxString::FromUTF8(str.c_str()));
         return *this;
     }
-    LogFrame& operator <<(wxString& str) {
+    LogFrame& operator <<(const wxString& str) {
         m_log_box->AppendText(str);
         return *this;
     }

@@ -8,7 +8,9 @@ Changes that don't exist in the official wxWidgets
 - disabled debug related functions for wxApp
   - include/wx/app.h
               /build.h
+              /gtk/app.h
   - src/common/appbase.cpp
+       /gtk/app.cpp
 
 - disabled some macros for RTTI system
   - include/wx/rtti.h
