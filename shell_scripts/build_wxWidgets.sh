@@ -218,7 +218,7 @@ else
     # Somehow OSX will use gnu++11 without the 'with-cxx' option
     non_gui_options="${non_gui_options} --disable-datetime"
     ctrl_options="${ctrl_options} --disable-filectrl"
-    lib_options="${lib_options} --without-cairo --with-cxx=17 --disable-std_iostreams"
+    lib_options="${lib_options} --without-cairo --with-cxx=11 --disable-std_iostreams"
 fi
 
 options="--disable-shared
