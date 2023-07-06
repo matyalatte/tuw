@@ -40,7 +40,9 @@ WXDLLIMPEXP_DATA_CORE(wxBrushList*) wxTheBrushList;
 WXDLLIMPEXP_DATA_CORE(wxFontList*)  wxTheFontList;
 WXDLLIMPEXP_DATA_CORE(wxPenList*)   wxThePenList;
 
+#if wxUSE_COLOR_DATABASE
 WXDLLIMPEXP_DATA_CORE(wxColourDatabase*) wxTheColourDatabase;
+#endif
 
 WXDLLIMPEXP_DATA_CORE(wxBitmap)  wxNullBitmap;
 WXDLLIMPEXP_DATA_CORE(wxBrush)   wxNullBrush;
@@ -255,6 +257,7 @@ wxRealPoint::wxRealPoint(const wxPoint& pt)
 {
 }
 
+#if wxUSE_COLOR_DATABASE
 // ============================================================================
 // wxColourDatabase
 // ============================================================================
@@ -454,6 +457,7 @@ wxString wxColourDatabase::FindName(const wxColour& colour) const
 
     return wxEmptyString;
 }
+#endif
 
 // ============================================================================
 // stock objects
@@ -686,8 +690,9 @@ const wxPen* wxStockGDI::GetPen(Item item)
 
 void wxInitializeStockLists()
 {
+#if wxUSE_COLOR_DATABASE
     wxTheColourDatabase = new wxColourDatabase;
-
+#endif
     wxTheBrushList = new wxBrushList;
     wxThePenList = new wxPenList;
     wxTheFontList = new wxFontList;

@@ -19,6 +19,14 @@
 #endif
 #endif
 
+#ifndef wxUSE_COLOR_DATABASE
+#ifdef _WIN32
+#define wxUSE_COLOR_DATABASE 0
+#else
+#define wxUSE_COLOR_DATABASE 1
+#endif
+#endif
+
 // ---------------------------------------------------------------------------
 // headers
 // ---------------------------------------------------------------------------
@@ -921,6 +929,7 @@ protected:
     wxList list;
 };
 
+#if wxUSE_COLOR_DATABASE
 WX_DECLARE_STRING_HASH_MAP(wxColour*, wxStringToColourHashMap);
 
 class WXDLLIMPEXP_CORE wxColourDatabase
@@ -943,6 +952,7 @@ private:
 
     wxStringToColourHashMap *m_map;
 };
+#endif
 
 class WXDLLIMPEXP_CORE wxResourceCache: public wxList
 {
@@ -1089,7 +1099,9 @@ extern WXDLLIMPEXP_DATA_CORE(wxFont)       wxNullFont;
 extern WXDLLIMPEXP_DATA_CORE(wxColour)     wxNullColour;
 extern WXDLLIMPEXP_DATA_CORE(wxIconBundle) wxNullIconBundle;
 
+#if wxUSE_COLOR_DATABASE
 extern WXDLLIMPEXP_DATA_CORE(wxColourDatabase*)  wxTheColourDatabase;
+#endif
 
 extern WXDLLIMPEXP_DATA_CORE(const char) wxPanelNameStr[];
 

@@ -1,5 +1,11 @@
 Changes that don't exist in the official wxWidgets
 
+- remove color database
+  - include/wx/gdicmn.h
+  - src/common/gdicmn.cpp
+              /appcmn.cpp
+              /colourcmn.cpp
+
 - fix compilation error for wxUSE_TIMER
   - include/wx/private/timer.h
               /osx/core/private/timer.h
