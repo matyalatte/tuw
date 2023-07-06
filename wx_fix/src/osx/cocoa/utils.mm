@@ -515,10 +515,12 @@ wxMouseState wxGetMouseState()
     return ms;
 }
 
+#if wxUSE_TIMER
 wxTimerImpl* wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
 {
     return new wxOSXTimerImpl(timer);
 }
+#endif
 
 int gs_wxBusyCursorCount = 0;
 extern wxCursor    gMacCurrentCursor;

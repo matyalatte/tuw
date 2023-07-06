@@ -61,7 +61,6 @@ non_gui_options="--disable-plugins
  --disable-fs_zip
  --disable-fsvolume
  --disable-fswatcher
- --disable-log
  --disable-mimetype
  --disable-printfposparam
  --disable-secretstore
@@ -145,6 +144,7 @@ ctrl_options="--disable-markup
  --disable-imaglist
  --disable-infobar
  --disable-listbook
+ --disable-listbox
  --disable-notebook
  --disable-notifmsg
  --disable-odcombobox
@@ -215,8 +215,7 @@ img_options="--disable-palette
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     non_gui_options="${non_gui_options} --enable-no_rtti"
 else
-    # Somehow OSX will use gnu++11 without the 'with-cxx' option
-    non_gui_options="${non_gui_options} --disable-datetime"
+    non_gui_options="${non_gui_options} --disable-datetime --disable-timer"
     ctrl_options="${ctrl_options} --disable-filectrl"
     lib_options="${lib_options} --without-cairo --with-cxx=11 --disable-std_iostreams"
 fi
@@ -238,6 +237,7 @@ if [ ${build_type} = "Debug" ]; then
     options="${options} --enable-debug"
 else
     options="${options} --disable-debug --disable-debug_flag --disable-debug_info"
+    options="${options} --disable-log --disable-exceptions"
     # Optimize for size
     export CXXFLAGS="-Os -ffunction-sections -fdata-sections -flto"
     if [[ "$OSTYPE" == "darwin"* ]]; then

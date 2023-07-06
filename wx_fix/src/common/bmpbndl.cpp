@@ -843,7 +843,7 @@ size_t wxBitmapBundleImpl::GetIndexToUpscale(const wxSize& size) const
 
 wxBitmapBundleImpl::~wxBitmapBundleImpl()
 {
-#ifdef __WXOSX__
+#if defined(__WXOSX__) && wxUSE_IMAGE
     wxOSXBundleImplDestroyed(this);
 #endif
 }

@@ -52,8 +52,15 @@ if (NOT ((${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     message(WARNING "${PROJECT_NAME} does NOT support your OS. You might get some problems.")
 endif()
 
+# check architecture
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" ARCH_LOWER)
+if ((${ARCH_LOWER} MATCHES "arm") OR (${ARCH_LOWER} MATCHES "aarch"))
+    message(WARNING "${PROJECT_NAME} is NOT tested with ARM devices. You might get some problems.")
+endif()
+
 # Show settings
 message(VERBOSE "SYSTEM                  : ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
+message(VERBOSE "ARCHITECTURE            : ${CMAKE_SYSTEM_PROCESSOR}")
 message(VERBOSE "COMPILER                : ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(VERBOSE "CXX_FLAGS               : ${CMAKE_CXX_FLAGS}")
 message(VERBOSE "CXX_FLAGS_RELEASE       : ${CMAKE_CXX_FLAGS_RELEASE}")

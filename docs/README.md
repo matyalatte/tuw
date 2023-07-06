@@ -33,8 +33,8 @@ It can make a GUI to run commands of your scripts.
 
 You can download executables from [the release page](https://github.com/matyalatte/Simple-Command-Runner/releases)
 
--   `SimpleCommandRunner*-Windows*.zip` is for Windows.  
--   `SimpleCommandRunner*-macOS*.tar.bz2` is for macOS.  
+-   `SimpleCommandRunner*-Windows*.zip` is for Windows (7 or later).  
+-   `SimpleCommandRunner*-macOS*.tar.bz2` is for macOS (10.10 or later).  
 -   `SimpleCommandRunner*-Linux*.tar.bz2` is for Ubuntu (20.04 or later).  
 
 > The linux builds only support Ubuntu due to the glibc dependences.  

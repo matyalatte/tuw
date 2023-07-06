@@ -1,5 +1,13 @@
 Changes that don't exist in the official wxWidgets
 
+- fix compilation error for wxUSE_TIMER
+  - include/wx/private/timer.h
+              /osx/core/private/timer.h
+  - src/osx/cocoa/utils.mm
+
+- remove log messages when wxUSE_LOG is off
+  - include/wx/log.h
+
 - allow to disable combobox and radiobtn on macOS
   - include/wx/osx/cocoa/private.h
   - src/osx/cocoa/window.mm
