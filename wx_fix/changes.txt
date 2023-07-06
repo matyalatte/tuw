@@ -33,6 +33,7 @@ Changes that don't exist in the official wxWidgets
   - include/wx/gdicmn.h
   - src/common/gdicmn.cpp
     src/msw/cursor.cpp
+    src/osx/carbon/utilscocoa.mm
 
 - disabled wxGetLibraryVersionInfo
   - include/wx/utils.h

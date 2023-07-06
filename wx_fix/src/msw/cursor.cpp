@@ -338,7 +338,9 @@ void wxCursor::InitFromStock(wxStockCursor idCursor)
         {  true, IDC_ARROW                   }, // WXCURSOR_LEFT_BUTTON
         { false, wxT("WXCURSOR_MAGNIFIER")    }, // wxCURSOR_MAGNIFIER
         {  true, IDC_ARROW                   }, // WXCURSOR_MIDDLE_BUTTON
+#endif
         {  true, IDC_NO                      }, // WXCURSOR_NO_ENTRY
+#if !wxUSE_ICON_MINIMAL
         { false, wxT("WXCURSOR_PBRUSH")       }, // wxCURSOR_PAINT_BRUSH
         { false, wxT("WXCURSOR_PENCIL")       }, // wxCURSOR_PENCIL
         { false, wxT("WXCURSOR_PLEFT")        }, // wxCURSOR_POINT_LEFT

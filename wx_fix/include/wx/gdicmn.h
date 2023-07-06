@@ -12,7 +12,7 @@
 #define _WX_GDICMNH__
 
 #ifndef wxUSE_ICON_MINIMAL
-#ifdef _WIN32
+#if !defined(__linux__)
 #define wxUSE_ICON_MINIMAL 1
 #else
 #define wxUSE_ICON_MINIMAL 0
@@ -20,7 +20,7 @@
 #endif
 
 #ifndef wxUSE_COLOR_DATABASE
-#ifdef _WIN32
+#if !defined(__linux__)
 #define wxUSE_COLOR_DATABASE 0
 #else
 #define wxUSE_COLOR_DATABASE 1
@@ -125,7 +125,9 @@ enum wxStockCursor
     wxCURSOR_LEFT_BUTTON,
     wxCURSOR_MAGNIFIER,
     wxCURSOR_MIDDLE_BUTTON,
+#endif
     wxCURSOR_NO_ENTRY,
+#if !wxUSE_ICON_MINIMAL
     wxCURSOR_PAINT_BRUSH,
     wxCURSOR_PENCIL,
     wxCURSOR_POINT_LEFT,
@@ -144,9 +146,11 @@ enum wxStockCursor
 #ifdef __WXGTK__
     wxCURSOR_DEFAULT, // standard X11 cursor
 #endif
+#endif
 #ifdef __WXMAC__
     wxCURSOR_COPY_ARROW , // MacOS Theme Plus arrow
 #endif
+#if !wxUSE_ICON_MINIMAL
 #ifdef __X__
     // Not yet implemented for Windows
     wxCURSOR_CROSS_REVERSE,
