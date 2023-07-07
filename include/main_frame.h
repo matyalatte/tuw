@@ -37,8 +37,8 @@ class MainFrame : public wxFrame {
     void CheckDefinition(rapidjson::Document& definition);
     void UpdatePanel();
     void UpdateConfig();
-    void ShowErrorDialog(const wxString& msg);
-    void ShowSuccessDialog(const wxString& msg);
+    void ShowErrorDialog(const wxString& msg, const wxString& title = "Error");
+    void ShowSuccessDialog(const wxString& msg, const wxString& title = "Success");
     void LoadJson(const std::string& file, rapidjson::Document& json, bool is_definition = false);
     void JsonLoadFailed(const wxString& msg, rapidjson::Document& definition);
 

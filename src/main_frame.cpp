@@ -30,25 +30,36 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     m_config.CopyFrom(config, m_config.GetAllocator());
 
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
-        if (wxFileExists("gui_definition.json")) {
-            LoadJson("gui_definition.json", m_definition, true);
-            PRINT("[LoadDefinition] Loaded gui_definition.json\n");
-        } else {
-            PRINT("[LoadDefinition] gui_definition.json not found.\n");
-            ExeContainer exe;
-            if (exe.Read(exe_path)) {
-                if (!exe.HasJson()) {
-                    PRINT("[LoadDefinition] Embedded JSON not found.\n");
-                    JsonLoadFailed("JSON data not found.", m_definition);
-                } else {
-                    PRINT("[LoadDefinition] Found JSON in the executable.\n");
-                    exe.GetJson(m_definition);
+        bool exists_external_json = wxFileExists("gui_definition.json");
+        ExeContainer exe;
+        bool success = exe.Read(exe_path);
+        if (success) {
+            if (exe.HasJson()) {
+                PRINT("[LoadDefinition] Found JSON in the executable.\n");
+                exe.GetJson(m_definition);
+                if (exists_external_json) {
+                    wxString msg = "WARNING: Using embedded JSON. gui_definition.json was ignored.";
+                    PRINT_FMT("[LoadDefinition] %s", msg);
+                    ShowSuccessDialog(msg, "Warning");
                 }
             } else {
-                JsonLoadFailed(exe.GetErrorMsg(), m_definition);
+                PRINT("[LoadDefinition] Embedded JSON not found.\n");
+                success = false;
+            }
+        } else {
+            PRINT_FMT("[LoadDefinition] ERROR: %s\n", exe.GetErrorMsg());
+        }
+
+        if (!success) {
+            if (exists_external_json) {
+                PRINT("[LoadDefinition] Loaded gui_definition.json\n");
+                LoadJson("gui_definition.json", m_definition, true);
+            } else {
+                JsonLoadFailed("gui_definition.json not found.", m_definition);
             }
         }
     }
+
     if (!config.IsObject() || config.ObjectEmpty()) {
         LoadJson("gui_config.json", m_config, false);
     }
@@ -168,16 +179,16 @@ void MainFrame::SaveConfig() {
     }
 }
 
-void MainFrame::ShowErrorDialog(const wxString& msg) {
+void MainFrame::ShowErrorDialog(const wxString& msg, const wxString& title) {
     wxMessageDialog* dialog;
-    dialog = new wxMessageDialog(this, msg, "Error", wxICON_ERROR | wxOK | wxCENTRE);
+    dialog = new wxMessageDialog(this, msg, title, wxICON_ERROR | wxOK | wxCENTRE);
     dialog->ShowModal();
     dialog->Destroy();
 }
 
-void MainFrame::ShowSuccessDialog(const wxString& msg) {
+void MainFrame::ShowSuccessDialog(const wxString& msg, const wxString& title) {
     wxMessageDialog* dialog;
-    dialog = new wxMessageDialog(this, msg, "Success");
+    dialog = new wxMessageDialog(this, msg, title);
     dialog->ShowModal();
     dialog->Destroy();
 }
