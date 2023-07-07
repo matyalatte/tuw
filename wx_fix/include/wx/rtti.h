@@ -137,16 +137,12 @@ WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxString& name);
 // Dynamic class macros
 // ----------------------------------------------------------------------------
 
-#if !defined(wxNO_RTTI) || !defined(_WIN32)
 #define wxDECLARE_ABSTRACT_CLASS(name)                                        \
     public:                                                                   \
         wxWARNING_SUPPRESS_MISSING_OVERRIDE()                                 \
         virtual wxClassInfo *GetClassInfo() const wxDUMMY_OVERRIDE;           \
         wxWARNING_RESTORE_MISSING_OVERRIDE()                                  \
         static wxClassInfo ms_classInfo
-#else
-#define wxDECLARE_ABSTRACT_CLASS(name)
-#endif
 
 #define wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN(name)                               \
     wxDECLARE_NO_ASSIGN_CLASS(name);                                          \
@@ -164,12 +160,29 @@ WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxString& name);
     wxDECLARE_ABSTRACT_CLASS(name);                                           \
     static wxObject* wxCreateObject()
 
+#if (defined(wxNO_RTTI) && defined(_WIN32))
+#define wxDECLARE_DYNAMIC_CLASS_REMOVABLE(name)                               \
+    static wxObject* wxCreateObject()
+#define wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN_REMOVABLE(name)                     \
+    wxDECLARE_NO_ASSIGN_CLASS(name);                                          \
+    static wxObject* wxCreateObject()
+#define wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN_DEF_COPY_REMOVABLE(name)            \
+    wxDECLARE_NO_ASSIGN_DEF_COPY(name);                                       \
+    static wxObject* wxCreateObject()
+#else
+#define wxDECLARE_DYNAMIC_CLASS_REMOVABLE(name)                               \
+    wxDECLARE_DYNAMIC_CLASS(name)
+#define wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN_REMOVABLE(name)                     \
+    wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN(name)
+#define wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN_DEF_COPY_REMOVABLE(name)            \
+    wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN_DEF_COPY(name)
+#endif
+
 #define wxDECLARE_CLASS(name)                                                 \
     wxDECLARE_ABSTRACT_CLASS(name)
 
 
 // common part of the macros below
-#if !defined(wxNO_RTTI) || !defined(_WIN32)
 #define wxIMPLEMENT_CLASS_COMMON(name, basename, baseclsinfo2, func)          \
     wxClassInfo name::ms_classInfo(wxT(#name),                                \
             &basename::ms_classInfo,                                          \
@@ -179,9 +192,6 @@ WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxString& name);
                                                                               \
     wxClassInfo *name::GetClassInfo() const                                   \
         { return &name::ms_classInfo; }
-#else
-#define wxIMPLEMENT_CLASS_COMMON(name, basename, baseclsinfo2, func)
-#endif
 
 #define wxIMPLEMENT_CLASS_COMMON1(name, basename, func)                       \
     wxIMPLEMENT_CLASS_COMMON(name, basename, NULL, func)
@@ -198,6 +208,15 @@ WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxString& name);
     wxIMPLEMENT_CLASS_COMMON1(name, basename, name::wxCreateObject)           \
     wxObject* name::wxCreateObject()                                          \
         { return new name; }
+
+#if (defined(wxNO_RTTI) && defined(_WIN32))
+#define wxIMPLEMENT_DYNAMIC_CLASS_REMOVABLE(name, basename)                   \
+    wxObject* name::wxCreateObject()                                          \
+        { return new name; }
+#else
+#define wxIMPLEMENT_DYNAMIC_CLASS_REMOVABLE(name, basename)                   \
+    wxIMPLEMENT_DYNAMIC_CLASS(name, basename)
+#endif
 
     // Multiple inheritance with two base classes
 #define wxIMPLEMENT_DYNAMIC_CLASS2(name, basename1, basename2)                \
