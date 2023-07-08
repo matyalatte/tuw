@@ -2,7 +2,7 @@ ver 0.5.0
 - Changed the json formats for "choice" and "check_array"
 - Added command-line utils to embed json into exe.
 - Added options for cross-platform support.
-- Added a function for saving the previously executed mode.
+- Added a function for saving the previously executed command.
 - Changed the json library from nlohmann/json to RapidJSON.
 - Changed the format of gui_config.json
 - Fixed a bug that help menu will be shown even if the size of ["help"] is zero.
@@ -11,7 +11,6 @@ ver 0.5.0
 - Removed more codes from wxWidgets.
 - Applied optimazation for objective-c++ files.
 - Applied link time optimization.
-- Removed RTTI for msvc.
 - Used cstdio instead of iostream.
 - Removed compressed version from releases.
 
