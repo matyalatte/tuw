@@ -38,7 +38,8 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
                 PRINT("[LoadDefinition] Found JSON in the executable.\n");
                 exe.GetJson(m_definition);
                 if (exists_external_json) {
-                    wxString msg = "WARNING: Using embedded JSON. gui_definition.json was ignored.\n";
+                    wxString msg =
+                        "WARNING: Using embedded JSON. gui_definition.json was ignored.\n";
                     PRINT_FMT("[LoadDefinition] %s", msg);
                     ShowSuccessDialog(msg, "Warning");
                 }
