@@ -72,7 +72,8 @@
             "components": [
                 {
                     "type": "static_text",
-                    "label": "All components with their optinal keys."
+                    "label": "All components with their optinal keys.",
+                    "platforms": ["win", "linux", "mac"]
                 },
                 {
                     "type": "file",
@@ -82,7 +83,8 @@
                     "empty_message": "Drop a file here!",
                     "default": "test.txt",
                     "add_quotes": true,
-                    "tooltip": "Tooltip!"
+                    "tooltip": "Tooltip!",
+                    "platforms": ["win", "linux", "mac"]
                 },
                 {
                     "type": "folder",
@@ -91,7 +93,8 @@
                     "empty_message": "Drop a folder here!",
                     "default": "testdir",
                     "add_quotes": true,
-                    "tooltip": "Tooltip?"
+                    "tooltip": "Tooltip?",
+                    "platforms": ["win", "linux", "mac"]
                 },
                 {
                     "type": "choice",
@@ -112,7 +115,8 @@
                         }
                     ],
                     "default": 2,
-                    "tooltip": "choose one of items."
+                    "tooltip": "choose one of items.",
+                    "platforms": ["win", "linux", "mac"]
                 },
                 {
                     "type": "check",
@@ -120,7 +124,8 @@
                     "id": "check",
                     "value": "flag!",
                     "default": true,
-                    "tooltip": "check this flag!"
+                    "tooltip": "check this flag!",
+                    "platforms": ["win", "linux", "mac"]
                 },
                 {
                     "type": "check_array",
@@ -145,7 +150,8 @@
                             "default": false,
                             "tooltip": "flag3"
                         }
-                    ]
+                    ],
+                    "platforms": ["win", "linux", "mac"]
                 },
                 {
                     "type": "text",
@@ -153,7 +159,8 @@
                     "id": "text",
                     "empty_message": "type here!",
                     "default": "remove this text!",
-                    "tooltip": "text box."
+                    "tooltip": "text box.",
+                    "platforms": ["win", "linux", "mac"]
                 },
                 {
                     "type": "int",
@@ -164,7 +171,8 @@
                     "max": 50,
                     "inc": 10,
                     "wrap": true,
-                    "tooltip": "int!"
+                    "tooltip": "int!",
+                    "platforms": ["win", "linux", "mac"]
                 },
                 {
                     "type": "float",
@@ -176,16 +184,21 @@
                     "digits": 2,
                     "inc": 0.01,
                     "wrap": false,
-                    "tooltip": "float!"
+                    "tooltip": "float!",
+                    "platforms": ["win", "linux", "mac"]
                 }
             ]
         },
         {
             "label": "GUI Optional",
             "window_name": "Window Title Here",
-            "command": "echo cwd: %__CWD__% & echo percent: %% & echo sample message!",
+            "command_win": "echo cwd: %__CWD__% & echo percent: %% & echo sample message!",
+            "command_linux": "echo cwd: %__CWD__%; echo percent: %%; echo sample message!",
+            "command_mac": "echo cwd: %__CWD__%; echo percent: %%; echo sample message!",
             "button": "Run!",
             "show_last_line": true,
+            "check_exit_code": true,
+            "exit_success": 0,
             "components": [
                 {
                     "type": "static_text",

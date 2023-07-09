@@ -1,6 +1,7 @@
 # Path Pickers
 
-You can use file pickers and folder pickers.
+You can use file pickers and folder pickers.  
+Of course, you can drop files on the pickers to specifiy the paths.  
 
 ![PathPikcers](https://user-images.githubusercontent.com/69258547/171440880-5948a7f0-5e26-4c38-ab95-8c6daaf67f93.png)
 
@@ -47,4 +48,4 @@ Each component should be defined as a dictionary.
 Inputs of components will be injected into `command` when executing the command.  
 You can specify where they should be injected with `%*%`.  
 In the example, the file path will be injected in `%foo%`, and the folder path will be in `%bar%`.  
-You can also use [`id`](../../comp_options/id) option to insert an input into multiple places.
+You can also use [`id`](../../comp_options/id) option to name the components like variables.

@@ -20,6 +20,7 @@ It can make a GUI to run commands of your scripts.
 ## Features
 
 -   [Define GUI in JSON](../examples/)
+-   [Embed JSON into exe](../examples/get_start/json_embed/)
 -   Save arguments
 -   Input paths by drag and drop
 -   Cross-platform
@@ -27,7 +28,6 @@ It can make a GUI to run commands of your scripts.
 -   Portable
 -   Small size
 -   UTF-8 support
--   [Embed JSON into exe](../examples/tips/json_embed/)
 
 ## Downloads
 
@@ -42,7 +42,7 @@ You can download executables from [the release page](https://github.com/matyalat
 
 ## Examples
 
-There are some [json files](../examples/README.md) to learn how to define GUIs.  
+There are some [JSON files](../examples/README.md) to learn how to define GUIs.  
 
 ## JSON Schema
 

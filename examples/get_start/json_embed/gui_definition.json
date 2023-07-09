@@ -19,7 +19,16 @@
                     "label": "New exe path",
                     "id": "merged_exe",
                     "default": "SimpleCommandRunner.new.exe",
-                    "add_quotes": true
+                    "add_quotes": true,
+                    "platforms": ["win"]
+                },
+                {
+                    "type": "file",
+                    "label": "New exe path",
+                    "id": "merged_exe",
+                    "default": "./SimpleCommandRunner-new",
+                    "add_quotes": true,
+                    "platforms": ["linux", "mac"]
                 }
             ]
         },
@@ -35,7 +44,16 @@
                     "label": "Exe file you want to split",
                     "id": "merged_exe",
                     "default": "SimpleCommandRunner.new.exe",
-                    "add_quotes": true
+                    "add_quotes": true,
+                    "platforms": ["win"]
+                },
+                {
+                    "type": "file",
+                    "label": "Exe file you want to split",
+                    "id": "merged_exe",
+                    "default": "./SimpleCommandRunner-new",
+                    "add_quotes": true,
+                    "platforms": ["linux", "mac"]
                 },
                 {
                     "type": "file",
@@ -49,7 +67,16 @@
                     "label": "New exe path",
                     "id": "orig_exe",
                     "default": "SimpleCommandRunner.orig.exe",
-                    "add_quotes": true
+                    "add_quotes": true,
+                    "platforms": ["win"]
+                },
+                {
+                    "type": "file",
+                    "label": "New exe path",
+                    "id": "orig_exe",
+                    "default": "./SimpleCommandRunner-orig",
+                    "add_quotes": true,
+                    "platforms": ["linux", "mac"]
                 }
             ]
         }
