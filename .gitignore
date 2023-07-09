@@ -3,13 +3,14 @@
 !examples/**/gui_definition.json
 !tests/**/*.json
 !CMakePresets.json
-!scr_schema.json
+!schema/*.json
 
 *.txt
 !changelog.txt
 !CMakeLists.txt
 !license.txt
 !WX_VERSION.txt
+!wx_fix/*.txt
 
 *.bat
 !batch_files/*.bat
@@ -50,7 +51,9 @@ out
 *.internal
 *.test
 *.make
-batch_files/*.cpp
+
+!wx_fix/build
+!wx_fix/build/cmake/*.cmake
 
 # python
 python

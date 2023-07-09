@@ -29,11 +29,19 @@ lib_options="--without-regex
  --without-libxpm
  --without-libjbig
  --without-libiconv
- --disable-glcanvasegl"
+ --disable-glcanvasegl
+ --disable-std_string
+ --disable-std_containers_compat
+ --disable-std_string_conv_in_wxstring
+ --disable-unsafe_conv_in_wxstring"
 
-non_gui_options="--disable-largefile
+non_gui_options="--disable-plugins
+ --disable-intl
+ --disable-xlocale
+ --disable-largefile
  --disable-config
  --disable-ipv6
+ --disable-ipc
  --disable-any
  --disable-apple_ieee
  --disable-arcstream
@@ -43,6 +51,7 @@ non_gui_options="--disable-largefile
  --disable-debugreport
  --disable-dialupman
  --disable-dynamicloader
+ --disable-ffile
  --disable-filehistory
  --disable-filesystem
  --disable-fontenum
@@ -50,6 +59,7 @@ non_gui_options="--disable-largefile
  --disable-fs_archive
  --disable-fs_inet
  --disable-fs_zip
+ --disable-fsvolume
  --disable-fswatcher
  --disable-mimetype
  --disable-printfposparam
@@ -57,11 +67,15 @@ non_gui_options="--disable-largefile
  --disable-snglinst
  --disable-sound
  --disable-spellcheck
+ --disable-stdpaths
  --disable-stopwatch
  --disable-sysoptions
  --disable-tarstream
+ --disable-textbuf
+ --disable-textfile
  --disable-webrequest
  --disable-zipstream
+ --disable-variant
  --disable-ftp
  --disable-http
  --disable-fileproto
@@ -71,6 +85,7 @@ non_gui_options="--disable-largefile
  --disable-protocol-ftp
  --disable-protocol-http
  --disable-protocol-file
+ --disable-threads
  --disable-dbghelp"
 
 big_gui_options="--disable-docview
@@ -83,6 +98,7 @@ big_gui_options="--disable-docview
  --disable-propgrid
  --disable-ribbon
  --disable-stc
+ --disable-constraints
  --disable-loggui
  --disable-logwin
  --disable-logdialog
@@ -96,17 +112,23 @@ big_gui_options="--disable-docview
  --disable-webview
  --disable-clipboard"
 
-ctrl_options=" --disable-actindicator
+ctrl_options="--disable-markup
+ --disable-accel
+ --disable-actindicator
  --disable-addremovectrl
  --disable-animatectrl
  --disable-bannerwindow
  --disable-artstd
  --disable-arttango
+ --disable-bmpbutton
  --disable-bmpcombobox
  --disable-calendar
+ --disable-caret
  --disable-checklst
  --disable-choicebook
+ --disable-collpane
  --disable-colourpicker
+ --disable-combobox
  --disable-comboctrl
  --disable-commandlinkbutton
  --disable-dataviewctrl
@@ -119,16 +141,21 @@ ctrl_options=" --disable-actindicator
  --disable-grid
  --disable-headerctrl
  --disable-hyperlink
+ --disable-imaglist
  --disable-infobar
  --disable-listbook
+ --disable-listbox
  --disable-notebook
  --disable-notifmsg
  --disable-odcombobox
  --disable-prefseditor
  --disable-radiobox
+ --disable-radiobtn
  --disable-richmsgdlg
  --disable-richtooltip
  --disable-rearrangectrl
+ --disable-sash
+ --disable-scrollbar
  --disable-searchctrl
  --disable-slider
  --disable-splitter
@@ -145,18 +172,22 @@ ctrl_options=" --disable-actindicator
  --disable-treebook
  --disable-treelist"
 
-dlg_options="--disable-splash
+dlg_options="--disable-aboutdlg
+ --disable-choicedlg
  --disable-coldlg
  --disable-creddlg
  --disable-finddlg
  --disable-fontdlg
  --disable-numberdlg
+ --disable-splash
  --disable-textdlg
  --disable-tipdlg
  --disable-progressdlg
  --disable-wizarddlg"
 
-misc_gui_options="--disable-splines
+misc_gui_options="--disable-miniframe
+ --disable-splines
+ --disable-mousewheel
  --disable-busyinfo
  --disable-hotkey
  --disable-joystick
@@ -169,12 +200,11 @@ misc_gui_options="--disable-splines
 # You can remove a test tool from the release build with "bash build_wxWidgets.sh NoTest"
 if [ "$1" = "NoTest" ]; then
     misc_gui_options="${misc_gui_options} --disable-uiactionsim"
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        ctrl_options="${ctrl_options} --disable-combobox"
-    fi
 fi
 
-img_options="--disable-gif
+img_options="--disable-palette
+ --disable-image
+ --disable-gif
  --disable-pcx
  --disable-tga
  --disable-iff
@@ -183,11 +213,11 @@ img_options="--disable-gif
  --disable-ico_cur"
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    non_gui_options="${non_gui_options} --enable-no_rtti --disable-intl --disable-xlocale"
-    ctrl_options="${ctrl_options} --disable-bmpbutton"
+    non_gui_options="${non_gui_options} --enable-no_rtti"
 else
-    lib_options="${lib_options} --without-cairo"
-    big_gui_options="${big_gui_options} --disable-graphics_ctx"
+    non_gui_options="${non_gui_options} --disable-datetime --disable-timer"
+    ctrl_options="${ctrl_options} --disable-filectrl"
+    lib_options="${lib_options} --without-cairo --with-cxx=11 --disable-std_iostreams"
 fi
 
 options="--disable-shared
@@ -206,8 +236,14 @@ options="--disable-shared
 if [ ${build_type} = "Debug" ]; then
     options="${options} --enable-debug"
 else
+    options="${options} --disable-debug --disable-debug_flag --disable-debug_info"
+    options="${options} --disable-log --disable-exceptions"
     # Optimize for size
-    export CXXFLAGS="-Os -ffunction-sections -fdata-sections"
+    export CXXFLAGS="-Os -ffunction-sections -fdata-sections -flto"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # for .mm files
+        export OBJCXXFLAGS="-Os -ffunction-sections -fdata-sections -flto"
+    fi
 fi
 echo "CMake arguments: ${options}"
 
@@ -224,6 +260,6 @@ fi
 pushd ~/wxWidgets-"$wx_version"
 mkdir ${build_type}
 cd ${build_type}
-../configure ${options}
+../configure ${options} || exit 1
 make -j"${num_proc}"
 popd

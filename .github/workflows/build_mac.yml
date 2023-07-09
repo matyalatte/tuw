@@ -36,7 +36,7 @@ jobs:
         id: cache-wx
         with:
           path: "~/wxWidgets-${{ steps.wx-version.outputs.version }}"
-          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}
+          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}-Release
             
       - name: build wxWidgets
         if: steps.cache-wx.outputs.cache-hit != 'true'

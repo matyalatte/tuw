@@ -1,31 +1,11 @@
 {
-    "check": {
-        "int": 1
-    },
-    "choice": {
-        "int": 2
-    },
-    "file": {
-        "str": "test.txt"
-    },
-    "folder": {
-        "str": "testdir"
-    },
-    "options": {
-        "ints": [
-            0,
-            0,
-            1,
-            0
-        ]
-    },
-    "text": {
-        "str": "remove this text!"
-    },
-    "integer":{
-        "float":2.0
-    },
-    "double": {
-        "float":0.1
-    }
+    "check": true,
+    "choice": 2,
+    "file": "test.txt",
+    "folder": "testdir",
+    "options": [ false, false, true ],
+    "text": "remove this text!",
+    "integer": 2.0,
+    "double": 0.1,
+    "_mode": 0
 }

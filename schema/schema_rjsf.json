@@ -2,8 +2,6 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "recommended": { "$ref": "#/definitions/types/version" },
-    "minimum_required": { "$ref": "#/definitions/types/version" },
     "gui": {
       "type": "array",
       "items": {
@@ -14,8 +12,6 @@
           "window_name": { "type": "string" },
           "button": { "type": "string" },
           "show_last_line": { "type": "boolean" },
-          "check_exit_code": { "type": "boolean" },
-          "exit_success": { "type": "integer" },
           "components": {
             "type": "array",
             "items": {
@@ -104,20 +100,6 @@
   },
   "required": [ "gui" ],
   "definitions": {
-    "types": {
-      "version": {
-        "type": "string",
-        "pattern": "^[.0-9]+$",
-        "minLength": 1,
-        "maxLength": 8
-      },
-      "str_array": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      }
-    },
     "components": {
       "file": {
         "if": {
@@ -207,8 +189,17 @@
           "properties": {
             "default": { "type": "integer" },
             "tooltip": { "type": "string" },
-            "item": { "$ref": "#/definitions/types/str_array" },
-            "value": { "$ref": "#/definitions/types/str_array" }
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": { "type": "string" },
+                  "value": { "type": "string" }
+                },
+                "required": [ "label" ]
+              }
+            }
           }
         }
       },
@@ -220,15 +211,19 @@
         },
         "then": {
           "properties": {
-            "default": {
+            "items": {
               "type": "array",
               "items": {
-                "type": "boolean"
+                "type": "object",
+                "properties": {
+                  "label": { "type": "string" },
+                  "value": { "type": "string" },
+                  "tooltip": { "type": "string" },
+                  "default": { "type": "boolean" }
+                },
+                "required": [ "label" ]
               }
-            },
-            "tooltip": { "$ref": "#/definitions/types/str_array" },
-            "item": { "$ref": "#/definitions/types/str_array" },
-            "value": { "$ref": "#/definitions/types/str_array" }
+            }
           }
         }
       }

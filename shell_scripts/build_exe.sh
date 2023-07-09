@@ -11,8 +11,8 @@ fi
 echo "Build type: ${build_type}"
 
 pushd $(dirname "$0")/..
-    cmake --preset ${build_type}-Unix
-    cmake --build --preset ${build_type}-Unix
+    cmake --preset ${build_type}-Unix || exit 1
+    cmake --build --preset ${build_type}-Unix || exit 1
 
     # Strip symbols to reduce the binary size
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then

@@ -17,7 +17,7 @@ It has only a button to echo `Hello!`.
 }
 ```
 
-You can write definition of your GUI in `"gui": [{}]`.  
+You can write a definition of your GUI in `"gui": [{}]`.  
 
 -   `label` is a label of your definition. You can type here as you like.
 -   `command` is a command you want to execute when clicking the execution button.

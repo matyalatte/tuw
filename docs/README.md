@@ -1,4 +1,4 @@
-# Simple Command Runner ver 0.4.1
+# Simple Command Runner ver 0.5.0
 
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/test.yml/badge.svg)
@@ -19,80 +19,65 @@ It can make a GUI to run commands of your scripts.
 
 ## Features
 
--   Define GUI in .json
+-   [Define GUI in JSON](../examples/)
+-   [Embed JSON into exe](../examples/get_start/json_embed/)
 -   Save arguments
 -   Input paths by drag and drop
 -   Cross-platform
 -   Native look and feel
 -   Portable
--   Small size (under 1MB)
+-   Small size
+-   UTF-8 support
 
 ## Downloads
 
 You can download executables from [the release page](https://github.com/matyalatte/Simple-Command-Runner/releases)
 
--   `SimpleCommandRunner*-Windows*.zip` is for Windows.  
--   `SimpleCommandRunner*-macOS*.tar.bz2` is for macOS.  
+-   `SimpleCommandRunner*-Windows*.zip` is for Windows (7 or later).  
+-   `SimpleCommandRunner*-macOS*.tar.bz2` is for macOS (10.10 or later).  
 -   `SimpleCommandRunner*-Linux*.tar.bz2` is for Ubuntu (20.04 or later).  
-
-> `*-packed.*` are the 1MB executables that were compressed by [UPX](https://github.com/upx/upx).  
-> But they might cause some problems (e.g. false positives by anti-viruses) on your machine.  
-> Use the uncompressed ones if they won't work.  
 
 > The linux builds only support Ubuntu due to the glibc dependences.  
 > Build the executable by yourself if you want to use it on other linux distros.  
 
 ## Examples
 
-There are some [json files](../examples/README.md) to learn how to define GUIs.  
+There are some [JSON files](../examples/README.md) to learn how to define GUIs.  
+
+## JSON Schema
+
+There is a [schema](../schema/schema.json) for `gui_definition.json`.  
+You can use it to validate definitions while editing files.  
+
+### VSCode
+
+For VSCode, you can add the schema path to `settings.json` (`File > Preferences > Settings > JSON:Schemas > Edit in settings.json`.)  
+
+```json
+"json.schemas": [    
+    {
+        "fileMatch": [ "gui_definition.json" ],
+        "url": "https://raw.githubusercontent.com/matyalatte/Simple-Command-Runner/main/schema/schema.json"
+    }
+]
+```
+
+### react-jsonschema-form
+
+You can also make `gui_definition.json` with [web forms](https://rjsf-team.github.io/react-jsonschema-form/#eyJmb3JtRGF0YSI6eyJndWkiOltdLCJoZWxwIjpbXX0sInNjaGVtYSI6eyIkc2NoZW1hIjoiaHR0cDovL2pzb24tc2NoZW1hLm9yZy9kcmFmdC0wNy9zY2hlbWEjIiwidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsiZ3VpIjp7InR5cGUiOiJhcnJheSIsIml0ZW1zIjp7InR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7ImxhYmVsIjp7InR5cGUiOiJzdHJpbmcifSwiY29tbWFuZCI6eyJ0eXBlIjoic3RyaW5nIn0sIndpbmRvd19uYW1lIjp7InR5cGUiOiJzdHJpbmcifSwiYnV0dG9uIjp7InR5cGUiOiJzdHJpbmcifSwic2hvd19sYXN0X2xpbmUiOnsidHlwZSI6ImJvb2xlYW4ifSwiY29tcG9uZW50cyI6eyJ0eXBlIjoiYXJyYXkiLCJpdGVtcyI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ0eXBlIjp7InR5cGUiOiJzdHJpbmciLCJlbnVtIjpbInN0YXRpY190ZXh0IiwiZmlsZSIsImZvbGRlciIsImNob2ljZSIsImNoZWNrIiwiY2hlY2tfYXJyYXkiLCJ0ZXh0IiwiaW50IiwiZmxvYXQiXX0sImxhYmVsIjp7InR5cGUiOiJzdHJpbmcifSwiaWQiOnsidHlwZSI6InN0cmluZyJ9LCJhZGRfcXVvdGVzIjp7InR5cGUiOiJib29sZWFuIn19LCJhbGxPZiI6W3siJHJlZiI6IiMvZGVmaW5pdGlvbnMvY29tcG9uZW50cy9maWxlIn0seyIkcmVmIjoiIy9kZWZpbml0aW9ucy9jb21wb25lbnRzL2ZvbGRlcl9vcl90ZXh0In0seyIkcmVmIjoiIy9kZWZpbml0aW9ucy9jb21wb25lbnRzL2NoZWNrIn0seyIkcmVmIjoiIy9kZWZpbml0aW9ucy9jb21wb25lbnRzL2ludCJ9LHsiJHJlZiI6IiMvZGVmaW5pdGlvbnMvY29tcG9uZW50cy9mbG9hdCJ9LHsiJHJlZiI6IiMvZGVmaW5pdGlvbnMvY29tcG9uZW50cy9jaG9pY2UifSx7IiRyZWYiOiIjL2RlZmluaXRpb25zL2NvbXBvbmVudHMvY2hlY2tfYXJyYXkifV0sInJlcXVpcmVkIjpbInR5cGUiLCJsYWJlbCJdfX19LCJyZXF1aXJlZCI6WyJsYWJlbCIsImNvbW1hbmQiLCJjb21wb25lbnRzIl19fSwiaGVscCI6eyJ0eXBlIjoiYXJyYXkiLCJpdGVtcyI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ0eXBlIjp7InR5cGUiOiJzdHJpbmciLCJlbnVtIjpbInVybCIsImZpbGUiXX0sImxhYmVsIjp7InR5cGUiOiJzdHJpbmcifX0sInJlcXVpcmVkIjpbInR5cGUiLCJsYWJlbCJdLCJhbGxPZiI6W3siaWYiOnsicHJvcGVydGllcyI6eyJ0eXBlIjp7ImNvbnN0IjoidXJsIn19fSwidGhlbiI6eyJwcm9wZXJ0aWVzIjp7InVybCI6eyJ0eXBlIjoic3RyaW5nIn0sInBhdGgiOnsidHlwZSI6Im51bGwifX19fSx7ImlmIjp7InByb3BlcnRpZXMiOnsidHlwZSI6eyJjb25zdCI6ImZpbGUifX19LCJ0aGVuIjp7InByb3BlcnRpZXMiOnsidXJsIjp7InR5cGUiOiJudWxsIn0sInBhdGgiOnsidHlwZSI6InN0cmluZyJ9fX19XX19fSwicmVxdWlyZWQiOlsiZ3VpIl0sImRlZmluaXRpb25zIjp7ImNvbXBvbmVudHMiOnsiZmlsZSI6eyJpZiI6eyJwcm9wZXJ0aWVzIjp7InR5cGUiOnsiY29uc3QiOiJmaWxlIn19fSwidGhlbiI6eyJwcm9wZXJ0aWVzIjp7ImV4dGVuc2lvbiI6eyJ0eXBlIjoic3RyaW5nIn0sImVtcHR5X21lc3NhZ2UiOnsidHlwZSI6InN0cmluZyJ9LCJkZWZhdWx0Ijp7InR5cGUiOiJzdHJpbmcifSwidG9vbHRpcCI6eyJ0eXBlIjoic3RyaW5nIn19fX0sImZvbGRlcl9vcl90ZXh0Ijp7ImlmIjp7InByb3BlcnRpZXMiOnsidHlwZSI6eyJlbnVtIjpbImZvbGRlciIsInRleHQiXX19fSwidGhlbiI6eyJwcm9wZXJ0aWVzIjp7ImVtcHR5X21lc3NhZ2UiOnsidHlwZSI6InN0cmluZyJ9LCJkZWZhdWx0Ijp7InR5cGUiOiJzdHJpbmcifSwidG9vbHRpcCI6eyJ0eXBlIjoic3RyaW5nIn19fX0sImNoZWNrIjp7ImlmIjp7InByb3BlcnRpZXMiOnsidHlwZSI6eyJjb25zdCI6ImNoZWNrIn19fSwidGhlbiI6eyJwcm9wZXJ0aWVzIjp7ImRlZmF1bHQiOnsidHlwZSI6ImJvb2xlYW4ifSwidG9vbHRpcCI6eyJ0eXBlIjoic3RyaW5nIn0sInZhbHVlIjp7InR5cGUiOiJzdHJpbmcifX19fSwiaW50Ijp7ImlmIjp7InByb3BlcnRpZXMiOnsidHlwZSI6eyJjb25zdCI6ImludCJ9fX0sInRoZW4iOnsicHJvcGVydGllcyI6eyJtaW4iOnsidHlwZSI6ImludGVnZXIifSwibWF4Ijp7InR5cGUiOiJpbnRlZ2VyIn0sImluYyI6eyJ0eXBlIjoiaW50ZWdlciJ9LCJ3cmFwIjp7InR5cGUiOiJib29sZWFuIn0sImRlZmF1bHQiOnsidHlwZSI6ImludGVnZXIifSwidG9vbHRpcCI6eyJ0eXBlIjoic3RyaW5nIn19fX0sImZsb2F0Ijp7ImlmIjp7InByb3BlcnRpZXMiOnsidHlwZSI6eyJjb25zdCI6ImZsb2F0In19fSwidGhlbiI6eyJwcm9wZXJ0aWVzIjp7Im1pbiI6eyJ0eXBlIjoibnVtYmVyIn0sIm1heCI6eyJ0eXBlIjoibnVtYmVyIn0sImluYyI6eyJ0eXBlIjoibnVtYmVyIn0sIndyYXAiOnsidHlwZSI6ImJvb2xlYW4ifSwiZGlnaXRzIjp7InR5cGUiOiJpbnRlZ2VyIn0sImRlZmF1bHQiOnsidHlwZSI6Im51bWJlciJ9LCJ0b29sdGlwIjp7InR5cGUiOiJzdHJpbmcifX19fSwiY2hvaWNlIjp7ImlmIjp7InByb3BlcnRpZXMiOnsidHlwZSI6eyJjb25zdCI6ImNob2ljZSJ9fX0sInRoZW4iOnsicHJvcGVydGllcyI6eyJkZWZhdWx0Ijp7InR5cGUiOiJpbnRlZ2VyIn0sInRvb2x0aXAiOnsidHlwZSI6InN0cmluZyJ9LCJpdGVtcyI6eyJ0eXBlIjoiYXJyYXkiLCJpdGVtcyI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJsYWJlbCI6eyJ0eXBlIjoic3RyaW5nIn0sInZhbHVlIjp7InR5cGUiOiJzdHJpbmcifX0sInJlcXVpcmVkIjpbImxhYmVsIl19fX19fSwiY2hlY2tfYXJyYXkiOnsiaWYiOnsicHJvcGVydGllcyI6eyJ0eXBlIjp7ImNvbnN0IjoiY2hlY2tfYXJyYXkifX19LCJ0aGVuIjp7InByb3BlcnRpZXMiOnsiaXRlbXMiOnsidHlwZSI6ImFycmF5IiwiaXRlbXMiOnsidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsibGFiZWwiOnsidHlwZSI6InN0cmluZyJ9LCJ2YWx1ZSI6eyJ0eXBlIjoic3RyaW5nIn0sInRvb2x0aXAiOnsidHlwZSI6InN0cmluZyJ9LCJkZWZhdWx0Ijp7InR5cGUiOiJib29sZWFuIn19LCJyZXF1aXJlZCI6WyJsYWJlbCJdfX19fX19fX0sInVpU2NoZW1hIjp7fSwidGhlbWUiOiJkZWZhdWx0IiwibGl2ZVNldHRpbmdzIjp7InNob3dFcnJvckxpc3QiOiJ0b3AiLCJleHBlcmltZW50YWxfZGVmYXVsdEZvcm1TdGF0ZUJlaGF2aW9yIjp7ImFycmF5TWluSXRlbXMiOiJwb3B1bGF0ZSIsImVtcHR5T2JqZWN0RmllbGRzIjoicG9wdWxhdGVBbGxEZWZhdWx0cyJ9LCJvbWl0RXh0cmFEYXRhIjp0cnVlLCJsaXZlT21pdCI6dHJ1ZX19)
 
 ## FAQ
 
 [Frequently Asked Questions](./FAQ.md)
 
-## Platforms
-
-Simple Command Runner uses cross-platform framework.  
-I made sure I can build it with the following platforms and compilers.
-
--   Windows10 + MSVC 19.31
--   MacOS 11 + AppleClang 13.0
--   Ubuntu 20.04 + GCC 9.4
--   Alpine Linux 3.16 + GCC 11.2
-
-And it should support your platform as well if [wxWidgets library](https://github.com/wxWidgets/wxWidgets) supports.  
-
 ## Building
 
-### CMake
+[Building Executables](./Building.md)
 
-There are platform-specific documents for building the executable with CMake.  
+## Want Smaller Executables?
 
--   [Building Workflow for Windows](./Build-on-Windows.md)  
--   [Building Workflow for macOS](./Build-on-Mac.md)  
--   [Building Workflow for Linux](./Build-on-Linux.md)  
-
-You can also see [batch files](../batch_files/), [shell scripts](../shell_scripts/), and [CMakePresets.json](../CMakePresets.json) to understand the workflow.  
-
-### Docker
-
-Linux users can use dockerfiles to build the executable.  
-See the dockerfiles for the details.
-
--   [Dockerfile_Ubuntu](../Dockerfile_Ubuntu): Builds SimpleCommandRunner on Ubuntu20.04  
--   [Dockerfile_Alpine](../Dockerfile_Alpine): Builds SimpleCommandRunner on Alpine3.16  
-
-### Github Actions
-
-There are some building workflows for Github Actions.  
-You can make Github build and upload the executable for your platform.  
-
--   [`build_windows`](../.github/workflows/build_windows.yml) is for Windows.
--   [`build_mac`](../.github/workflows/build_mac.yml) is for MacOS.
--   [`build_ubuntu`](../.github/workflows/build_ubuntu.yml) is for Ubuntu (20.04 or later).
-
-See here for the details.  
-[How to Build With Github Actions](./Github-Actions.md)
+You can use [UPX to compress the executables](./UPX.md).  
+They will be **under 500KB**!  
 
 ## License
 
@@ -103,5 +88,4 @@ Files in this repository are available under the [GPL2+](../license.txt).
 | Project | Used for | License |
 | -- | -- | -- |
 | [wxWidgets library](https://github.com/wxWidgets/wxWidgets) | GUI framework | [Modified LGPL](https://github.com/wxWidgets/wxWidgets/blob/master/docs/licence.txt) | 
-| [nlohmann's json library](https://github.com/nlohmann/json) | JSON handling | [MIT](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT) |
-| [UPX](https://github.com/upx/upx) | EXE compression | [Modified GPL2+](https://github.com/upx/upx/blob/devel/LICENSE) |
+| [RapidJSON](https://github.com/Tencent/rapidjson) | JSON handling | [MIT](http://opensource.org/licenses/MIT) |

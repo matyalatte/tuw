@@ -43,9 +43,23 @@
                 {
                     "type": "check_array",
                     "label": "options",
-                    "item": ["option1 ", "option2 ", " flag"],
-                    "value": [" --option1 ", " --option2 ", " -flag"],
-                    "default": [true, false, false]
+                    "items": [
+                        {
+                            "label": "option1",
+                            "value": "--opt1",
+                            "default": true
+                        },
+                        {
+                            "label": "option2",
+                            "value": "--opt2",
+                            "default": false
+                        },
+                        {
+                            "label": "option3",
+                            "value": "--opt3",
+                            "default": false
+                        }
+                    ]
                 }
             ]
         }

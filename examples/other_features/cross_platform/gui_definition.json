@@ -1,0 +1,33 @@
+{
+    "gui": [
+        {
+            "label": "Platform Specific Commands",
+            "command_win": "echo Windows!",
+            "command_mac": "echo macOS!",
+            "command_linux": "echo Linux!",
+            "show_last_line": true,
+            "components": []
+        },
+        {
+            "label": "Platform Specific Components",
+            "command": "echo %os%",
+            "show_last_line": true,
+            "components": [
+                {
+                    "type": "check",
+                    "label": "Windows!",
+                    "id": "os",
+                    "default": true,
+                    "platforms": [ "win" ]
+                },
+                {
+                    "type": "check",
+                    "label": "Not Windows!",
+                    "id": "os",
+                    "default": true,
+                    "platforms": [ "mac", "linux" ]
+                }
+            ]
+        }
+    ]
+}

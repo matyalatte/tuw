@@ -2,7 +2,7 @@
     "gui": [
         {
             "label": "Alternate Spellings",
-            "command": "echo folder: %-% & echo choice: %-% & echo check_array: %-% & echo textbox: %-%",
+            "command": "echo folder: %-% & echo choice: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-%",
             "title": "Alternate Spellings Sample",
             "component_array": [
                 {
@@ -18,15 +18,32 @@
                 {
                     "type": "combo",
                     "label": "combo box",
-                    "item_array": ["value1", "value2", "value3"]
+                    "item_array": [
+                        {
+                            "label": "value1"
+                        },
+                        {
+                            "label": "value2"
+                        },
+                        {
+                            "label": "value3"
+                        }
+                    ]
                 },
                 {
                     "type": "checks",
                     "label": "options",
-                    "items": ["flag1", "flag2", "flag3", "flag4"],
-                    "values": [" --f1", " --f2", " --f3", " --f4"],
-                    "default_array": [true, false, false, true],
-                    "tooltips": ["falg1!", "flag2!", "flag3!", "flag4!"]
+                    "item_array": [
+                        {
+                            "label": "flag1"
+                        },
+                        {
+                            "label": "flag2"
+                        },
+                        {
+                            "label": "flag3"
+                        }
+                    ]
                 },
                 {
                     "type": "text_box",

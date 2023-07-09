@@ -48,53 +48,77 @@ int main(int argc, char *argv[]) {
 
 TEST(MainFrameTest, MakeDefaultMainFrame) {
     MainFrame* main_frame = new MainFrame();
-    EXPECT_EQ(json_utils::GetDefaultDefinition(), main_frame->GetDefinition()["gui"][0]);
+    rapidjson::Document json1;
+    rapidjson::Document json2;
+    json_utils::GetDefaultDefinition(json1);
+    main_frame->GetDefinition(json2);
+    EXPECT_EQ(json1, json2);
 }
 
-nlohmann::json GetTestJson() {
-    nlohmann::json test_json = json_utils::LoadJson(json_file);
-    EXPECT_NE(nlohmann::json({}), test_json);
-    return test_json;
+void GetTestJson(rapidjson::Document& test_json) {
+    json_utils::LoadJson(json_file, test_json);
+    EXPECT_FALSE(test_json.ObjectEmpty());
 }
 
-nlohmann::json dummy_config = {{"dummy", 0}};
+void GetDummyConfig(rapidjson::Document& dummy_config) {
+    dummy_config.SetObject();
+    dummy_config.AddMember("test", 0, dummy_config.GetAllocator());
+}
 
 TEST(MainFrameTest, InvalidDefinition) {
-    nlohmann::json test_json = GetTestJson();
-    test_json["gui"][1]["components"][4]["default"] = "number";
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    test_json["gui"][1]["components"][4]["default"].SetString("number");
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
-    EXPECT_EQ(json_utils::GetDefaultDefinition(), main_frame->GetDefinition()["gui"][0]);
-    EXPECT_TRUE(main_frame->GetDefinition().contains("help"));
+    json_utils::GetDefaultDefinition(test_json);
+    rapidjson::Document actual_json;
+    main_frame->GetDefinition(actual_json);
+    EXPECT_EQ(test_json, actual_json);
 }
 
 TEST(MainFrameTest, InvalidHelp) {
-    nlohmann::json test_json = GetTestJson();
-    test_json["help"][0]["url"] = 1;
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    test_json["help"][0]["url"].SetInt(1);
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
-    EXPECT_FALSE(main_frame->GetDefinition().contains("help"));
+    main_frame->GetDefinition(test_json);
+    EXPECT_FALSE(test_json.HasMember("help"));
 }
 
 TEST(MainFrameTest, GetCommand1) {
-    nlohmann::json test_json = GetTestJson();
-    test_json["gui"][0] = json_utils::GetDefaultDefinition();
-    test_json["gui"][0]["command"] = "command!";
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    json_utils::GetDefaultDefinition(test_json);
+    test_json["gui"][0]["command"].SetString("command!");
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     EXPECT_STREQ("command!", main_frame->GetCommand().ToUTF8());
 }
 
 TEST(MainFrameTest, GetCommand2) {
-    nlohmann::json test_json = GetTestJson();
-    test_json["gui"][0] = test_json["gui"][1];
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    test_json["gui"][0].Swap(test_json["gui"][1]);
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     std::string expected = "echo file: \"test.txt\" & echo folder: \"testdir\"";
     expected += " & echo choice: value3 & echo check: flag!";
-    expected += " & echo check_array:  --f3 & echo textbox: remove this text!";
+    expected += " & echo check_array:  --f2 & echo textbox: remove this text!";
     expected += " & echo int: 10 & echo float: 0.01";
     EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().ToUTF8());
 }
 
 TEST(MainFrameTest, GetCommand3) {
-    nlohmann::json test_json = GetTestJson();
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     std::string expected = "echo file:  & echo folder:  & echo choice: value1";
     expected += " & echo check:  & echo check_array:  & echo textbox: ";
@@ -103,19 +127,27 @@ TEST(MainFrameTest, GetCommand3) {
 }
 
 TEST(MainFrameTest, RunCommandSuccess) {
-    nlohmann::json test_json = GetTestJson();
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
 
-    ASSERT_EQ(test_json["help"], main_frame->GetDefinition()["help"]);
+    rapidjson::Document actual_json;
+    main_frame->GetDefinition(actual_json);
+    ASSERT_EQ(test_json["help"], actual_json["help"]);
 
     std::string last_line = main_frame->RunCommand();
     EXPECT_STRNE("", last_line.c_str());
 }
 
 TEST(MainFrameTest, RunCommandFail) {
-    nlohmann::json test_json = GetTestJson();
-    test_json["gui"][0] = json_utils::GetDefaultDefinition();
-    test_json["gui"][0]["command"] = "I'll fail";
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    json_utils::GetDefaultDefinition(test_json);
+    test_json["gui"][0]["command"].SetString("I'll fail");
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
 
     try {
@@ -128,21 +160,30 @@ TEST(MainFrameTest, RunCommandFail) {
 }
 
 TEST(MainFrameTest, ClickRunButton) {
-    nlohmann::json test_json = GetTestJson();
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     wxCommandEvent event = wxCommandEvent();
     main_frame->ClickButton(event);
 }
 
 TEST(MainFrameTest, UpdateFrame) {
-    nlohmann::json test_json = GetTestJson();
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     wxCommandEvent event = wxCommandEvent(wxEVT_NULL, wxID_HIGHEST + 2);
     main_frame->UpdateFrame(event);
 }
 
 TEST(MainFrameTest, ClickRunButtonShowLast) {
-    nlohmann::json test_json = GetTestJson();
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     wxCommandEvent event = wxCommandEvent(wxEVT_NULL, wxID_HIGHEST + 3);
     main_frame->UpdateFrame(event);
@@ -150,32 +191,39 @@ TEST(MainFrameTest, ClickRunButtonShowLast) {
 }
 
 TEST(MainFrameTest, DeleteFrame) {
-    nlohmann::json test_json = GetTestJson();
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
     wxCloseEvent event = wxCloseEvent();
     main_frame->OnClose(event);
 }
 
-void TestConfig(nlohmann::json test_json, std::string config) {
-    nlohmann::json test_config = json_utils::LoadJson(config);
+void TestConfig(rapidjson::Document& test_json, std::string config) {
+    rapidjson::Document test_config;
+    json_utils::LoadJson(config, test_config);
     MainFrame* main_frame = new MainFrame(test_json, test_config);
     main_frame->SaveConfig();
-    nlohmann::json saved_config = json_utils::LoadJson("gui_config.json");
+    rapidjson::Document saved_config;
+    json_utils::LoadJson("gui_config.json", saved_config);
     EXPECT_EQ(test_config, saved_config);
 }
 
 TEST(MainFrameTest, LoadSaveConfigAscii) {
-    nlohmann::json test_json = GetTestJson();
-    test_json["gui"][0] = test_json["gui"][1];
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    test_json["gui"][0].Swap(test_json["gui"][1]);
     TestConfig(test_json, config_ascii);
 }
 
 TEST(MainFrameTest, LoadSaveConfigUTF) {
-    nlohmann::json test_json = GetTestJson();
-    test_json["gui"][0] = test_json["gui"][1];
-    std::string cmd = test_json["gui"][0]["command"].get<std::string>();
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    test_json["gui"][0].Swap(test_json["gui"][1]);
+    std::string cmd = test_json["gui"][0]["command"].GetString();
     cmd.replace(12, 4, "ファイル");
-    test_json["gui"][0]["command"] = cmd;
-    test_json["gui"][0]["components"][1]["id"] = "ファイル";
+    test_json["gui"][0]["command"].SetString(rapidjson::StringRef(cmd.c_str()));
+    test_json["gui"][0]["components"][1]["id"].SetString("ファイル");
     TestConfig(test_json, config_utf);
 }

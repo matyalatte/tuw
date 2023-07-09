@@ -96,7 +96,7 @@ std::string ReadStream(wxInputStream* stream, char* buf, size_t size) {
 #ifdef __linux__
 std::string Exec(LogFrame& ostream,
 #else
-std::string Exec(std::ostream& ostream,
+std::string Exec(
 #endif
                  wxString& cmd,
                  bool check_exit_code,
@@ -123,7 +123,11 @@ std::string Exec(std::ostream& ostream,
         istream->CanRead() || estream->CanRead()) {  // while process is running
         // print outputs
         std::string str = ReadStream(istream, ibuf, size);
+    #ifdef __linux__
         ostream << str;
+    #else
+        wxPrintf(str.c_str());
+    #endif
         in_msg += str;
         if (in_msg.length() > 2048) {
             in_msg = in_msg.substr(in_msg.length() - 1024, 1024);
@@ -142,15 +146,16 @@ std::string Exec(std::ostream& ostream,
 
     // print and return error messages
     if (err_msg != "") {
-        throw std::runtime_error(err_msg);
+        throw std::runtime_error(err_msg.c_str());
     }
 
     int exit_code = process->GetExitCode();
     if (check_exit_code && (exit_code != exit_success)) {
         if (show_last_line) {
-            throw std::runtime_error(in_msg);
+            throw std::runtime_error(in_msg.c_str());
         } else {
-            throw std::runtime_error("Invalid exit code (" + std::to_string(exit_code) + ")");
+            std::string msg = "Invalid exit code (" + std::to_string(exit_code) + ")";
+            throw std::runtime_error(msg.c_str());
         }
     }
 

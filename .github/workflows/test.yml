@@ -1,9 +1,9 @@
 name: test
 
 on:
-  push:
-    tags:
-      - "v*"
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
   
 env:
@@ -31,72 +31,60 @@ jobs:
       - uses: actions/setup-python@v4
       - run: pip install cpplint
       - run: cpplint --recursive --quiet .
-
-  test_windows:
-    runs-on: windows-2022
-    needs: [setup, lint]
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Cache wxWidget
-        uses: actions/cache@v3
-        id: cache-wx
-        with:
-            path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
-            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-Test
-        
-      - name: install wxWidget
-        if: steps.cache-wx.outputs.cache-hit != 'true'
-        run: |
-          cd batch_files
-          ./download_wxWidgets.bat
-          ./build_wxWidgets.bat
-
-      - name: build and run tests
-        run: |
-          cd batch_files
-          ./test.bat
           
-  test_unix:
+  test:
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-11]
+        os: [windows-2022, ubuntu-20.04, macos-11]
     runs-on: ${{ matrix.os }}
     needs: [setup, lint]
     steps:
       - uses: actions/checkout@v3
       
-      - name: Cache wxWidget
+      - name: Cache wxWidgets
         uses: actions/cache@v3
         id: cache-wx
         with:
             path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
             key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-Test
-            
+
       - name: install gtk for linux
-        if: runner.os=='Linux'
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get -y install libgtk-3-dev
+
+      - name: build wxWidgets for Windows
+        if: (steps.cache-wx.outputs.cache-hit != 'true') && (runner.os == 'Windows')
+        run: |
+          cd batch_files
+          ./download_wxWidgets.bat
+          ./build_wxWidgets.bat
       
-      - name: build wxWidget
-        if: steps.cache-wx.outputs.cache-hit != 'true'
+      - name: build wxWidgets for Unix
+        if: (steps.cache-wx.outputs.cache-hit != 'true') && (runner.os != 'Windows')
         run: |
           cd shell_scripts
           bash download_wxWidgets.sh
           bash build_wxWidgets.sh
-          
+
+      - name: build and run tests for Windows
+        if: runner.os == 'Windows'
+        run: |
+          cd batch_files
+          ./test.bat
+
       # need xvfb for gui test
       - name: build and run tests for Linux
-        if: runner.os=='Linux'
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get -y install xvfb at-spi2-core
           xvfb-run bash shell_scripts/test.sh
 
       # xquartz has xvfb functions
       - name: build and run tests for mac
-        if: runner.os=='macOS'
+        if: runner.os == 'macOS'
         run: |
-          brew update
           brew install --cask xquartz
           bash shell_scripts/test.sh

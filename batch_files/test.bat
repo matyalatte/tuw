@@ -25,16 +25,16 @@ if %ERRORLEVEL% NEQ 0 (
     set PRESET=--preset %BUILD_TYPE%-Windows-Test
     cmake %PRESET% -D BUILD_TESTS=ON
     cmake --build %PRESET%
+    if %ERRORLEVEL% neq 0 goto :testend
 
     if "%BUILD_TYPE%"=="Release" goto nocoverage
     if %GET_COVERAGE% equ 0 goto nocoverage
 
     REM Test and get coverage report from tests.
-    cd ..
     set MODULES=--modules %cd%\build\%BUILD_TYPE%\tests
     set SOURCES=--sources %cd%\src
     set EXPORT_TYPE=--export_type html:%cd%\coverage-report
-    set WORKDIR=--working_dir %cd%\build\%BUILD_TYPE%
+    set WORKDIR=--working_dir %cd%
     OpenCppCoverage --cover_children %WORKDIR% %EXPORT_TYPE% %MODULES% %SOURCES% -- ctest %PRESET%
     goto testend
 
@@ -49,3 +49,4 @@ if %ERRORLEVEL% NEQ 0 (
 @popd
 
 pause
+if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%

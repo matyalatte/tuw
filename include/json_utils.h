@@ -1,10 +1,16 @@
 // Functions related to json.
 
 #pragma once
-#include <fstream>
-#include <iostream>
+#include <cstdio>
+#include <stdexcept>
 #include <string>
-#include <nlohmann/json.hpp>
+#include <cassert>
+#include "rapidjson/document.h"
+#include "rapidjson/filereadstream.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/error/en.h"
 #include "scr_constants.h"
 #include "component.h"
 #include "map_as_vec.hpp"
@@ -18,12 +24,19 @@ constexpr char CMD_TOKEN_PERCENT[] = "";
 constexpr char CMD_TOKEN_CURRENT_DIR[] = "__CWD__";
 
 namespace json_utils {
-    nlohmann::json LoadJson(const std::string& file);
-    bool SaveJson(nlohmann::json& json, const std::string& file);
+    void LoadJson(const std::string& file, rapidjson::Document& json);
+    bool SaveJson(rapidjson::Document& json, const std::string& file);
+    std::string JsonToString(rapidjson::Document& json);
 
-    nlohmann::json GetDefaultDefinition();
-    void CheckVersion(nlohmann::json& definition);
-    void CheckDefinition(nlohmann::json& definition);
-    void CheckSubDefinition(nlohmann::json& sub_definition);
-    void CheckHelpURLs(const nlohmann::json& definition);
-}
+    std::string GetString(const rapidjson::Value& json, const char* key, const char* def);
+    bool GetBool(const rapidjson::Value& json, const char* key, bool def);
+    int GetInt(const rapidjson::Value& json, const char* key, int def);
+    double GetDouble(const rapidjson::Value& json, const char* key, double def);
+
+    void GetDefaultDefinition(rapidjson::Document& definition);
+    void CheckVersion(rapidjson::Document& definition);
+    void CheckDefinition(rapidjson::Document& definition);
+    void CheckSubDefinition(rapidjson::Value& sub_definition,
+                            rapidjson::Document::AllocatorType& alloc);
+    void CheckHelpURLs(const rapidjson::Document& definition);
+}  // namespace json_utils

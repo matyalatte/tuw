@@ -2,7 +2,6 @@
 
 #pragma once
 #include <string>
-#include <nlohmann/json.hpp>
 #include "wx/wx.h"
 #include "wx/filepicker.h"
 #include "wx/dnd.h"

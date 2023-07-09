@@ -1,6 +1,6 @@
 # All Keys
 
-This json file has all keys the Simple Command Runner supports.  
+[The JSON file](./gui_definition.json) in this folder has all keys the Simple Command Runner supports.  
 
 -   `Components Minimal` has all components with their required keys.
 -   `Components Optional` has all components with their optional keys.

@@ -1,13 +1,5 @@
 #include "exe_container.h"
 
-static wxFile* OpenFileIO(const wxString& path, wxFile::OpenMode mode) {
-    wxFile* io = new wxFile(path, mode);
-    if (!io->IsOpened()) {
-        throw std::runtime_error(std::string("Failed to open a file. (") + path + ")");
-    }
-    return io;
-}
-
 static void CloseFileIO(wxFile* io) {
     io->Close();
     delete io;
@@ -45,8 +37,6 @@ static void ReadStr(wxFile* io, std::string& str, const wxUint32& size) {
         str += buff;
         pos += 1024;
     }
-    if (str.length() != size)
-        throw std::runtime_error("Unexpected char detected.");
 }
 
 static void WriteStr(wxFile* io, const std::string& str) {
@@ -88,12 +78,6 @@ static wxString ReadMagic(wxFile* io) {
     return wxString(magic);
 }
 
-static void CheckMagic(wxFile* io, const wxString& true_magic) {
-    wxString magic = ReadMagic(io);
-    if (magic != true_magic)
-        throw std::runtime_error(std::string("Invalid magic. (") + true_magic + ")");
-}
-
 static const wxUint32 FNV_OFFSET_BASIS_32 = 2166136261U;
 static const wxUint32 FNV_PRIME_32 = 16777619U;
 
@@ -106,10 +90,13 @@ static wxUint32 Fnv1Hash32(const std::string& str) {
 static const wxUint32 EXE_SIZE_MAX = 20000000;  // Allowed size of exe
 static const wxUint32 JSON_SIZE_MAX = 1000000;  // Allowed size of json
 
-void ExeContainer::Read(const wxString& exe_path) {
+bool ExeContainer::Read(const wxString& exe_path) {
     m_exe_path = exe_path;
-    wxFile* file_io = OpenFileIO(exe_path, wxFile::read);
-
+    wxFile* file_io = new wxFile(exe_path, wxFile::read);
+    if (!file_io->IsOpened()) {
+        m_err_msg = "Failed to open a file. (" + exe_path + ")";
+        return false;
+    }
     // Read the last 4 bytes
     file_io->SeekEnd();
     wxUint32 end_off = file_io->Tell();
@@ -120,66 +107,93 @@ void ExeContainer::Read(const wxString& exe_path) {
         // Json data not found
         m_exe_size = end_off;
         CloseFileIO(file_io);
-        return;
+        return true;
     }
 
     // Read exe size
     file_io->Seek(-8, wxFromCurrent);
-    m_exe_size = ReadUint32(file_io);
+    m_exe_size = end_off + ReadUint32(file_io);
     if (EXE_SIZE_MAX <= m_exe_size || end_off < m_exe_size) {
-        wxString num;
-        num << m_exe_size;
-        throw std::runtime_error(std::string("Unexpected exe size. (") + num + ")");
+        m_err_msg = wxString::Format("Unexpected exe size. (%d)", m_exe_size);
+        return false;
     }
     file_io->Seek(m_exe_size);
 
     // Read a header for json data
-    CheckMagic(file_io, "JSON");
+    magic = ReadMagic(file_io);
+    if (magic != "JSON") {
+        m_err_msg = "Invalid magic. (" + magic + ")";
+        return false;
+    }
     wxUint32 json_size = ReadUint32(file_io);
     wxUint32 stored_hash = ReadUint32(file_io);
     if (JSON_SIZE_MAX <= json_size || end_off < m_exe_size + json_size + 20) {
-        wxString num;
-        num << json_size;
-        throw std::runtime_error(std::string("Unexpected json size. (") + num + ")");
+        m_err_msg = wxString::Format("Unexpected json size. (%d)", json_size);
+        return false;
     }
 
     // Read json data
     std::string json_str = "";
     ReadStr(file_io, json_str, json_size);
-    if (stored_hash != Fnv1Hash32(json_str)) {
-        wxString num;
-        num << stored_hash;
-        throw std::runtime_error(std::string("Invalid JSON hash. (") + num + ")");
+    if (json_str.length() != json_size) {
+        m_err_msg = "Unexpected char detected.";
+        return false;
     }
-    m_json = nlohmann::json::parse(json_str);
+    if (stored_hash != Fnv1Hash32(json_str)) {
+        m_err_msg = wxString::Format("Invalid JSON hash. (%d)", stored_hash);
+        return false;
+    }
+
+    rapidjson::ParseResult ok = m_json.Parse(json_str);
+    if (!ok) {
+        m_err_msg = wxString::Format("Failed to parse JSON: %s (offset: %d)",
+                                   wxString::FromUTF8(rapidjson::GetParseError_En(ok.Code())),
+                                   ok.Offset());
+        return false;
+    }
 
     CloseFileIO(file_io);
+    return true;
 }
 
-void ExeContainer::Write(const wxString& exe_path) {
+bool ExeContainer::Write(const wxString& exe_path) {
     assert(m_exe_path != "");
     std::string json_str = "";
-    if (!m_json.empty()) json_str = m_json.dump();
+    if (HasJson()) {
+        json_str = json_utils::JsonToString(m_json);
+    }
     wxUint32 json_size = json_str.length();
     if (JSON_SIZE_MAX <= json_size) {
-        wxString num;
-        num << json_size;
-        throw std::runtime_error(std::string("Json file is too large. (") + num + ")");
+        m_err_msg = wxString::Format("Json file is too large. (%d)", json_size);
+        return false;
     }
 
-    wxFile* old_io = OpenFileIO(m_exe_path, wxFile::read);
-    wxFile* new_io = OpenFileIO(exe_path, wxFile::write);
+    wxFile* old_io = new wxFile(m_exe_path, wxFile::read);
+    if (!old_io->IsOpened()) {
+        m_err_msg = "Failed to open a file. (" + m_exe_path + ")";
+        return false;
+    }
+    wxFile* new_io = new wxFile(exe_path, wxFile::write);
+    if (!new_io->IsOpened()) {
+        m_err_msg = "Failed to open a file. (" + exe_path + ")";
+        return false;
+    }
     m_exe_path = exe_path;
 
     CopyBinary(old_io, new_io, m_exe_size);
 
-    if (old_io->Tell() != old_io->Length())
-        CheckMagic(old_io, "JSON");
+    if (old_io->Tell() != old_io->Length()) {
+        wxString magic = ReadMagic(old_io);
+        if (magic != "JSON") {
+            m_err_msg = "Invalid magic. (" + magic + ")";
+            return false;
+        }
+    }
 
     CloseFileIO(old_io);
     if (json_size == 0) {
         CloseFileIO(new_io);
-        return;
+        return true;
     }
 
     // Write json data
@@ -187,7 +201,8 @@ void ExeContainer::Write(const wxString& exe_path) {
     WriteUint32(new_io, json_size);
     WriteUint32(new_io, Fnv1Hash32(json_str));
     WriteStr(new_io, json_str);
-    WriteUint32(new_io, m_exe_size);
+    WriteUint32(new_io, m_exe_size - new_io->Tell() - 8);
     new_io->Write("JSON", 4);
     CloseFileIO(new_io);
+    return true;
 }
