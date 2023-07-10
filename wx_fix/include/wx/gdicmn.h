@@ -117,7 +117,9 @@ enum wxStockCursor
     wxCURSOR_RIGHT_ARROW,
     wxCURSOR_BULLSEYE,
     wxCURSOR_CHAR,
+#endif
     wxCURSOR_CROSS,
+#if !wxUSE_ICON_MINIMAL
     wxCURSOR_HAND,
 #endif
     wxCURSOR_IBEAM,
@@ -140,7 +142,9 @@ enum wxStockCursor
     wxCURSOR_SIZEWE,
     wxCURSOR_SIZING,
     wxCURSOR_SPRAYCAN,
+#endif
     wxCURSOR_WAIT,
+#if !wxUSE_ICON_MINIMAL
     wxCURSOR_WATCH,
     wxCURSOR_BLANK,
 #ifdef __WXGTK__

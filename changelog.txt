@@ -1,3 +1,6 @@
+ver 0.5.1
+- Fixed crashes when opening URLs or files via the help menu
+
 ver 0.5.0
 - Changed the json formats for "choice" and "check_array"
 - Added command-line utils to embed json into exe.

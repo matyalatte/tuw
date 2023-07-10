@@ -330,7 +330,9 @@ void wxCursor::InitFromStock(wxStockCursor idCursor)
         { false, wxT("WXCURSOR_RIGHT_ARROW")  }, // wxCURSOR_RIGHT_ARROW
         { false, wxT("WXCURSOR_BULLSEYE")     }, // wxCURSOR_BULLSEYE
         {  true, IDC_ARROW                   }, // WXCURSOR_CHAR
+#endif
         {  true, IDC_CROSS                   }, // WXCURSOR_CROSS
+#if !wxUSE_ICON_MINIMAL
         {  true, IDC_HAND                    }, // wxCURSOR_HAND
 #endif
         {  true, IDC_IBEAM                   }, // WXCURSOR_IBEAM
@@ -353,7 +355,9 @@ void wxCursor::InitFromStock(wxStockCursor idCursor)
         {  true, IDC_SIZEWE                  }, // WXCURSOR_SIZEWE
         {  true, IDC_SIZEALL                 }, // WXCURSOR_SIZING
         { false, wxT("WXCURSOR_PBRUSH")       }, // wxCURSOR_SPRAYCAN
+#endif
         {  true, IDC_WAIT                    }, // WXCURSOR_WAIT
+#if !wxUSE_ICON_MINIMAL
         {  true, IDC_WAIT                    }, // WXCURSOR_WATCH
         { false, wxT("WXCURSOR_BLANK")        }, // wxCURSOR_BLANK
         {  true, IDC_APPSTARTING             }, // wxCURSOR_ARROWWAIT

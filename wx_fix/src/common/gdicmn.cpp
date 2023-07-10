@@ -577,14 +577,12 @@ const wxCursor* wxStockGDI::GetCursor(Item item)
     {
         switch (item)
         {
-#if !wxUSE_ICON_MINIMAL
         case CURSOR_CROSS:
             cursor = new wxCursor(wxCURSOR_CROSS);
             break;
         case CURSOR_HOURGLASS:
             cursor = new wxCursor(wxCURSOR_WAIT);
             break;
-#endif
         case CURSOR_STANDARD:
             cursor = new wxCursor(wxCURSOR_ARROW);
             break;
