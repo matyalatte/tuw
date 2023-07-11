@@ -14,6 +14,10 @@
 
 #if !wxUSE_EXTENDED_RTTI     // XTI system is meant to replace these macros
 
+#ifndef wxUSE_RTTI_MINIMAL
+#define wxUSE_RTTI_MINIMAL 1
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -160,7 +164,7 @@ WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxString& name);
     wxDECLARE_ABSTRACT_CLASS(name);                                           \
     static wxObject* wxCreateObject()
 
-#if (defined(wxNO_RTTI) && defined(_WIN32))
+#if wxUSE_RTTI_MINIMAL
 #define wxDECLARE_DYNAMIC_CLASS_REMOVABLE(name)                               \
     static wxObject* wxCreateObject()
 #define wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN_REMOVABLE(name)                     \
@@ -209,7 +213,7 @@ WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxString& name);
     wxObject* name::wxCreateObject()                                          \
         { return new name; }
 
-#if (defined(wxNO_RTTI) && defined(_WIN32))
+#if wxUSE_RTTI_MINIMAL
 #define wxIMPLEMENT_DYNAMIC_CLASS_REMOVABLE(name, basename)                   \
     wxObject* name::wxCreateObject()                                          \
         { return new name; }
