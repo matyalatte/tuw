@@ -60,8 +60,6 @@ Component* Component::PutComponent(wxWindow* panel, wxBoxSizer* sizer, const rap
             comp = new FloatPicker(panel, sizer, j);
             break;
         default:
-            std::string msg = "Unknown component type detected. (" + std::to_string(type) + ")";
-            throw std::runtime_error(msg);
             break;
     }
     return comp;

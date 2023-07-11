@@ -32,8 +32,8 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
         bool exists_external_json = wxFileExists("gui_definition.json");
         ExeContainer exe;
-        bool success = exe.Read(exe_path);
-        if (success) {
+        wxResult result = exe.Read(exe_path);
+        if (result.ok) {
             if (exe.HasJson()) {
                 PRINT("[LoadDefinition] Found JSON in the executable.\n");
                 exe.GetJson(m_definition);
@@ -45,13 +45,13 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
                 }
             } else {
                 PRINT("[LoadDefinition] Embedded JSON not found.\n");
-                success = false;
+                result = { false };
             }
         } else {
-            PRINT_FMT("[LoadDefinition] ERROR: %s\n", exe.GetErrorMsg());
+            PRINT_FMT("[LoadDefinition] ERROR: %s\n", result.msg);
         }
 
-        if (!success) {
+        if (!result.ok) {
             if (exists_external_json) {
                 PRINT("[LoadDefinition] Loaded gui_definition.json\n");
                 LoadJson("gui_definition.json", m_definition, true);
@@ -76,13 +76,12 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 }
 
 void MainFrame::LoadJson(const std::string& file, rapidjson::Document& json, bool is_definition) {
-    try {
-        json_utils::LoadJson(file, json);
-    }
-    catch (const std::exception& e) {
+    json_utils::JsonResult result = json_utils::LoadJson(file, json);
+
+    if (!result.ok) {
         json.SetObject();
         if (is_definition)
-            JsonLoadFailed(wxString::FromUTF8(e.what()), json);
+            JsonLoadFailed(wxString::FromUTF8(result.msg.c_str()), json);
     }
 }
 
@@ -144,19 +143,30 @@ void MainFrame::JsonLoadFailed(const wxString& msg, rapidjson::Document& definit
 
 // read gui_definition.json
 void MainFrame::CheckDefinition(rapidjson::Document& definition) {
-    try {
-        json_utils::CheckVersion(definition);
-        if (definition.HasMember("recommended")) {
-            if (definition["not_recommended"].GetBool()) {
-                PRINT_FMT("[LoadDefinition] Warning: Version %s is recommended.\n",
-                           definition["recommended"].GetString());
-            }
-        }
-        json_utils::CheckDefinition(definition);
-        json_utils::CheckHelpURLs(definition);
+    json_utils::JsonResult result = { true };
+    json_utils::CheckVersion(result, definition);
+    if (!result.ok) {
+        wxString msg = "Failed to load gui_definition.json (" + wxString::FromUTF8(result.msg.c_str()) + ")";
+        JsonLoadFailed(msg, definition);
+        return;
     }
-    catch (const std::exception& e) {
-        wxString msg = "Failed to load gui_definition.json (" + wxString::FromUTF8(e.what()) + ")";
+    if (definition.HasMember("recommended")) {
+        if (definition["not_recommended"].GetBool()) {
+            PRINT_FMT("[LoadDefinition] Warning: Version %s is recommended.\n",
+                        definition["recommended"].GetString());
+        }
+    }
+
+    json_utils::CheckDefinition(result, definition);
+    if (!result.ok) {
+        wxString msg = "Failed to load gui_definition.json (" + wxString::FromUTF8(result.msg.c_str()) + ")";
+        JsonLoadFailed(msg, definition);
+        return;
+    }
+
+    json_utils::CheckHelpURLs(result, definition);
+    if (!result.ok) {
+        wxString msg = "Failed to load gui_definition.json (" + wxString::FromUTF8(result.msg.c_str()) + ")";
         JsonLoadFailed(msg, definition);
         return;
     }
@@ -172,11 +182,11 @@ void MainFrame::UpdateConfig() {
 
 void MainFrame::SaveConfig() {
     UpdateConfig();
-    bool saved = json_utils::SaveJson(m_config, "gui_config.json");
-    if (saved) {
+    json_utils::JsonResult result = json_utils::SaveJson(m_config, "gui_config.json");
+    if (result.ok) {
         PRINT("[SaveConfig] Saved gui_config.json\n");
     } else {
-        PRINT("[SaveConfig] Error: Failed to write gui_config.json\n");
+        PRINT_FMT("[SaveConfig] Error: %s\n", result.msg.c_str());
     }
 }
 
@@ -226,7 +236,7 @@ wxString MainFrame::GetCommand() {
     return cmd;
 }
 
-std::string MainFrame::RunCommand() {
+wxResult MainFrame::RunCommand(wxString& last_line) {
     wxString cmd = GetCommand();
 
     PRINT_FMT("[RunCommand] Command: %s\n", cmd);
@@ -238,12 +248,12 @@ std::string MainFrame::RunCommand() {
     int exit_success = json_utils::GetInt(sub_definition, "exit_success", 0);
     bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
 #ifdef __linux__
-    std::string last_line = Exec(*m_ostream, cmd,
+    return Exec(*m_ostream, cmd,
 #else
-    std::string last_line = Exec(cmd,
+    return Exec(cmd,
 #endif
-                                 check_exit_code, exit_success, show_last_line);
-    return last_line;
+                check_exit_code, exit_success,
+                show_last_line, last_line);
 }
 
 // run command
@@ -253,23 +263,21 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
 
     bool failed = false;
     wxString text = m_run_button->GetLabel();
-    std::string last_line = "";
-    try {
-        m_run_button->SetLabel("Processing...");
-        last_line = RunCommand();
-    }
-    catch (std::exception& e) {
-        PRINT_FMT("[RunCommand] Error: %s\n", e.what());
-        ShowErrorDialog(e.what());
-        failed = true;
-    }
+    wxString last_line;
 
+    m_run_button->SetLabel("Processing...");
+    wxResult result = RunCommand(last_line);
     m_run_button->SetLabel(text);
-    if (failed) return;
+    
+    if (!result.ok) {
+        PRINT_FMT("[RunCommand] Error: %s\n", result.msg);
+        ShowErrorDialog(result.msg);
+        return;
+    }
 
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     if (json_utils::GetBool(sub_definition, "show_last_line", false) && last_line != "") {
-        ShowSuccessDialog(last_line.c_str());
+        ShowSuccessDialog(last_line);
     } else {
         ShowSuccessDialog("Success!");
     }
@@ -280,39 +288,39 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
     rapidjson::Value& help = m_definition["help"].GetArray()[id];
     std::string type = help["type"].GetString();
     wxString url = "";
-    std::string tag;
-    try {
-        if (type == "url") {
-            url = wxString::FromUTF8(help["url"].GetString());
-            tag = "[OpenURL] ";
-            int pos = url.Find("://");
-            if (pos !=wxNOT_FOUND) {
-                wxString scheme = url.Left(pos);
-                // scheme should be http or https
-                if (scheme.IsSameAs("file", false)) {
-                    wxString msg = "Use 'file' type for a path, not 'url' type. (" + url + ")";
-                    throw std::runtime_error(msg.c_str());
-                } else if (!scheme.IsSameAs("https", false) && !scheme.IsSameAs("http", false)) {
-                    wxString msg = "Unsupported scheme detected. "
-                                      "It should be http or https. (" + scheme + ")";
-                    throw std::runtime_error(msg.c_str());
-                }
-            } else {
-                url = "https://" + url;
+    wxString tag;
+
+    if (type == "url") {
+        url = wxString::FromUTF8(help["url"].GetString());
+        tag = "[OpenURL] ";
+        int pos = url.Find("://");
+        if (pos !=wxNOT_FOUND) {
+            wxString scheme = url.Left(pos);
+            // scheme should be http or https
+            if (scheme.IsSameAs("file", false)) {
+                wxString msg = "Use 'file' type for a path, not 'url' type. (" + url + ")";
+                PRINT_FMT("%sError: %s\n", tag, msg);
+                ShowErrorDialog(msg);
+                return;
+            } else if (!scheme.IsSameAs("https", false) && !scheme.IsSameAs("http", false)) {
+                wxString msg = "Unsupported scheme detected. "
+                                    "It should be http or https. (" + scheme + ")";
+                PRINT_FMT("%sError: %s\n", tag, msg);
+                ShowErrorDialog(msg);
+                return;
             }
-        } else if (type == "file") {
-            url = wxString::FromUTF8(help["path"].GetString());
-            tag = "[OpenFile] ";
-            if (!wxFileExists(url) && !wxDirExists(url)) {
-                wxString msg = "File does not exist. (" + url + ")";
-                throw std::runtime_error(msg.c_str());
-            }
+        } else {
+            url = "https://" + url;
         }
-    }
-    catch (std::exception& e) {
-        PRINT_FMT("%sError: %s\n", tag.c_str(), e.what());
-        ShowErrorDialog(e.what());
-        return;
+    } else if (type == "file") {
+        url = wxString::FromUTF8(help["path"].GetString());
+        tag = "[OpenFile] ";
+        if (!wxFileExists(url) && !wxDirExists(url)) {
+            wxString msg = "File does not exist. (" + url + ")";
+            PRINT_FMT("%sError: %s\n", tag, msg);
+            ShowErrorDialog(msg);
+            return;
+        }
     }
 
     PRINT_FMT("%s%s\n", tag.c_str(), url);
@@ -321,8 +329,8 @@ void MainFrame::OpenURL(wxCommandEvent& event) {
     }
     bool success = wxLaunchDefaultBrowser(url);
     if (!success) {
-        std::string msg = "Failed to open " + type + " by an unexpected error.";
-        PRINT_FMT("%sError: %s\n", tag.c_str(), msg.c_str());
+        std::string msg = "Failed to open a " + type + " by an unexpected error.";
+        PRINT_FMT("%sError: %s\n", tag, msg.c_str());
         ShowErrorDialog(msg.c_str());
     }
 }
@@ -363,7 +371,9 @@ void MainFrame::UpdatePanel() {
     if (sub_definition["components"].Size() > 0) {
         for (rapidjson::Value& c : sub_definition["components"].GetArray()) {
             new_comp = Component::PutComponent(m_panel, comp_sizer, c);
-            if (new_comp != nullptr) {
+            if (new_comp == nullptr) {
+                ShowErrorDialog("Unknown component type detected. This is unexpected.");
+            } else {
                 new_comp->SetConfig(m_config);
                 m_components.push_back(new_comp);
             }

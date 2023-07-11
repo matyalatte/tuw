@@ -39,16 +39,6 @@ class map_as_vec {
     // a key can be duplicated.
     void push_back(const char* k, const T& v) { items.push_back({k, v}); }
 
-    const T& get(const char* k) const {
-        for (const ItemT& i : items)
-            if ( strcmp(i.key, k) == 0 ) return i.value;
-        throw std::runtime_error("Undefined key detected.");
-    }
-
-    const T& get(const std::string& k) const {
-        return get(k.c_str());
-    }
-
     const T& get(const char* k, const T& def_val) const {
         for (const ItemT& i : items)
             if ( strcmp(i.key, k) == 0 ) return i.value;

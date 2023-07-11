@@ -18,36 +18,29 @@ int main(int argc, char * argv[]) {
 }
 
 TEST(JsonCheckTest, LoadJsonFail) {
-    try {
-        rapidjson::Document test_json;
-        json_utils::LoadJson("fake.json", test_json);
-        FAIL();
-    }
-    catch(std::exception& err) {
-        const char* expected = "Failed to open fake.json";
-        EXPECT_STREQ(expected, err.what());
-    }
+    rapidjson::Document test_json;
+    json_utils::JsonResult result = json_utils::LoadJson("fake.json", test_json);
+    const char* expected = "Failed to open fake.json";
+    EXPECT_FALSE(result.ok);
+    EXPECT_STREQ(expected, result.msg.c_str());
 }
 
 TEST(JsonCheckTest, LoadJsonFail2) {
-    try {
-        rapidjson::Document test_json;
-        json_utils::LoadJson(broken, test_json);
-        FAIL();
-    }
-    catch(std::exception& err) {
-        const char* expected = "Failed to parse JSON: Missing a comma or '}'"
-        #ifdef _WIN32
-                               " after an object member. (offset: 128)";
-        #else
-                               " after an object member. (offset: 122)";
-        #endif
-        EXPECT_STREQ(expected, err.what());
-    }
+    rapidjson::Document test_json;
+    json_utils::JsonResult result = json_utils::LoadJson(broken, test_json);
+    const char* expected = "Failed to parse JSON: Missing a comma or '}'"
+    #ifdef _WIN32
+                            " after an object member. (offset: 128)";
+    #else
+                            " after an object member. (offset: 122)";
+    #endif
+    EXPECT_FALSE(result.ok);
+    EXPECT_STREQ(expected, result.msg.c_str());
 }
 
 void GetTestJson(rapidjson::Document& json) {
-    json_utils::LoadJson(json_file, json);
+    json_utils::JsonResult result = json_utils::LoadJson(json_file, json);
+    EXPECT_TRUE(result.ok);
     EXPECT_FALSE(json.ObjectEmpty());
 }
 
@@ -59,7 +52,9 @@ TEST(JsonCheckTest, LoadJsonSuccess) {
 TEST(JsonCheckTest, checkGUISuccess) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
-    json_utils::CheckDefinition(test_json);
+    json_utils::JsonResult result = { true };
+    json_utils::CheckDefinition(result, test_json);
+    EXPECT_TRUE(result.ok);
 }
 
 TEST(JsonCheckTest, checkGUISuccess2) {
@@ -68,31 +63,34 @@ TEST(JsonCheckTest, checkGUISuccess2) {
     rapidjson::Value& comp = test_json["gui"][0]["components"][5];
     comp.AddMember("item_array", comp["items"], test_json.GetAllocator());
     comp.RemoveMember("items");
-    json_utils::CheckDefinition(test_json);
+    json_utils::JsonResult result = { true };
+    json_utils::CheckDefinition(result, test_json);
+    EXPECT_TRUE(result.ok);
 }
 
 TEST(JsonCheckTest, checkGUISuccess3) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["gui"][0].Swap(test_json["gui"][1]);
-    json_utils::CheckDefinition(test_json);
+    json_utils::JsonResult result = { true };
+    json_utils::CheckDefinition(result, test_json);
+    EXPECT_TRUE(result.ok);
 }
 
 TEST(JsonCheckTest, checkGUISuccess4) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["gui"][0].Swap(test_json["gui"][2]);
-    json_utils::CheckDefinition(test_json);
+    json_utils::JsonResult result = { true };
+    json_utils::CheckDefinition(result, test_json);
+    EXPECT_TRUE(result.ok);
 }
 
 void CheckGUIError(rapidjson::Document& test_json, const char* expected) {
-    try {
-        json_utils::CheckDefinition(test_json);
-        FAIL();
-    }
-    catch(std::exception& err) {
-        EXPECT_STREQ(expected, err.what());
-    }
+    json_utils::JsonResult result = { true };
+    json_utils::CheckDefinition(result, test_json);
+    EXPECT_FALSE(result.ok);
+    EXPECT_STREQ(expected, result.msg.c_str());
 }
 
 TEST(JsonCheckTest, checkGUIFail) {
@@ -155,17 +153,16 @@ TEST(JsonCheckTest, checkGUIFail7) {
 TEST(JsonCheckTest, checkHelpSuccess) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
-    json_utils::CheckHelpURLs(test_json);
+    json_utils::JsonResult result = { true };
+    json_utils::CheckHelpURLs(result, test_json);
+    EXPECT_TRUE(result.ok);
 }
 
 void CheckHelpError(rapidjson::Document& test_json, const char* expected) {
-    try {
-        json_utils::CheckHelpURLs(test_json);
-        FAIL();
-    }
-    catch(std::exception& err) {
-        EXPECT_STREQ(expected, err.what());
-    }
+    json_utils::JsonResult result = { true };
+    json_utils::CheckHelpURLs(result, test_json);
+    EXPECT_FALSE(result.ok);
+    EXPECT_STREQ(expected, result.msg.c_str());
 }
 
 TEST(JsonCheckTest, checkHelpFail) {
@@ -186,7 +183,9 @@ TEST(JsonCheckTest, checkVersionSuccess) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["recommended"].SetString(scr_constants::VERSION);
-    json_utils::CheckVersion(test_json);
+    json_utils::JsonResult result = { true };
+    json_utils::CheckVersion(result, test_json);
+    EXPECT_TRUE(result.ok);
     EXPECT_FALSE(test_json["not_recommended"].GetBool());
 }
 
@@ -194,7 +193,9 @@ TEST(JsonCheckTest, checkVersionFail) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["recommended"].SetString("0.2.3");
-    json_utils::CheckVersion(test_json);
+    json_utils::JsonResult result = { true };
+    json_utils::CheckVersion(result, test_json);
+    EXPECT_TRUE(result.ok);
     EXPECT_TRUE(test_json["not_recommended"].GetBool());
 }
 
@@ -202,18 +203,17 @@ TEST(JsonCheckTest, checkVersionSuccess2) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["minimum_required"].SetString(scr_constants::VERSION);
-    json_utils::CheckVersion(test_json);
+    json_utils::JsonResult result = { true };
+    json_utils::CheckVersion(result, test_json);
+    EXPECT_TRUE(result.ok);
 }
 
 TEST(JsonCheckTest, checkVersionFail2) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["minimum_required"].SetString("1.0.0");
-    try {
-        json_utils::CheckVersion(test_json);
-        FAIL();
-    }
-    catch(std::exception& err) {
-        EXPECT_STREQ("Version 1.0.0 is required.", err.what());
-    }
+    json_utils::JsonResult result = { true };
+    json_utils::CheckVersion(result, test_json);
+    EXPECT_FALSE(result.ok);
+    EXPECT_STREQ("Version 1.0.0 is required.", result.msg.c_str());
 }

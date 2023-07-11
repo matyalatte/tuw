@@ -34,46 +34,43 @@ bool AskOverwrite(const wxString& path) {
     return (ans == "y"[0] || ans == "Y"[0]);
 }
 
-#define STATUS_ERROR 1
-#define STATUS_SUCCESS 0
-
-int Merge(const wxString& exe_path, const wxString& json_path, const wxString& new_path,
+wxResult Merge(const wxString& exe_path, const wxString& json_path, const wxString& new_path,
            const bool force) {
     rapidjson::Document json;
-    json_utils::LoadJson(std::string(json_path.c_str()), json);
+    json_utils::JsonResult result = json_utils::LoadJson(std::string(json_path.c_str()), json);
+    if (!result.ok)
+        return { false, wxString::FromUTF8(result.msg.c_str())};
+
     if (json.Size() == 0) {
         wxPrintf("JSON file loaded but it has no data.\n");
-        return STATUS_SUCCESS;
+        return { true };
     }
     ExeContainer exe;
-    if (!exe.Read(exe_path)) {
-        wxFprintf(stderr, "Error: %s\n", exe.GetErrorMsg());
-        return STATUS_ERROR;
-    }
+    wxResult wxresult = exe.Read(exe_path);
+    if (!wxresult.ok)
+        return wxresult;
     wxPrintf("Importing a json file... (%s)\n", json_path);
     exe.SetJson(json);
     if (!force && !AskOverwrite(new_path)) {
         wxPrintf("The operation has been cancelled.\n");
-        return STATUS_SUCCESS;
+        return { true };
     }
-    if (!exe.Write(new_path)) {
-        wxFprintf(stderr, "Error: %s\n", exe.GetErrorMsg());
-        return STATUS_ERROR;
-    }
+    wxresult = exe.Write(new_path);
+    if (!wxresult.ok)
+        return wxresult;
     wxPrintf("Generated an executable. (%s)\n", new_path);
-    return STATUS_SUCCESS;
+    return { true };
 }
 
-int Split(const wxString& exe_path, const wxString& json_path, const wxString& new_path,
+wxResult Split(const wxString& exe_path, const wxString& json_path, const wxString& new_path,
            const bool force) {
     ExeContainer exe;
-    if (!exe.Read(exe_path)) {
-        wxFprintf(stderr, "Error: %s\n", exe.GetErrorMsg());
-        return STATUS_ERROR;
-    }
+    wxResult wxresult = exe.Read(exe_path);
+    if (!wxresult.ok)
+        return wxresult;
     if (!exe.HasJson()) {
         wxPrintf("The executable has no json data.\n");
-        return STATUS_SUCCESS;
+        return { true };
     }
     wxPrintf("Extracting JSON data from the executable...\n");
     rapidjson::Document json;
@@ -81,20 +78,17 @@ int Split(const wxString& exe_path, const wxString& json_path, const wxString& n
     exe.RemoveJson();
     if (!force && (!AskOverwrite(new_path) || !AskOverwrite(json_path))) {
         wxPrintf("The operation has been cancelled.\n");
-        return STATUS_SUCCESS;
+        return { true };
     }
-    if (!exe.Write(new_path)) {
-        wxFprintf(stderr, "Error: %s\n", exe.GetErrorMsg());
-        return STATUS_ERROR;
-    }
-    bool saved = json_utils::SaveJson(json, std::string(json_path.c_str()));
-    if (!saved) {
-        wxFprintf(stderr, "Failed to save json file.");
-        return STATUS_ERROR;
-    }
+    wxresult = exe.Write(new_path);
+    if (!wxresult.ok)
+        return wxresult;
+    json_utils::JsonResult result = json_utils::SaveJson(json, std::string(json_path.c_str()));
+    if (!result.ok)
+        return { false, wxString::FromUTF8(result.msg.c_str())};
     wxPrintf("Generated an executable. (%s)\n", new_path);
     wxPrintf("Exported a json file. (%s)\n", json_path);
-    return STATUS_SUCCESS;
+    return { true };
 }
 
 void PrintUsage() {
@@ -164,6 +158,9 @@ wxString GetFullPath(const wxString& path) {
     fn.MakeAbsolute();
     return fn.GetFullPath();
 }
+
+#define STATUS_ERROR 1
+#define STATUS_SUCCESS 0
 
 #ifdef _WIN32
 int wmain(int argc, wchar_t* argv[]) {
@@ -242,11 +239,15 @@ int main(int argc, char* argv[]) {
         return STATUS_ERROR;
     }
 
+    wxResult result = { true };
+
     switch (cmd_int) {
         case CMD_MERGE:
-            return Merge(exe_path, json_path, new_exe_path, force);
+            result = Merge(exe_path, json_path, new_exe_path, force);
+            break;
         case CMD_SPLIT:
-            return Split(exe_path, json_path, new_exe_path, force);
+            result = Split(exe_path, json_path, new_exe_path, force);
+            break;
         case CMD_VERSION:
             wxPrintf("%s\n", scr_constants::VERSION);
             break;
@@ -255,6 +256,11 @@ int main(int argc, char* argv[]) {
             break;
         default:
             break;
+    }
+
+    if (!result.ok) {
+        wxFprintf(stderr, "Error: %s\n", result.msg);
+        return STATUS_ERROR;
     }
 
     return STATUS_SUCCESS;

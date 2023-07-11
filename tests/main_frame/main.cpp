@@ -56,7 +56,8 @@ TEST(MainFrameTest, MakeDefaultMainFrame) {
 }
 
 void GetTestJson(rapidjson::Document& test_json) {
-    json_utils::LoadJson(json_file, test_json);
+    json_utils::JsonResult result = json_utils::LoadJson(json_file, test_json);
+    EXPECT_TRUE(result.ok);
     EXPECT_FALSE(test_json.ObjectEmpty());
 }
 
@@ -137,7 +138,9 @@ TEST(MainFrameTest, RunCommandSuccess) {
     main_frame->GetDefinition(actual_json);
     ASSERT_EQ(test_json["help"], actual_json["help"]);
 
-    std::string last_line = main_frame->RunCommand();
+    wxString last_line;
+    wxResult result = main_frame->RunCommand(last_line);
+    EXPECT_TRUE(result.ok);
     EXPECT_STRNE("", last_line.c_str());
 }
 
@@ -150,13 +153,10 @@ TEST(MainFrameTest, RunCommandFail) {
     GetDummyConfig(dummy_config);
     MainFrame* main_frame = new MainFrame(test_json, dummy_config);
 
-    try {
-        main_frame->RunCommand();
-        FAIL();
-    }
-    catch(std::exception& err) {
-        EXPECT_STRNE("", err.what());
-    }
+    wxString last_line;
+    wxResult result = main_frame->RunCommand(last_line);
+    EXPECT_FALSE(result.ok);
+    EXPECT_STRNE("", result.msg.c_str());
 }
 
 TEST(MainFrameTest, ClickRunButton) {
@@ -202,11 +202,13 @@ TEST(MainFrameTest, DeleteFrame) {
 
 void TestConfig(rapidjson::Document& test_json, std::string config) {
     rapidjson::Document test_config;
-    json_utils::LoadJson(config, test_config);
+    json_utils::JsonResult result = json_utils::LoadJson(config, test_config);
+    EXPECT_TRUE(result.ok);
     MainFrame* main_frame = new MainFrame(test_json, test_config);
     main_frame->SaveConfig();
     rapidjson::Document saved_config;
-    json_utils::LoadJson("gui_config.json", saved_config);
+    result = json_utils::LoadJson("gui_config.json", saved_config);
+    EXPECT_TRUE(result.ok);
     EXPECT_EQ(test_config, saved_config);
 }
 

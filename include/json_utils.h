@@ -24,8 +24,14 @@ constexpr char CMD_TOKEN_PERCENT[] = "";
 constexpr char CMD_TOKEN_CURRENT_DIR[] = "__CWD__";
 
 namespace json_utils {
-    void LoadJson(const std::string& file, rapidjson::Document& json);
-    bool SaveJson(rapidjson::Document& json, const std::string& file);
+
+    struct JsonResult {
+        bool ok;
+        std::string msg;
+    };
+
+    JsonResult LoadJson(const std::string& file, rapidjson::Document& json);
+    JsonResult SaveJson(rapidjson::Document& json, const std::string& file);
     std::string JsonToString(rapidjson::Document& json);
 
     std::string GetString(const rapidjson::Value& json, const char* key, const char* def);
@@ -34,9 +40,9 @@ namespace json_utils {
     double GetDouble(const rapidjson::Value& json, const char* key, double def);
 
     void GetDefaultDefinition(rapidjson::Document& definition);
-    void CheckVersion(rapidjson::Document& definition);
-    void CheckDefinition(rapidjson::Document& definition);
-    void CheckSubDefinition(rapidjson::Value& sub_definition,
+    void CheckVersion(JsonResult& result, rapidjson::Document& definition);
+    void CheckDefinition(JsonResult& result, rapidjson::Document& definition);
+    void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
                             rapidjson::Document::AllocatorType& alloc);
-    void CheckHelpURLs(const rapidjson::Document& definition);
+    void CheckHelpURLs(JsonResult& result, const rapidjson::Document& definition);
 }  // namespace json_utils

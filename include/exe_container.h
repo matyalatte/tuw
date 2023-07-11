@@ -8,6 +8,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/error/en.h"
+#include "wx_utils.h"
 #include "json_utils.h"
 
 class ExeContainer {
@@ -15,17 +16,15 @@ class ExeContainer {
     wxString m_exe_path;
     wxUint32 m_exe_size;
     rapidjson::Document m_json;
-    wxString m_err_msg;
 
  public:
     ExeContainer(): m_exe_path(""),
                     m_exe_size(0),
-                    m_json(),
-                    m_err_msg("") {
+                    m_json() {
         m_json.SetObject();
     }
-    bool Read(const wxString& exe_path);
-    bool Write(const wxString& exe_path);
+    wxResult Read(const wxString& exe_path);
+    wxResult Write(const wxString& exe_path);
     bool HasJson() { return m_json.IsObject() && !m_json.ObjectEmpty(); }
     void GetJson(rapidjson::Document& json) { json.CopyFrom(m_json, json.GetAllocator()); }
     void SetJson(rapidjson::Document& json) { m_json.CopyFrom(json, m_json.GetAllocator()); }
@@ -34,5 +33,4 @@ class ExeContainer {
         doc.SetObject();
         SetJson(doc);
     }
-    wxString GetErrorMsg() { return m_err_msg; }
 };
