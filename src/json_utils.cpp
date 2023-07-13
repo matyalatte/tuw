@@ -20,7 +20,7 @@ namespace json_utils {
         }
         if (!json.IsObject())
             json.SetObject();
-        
+
         return { true };
     }
 
@@ -207,7 +207,8 @@ namespace json_utils {
         return tokens;
     }
 
-    static void CheckIndexDuplication(JsonResult& result, const std::vector<std::string>& component_ids) {
+    static void CheckIndexDuplication(JsonResult& result,
+                                      const std::vector<std::string>& component_ids) {
         int size = component_ids.size();
         for (int i = 0; i < size - 1; i++) {
             std::string str = component_ids[i];
@@ -225,7 +226,7 @@ namespace json_utils {
     }
 
     // split command by "%" symbol, and calculate which component should be inserted there.
-    static void CompileCommand(JsonResult& result, 
+    static void CompileCommand(JsonResult& result,
                                rapidjson::Value& sub_definition,
                                const std::vector<std::string>& comp_ids,
                                rapidjson::Document::AllocatorType& alloc) {
@@ -429,7 +430,6 @@ namespace json_utils {
                     result.ok = false;
                     result.msg = "Unknown component type: " + type_str;
                     break;
-
             }
             if (!result.ok) return;
 

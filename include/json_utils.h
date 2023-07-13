@@ -25,24 +25,25 @@ constexpr char CMD_TOKEN_CURRENT_DIR[] = "__CWD__";
 
 namespace json_utils {
 
-    struct JsonResult {
-        bool ok;
-        std::string msg;
-    };
+struct JsonResult {
+    bool ok;
+    std::string msg;
+};
 
-    JsonResult LoadJson(const std::string& file, rapidjson::Document& json);
-    JsonResult SaveJson(rapidjson::Document& json, const std::string& file);
-    std::string JsonToString(rapidjson::Document& json);
+JsonResult LoadJson(const std::string& file, rapidjson::Document& json);
+JsonResult SaveJson(rapidjson::Document& json, const std::string& file);
+std::string JsonToString(rapidjson::Document& json);
 
-    std::string GetString(const rapidjson::Value& json, const char* key, const char* def);
-    bool GetBool(const rapidjson::Value& json, const char* key, bool def);
-    int GetInt(const rapidjson::Value& json, const char* key, int def);
-    double GetDouble(const rapidjson::Value& json, const char* key, double def);
+std::string GetString(const rapidjson::Value& json, const char* key, const char* def);
+bool GetBool(const rapidjson::Value& json, const char* key, bool def);
+int GetInt(const rapidjson::Value& json, const char* key, int def);
+double GetDouble(const rapidjson::Value& json, const char* key, double def);
 
-    void GetDefaultDefinition(rapidjson::Document& definition);
-    void CheckVersion(JsonResult& result, rapidjson::Document& definition);
-    void CheckDefinition(JsonResult& result, rapidjson::Document& definition);
-    void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
-                            rapidjson::Document::AllocatorType& alloc);
-    void CheckHelpURLs(JsonResult& result, const rapidjson::Document& definition);
+void GetDefaultDefinition(rapidjson::Document& definition);
+void CheckVersion(JsonResult& result, rapidjson::Document& definition);
+void CheckDefinition(JsonResult& result, rapidjson::Document& definition);
+void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
+                        rapidjson::Document::AllocatorType& alloc);
+void CheckHelpURLs(JsonResult& result, const rapidjson::Document& definition);
+
 }  // namespace json_utils

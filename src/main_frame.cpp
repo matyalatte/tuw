@@ -146,7 +146,8 @@ void MainFrame::CheckDefinition(rapidjson::Document& definition) {
     json_utils::JsonResult result = { true };
     json_utils::CheckVersion(result, definition);
     if (!result.ok) {
-        wxString msg = "Failed to load gui_definition.json (" + wxString::FromUTF8(result.msg.c_str()) + ")";
+        wxString msg = "Failed to load gui_definition.json ("
+                       + wxString::FromUTF8(result.msg.c_str()) + ")";
         JsonLoadFailed(msg, definition);
         return;
     }
@@ -159,14 +160,16 @@ void MainFrame::CheckDefinition(rapidjson::Document& definition) {
 
     json_utils::CheckDefinition(result, definition);
     if (!result.ok) {
-        wxString msg = "Failed to load gui_definition.json (" + wxString::FromUTF8(result.msg.c_str()) + ")";
+        wxString msg = "Failed to load gui_definition.json ("
+                       + wxString::FromUTF8(result.msg.c_str()) + ")";
         JsonLoadFailed(msg, definition);
         return;
     }
 
     json_utils::CheckHelpURLs(result, definition);
     if (!result.ok) {
-        wxString msg = "Failed to load gui_definition.json (" + wxString::FromUTF8(result.msg.c_str()) + ")";
+        wxString msg = "Failed to load gui_definition.json ("
+                       + wxString::FromUTF8(result.msg.c_str()) + ")";
         JsonLoadFailed(msg, definition);
         return;
     }
@@ -268,7 +271,7 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
     m_run_button->SetLabel("Processing...");
     wxResult result = RunCommand(last_line);
     m_run_button->SetLabel(text);
-    
+
     if (!result.ok) {
         PRINT_FMT("[RunCommand] Error: %s\n", result.msg);
         ShowErrorDialog(result.msg);
