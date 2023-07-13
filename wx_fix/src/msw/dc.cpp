@@ -1776,7 +1776,6 @@ void wxMSWDCImpl::InitializePalette()
 
 void wxMSWDCImpl::SetFont(const wxFont& font)
 {
-#if wxUSE_DC_DRAWING
     if ( font == m_font )
         return;
 
@@ -1813,7 +1812,6 @@ void wxMSWDCImpl::SetFont(const wxFont& font)
 
         m_font = wxNullFont;
     }
-#endif
 }
 
 void wxMSWDCImpl::SetPen(const wxPen& pen)
