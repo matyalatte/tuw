@@ -77,7 +77,7 @@ You can also make `gui_definition.json` with [web forms](https://rjsf-team.githu
 ## Want Smaller Executables?
 
 You can use [UPX to compress the executables](./UPX.md).  
-They will be **under 500KB**!  
+They will be **under 400KB**!  
 
 ## License
 

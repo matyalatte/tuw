@@ -1,6 +1,16 @@
 Changes that don't exist in the official wxWidgets
 
-- remove color database
+- disabled some DC related functions
+  - include/wx/dc.h
+              /msw/dc.h
+  - src/common/dcbase.cpp
+       /msw/dc.cpp
+
+- disabled generic renderer
+  - include/wx/renderer.h
+  - src/generic/renderg.cpp
+
+- removed color database
   - include/wx/gdicmn.h
   - src/common/gdicmn.cpp
               /appcmn.cpp

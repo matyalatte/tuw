@@ -387,8 +387,10 @@ public:
     // return the currently used renderer
     static wxRendererNative& Get();
 
+#ifndef __WXMSW__
     // return the generic implementation of the renderer
     static wxRendererNative& GetGeneric();
+#endif
 
     // return the default (native) implementation for this platform
     static wxRendererNative& GetDefault();
@@ -430,7 +432,7 @@ class WXDLLIMPEXP_CORE wxDelegateRendererNative : public wxRendererNative
 {
 public:
     wxDelegateRendererNative()
-        : m_rendererNative(GetGeneric()) { }
+        : m_rendererNative(GetDefault()) { }
 
     wxDelegateRendererNative(wxRendererNative& rendererNative)
         : m_rendererNative(rendererNative) { }
