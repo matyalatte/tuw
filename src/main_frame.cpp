@@ -229,6 +229,8 @@ wxString MainFrame::GetCommand() {
             cmd += "%";
         } else if (id == CMD_ID_CURRENT_DIR) {
             cmd += wxGetCwd();
+        } else if (id == CMD_ID_HOME_DIR) {
+            cmd += wxGetHomeDir();
         } else {
             cmd += comp_strings[id];
         }

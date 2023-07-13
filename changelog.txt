@@ -1,6 +1,8 @@
 ver 0.5.1
-- Disabled c++ exceptions
-- Fixed crashes when opening URLs or files via the help menu
+- Added a predefined ID for the user's home directory.
+- Disabled c++ exceptions.
+- Removed more codes from wxWidgets.
+- Fixed crashes when opening URLs or files via the help menu.
 
 ver 0.5.0
 - Changed the json formats for "choice" and "check_array"

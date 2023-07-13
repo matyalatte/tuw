@@ -17,11 +17,13 @@
 
 enum CmdPredefinedIds: int {
     CMD_ID_PERCENT = -1,
-    CMD_ID_CURRENT_DIR = -2
+    CMD_ID_CURRENT_DIR = -2,
+    CMD_ID_HOME_DIR = -3
 };
 
 constexpr char CMD_TOKEN_PERCENT[] = "";
 constexpr char CMD_TOKEN_CURRENT_DIR[] = "__CWD__";
+constexpr char CMD_TOKEN_HOME_DIR[] = "__HOME__";
 
 namespace json_utils {
 

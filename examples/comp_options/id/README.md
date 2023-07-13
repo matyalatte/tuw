@@ -55,12 +55,13 @@ When you put an undefined id in `%*%`, it'll use one of the components that have
 There are some predefined ids.  
 `%%` will be replaced with `%` at runtime.  
 `%__CWD__%` will be replaced with the executable directory at runtime.  
+`%__HOME__%` will be replaced with the user's home directory at runtime.  
 Also, all ids that start with `_` are reserved.  
 
 ```json
 {
     "label": "Reserved IDs",
-    "command": "echo percent: %% & echo cwd: %__CWD__%",
+    "command": "echo percent: %% & echo cwd: %__CWD__% & echo home: %__HOME__%",
     "button": "Echo!",
     "components": []
 }

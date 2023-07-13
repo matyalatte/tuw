@@ -192,9 +192,9 @@
         {
             "label": "GUI Optional",
             "window_name": "Window Title Here",
-            "command_win": "echo cwd: %__CWD__% & echo percent: %% & echo sample message!",
-            "command_linux": "echo cwd: %__CWD__%; echo percent: %%; echo sample message!",
-            "command_mac": "echo cwd: %__CWD__%; echo percent: %%; echo sample message!",
+            "command_win": "echo home: %__HOME__% & echo cwd: %__CWD__% & echo percent: %% & echo sample message!",
+            "command_linux": "echo home: %__HOME__%; echo cwd: %__CWD__%; echo percent: %%; echo sample message!",
+            "command_mac": "echo home: %__HOME__%; echo cwd: %__CWD__%; echo percent: %%; echo sample message!",
             "button": "Run!",
             "show_last_line": true,
             "check_exit_code": true,

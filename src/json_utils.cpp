@@ -266,6 +266,9 @@ namespace json_utils {
             } else if (id == CMD_TOKEN_CURRENT_DIR) {
                 j = CMD_ID_CURRENT_DIR;
                 cmd_str += id;
+            } else if (id == CMD_TOKEN_HOME_DIR) {
+                j = CMD_ID_HOME_DIR;
+                cmd_str += id;
             } else {
                 for (j = 0; j < comp_size; j++)
                     if (id == comp_ids[j]) break;
