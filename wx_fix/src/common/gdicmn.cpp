@@ -38,7 +38,9 @@ wxIMPLEMENT_ABSTRACT_CLASS(wxGDIObject, wxObject);
 
 WXDLLIMPEXP_DATA_CORE(wxBrushList*) wxTheBrushList;
 WXDLLIMPEXP_DATA_CORE(wxFontList*)  wxTheFontList;
+#if wxUSE_PEN
 WXDLLIMPEXP_DATA_CORE(wxPenList*)   wxThePenList;
+#endif
 
 #if wxUSE_COLOR_DATABASE
 WXDLLIMPEXP_DATA_CORE(wxColourDatabase*) wxTheColourDatabase;
@@ -50,7 +52,9 @@ WXDLLIMPEXP_DATA_CORE(wxColour)  wxNullColour;
 WXDLLIMPEXP_DATA_CORE(wxCursor)  wxNullCursor;
 WXDLLIMPEXP_DATA_CORE(wxFont)    wxNullFont;
 WXDLLIMPEXP_DATA_CORE(wxIcon)    wxNullIcon;
+#if wxUSE_PEN
 WXDLLIMPEXP_DATA_CORE(wxPen)     wxNullPen;
+#endif
 #if wxUSE_PALETTE
 WXDLLIMPEXP_DATA_CORE(wxPalette) wxNullPalette;
 #endif
@@ -635,6 +639,7 @@ const wxFont* wxStockGDI::GetFont(Item item)
     return font;
 }
 
+#if wxUSE_PEN
 const wxPen* wxStockGDI::GetPen(Item item)
 {
     wxPen* pen = static_cast<wxPen*>(ms_stockObject[item]);
@@ -685,6 +690,7 @@ const wxPen* wxStockGDI::GetPen(Item item)
     }
     return pen;
 }
+#endif
 
 void wxInitializeStockLists()
 {
@@ -692,14 +698,18 @@ void wxInitializeStockLists()
     wxTheColourDatabase = new wxColourDatabase;
 #endif
     wxTheBrushList = new wxBrushList;
+#if wxUSE_PEN
     wxThePenList = new wxPenList;
+#endif
     wxTheFontList = new wxFontList;
 }
 
 void wxDeleteStockLists()
 {
     wxDELETE(wxTheBrushList);
+#if wxUSE_PEN
     wxDELETE(wxThePenList);
+#endif
     wxDELETE(wxTheFontList);
 
     // wxTheColourDatabase is cleaned up by wxAppBase::CleanUp()
@@ -721,6 +731,7 @@ wxGDIObjListBase::~wxGDIObjListBase()
     }
 }
 
+#if wxUSE_PEN
 wxPen *wxPenList::FindOrCreatePen (const wxColour& colour, int width, wxPenStyle style)
 {
     for ( wxList::compatibility_iterator node = list.GetFirst();
@@ -744,6 +755,7 @@ wxPen *wxPenList::FindOrCreatePen (const wxColour& colour, int width, wxPenStyle
 
     return pen;
 }
+#endif
 
 wxBrush *wxBrushList::FindOrCreateBrush (const wxColour& colour, wxBrushStyle style)
 {

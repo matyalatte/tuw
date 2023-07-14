@@ -397,8 +397,10 @@ public:
     virtual void SetFont(const wxFont& font) = 0;
     virtual const wxFont& GetFont() const { return m_font; }
 
+#if wxUSE_PEN
     virtual void SetPen(const wxPen& pen) = 0;
     virtual const wxPen& GetPen() const { return m_pen; }
+#endif
 
     virtual void SetBrush(const wxBrush& brush) = 0;
     virtual const wxBrush& GetBrush() const { return m_brush; }
@@ -788,7 +790,9 @@ protected:
     int m_backgroundMode;
     wxMappingMode m_mappingMode;
 
+#if wxUSE_PEN
     wxPen             m_pen;
+#endif
     wxBrush           m_brush;
     wxBrush           m_backgroundBrush;
     wxColour          m_textForegroundColour;
@@ -933,10 +937,12 @@ public:
     const wxFont&   GetFont() const
         { return m_pimpl->GetFont(); }
 
+#if wxUSE_PEN
     void SetPen(const wxPen& pen)
         { m_pimpl->SetPen( pen ); }
     const wxPen&    GetPen() const
         { return m_pimpl->GetPen(); }
+#endif
 
     void SetBrush(const wxBrush& brush)
         { m_pimpl->SetBrush( brush ); }
@@ -1580,6 +1586,7 @@ private:
     wxDECLARE_NO_COPY_CLASS(wxDCTextBgModeChanger);
 };
 
+#if wxUSE_PEN
 // ----------------------------------------------------------------------------
 // helper class: you can use it to temporarily change the DC pen and
 // restore it automatically when the object goes out of scope
@@ -1606,6 +1613,7 @@ private:
 
     wxDECLARE_NO_COPY_CLASS(wxDCPenChanger);
 };
+#endif
 
 // ----------------------------------------------------------------------------
 // helper class: you can use it to temporarily change the DC brush and

@@ -338,7 +338,9 @@ wxDCImpl::wxDCImpl( wxDC *owner )
         , m_logicalFunction(wxCOPY)
         , m_backgroundMode(wxBRUSHSTYLE_TRANSPARENT)
         , m_mappingMode(wxMM_TEXT)
+#if wxUSE_PEN
         , m_pen()
+#endif
         , m_brush()
         , m_backgroundBrush()
         , m_textForegroundColour(*wxBLACK)

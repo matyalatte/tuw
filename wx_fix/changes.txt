@@ -1,5 +1,23 @@
 Changes that don't exist in the official wxWidgets
 
+- disabled wxPen
+  - include/wx/pen.h
+              /peninfobase.h
+              /gdicmn.h
+              /dc.h
+              /msw/dc.h
+              /generic/splitter.h
+  - src/common/gdicmn.cpp
+              /dcbase.cpp
+       /generic/tipwin.cpp
+       /msw/renderer.cpp
+           /dc.cpp
+           /dcmemory.cpp
+           /pen.cpp
+
+- disabled unused rendering functions for msw port
+  - src/msw/renderer.cpp
+
 - disabled some DC related functions
   - include/wx/dc.h
               /msw/dc.h

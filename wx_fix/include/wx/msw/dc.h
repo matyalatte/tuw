@@ -60,7 +60,9 @@ public:
     virtual void EndPage() wxOVERRIDE;
 
     virtual void SetFont(const wxFont& font) wxOVERRIDE;
+#if wxUSE_PEN
     virtual void SetPen(const wxPen& pen) wxOVERRIDE;
+#endif
     virtual void SetBrush(const wxBrush& brush) wxOVERRIDE;
     virtual void SetBackground(const wxBrush& brush) wxOVERRIDE;
     virtual void SetBackgroundMode(int mode) wxOVERRIDE;

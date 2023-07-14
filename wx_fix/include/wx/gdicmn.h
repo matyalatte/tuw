@@ -27,6 +27,14 @@
 #endif
 #endif
 
+#ifndef wxUSE_PEN
+#ifdef __WXMSW__
+#define wxUSE_PEN 0
+#else
+#define wxUSE_PEN 1
+#endif
+#endif
+
 // ---------------------------------------------------------------------------
 // headers
 // ---------------------------------------------------------------------------
@@ -49,7 +57,9 @@ class WXDLLIMPEXP_FWD_CORE wxCursor;
 class WXDLLIMPEXP_FWD_CORE wxFont;
 class WXDLLIMPEXP_FWD_CORE wxIcon;
 class WXDLLIMPEXP_FWD_CORE wxPalette;
+#if wxUSE_PEN
 class WXDLLIMPEXP_FWD_CORE wxPen;
+#endif
 class WXDLLIMPEXP_FWD_CORE wxRegion;
 class WXDLLIMPEXP_FWD_BASE wxString;
 class WXDLLIMPEXP_FWD_CORE wxIconBundle;
@@ -1017,6 +1027,7 @@ public:
         FONT_NORMAL,
         FONT_SMALL,
         FONT_SWISS,
+#if wxUSE_PEN
         PEN_BLACK,
         PEN_BLACKDASHED,
         PEN_BLUE,
@@ -1029,6 +1040,7 @@ public:
         PEN_RED,
         PEN_TRANSPARENT,
         PEN_WHITE,
+#endif
         ITEMCOUNT
     };
 
@@ -1043,7 +1055,9 @@ public:
     static const wxCursor* GetCursor(Item item);
     // Can be overridden by platform-specific derived classes
     virtual const wxFont* GetFont(Item item);
+#if wxUSE_PEN
     static const wxPen* GetPen(Item item);
+#endif
 
 protected:
     static wxStockGDI* ms_instance;
@@ -1058,6 +1072,7 @@ protected:
 #define wxSMALL_FONT   wxStockGDI::instance().GetFont(wxStockGDI::FONT_SMALL)
 #define wxSWISS_FONT   wxStockGDI::instance().GetFont(wxStockGDI::FONT_SWISS)
 
+#if wxUSE_PEN
 #define wxBLACK_DASHED_PEN  wxStockGDI::GetPen(wxStockGDI::PEN_BLACKDASHED)
 #define wxBLACK_PEN         wxStockGDI::GetPen(wxStockGDI::PEN_BLACK)
 #define wxBLUE_PEN          wxStockGDI::GetPen(wxStockGDI::PEN_BLUE)
@@ -1070,6 +1085,7 @@ protected:
 #define wxRED_PEN           wxStockGDI::GetPen(wxStockGDI::PEN_RED)
 #define wxTRANSPARENT_PEN   wxStockGDI::GetPen(wxStockGDI::PEN_TRANSPARENT)
 #define wxWHITE_PEN         wxStockGDI::GetPen(wxStockGDI::PEN_WHITE)
+#endif
 
 #define wxBLACK_BRUSH        wxStockGDI::GetBrush(wxStockGDI::BRUSH_BLACK)
 #define wxBLUE_BRUSH         wxStockGDI::GetBrush(wxStockGDI::BRUSH_BLUE)
@@ -1100,7 +1116,9 @@ protected:
 extern WXDLLIMPEXP_DATA_CORE(wxBitmap)     wxNullBitmap;
 extern WXDLLIMPEXP_DATA_CORE(wxIcon)       wxNullIcon;
 extern WXDLLIMPEXP_DATA_CORE(wxCursor)     wxNullCursor;
+#if wxUSE_PEN
 extern WXDLLIMPEXP_DATA_CORE(wxPen)        wxNullPen;
+#endif
 extern WXDLLIMPEXP_DATA_CORE(wxBrush)      wxNullBrush;
 extern WXDLLIMPEXP_DATA_CORE(wxPalette)    wxNullPalette;
 extern WXDLLIMPEXP_DATA_CORE(wxFont)       wxNullFont;

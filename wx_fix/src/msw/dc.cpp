@@ -595,7 +595,9 @@ void wxMSWDCImpl::SelectOldObjects(WXHDC dc)
     }
 
     m_brush = wxNullBrush;
+#if wxUSE_PEN
     m_pen = wxNullPen;
+#endif
 #if wxUSE_PALETTE
     m_palette = wxNullPalette;
 #endif // wxUSE_PALETTE
@@ -1814,6 +1816,7 @@ void wxMSWDCImpl::SetFont(const wxFont& font)
     }
 }
 
+#if wxUSE_PEN
 void wxMSWDCImpl::SetPen(const wxPen& pen)
 {
 #if wxUSE_DC_DRAWING
@@ -1851,6 +1854,7 @@ void wxMSWDCImpl::SetPen(const wxPen& pen)
     }
 #endif
 }
+#endif
 
 void wxMSWDCImpl::SetBrush(const wxBrush& brush)
 {
