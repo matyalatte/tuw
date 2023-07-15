@@ -266,7 +266,6 @@ void MainFrame::ClickButton(wxCommandEvent& event) {
     // save config
     SaveConfig();
 
-    bool failed = false;
     wxString text = m_run_button->GetLabel();
     wxString last_line;
 

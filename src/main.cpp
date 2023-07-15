@@ -30,8 +30,8 @@ bool AskOverwrite(const wxString& path) {
     }
     wxPrintf("Overwrite %s? (y/n)\n", path);
     char ans;
-    scanf("%c", &ans);
-    return (ans == "y"[0] || ans == "Y"[0]);
+    int ret = scanf("%c", &ans);
+    return ret == 1 && (ans == "y"[0] || ans == "Y"[0]);
 }
 
 wxResult Merge(const wxString& exe_path, const wxString& json_path, const wxString& new_path,

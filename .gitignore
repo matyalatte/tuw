@@ -20,6 +20,7 @@
 
 # built files
 *.exe
+*.new
 *.zip
 
 SimpleCommandRunner
