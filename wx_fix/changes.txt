@@ -1,5 +1,8 @@
 Changes that don't exist in the official wxWidgets
 
+- disabled stock item IDs
+  - src/common/stockitem.cpp
+
 - disabled wxPen
   - include/wx/pen.h
               /peninfobase.h
