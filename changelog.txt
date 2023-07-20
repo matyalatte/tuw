@@ -1,5 +1,6 @@
 ver 0.5.1
 - Added a predefined ID for the user's home directory.
+- Added an option to rename the "Browse" button for path pickers. 
 - Disabled c++ exceptions.
 - Removed more codes from wxWidgets.
 - Fixed crashes when opening URLs or files via the help menu.

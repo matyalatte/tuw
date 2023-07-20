@@ -104,8 +104,11 @@ FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Valu
     wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", "").c_str());
     wxString empty_message = wxString::FromUTF8(
                                  json_utils::GetString(j, "empty_message", "").c_str());
+    wxString button_label = wxString::FromUTF8(
+                                json_utils::GetString(j, "button", "Browse").c_str());
     CustomFilePicker* picker = new CustomFilePicker(panel, wxID_ANY,
                                                     value, "", ext, empty_message,
+                                                    button_label,
                                                     wxDefaultPosition, wxSize(350, -1),
                                                     wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
 
@@ -133,8 +136,11 @@ DirPicker::DirPicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value&
     wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", "").c_str());
     wxString empty_message = wxString::FromUTF8(
                                  json_utils::GetString(j, "empty_message", "").c_str());
+    wxString button_label = wxString::FromUTF8(
+                                json_utils::GetString(j, "button", "Browse").c_str());
     CustomDirPicker* picker = new CustomDirPicker(panel, wxID_ANY,
                                                   value, "", empty_message,
+                                                  button_label,
                                                   wxDefaultPosition, wxSize(350, -1),
                                                   wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
 

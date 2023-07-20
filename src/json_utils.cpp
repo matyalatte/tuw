@@ -383,6 +383,7 @@ namespace json_utils {
                 case COMP_FILE:
                     CheckJsonType(result, c, "extention", JsonType::STRING, label, CAN_SKIP);
                 case COMP_FOLDER:
+                    CheckJsonType(result, c, "button", JsonType::STRING, label, CAN_SKIP);
                 case COMP_TEXT:
                     CheckJsonType(result, c, "default", JsonType::STRING, label, CAN_SKIP);
                     break;
