@@ -4,6 +4,7 @@ ver 0.5.1
 - Disabled c++ exceptions.
 - Removed more codes from wxWidgets.
 - Fixed crashes when opening URLs or files via the help menu.
+- Removed compilation warnings about overriding.
 
 ver 0.5.0
 - Changed the json formats for "choice" and "check_array"

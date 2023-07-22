@@ -23,11 +23,7 @@
 #include "wx/stockitem.h"
 
 #ifndef wxUSE_STOCKITEM
-#ifdef __WXMSW__
 #define wxUSE_STOCKITEM 0
-#else
-#define wxUSE_STOCKITEM 1
-#endif
 #endif
 
 #ifndef WX_PRECOMP

@@ -100,8 +100,8 @@ class CustomPickerBase : public wxFileDirPickerCtrlBase {
         long style,
         const wxValidator& validator,
         const wxString& name);
-    void UpdateTextCtrlFromPicker();
-    void UpdatePickerFromTextCtrl();
+    void UpdateTextCtrlFromPicker() wxOVERRIDE;
+    void UpdatePickerFromTextCtrl() wxOVERRIDE;
     virtual wxString GetFullPath() {return "";}
 };
 
