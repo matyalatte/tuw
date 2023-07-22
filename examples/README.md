@@ -29,6 +29,8 @@ Examples for component options.
 -   [IDs](./comp_options/id/): An option to set ids. You can use them as variable names in commands.
 -   [Default Values](./comp_options/default/):  An option to set default values of components.
 -   [Tooltip](./comp_options/tooltip/): An option to show a message when the mouse cursor is on a component.
+-   [Placeholder](./comp_options/placeholder/): An option to show a message when the text box is empty.
+-   [Renaming Buttons](./comp_options/button/): An option to rename buttons of path pickers.
 
 ![tooltip](https://user-images.githubusercontent.com/69258547/223138605-9a9aa6a7-a5c9-4aa6-b0af-dd674b46160a.png)  
 
