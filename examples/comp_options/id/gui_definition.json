@@ -39,7 +39,7 @@
         },
         {
             "label": "Reserved IDs",
-            "command": "echo percent: %% & echo cwd: %__CWD__%",
+            "command": "echo percent: %% & echo cwd: %__CWD__% & echo home: %__HOME__%",
             "button": "Echo!",
             "components": []
         }

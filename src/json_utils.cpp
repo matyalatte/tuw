@@ -1,12 +1,11 @@
 #include "json_utils.h"
 
 namespace json_utils {
-    void LoadJson(const std::string& file, rapidjson::Document& json) {
+    JsonResult LoadJson(const std::string& file, rapidjson::Document& json) {
         FILE* fp = fopen(file.c_str(), "rb");
-        if (!fp) {
-            std::string msg = "Failed to open " + file;
-            throw std::runtime_error(msg);
-        }
+        if (!fp)
+            return { false, "Failed to open " + file };
+
         char readBuffer[65536];
         rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
 
@@ -17,23 +16,25 @@ namespace json_utils {
             std::string msg("Failed to parse JSON: ");
             msg += std::string(rapidjson::GetParseError_En(ok.Code()))
                    + " (offset: " + std::to_string(ok.Offset()) + ")";
-            throw std::runtime_error(msg);
+            return { false, msg };
         }
         if (!json.IsObject())
             json.SetObject();
+
+        return { true };
     }
 
-    bool SaveJson(rapidjson::Document& json, const std::string& file) {
+    JsonResult SaveJson(rapidjson::Document& json, const std::string& file) {
         FILE* fp = fopen(file.c_str(), "wb");
         if (!fp)
-            return false;
+            return { false, "Failed to open " + file + "." };
 
         char writeBuffer[65536];
         rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
         rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);
         json.Accept(writer);
         fclose(fp);
-        return true;
+        return { true };
     }
 
     std::string JsonToString(rapidjson::Document& json) {
@@ -106,12 +107,13 @@ namespace json_utils {
 
     static const bool CAN_SKIP = true;
 
-    static void CheckJsonType(const rapidjson::Value& j, const std::string& key,
+    static void CheckJsonType(JsonResult& result, const rapidjson::Value& j, const std::string& key,
         const JsonType& type, const std::string& label = "", const bool& canSkip = false) {
         if (!j.HasMember(key)) {
             if (canSkip) return;
-            std::string msg = GetLabel(label, key) + " not found.";
-            throw std::runtime_error(msg);
+            result.ok = false;
+            result.msg = GetLabel(label, key) + " not found.";
+            return;
         }
         bool valid = false;
         std::string type_name;
@@ -144,7 +146,8 @@ namespace json_utils {
             break;
         }
         if (!valid) {
-            throw std::runtime_error(GetLabel(label, key) + " should be " + type_name + ".");
+            result.ok = false;
+            result.msg = GetLabel(label, key) + " should be " + type_name + ".";
         }
     }
 
@@ -204,24 +207,27 @@ namespace json_utils {
         return tokens;
     }
 
-    static void CheckIndexDuplication(const std::vector<std::string>& component_ids) {
+    static void CheckIndexDuplication(JsonResult& result,
+                                      const std::vector<std::string>& component_ids) {
         int size = component_ids.size();
         for (int i = 0; i < size - 1; i++) {
             std::string str = component_ids[i];
             if (str == "") { continue; }
             for (int j = i + 1; j < size; j++) {
                 if (str == component_ids[j]) {
-                    std::string msg = GetLabel("components", "id")
-                                      + " should not be duplicated in a gui definition. ("
-                                      + str + ")";
-                    throw std::runtime_error(msg);
+                    result.ok = false;
+                    result.msg = GetLabel("components", "id")
+                                 + " should not be duplicated in a gui definition. ("
+                                 + str + ")";
+                    return;
                 }
             }
         }
     }
 
     // split command by "%" symbol, and calculate which component should be inserted there.
-    static void CompileCommand(rapidjson::Value& sub_definition,
+    static void CompileCommand(JsonResult& result,
+                               rapidjson::Value& sub_definition,
                                const std::vector<std::string>& comp_ids,
                                rapidjson::Document::AllocatorType& alloc) {
         std::vector<std::string> cmd = SplitString(sub_definition["command"].GetString(),
@@ -260,6 +266,9 @@ namespace json_utils {
             } else if (id == CMD_TOKEN_CURRENT_DIR) {
                 j = CMD_ID_CURRENT_DIR;
                 cmd_str += id;
+            } else if (id == CMD_TOKEN_HOME_DIR) {
+                j = CMD_ID_HOME_DIR;
+                cmd_str += id;
             } else {
                 for (j = 0; j < comp_size; j++)
                     if (id == comp_ids[j]) break;
@@ -293,16 +302,19 @@ namespace json_utils {
             for (rapidjson::Value& id : cmd_int_ids.GetArray())
                 if (id.GetInt() == j) { found = true; break; }
             if (!found) {
-                std::string msg = "[\"commponents\"][" + std::to_string(j)
-                                  + "] is unused in the command; " + cmd_str;
+                result.ok = false;
+                result.msg = "[\"commponents\"][" + std::to_string(j)
+                             + "] is unused in the command; " + cmd_str;
                 if (comp_ids[j] != "")
-                    msg = "The ID of " + msg;
-                throw std::runtime_error(msg);
+                    result.msg = "The ID of " + result.msg;
+                return;
             }
         }
         if (non_id_comp > comp_size) {
-            throw std::runtime_error(
-                "The command requires more components for arguments; " + cmd_str);
+            result.ok = false;
+            result.msg =
+                "The command requires more components for arguments; " + cmd_str;
+            return;
         }
         if (sub_definition.HasMember("command_str"))
             sub_definition.RemoveMember("command_str");
@@ -330,32 +342,36 @@ namespace json_utils {
     };
 
     // validate one of definitions (["gui"][i]) and store parsed info
-    void CheckSubDefinition(rapidjson::Value& sub_definition,
+    void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
                             rapidjson::Document::AllocatorType& alloc) {
         // check is_string
-        CheckJsonType(sub_definition, "label", JsonType::STRING);
-        CheckJsonType(sub_definition, "button", JsonType::STRING, "", CAN_SKIP);
+        CheckJsonType(result, sub_definition, "label", JsonType::STRING);
+        CheckJsonType(result, sub_definition, "button", JsonType::STRING, "", CAN_SKIP);
         CorrectKey(sub_definition, "window_title", "window_name", alloc);
         CorrectKey(sub_definition, "title", "window_name", alloc);
-        CheckJsonType(sub_definition, "window_name", JsonType::STRING, "", CAN_SKIP);
+        CheckJsonType(result, sub_definition, "window_name", JsonType::STRING, "", CAN_SKIP);
 
-        CheckJsonType(sub_definition, "check_exit_code", JsonType::BOOLEAN, "", CAN_SKIP);
-        CheckJsonType(sub_definition, "exit_success", JsonType::INTEGER, "", CAN_SKIP);
-        CheckJsonType(sub_definition, "show_last_line", JsonType::BOOLEAN, "", CAN_SKIP);
+        CheckJsonType(result, sub_definition, "check_exit_code", JsonType::BOOLEAN, "", CAN_SKIP);
+        CheckJsonType(result, sub_definition, "exit_success", JsonType::INTEGER, "", CAN_SKIP);
+        CheckJsonType(result, sub_definition, "show_last_line", JsonType::BOOLEAN, "", CAN_SKIP);
 
         CorrectKey(sub_definition, "component", "components", alloc);
         CorrectKey(sub_definition, "component_array", "components", alloc);
-        CheckJsonType(sub_definition, "components", JsonType::JSON_ARRAY);
+        CheckJsonType(result, sub_definition, "components", JsonType::JSON_ARRAY);
+
+        if (!result.ok) return;
 
         // check components
         std::vector<std::string> comp_ids;
         for (rapidjson::Value& c : sub_definition["components"].GetArray()) {
             // check if type and label exist
-            CheckJsonType(c, "label", JsonType::STRING, "components");
+            CheckJsonType(result, c, "label", JsonType::STRING, "components");
+            if (!result.ok) return;
             std::string label = c["label"].GetString();
 
             // convert ["type"] from string to enum.
-            CheckJsonType(c, "type", JsonType::STRING, label);
+            CheckJsonType(result, c, "type", JsonType::STRING, label);
+            if (!result.ok) return;
             std::string type_str = c["type"].GetString();
             int type = COMPTYPE_TO_INT.get(type_str, COMP_UNKNOWN);
             if (c.HasMember("type_int"))
@@ -365,29 +381,32 @@ namespace json_utils {
             CorrectKey(c, "item_array", "items", alloc);
             switch (type) {
                 case COMP_FILE:
-                    CheckJsonType(c, "extention", JsonType::STRING, label, CAN_SKIP);
+                    CheckJsonType(result, c, "extention", JsonType::STRING, label, CAN_SKIP);
                 case COMP_FOLDER:
+                    CheckJsonType(result, c, "button", JsonType::STRING, label, CAN_SKIP);
                 case COMP_TEXT:
-                    CheckJsonType(c, "default", JsonType::STRING, label, CAN_SKIP);
+                    CheckJsonType(result, c, "default", JsonType::STRING, label, CAN_SKIP);
                     break;
                 case COMP_CHOICE:
-                    CheckJsonType(c, "items", JsonType::JSON_ARRAY, label);
+                    CheckJsonType(result, c, "items", JsonType::JSON_ARRAY, label);
+                    if (!result.ok) return;
                     for (rapidjson::Value& i : c["items"].GetArray()) {
-                        CheckJsonType(i, "label", JsonType::STRING, "items");
-                        CheckJsonType(i, "value", JsonType::STRING, "items", CAN_SKIP);
+                        CheckJsonType(result, i, "label", JsonType::STRING, "items");
+                        CheckJsonType(result, i, "value", JsonType::STRING, "items", CAN_SKIP);
                     }
                     break;
                 case COMP_CHECK:
-                    CheckJsonType(c, "value", JsonType::STRING, label, CAN_SKIP);
-                    CheckJsonType(c, "default", JsonType::BOOLEAN, label, CAN_SKIP);
+                    CheckJsonType(result, c, "value", JsonType::STRING, label, CAN_SKIP);
+                    CheckJsonType(result, c, "default", JsonType::BOOLEAN, label, CAN_SKIP);
                     break;
                 case COMP_CHECK_ARRAY:
-                    CheckJsonType(c, "items", JsonType::JSON_ARRAY, label);
+                    CheckJsonType(result, c, "items", JsonType::JSON_ARRAY, label);
+                    if (!result.ok) return;
                     for (rapidjson::Value& i : c["items"].GetArray()) {
-                        CheckJsonType(i, "label", JsonType::STRING, "items");
-                        CheckJsonType(i, "value", JsonType::STRING, "items", CAN_SKIP);
-                        CheckJsonType(i, "default", JsonType::BOOLEAN, "items", CAN_SKIP);
-                        CheckJsonType(i, "tooltip", JsonType::STRING, "items", CAN_SKIP);
+                        CheckJsonType(result, i, "label", JsonType::STRING, "items");
+                        CheckJsonType(result, i, "value", JsonType::STRING, "items", CAN_SKIP);
+                        CheckJsonType(result, i, "default", JsonType::BOOLEAN, "items", CAN_SKIP);
+                        CheckJsonType(result, i, "tooltip", JsonType::STRING, "items", CAN_SKIP);
                     }
                     break;
                 case COMP_INT:
@@ -397,34 +416,39 @@ namespace json_utils {
                         jtype = JsonType::INTEGER;
                     } else {
                         jtype = JsonType::FLOAT;
-                        CheckJsonType(c, "digits", JsonType::INTEGER, label, CAN_SKIP);
+                        CheckJsonType(result, c, "digits", JsonType::INTEGER, label, CAN_SKIP);
+                        if (!result.ok) return;
                         if (c.HasMember("digits") && c["digits"].GetInt() < 0) {
-                            throw std::runtime_error(GetLabel(label, "digits")
-                                                     + " should be a non-negative integer.");
+                            result.ok = false;
+                            result.msg = GetLabel(label, "digits")
+                                         + " should be a non-negative integer.";
                         }
                     }
-                    CheckJsonType(c, "default", jtype, label, CAN_SKIP);
-                    CheckJsonType(c, "min", jtype, label, CAN_SKIP);
-                    CheckJsonType(c, "max", jtype, label, CAN_SKIP);
-                    CheckJsonType(c, "inc", jtype, label, CAN_SKIP);
-                    CheckJsonType(c, "wrap", JsonType::BOOLEAN, label, CAN_SKIP);
+                    CheckJsonType(result, c, "default", jtype, label, CAN_SKIP);
+                    CheckJsonType(result, c, "min", jtype, label, CAN_SKIP);
+                    CheckJsonType(result, c, "max", jtype, label, CAN_SKIP);
+                    CheckJsonType(result, c, "inc", jtype, label, CAN_SKIP);
+                    CheckJsonType(result, c, "wrap", JsonType::BOOLEAN, label, CAN_SKIP);
                     break;
                 case COMP_UNKNOWN:
-                    throw std::runtime_error("Unknown component type: " + type_str);
+                    result.ok = false;
+                    result.msg = "Unknown component type: " + type_str;
                     break;
             }
+            if (!result.ok) return;
 
             CorrectKey(c, "add_quote", "add_quotes", alloc);
-            CheckJsonType(c, "add_quotes", JsonType::BOOLEAN, label, CAN_SKIP);
+            CheckJsonType(result, c, "add_quotes", JsonType::BOOLEAN, label, CAN_SKIP);
             CorrectKey(c, "placeholder", "empty_message", alloc);
-            CheckJsonType(c, "empty_message", JsonType::STRING, label, CAN_SKIP);
-            CheckJsonType(c, "id", JsonType::STRING, label, CAN_SKIP);
-            CheckJsonType(c, "tooltip", JsonType::STRING, label, CAN_SKIP);
+            CheckJsonType(result, c, "empty_message", JsonType::STRING, label, CAN_SKIP);
+            CheckJsonType(result, c, "id", JsonType::STRING, label, CAN_SKIP);
+            CheckJsonType(result, c, "tooltip", JsonType::STRING, label, CAN_SKIP);
 
             bool ignore = false;
             CorrectKey(c, "platform", "platforms", alloc);
             CorrectKey(c, "platform_array", "platforms", alloc);
-            CheckJsonType(c, "platforms", JsonType::STRING_ARRAY, label, CAN_SKIP);
+            CheckJsonType(result, c, "platforms", JsonType::STRING_ARRAY, label, CAN_SKIP);
+            if (!result.ok) return;
             if (c.HasMember("platforms")) {
                 ignore = true;
                 for (rapidjson::Value& v : c["platforms"].GetArray()) {
@@ -439,13 +463,16 @@ namespace json_utils {
             if (c.HasMember("id")) {
                 id = c["id"].GetString();
                 if (id == "") {
-                    throw std::runtime_error(GetLabel(label, "id")
-                                             + " should NOT be an empty string.");
+                    result.ok = false;
+                    result.msg = GetLabel(label, "id")
+                                 + " should NOT be an empty string.";
                 } else if (id[0] == "_"[0]) {
-                    throw std::runtime_error(GetLabel(label, "id")
-                                             + " should NOT start with '_'.");
+                    result.ok = false;
+                    result.msg = GetLabel(label, "id")
+                                 + " should NOT start with '_'.";
                 }
             }
+            if (!result.ok) return;
 
             if (ignore) {
                 comp_ids.push_back("");
@@ -454,12 +481,14 @@ namespace json_utils {
                 comp_ids.push_back(id);
             }
         }
-        CheckIndexDuplication(comp_ids);
+        CheckIndexDuplication(result, comp_ids);
+        if (!result.ok) return;
 
         // Overwrite ["command"] with ["command_'os'"] if exists.
         std::string command_os_key = std::string("command_") + scr_constants::OS;
         if (sub_definition.HasMember(command_os_key)) {
-            CheckJsonType(sub_definition, command_os_key, JsonType::STRING);
+            CheckJsonType(result, sub_definition, command_os_key, JsonType::STRING);
+            if (!result.ok) return;
             std::string command_os = sub_definition[command_os_key].GetString();
             if (sub_definition.HasMember("command"))
                 sub_definition.RemoveMember("command");
@@ -467,35 +496,41 @@ namespace json_utils {
         }
 
         // check sub_definition["command"] and convert it to more useful format.
-        CheckJsonType(sub_definition, "command", JsonType::STRING);
-        CompileCommand(sub_definition, comp_ids, alloc);
+        CheckJsonType(result, sub_definition, "command", JsonType::STRING);
+        if (!result.ok) return;
+        CompileCommand(result, sub_definition, comp_ids, alloc);
     }
 
     // vX.Y.Z -> 10000*X + 100 * Y + Z
-    static int VersionStringToInt(const std::string& string) {
-        try {
-            std::vector<std::string> version_strings = SplitString(string, {"."});
-            int digit = 10000;
-            int version_int = 0;
-            for (std::string str : version_strings) {
-                version_int += digit * std::stoi(str);
-                if (digit == 1) { break; }
-                digit /= 100;
+    static int VersionStringToInt(JsonResult& result, const std::string& string) {
+        std::vector<std::string> version_strings =
+            SplitString(string, { '.' });
+        int digit = 10000;
+        int version_int = 0;
+        for (const std::string& str : version_strings) {
+            if (str.length() == 0 || str.length() > 2) {
+                result.ok = false;
+                result.msg = "Can NOT convert '" + string + "' to int.";
+                return 0;
             }
-            return version_int;
+            if (str.length() == 1) {
+                version_int += digit * (str[0] - 48);
+            } else {  // length() == 2
+                version_int += digit * (str[0] - 48) * 10;
+                version_int += digit * (str[1] - 48);
+            }
+            if (digit == 1) { break; }
+            digit /= 100;
         }
-        catch(std::exception& e) {
-            throw std::runtime_error("Can NOT convert '" + string + "' to int.");
-        }
-        return 0;
+        return version_int;
     }
 
-    void CheckVersion(rapidjson::Document& definition) {
+    void CheckVersion(JsonResult& result, rapidjson::Document& definition) {
         CorrectKey(definition, "recommended_version", "recommended", definition.GetAllocator());
         if (definition.HasMember("recommended")) {
-            CheckJsonType(definition, "recommended", JsonType::STRING);
-            int recom_int = VersionStringToInt(definition["recommended"].GetString());
-            CheckJsonType(definition, "not_recommended", JsonType::BOOLEAN, "", CAN_SKIP);
+            CheckJsonType(result, definition, "recommended", JsonType::STRING);
+            if (!result.ok) return;
+            int recom_int = VersionStringToInt(result, definition["recommended"].GetString());
             if (definition.HasMember("not_recommended")) definition.RemoveMember("not_recommended");
             definition.AddMember("not_recommended",
                                  scr_constants::VERSION_INT != recom_int,
@@ -504,38 +539,49 @@ namespace json_utils {
         CorrectKey(definition, "minimum_required_version",
                    "minimum_required", definition.GetAllocator());
         if (definition.HasMember("minimum_required")) {
-            CheckJsonType(definition, "minimum_required", JsonType::STRING);
+            CheckJsonType(result, definition, "minimum_required", JsonType::STRING);
+            if (!result.ok) return;
             std::string required = definition["minimum_required"].GetString();
-            int required_int = VersionStringToInt(required);
+            if (!result.ok) return;
+            int required_int = VersionStringToInt(result, required);
             if (scr_constants::VERSION_INT < required_int) {
-                std::string msg = "Version " + required + " is required.";
-                throw std::runtime_error(msg);
+                result.ok = false;
+                result.msg = "Version " + required + " is required.";
             }
         }
     }
 
-    void CheckDefinition(rapidjson::Document& definition) {
-        CheckJsonType(definition, "gui", JsonType::JSON_ARRAY);
-        if (definition["gui"].Size() == 0)
-            throw std::runtime_error("The size of [\"gui\"] should NOT be zero.");
+    void CheckDefinition(JsonResult& result, rapidjson::Document& definition) {
+        CheckJsonType(result, definition, "gui", JsonType::JSON_ARRAY);
+        if (!result.ok) return;
+        if (definition["gui"].Size() == 0) {
+            result.ok = false;
+            result.msg = "The size of [\"gui\"] should NOT be zero.";
+        }
+
         for (rapidjson::Value& sub_d : definition["gui"].GetArray()) {
-            CheckSubDefinition(sub_d, definition.GetAllocator());
+            if (!result.ok) return;
+            CheckSubDefinition(result, sub_d, definition.GetAllocator());
         }
     }
 
-    void CheckHelpURLs(const rapidjson::Document& definition) {
+    void CheckHelpURLs(JsonResult& result, const rapidjson::Document& definition) {
         if (!definition.HasMember("help")) return;
-        CheckJsonType(definition, "help", JsonType::JSON_ARRAY);
+        CheckJsonType(result, definition, "help", JsonType::JSON_ARRAY);
+        if (!result.ok) return;
         for (const rapidjson::Value& h : definition["help"].GetArray()) {
-            CheckJsonType(h, "type", JsonType::STRING);
-            CheckJsonType(h, "label", JsonType::STRING);
+            CheckJsonType(result, h, "type", JsonType::STRING);
+            CheckJsonType(result, h, "label", JsonType::STRING);
+            if (!result.ok) return;
             std::string type = h["type"].GetString();
             if (type == "url") {
-                CheckJsonType(h, "url", JsonType::STRING);
+                CheckJsonType(result, h, "url", JsonType::STRING);
             } else if (type == "file") {
-                CheckJsonType(h, "path", JsonType::STRING);
+                CheckJsonType(result, h, "path", JsonType::STRING);
             } else {
-                throw std::runtime_error("Unsupported help type: " + type);
+                result.ok = false;
+                result.msg = "Unsupported help type: " + type;
+                return;
             }
         }
     }

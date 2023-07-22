@@ -5,6 +5,7 @@
 #include <string>
 #include "wx/wx.h"
 #include "wx/process.h"
+#include "wx_utils.h"
 
 #ifdef __linux__
 // A text window to show outputs.
@@ -35,11 +36,12 @@ class LogFrame : public wxFrame {
 
 // run command and return error messages
 #ifdef __linux__
-std::string Exec(LogFrame& ostream,
+wxResult Exec(LogFrame& ostream,
 #else
-std::string Exec(
+wxResult Exec(
 #endif
                  wxString& cmd,
-                 bool check_exit_code = false,
-                 int exit_success = 0,
-                 bool show_last_line = false);
+                 bool check_exit_code,
+                 int exit_success,
+                 bool show_last_line,
+                 wxString& last_line);

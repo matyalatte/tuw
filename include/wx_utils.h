@@ -1,10 +1,16 @@
 #pragma once
-// GetExecutablePath is from wxStandardPaths.
-// This file will make us possible to disable wxStandardPaths.
-// And, no need to make wxApp for the function.
+// utils related to wxWidgets.
 
 #include "wx/string.h"
 
+struct wxResult {
+    bool ok;
+    wxString msg;
+};
+
+// GetExecutablePath is from wxStandardPaths.
+// This file will make us possible to disable wxStandardPaths.
+// And, no need to make wxApp for the function.
 #ifdef _WIN32
 #include "wx/msw/private.h"
 

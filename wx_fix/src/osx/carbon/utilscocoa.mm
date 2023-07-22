@@ -467,6 +467,7 @@ WX_NSCursor wxMacCocoaCreateStockCursor( int cursor_type )
 
 #if !wxUSE_ICON_MINIMAL
     case wxCURSOR_WATCH:
+#endif
     case wxCURSOR_WAIT:
         // an arrow should be displayed by the system when things are running
         // according to the HIG
@@ -474,15 +475,16 @@ WX_NSCursor wxMacCocoaCreateStockCursor( int cursor_type )
         // but for crossplatform compatibility we display a watch cursor
         cursor = wxCreateStockCursor(kwxCursorWatch);
         break;
-#endif
+
     case wxCURSOR_IBEAM:
         cursor = [[NSCursor IBeamCursor] retain];
         break;
-#if !wxUSE_ICON_MINIMAL
+
     case wxCURSOR_CROSS:
         cursor = [[NSCursor crosshairCursor] retain];
         break;
 
+#if !wxUSE_ICON_MINIMAL
     case wxCURSOR_SIZENWSE:
         cursor = wxCreateStockCursor(kwxCursorSizeNWSE);
         break;

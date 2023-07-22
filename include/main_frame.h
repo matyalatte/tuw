@@ -13,7 +13,7 @@
 #include "json_utils.h"
 #include "scr_constants.h"
 #include "exe_container.h"
-#include "stdpath_min.h"
+#include "wx_utils.h"
 
 // Main window
 class MainFrame : public wxFrame {
@@ -52,7 +52,7 @@ class MainFrame : public wxFrame {
     void UpdateFrame(wxCommandEvent& event);
     void ClickButton(wxCommandEvent& event);
     wxString GetCommand();
-    std::string RunCommand();
+    wxResult RunCommand(wxString& last_line);
     void GetDefinition(rapidjson::Document& json);
     void SaveConfig();
 };

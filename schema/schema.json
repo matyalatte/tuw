@@ -200,6 +200,7 @@
             "extension": { "type": "string" },
             "empty_message": { "type": "string" },
             "placeholder": { "type": "string" },
+            "button": { "type": "string" },
             "default": { "type": "string" },
             "tooltip": { "type": "string" }
           }
@@ -215,6 +216,7 @@
           "properties": {
             "empty_message": { "type": "string" },
             "placeholder": { "type": "string" },
+            "button": { "type": "string" },
             "default": { "type": "string" },
             "tooltip": { "type": "string" }
           }

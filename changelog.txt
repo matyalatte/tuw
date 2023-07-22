@@ -1,3 +1,11 @@
+ver 0.5.1
+- Added a predefined ID for the user's home directory.
+- Added an option to rename the "Browse" button for path pickers. 
+- Disabled c++ exceptions.
+- Removed more codes from wxWidgets.
+- Fixed crashes when opening URLs or files via the help menu.
+- Removed compilation warnings about overriding.
+
 ver 0.5.0
 - Changed the json formats for "choice" and "check_array"
 - Added command-line utils to embed json into exe.

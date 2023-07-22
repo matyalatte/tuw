@@ -55,6 +55,22 @@ class CustomPickerBase : public wxFileDirPickerCtrlBase {
  protected:
     CustomTextCtrl* m_custom_text_ctrl;
 
+    virtual
+        wxFileDirPickerWidgetBase* CreatePicker(wxWindow* parent,
+            const wxString& path,
+            const wxString& message,
+            const wxString& wildcard) wxOVERRIDE {
+                return nullptr;
+            }
+
+    virtual wxFileDirPickerWidgetBase* CreatePicker(wxWindow* parent,
+            const wxString& path,
+            const wxString& message,
+            const wxString& button_label,
+            const wxString& wildcard) {
+                return nullptr;
+            }
+
  public:
     CustomPickerBase() : wxFileDirPickerCtrlBase() {
         m_custom_text_ctrl = nullptr;
@@ -78,13 +94,14 @@ class CustomPickerBase : public wxFileDirPickerCtrlBase {
         const wxString& message,
         const wxString& wildcard,
         const wxString& empty_message,
+        const wxString& button_label,
         const wxPoint& pos,
         const wxSize& size,
         long style,
         const wxValidator& validator,
         const wxString& name);
-    void UpdateTextCtrlFromPicker();
-    void UpdatePickerFromTextCtrl();
+    void UpdateTextCtrlFromPicker() wxOVERRIDE;
+    void UpdatePickerFromTextCtrl() wxOVERRIDE;
     virtual wxString GetFullPath() {return "";}
 };
 
@@ -97,6 +114,7 @@ class CustomFilePicker : public CustomPickerBase {
         const wxString& message = wxFileSelectorPromptStr,
         const wxString& wildcard = wxFileSelectorDefaultWildcardStr,
         const wxString& empty_message = wxEmptyString,
+        const wxString& button_label = wxEmptyString,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxFLP_DEFAULT_STYLE,
@@ -124,9 +142,10 @@ class CustomFilePicker : public CustomPickerBase {
         wxFileDirPickerWidgetBase* CreatePicker(wxWindow* parent,
             const wxString& path,
             const wxString& message,
+            const wxString& button_label,
             const wxString& wildcard) wxOVERRIDE {
         return new wxFilePickerWidget(parent, wxID_ANY,
-            wxGetTranslation(wxFilePickerWidgetLabel),
+            button_label,
             path, message, wildcard,
             wxDefaultPosition, wxDefaultSize,
             GetPickerStyle(GetWindowStyle()));
@@ -151,6 +170,7 @@ class CustomDirPicker : public CustomPickerBase {
         const wxString& path = wxEmptyString,
         const wxString& message = wxFileSelectorPromptStr,
         const wxString& empty_message = wxEmptyString,
+        const wxString& button_label = wxEmptyString,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxFLP_DEFAULT_STYLE,
@@ -173,15 +193,15 @@ class CustomDirPicker : public CustomPickerBase {
             &wxFileDirPickerCtrlBase::OnFileDirChange, eventSink);
     }
 
-
  protected:
     virtual
         wxFileDirPickerWidgetBase* CreatePicker(wxWindow* parent,
             const wxString& path,
             const wxString& message,
+            const wxString& button_label,
             const wxString& WXUNUSED(wildcard)) wxOVERRIDE {
         return new wxDirPickerWidget(parent, wxID_ANY,
-            wxGetTranslation(wxDirPickerWidgetLabel),
+            button_label,
             path, message,
             wxDefaultPosition, wxDefaultSize,
             GetPickerStyle(GetWindowStyle()));

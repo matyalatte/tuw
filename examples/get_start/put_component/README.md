@@ -41,7 +41,7 @@ In the example, the value of the text box will be injected in `%-%`.
 
 ## IDs
 
-You can also use [`id`](../../comp_options/id) option to name the componets like variables.  
+You can also use the [`id`](../../comp_options/id) option to name the components like variables.  
 
 ```json
 "gui": [

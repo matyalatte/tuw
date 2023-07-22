@@ -94,19 +94,19 @@ std::string ReadStream(wxInputStream* stream, char* buf, size_t size) {
 
 // run command and return error messages
 #ifdef __linux__
-std::string Exec(LogFrame& ostream,
+wxResult Exec(LogFrame& ostream,
 #else
-std::string Exec(
+wxResult Exec(
 #endif
                  wxString& cmd,
                  bool check_exit_code,
                  int exit_success,
-                 bool show_last_line) {
+                 bool show_last_line,
+                 wxString& last_line) {
     // open process
     wxProcessExecute* process = wxProcessExecute::Open(cmd);
-    if (!process) {
-        throw std::runtime_error("Failed to open a process.");
-    }
+    if (!process)
+        return { false, "Failed to open a process." };
 
     // get stream
     wxInputStream* istream = process->GetInputStream();
@@ -140,24 +140,21 @@ std::string Exec(
         }
     }
     // get last line
-    in_msg = GetLastLine(in_msg);
+    last_line = GetLastLine(in_msg).c_str();
 
     process->Wait();
 
     // print and return error messages
-    if (err_msg != "") {
-        throw std::runtime_error(err_msg.c_str());
-    }
+    if (err_msg != "")
+        return { false, err_msg.c_str() };
 
     int exit_code = process->GetExitCode();
     if (check_exit_code && (exit_code != exit_success)) {
-        if (show_last_line) {
-            throw std::runtime_error(in_msg.c_str());
-        } else {
-            std::string msg = "Invalid exit code (" + std::to_string(exit_code) + ")";
-            throw std::runtime_error(msg.c_str());
-        }
+        if (show_last_line)
+            return { false, last_line };
+        else
+            return { false, wxString::Format("Invalid exit code (%d)", exit_code) };
     }
 
-    return in_msg;
+    return { true };
 }

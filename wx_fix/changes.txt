@@ -1,6 +1,37 @@
 Changes that don't exist in the official wxWidgets
 
-- remove color database
+- disabled stock item IDs
+  - src/common/stockitem.cpp
+
+- disabled wxPen
+  - include/wx/pen.h
+              /peninfobase.h
+              /gdicmn.h
+              /dc.h
+              /msw/dc.h
+              /generic/splitter.h
+  - src/common/gdicmn.cpp
+              /dcbase.cpp
+       /generic/tipwin.cpp
+       /msw/renderer.cpp
+           /dc.cpp
+           /dcmemory.cpp
+           /pen.cpp
+
+- disabled unused rendering functions for msw port
+  - src/msw/renderer.cpp
+
+- disabled some DC related functions
+  - include/wx/dc.h
+              /msw/dc.h
+  - src/common/dcbase.cpp
+       /msw/dc.cpp
+
+- disabled generic renderer
+  - include/wx/renderer.h
+  - src/generic/renderg.cpp
+
+- removed color database
   - include/wx/gdicmn.h
   - src/common/gdicmn.cpp
               /appcmn.cpp
@@ -10,9 +41,6 @@ Changes that don't exist in the official wxWidgets
   - include/wx/private/timer.h
               /osx/core/private/timer.h
   - src/osx/cocoa/utils.mm
-
-- remove log messages when wxUSE_LOG is off
-  - include/wx/log.h
 
 - allow to disable combobox and radiobtn on macOS
   - include/wx/osx/cocoa/private.h
@@ -78,9 +106,6 @@ Changes that don't exist in the official wxWidgets
   - include/osx/cocoa/private/textimpl.h
   - include/osx/core/private.h
 
-- fix compilation error for wxFFIle
-  - src/unix/dlunix.cpp
-
 - fix compilation error for wxImage
   - src/gtk/dataobj.cpp
 
@@ -109,23 +134,9 @@ Changes that don't exist in the official wxWidgets
 - disabled wxUSE_OLE_AUTOMATION
   - build/cmake/init.cmake
 
-- disabled wxTempFFileOutputStream when wxUSE_FFILE=OFF
-  - include/wx/wfstream.h
-  - src/common/wfstream.cpp
-
 - disabled 2 files with wxUSE_DIRCTRL
   - include/wx/dirctrl.h
   - src/common/dirctrlcmn.cpp
-
-- disabled 8 files with defined(__WXUNIVERSAL)
-  - include/wx/generic/dirdlgg.h
-                      /filedlgg.h
-                      /filectrlg.h
-                      /dirctrlg.h
-  - src/generic/dirdlgg.cpp
-               /filedlgg.cpp
-               /filectrlg.cpp
-               /dirctrlg.cpp
 
 - disabled some functions with wxUSE_PLAT_STRINGS
   - include/wx/utils.h

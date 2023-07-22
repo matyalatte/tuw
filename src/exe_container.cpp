@@ -90,13 +90,12 @@ static wxUint32 Fnv1Hash32(const std::string& str) {
 static const wxUint32 EXE_SIZE_MAX = 20000000;  // Allowed size of exe
 static const wxUint32 JSON_SIZE_MAX = 1000000;  // Allowed size of json
 
-bool ExeContainer::Read(const wxString& exe_path) {
+wxResult ExeContainer::Read(const wxString& exe_path) {
     m_exe_path = exe_path;
     wxFile* file_io = new wxFile(exe_path, wxFile::read);
-    if (!file_io->IsOpened()) {
-        m_err_msg = "Failed to open a file. (" + exe_path + ")";
-        return false;
-    }
+    if (!file_io->IsOpened())
+        return { false, "Failed to open a file. (" + exe_path + ")"};
+
     // Read the last 4 bytes
     file_io->SeekEnd();
     wxUint32 end_off = file_io->Tell();
@@ -107,76 +106,74 @@ bool ExeContainer::Read(const wxString& exe_path) {
         // Json data not found
         m_exe_size = end_off;
         CloseFileIO(file_io);
-        return true;
+        return { true };
     }
 
     // Read exe size
     file_io->Seek(-8, wxFromCurrent);
     m_exe_size = end_off + ReadUint32(file_io);
     if (EXE_SIZE_MAX <= m_exe_size || end_off < m_exe_size) {
-        m_err_msg = wxString::Format("Unexpected exe size. (%d)", m_exe_size);
-        return false;
+        wxString msg = wxString::Format("Unexpected exe size. (%d)", m_exe_size);
+        return { false, msg };
     }
     file_io->Seek(m_exe_size);
 
     // Read a header for json data
     magic = ReadMagic(file_io);
-    if (magic != "JSON") {
-        m_err_msg = "Invalid magic. (" + magic + ")";
-        return false;
-    }
+    if (magic != "JSON")
+        return { false, "Invalid magic. (" + magic + ")" };
+
     wxUint32 json_size = ReadUint32(file_io);
     wxUint32 stored_hash = ReadUint32(file_io);
     if (JSON_SIZE_MAX <= json_size || end_off < m_exe_size + json_size + 20) {
-        m_err_msg = wxString::Format("Unexpected json size. (%d)", json_size);
-        return false;
+        wxString msg = wxString::Format("Unexpected json size. (%d)", json_size);
+        return { false, msg };
     }
 
     // Read json data
     std::string json_str = "";
     ReadStr(file_io, json_str, json_size);
-    if (json_str.length() != json_size) {
-        m_err_msg = "Unexpected char detected.";
-        return false;
-    }
+    if (json_str.length() != json_size)
+        return { false, "Unexpected char detected." };
+
     if (stored_hash != Fnv1Hash32(json_str)) {
-        m_err_msg = wxString::Format("Invalid JSON hash. (%d)", stored_hash);
-        return false;
+        wxString msg = wxString::Format("Invalid JSON hash. (%d)", stored_hash);
+        return { false, msg };
     }
 
     rapidjson::ParseResult ok = m_json.Parse(json_str);
     if (!ok) {
-        m_err_msg = wxString::Format("Failed to parse JSON: %s (offset: %d)",
-                                   wxString::FromUTF8(rapidjson::GetParseError_En(ok.Code())),
-                                   ok.Offset());
-        return false;
+        wxString msg = wxString::Format("Failed to parse JSON: %s (offset: %d)",
+                            wxString::FromUTF8(rapidjson::GetParseError_En(ok.Code())),
+                            ok.Offset());
+        return { false, msg };
     }
 
     CloseFileIO(file_io);
-    return true;
+    return { true };
 }
 
-bool ExeContainer::Write(const wxString& exe_path) {
+wxResult ExeContainer::Write(const wxString& exe_path) {
     assert(m_exe_path != "");
     std::string json_str = "";
-    if (HasJson()) {
+    if (HasJson())
         json_str = json_utils::JsonToString(m_json);
-    }
+
     wxUint32 json_size = json_str.length();
     if (JSON_SIZE_MAX <= json_size) {
-        m_err_msg = wxString::Format("Json file is too large. (%d)", json_size);
-        return false;
+        wxString msg = wxString::Format("Json file is too large. (%d)", json_size);
+        return { false, msg };
     }
 
     wxFile* old_io = new wxFile(m_exe_path, wxFile::read);
     if (!old_io->IsOpened()) {
-        m_err_msg = "Failed to open a file. (" + m_exe_path + ")";
-        return false;
+        wxString msg = "Failed to open a file. (" + m_exe_path + ")";
+        return { false, msg };
     }
     wxFile* new_io = new wxFile(exe_path, wxFile::write);
     if (!new_io->IsOpened()) {
-        m_err_msg = "Failed to open a file. (" + exe_path + ")";
-        return false;
+        wxString msg = "Failed to open a file. (" + exe_path + ")";
+        return { false, msg };
     }
     m_exe_path = exe_path;
 
@@ -184,16 +181,14 @@ bool ExeContainer::Write(const wxString& exe_path) {
 
     if (old_io->Tell() != old_io->Length()) {
         wxString magic = ReadMagic(old_io);
-        if (magic != "JSON") {
-            m_err_msg = "Invalid magic. (" + magic + ")";
-            return false;
-        }
+        if (magic != "JSON")
+            return { false, "Invalid magic. (" + magic + ")" };
     }
 
     CloseFileIO(old_io);
     if (json_size == 0) {
         CloseFileIO(new_io);
-        return true;
+        return { true };
     }
 
     // Write json data
@@ -204,5 +199,5 @@ bool ExeContainer::Write(const wxString& exe_path) {
     WriteUint32(new_io, m_exe_size - new_io->Tell() - 8);
     new_io->Write("JSON", 4);
     CloseFileIO(new_io);
-    return true;
+    return { true };
 }

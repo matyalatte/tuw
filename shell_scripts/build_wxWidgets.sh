@@ -237,12 +237,12 @@ if [ ${build_type} = "Debug" ]; then
     options="${options} --enable-debug"
 else
     options="${options} --disable-debug --disable-debug_flag --disable-debug_info"
-    options="${options} --disable-log --disable-exceptions"
+    options="${options} --disable-log --disable-exceptions --disable-catch_segvs"
     # Optimize for size
-    export CXXFLAGS="-Os -ffunction-sections -fdata-sections -flto"
+    export CXXFLAGS="-Os -ffunction-sections -fdata-sections -flto -fno-exceptions"
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # for .mm files
-        export OBJCXXFLAGS="-Os -ffunction-sections -fdata-sections -flto"
+        export OBJCXXFLAGS="-Os -ffunction-sections -fdata-sections -flto -fno-exceptions"
     fi
 fi
 echo "CMake arguments: ${options}"

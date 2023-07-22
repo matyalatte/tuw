@@ -1,4 +1,4 @@
-# Simple Command Runner ver 0.5.0
+# Simple Command Runner ver 0.5.1
 
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/test.yml/badge.svg)
@@ -77,7 +77,7 @@ You can also make `gui_definition.json` with [web forms](https://rjsf-team.githu
 ## Want Smaller Executables?
 
 You can use [UPX to compress the executables](./UPX.md).  
-They will be **under 500KB**!  
+They will be **under 400KB**!  
 
 ## License
 

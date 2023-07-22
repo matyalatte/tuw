@@ -115,6 +115,7 @@ bool CustomPickerBase::CustomCreateBase(wxWindow * parent,
     const wxString & message,
     const wxString & wildcard,
     const wxString & empty_message,
+    const wxString & button_label,
     const wxPoint & pos,
     const wxSize & size,
     long style,
@@ -138,7 +139,7 @@ bool CustomPickerBase::CustomCreateBase(wxWindow * parent,
     wxASSERT_MSG(!HasFlag(wxFLP_OPEN) || !HasFlag(wxFLP_OVERWRITE_PROMPT),
         wxT("wxFLP_OVERWRITE_PROMPT can't be used with wxFLP_OPEN"));
 
-    m_pickerIface = CreatePicker(this, path, message, wildcard);
+    m_pickerIface = CreatePicker(this, path, message, button_label, wildcard);
     if (!m_pickerIface)
         return false;
     m_picker = m_pickerIface->AsControl();
@@ -183,13 +184,14 @@ CustomFilePicker::CustomFilePicker(
     const wxString& message,
     const wxString& wildcard,
     const wxString& empty_message,
+    const wxString& button_label,
     const wxPoint& pos,
     const wxSize& size,
     long style,
     const wxValidator& validator,
     const wxString& name) {
     if (!CustomCreateBase(
-        parent, id, path, message, wildcard, empty_message,
+        parent, id, path, message, wildcard, empty_message, button_label,
         pos, size, style, validator, name))
         return;
 
@@ -212,13 +214,14 @@ CustomDirPicker::CustomDirPicker(
     const wxString& path,
     const wxString& message,
     const wxString& empty_message,
+    const wxString& button_label,
     const wxPoint& pos,
     const wxSize& size,
     long style,
     const wxValidator& validator,
     const wxString& name) {
     if (!CustomCreateBase(
-        parent, id, path, message, wxEmptyString, empty_message,
+        parent, id, path, message, wxEmptyString, empty_message, button_label,
         pos, size, style, validator, name))
         return;
 
