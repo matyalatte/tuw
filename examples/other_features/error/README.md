@@ -20,7 +20,7 @@ When the executed command output something to `stderr`, Simple Command Runner wi
 
 ## Exit Code Checking
 
-Your command might not use `stderr` even if they got errors.  
+Your command might not use `stderr` for error handling.  
 If so, you can use `check_exit_code` option.  
 It's an option to show an error dialogue when the exit code is not 0.  
 Also, you can change the success code with `exit_success` option.  

@@ -31,17 +31,17 @@ Of course, you can drop files on the pickers to specifiy the paths.
 }
 ```
 
-## "components"
+## Components
 
 `compoents` is an array of GUI components (e.g. file pickers).  
 Each component should be defined as a dictionary.  
 
 -   `type` is component type. `file` for a file picker, and `folder` for a dir picker.
--   `label` is a string written above the text box of picker.
--   `extension` is an optional key for file picker. It's wildcard for file pickers. Use the same syntax as for [wxWidget's wildcards](https://docs.wxwidgets.org/3.0/classwx_file_dialog.html).
+-   `label` is a string written above the text box of the picker.
+-   `extension` is an optional key for file pickers. It's wildcard for file extensions. Use the same syntax as for [wxWidget's wildcards](https://docs.wxwidgets.org/3.0/classwx_file_dialog.html).
 -   `add_quotes` is an optional key for components. It will add quotes (`""`) to the input strings.
 
-## "command"
+## Command
 
 Inputs of components will be injected into `command` when executing the command.  
 You can specify where they should be injected with `%*%`.  

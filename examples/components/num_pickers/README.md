@@ -45,8 +45,8 @@ It can set the number of digits after the decimal point.
 ## `wrap`
 
 `wrap` is an optional key to wrap at the `min` and `max`.  
-The minimum value will be the maximum value when clicking down arrow.  
-The maximum value will be the minimum value when clicking up arrow.  
+The minimum value will be the maximum value when clicking the down arrow.  
+The maximum value will be the minimum value when clicking the up arrow.  
 
 ## Notes
 
