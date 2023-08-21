@@ -46,7 +46,9 @@ out
 *.bin
 *.ninja
 *.manifest
+!src/*.manifest
 *.rc
+!src/*.rc
 *.res
 *.ninja
 
