@@ -1,6 +1,33 @@
 #include "json_utils.h"
+#include <cstdio>
+#include <cassert>
+
+#include "rapidjson/filereadstream.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/error/en.h"
+
+#include "scr_constants.h"
+#include "map_as_vec.hpp"
 
 namespace json_utils {
+
+    enum ComponentType: int {
+        COMP_UNKNOWN = 0,
+        COMP_EMPTY,
+        COMP_STATIC_TEXT,
+        COMP_FILE,
+        COMP_FOLDER,
+        COMP_CHOICE,
+        COMP_CHECK,
+        COMP_CHECK_ARRAY,
+        COMP_TEXT,
+        COMP_INT,
+        COMP_FLOAT,
+        COMP_MAX
+    };
+
     JsonResult LoadJson(const std::string& file, rapidjson::Document& json) {
         FILE* fp = fopen(file.c_str(), "rb");
         if (!fp)
@@ -44,10 +71,10 @@ namespace json_utils {
         return std::string(buffer.GetString());
     }
 
-    std::string GetString(const rapidjson::Value& json, const char* key, const char* def) {
+    const char* GetString(const rapidjson::Value& json, const char* key, const char* def) {
         if (json.HasMember(key))
             return json[key].GetString();
-        return std::string(def);
+        return def;
     }
 
     bool GetBool(const rapidjson::Value& json, const char* key, bool def) {

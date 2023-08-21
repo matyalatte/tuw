@@ -1,5 +1,7 @@
 # Simple Command Runner ver 0.5.1
 
+> :warning: This branch has tons of issues. Don't use it for your project.    
+
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/test.yml/badge.svg)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4aee3ee5172e4c38915d07f9c62725d3)](https://www.codacy.com/gh/matyalatte/Simple-Command-Runner/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matyalatte/Simple-Command-Runner&amp;utm_campaign=Badge_Grade)
@@ -87,5 +89,7 @@ Files in this repository are available under the [GPL2+](../license.txt).
 
 | Project | Used for | License |
 | -- | -- | -- |
-| [wxWidgets library](https://github.com/wxWidgets/wxWidgets) | GUI framework | [Modified LGPL](https://github.com/wxWidgets/wxWidgets/blob/master/docs/licence.txt) | 
+| [libui-ng](https://github.com/libui-ng/libui-ng) | GUI framework | [MIT](http://opensource.org/licenses/MIT) | 
+| [subprocess.h](https://github.com/sheredom/subprocess.h) | Command processing | [Unlicense](https://github.com/sheredom/subprocess.h/blob/master/LICENSE) | 
 | [RapidJSON](https://github.com/Tencent/rapidjson) | JSON handling | [MIT](http://opensource.org/licenses/MIT) |
+| [wxWidgets library](https://github.com/wxWidgets/wxWidgets) | Some utils | [Modified LGPL](https://github.com/wxWidgets/wxWidgets/blob/master/docs/licence.txt) | 

@@ -1,93 +1,92 @@
-#include "main_frame.h"
+// 2 september 2015
+#include <stdio.h>
+#include <string.h>
 #include <locale.h>
+#include "ui.h"
+#include "json_utils.h"
+#include "main_frame.h"
+#include "map_as_vec.hpp"
+#include "exe_container.h"
+#include "std_path.h"
 
-// Main
-class MainApp : public wxApp {
- private:
-    MainFrame* m_frame;
- public:
-    MainApp(): wxApp(), m_frame(nullptr) {}
-    bool OnInit() override;
-};
+int main_app()
+{
+	uiInitOptions options;
+	const char *err;
+	uiTab *tab;
 
-bool MainApp::OnInit() {
-    if (!wxApp::OnInit())
-        return false;
+	memset(&options, 0, sizeof (uiInitOptions));
+	err = uiInit(&options);
+	if (err != NULL) {
+		fprintf(stderr, "error initializing libui: %s", err);
+		uiFreeInitError(err);
+		return 1;
+	}
 
-    // make main window
-    m_frame = new MainFrame();
-    m_frame->Show();
-
-    return true;
+    MainFrame main_frame = MainFrame();
+	
+	uiMain();
+	return 0;
 }
 
-wxDECLARE_APP(MainApp);
-wxIMPLEMENT_APP_NO_MAIN(MainApp);
 
-bool AskOverwrite(const wxString& path) {
-    if (!wxFileExists(path)) {
-        return true;
-    }
-    wxPrintf("Overwrite %s? (y/n)\n", path);
+bool AskOverwrite(const std::string& path) {
+    if (!stdpath::FileExists(path)) return true;
+    printf("Overwrite %s? (y/n)\n", path.c_str());
     char ans;
     int ret = scanf("%c", &ans);
     return ret == 1 && (ans == "y"[0] || ans == "Y"[0]);
 }
 
-wxResult Merge(const wxString& exe_path, const wxString& json_path, const wxString& new_path,
+json_utils::JsonResult Merge(const std::string& exe_path, const std::string& json_path, const std::string& new_path,
            const bool force) {
     rapidjson::Document json;
-    json_utils::JsonResult result = json_utils::LoadJson(std::string(json_path.c_str()), json);
-    if (!result.ok)
-        return { false, wxString::FromUTF8(result.msg.c_str())};
+    json_utils::JsonResult result = json_utils::LoadJson(json_path, json);
+    if (!result.ok) return result;
 
     if (json.Size() == 0) {
-        wxPrintf("JSON file loaded but it has no data.\n");
+        printf("JSON file loaded but it has no data.\n");
         return { true };
     }
     ExeContainer exe;
-    wxResult wxresult = exe.Read(exe_path);
-    if (!wxresult.ok)
-        return wxresult;
-    wxPrintf("Importing a json file... (%s)\n", json_path);
+    result = exe.Read(exe_path);
+    if (!result.ok) return result;
+
+    printf("Importing a json file... (%s)\n", json_path.c_str());
     exe.SetJson(json);
     if (!force && !AskOverwrite(new_path)) {
-        wxPrintf("The operation has been cancelled.\n");
+        printf("The operation has been cancelled.\n");
         return { true };
     }
-    wxresult = exe.Write(new_path);
-    if (!wxresult.ok)
-        return wxresult;
-    wxPrintf("Generated an executable. (%s)\n", new_path);
+    result = exe.Write(new_path);
+    if (!result.ok) return result;
+    printf("Generated an executable. (%s)\n", new_path.c_str());
     return { true };
 }
 
-wxResult Split(const wxString& exe_path, const wxString& json_path, const wxString& new_path,
+json_utils::JsonResult Split(const std::string& exe_path, const std::string& json_path, const std::string& new_path,
            const bool force) {
     ExeContainer exe;
-    wxResult wxresult = exe.Read(exe_path);
-    if (!wxresult.ok)
-        return wxresult;
+    json_utils::JsonResult result = exe.Read(exe_path);
+    if (!result.ok) return result;
     if (!exe.HasJson()) {
-        wxPrintf("The executable has no json data.\n");
+        printf("The executable has no json data.\n");
         return { true };
     }
-    wxPrintf("Extracting JSON data from the executable...\n");
+    printf("Extracting JSON data from the executable...\n");
     rapidjson::Document json;
     exe.GetJson(json);
     exe.RemoveJson();
     if (!force && (!AskOverwrite(new_path) || !AskOverwrite(json_path))) {
-        wxPrintf("The operation has been cancelled.\n");
+        printf("The operation has been cancelled.\n");
         return { true };
     }
-    wxresult = exe.Write(new_path);
-    if (!wxresult.ok)
-        return wxresult;
-    json_utils::JsonResult result = json_utils::SaveJson(json, std::string(json_path.c_str()));
-    if (!result.ok)
-        return { false, wxString::FromUTF8(result.msg.c_str())};
-    wxPrintf("Generated an executable. (%s)\n", new_path);
-    wxPrintf("Exported a json file. (%s)\n", json_path);
+    result = exe.Write(new_path);
+    if (!result.ok) return result;
+    result = json_utils::SaveJson(json, json_path);
+    if (!result.ok) return result;
+    printf("Generated an executable. (%s)\n", new_path.c_str());
+    printf("Exported a json file. (%s)\n", json_path.c_str());
     return { true };
 }
 
@@ -112,7 +111,7 @@ void PrintUsage() {
         "    SimpleCommandRunner merge -f -j my_definition.json -e MyGUI.exe\n"
         "\n";
 
-    wxPrintf(usage);
+    printf(usage);
 }
 
 enum Commands: int {
@@ -153,64 +152,50 @@ const matya::map_as_vec<int> OPT_TO_INT = {
     {"y", OPT_FORCE},
 };
 
-wxString GetFullPath(const wxString& path) {
-    wxFileName fn(path);
-    fn.MakeAbsolute();
-    return fn.GetFullPath();
-}
-
-#define STATUS_ERROR 1
-#define STATUS_SUCCESS 0
-
-#ifdef _WIN32
-int wmain(int argc, wchar_t* argv[]) {
-#else
 int main(int argc, char* argv[]) {
-#endif
     setlocale(LC_CTYPE, "");
+    stdpath::InitStdPath(argv[0]);
 
     // Launch GUI if no args.
-    if (argc == 1) return wxEntry(argc, argv);
+    if (argc == 1) return main_app();
 
-    wxString cmd_str(argv[1]);
-    cmd_str.Replace("-", "");
+    std::string cmd_str(argv[1]);
     int cmd_int = CMD_TO_INT.get(cmd_str.c_str(), CMD_UNKNOWN);
     if (cmd_int == CMD_UNKNOWN) {
         PrintUsage();
-        wxFprintf(stderr, "Error: Unknown command detected. (%s)", cmd_str);
-        return STATUS_ERROR;
+    	fprintf(stderr, "Error: Unknown command detected. (%s)", cmd_str.c_str());
+        return 1;
     }
 
-    wxString exe_path =  stdpath::GetExecutablePath(argv[0]);
+    std::string exe_path = stdpath::GetExecutablePath();
 
-    wxString json_path = "";
-    wxString new_exe_path = "";
+    std::string json_path = "";
+    std::string new_exe_path = "";
     bool force = false;
 
     for (size_t i = 2; i < argc; i++) {
-        wxString opt_str = wxString(argv[i]);
-        opt_str.Replace("-", "");
+        std::string opt_str(argv[i]);
         int opt_int = OPT_TO_INT.get(opt_str.c_str(), OPT_UNKNOWN);
         if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && argc <= i + 1) {
             PrintUsage();
-            wxFprintf(stderr, "Error: This option requires a file path. (%s)\n", opt_str);
-            return STATUS_ERROR;
+            fprintf(stderr, "Error: This option requires a file path. (%s)\n", opt_str.c_str());
+            return 1;
         }
         switch (opt_int) {
             case OPT_UNKNOWN:
                 {
                     PrintUsage();
-                    wxFprintf(stderr, "Error: Unknown option detected. (%s)\n", opt_str);
-                    return STATUS_ERROR;
+                    fprintf(stderr, "Error: Unknown option detected. (%s)\n", opt_str.c_str());
+                    return 1;
                 }
                 break;
             case OPT_JSON:
                 i++;
-                json_path = wxString(argv[i]);
+                json_path = std::string(argv[i]);
                 break;
             case OPT_EXE:
                 i++;
-                new_exe_path = wxString(argv[i]);
+                new_exe_path = std::string(argv[i]);
                 break;
             case OPT_FORCE:
                 force = true;
@@ -230,16 +215,14 @@ int main(int argc, char* argv[]) {
     if (new_exe_path == "")
         new_exe_path = exe_path + ".new";
 
-    json_path = GetFullPath(json_path);
-    new_exe_path = GetFullPath(new_exe_path);
-
     if (json_path == exe_path || new_exe_path == exe_path) {
         PrintUsage();
-        wxFprintf(stderr, "Error: Can NOT overwrite the executable itself.\n");
-        return STATUS_ERROR;
+    	fprintf(stderr, "Error: Can NOT overwrite the executable itself.\n");
+        return 1;
     }
 
-    wxResult result = { true };
+    rapidjson::Document json(rapidjson::kObjectType);
+	json_utils::JsonResult result;
 
     switch (cmd_int) {
         case CMD_MERGE:
@@ -249,7 +232,7 @@ int main(int argc, char* argv[]) {
             result = Split(exe_path, json_path, new_exe_path, force);
             break;
         case CMD_VERSION:
-            wxPrintf("%s\n", scr_constants::VERSION);
+            printf("%s\n", scr_constants::VERSION);
             break;
         case CMD_HELP:
             PrintUsage();
@@ -259,12 +242,9 @@ int main(int argc, char* argv[]) {
     }
 
     if (!result.ok) {
-        wxFprintf(stderr, "Error: %s\n", result.msg);
-        return STATUS_ERROR;
+        fprintf(stderr, "Error: %s\n", result.msg.c_str());
+        return 1;
     }
 
-    return STATUS_SUCCESS;
+    return 0;
 }
-
-#undef STATUS_ERROR
-#undef STATUS_SUCCESS

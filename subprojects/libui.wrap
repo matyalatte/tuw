@@ -1,0 +1,7 @@
+[wrap-git]
+url = https://github.com/libui-ng/libui-ng.git
+revision = 672539b53de21757ebb0a388b3eabc3c414340b6
+depth=1
+
+[provide]
+libui = libui_dep

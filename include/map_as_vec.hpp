@@ -1,6 +1,4 @@
-#ifndef INCLUDE_MAP_AS_VEC_HPP_
-#define INCLUDE_MAP_AS_VEC_HPP_
-
+#pragma once
 #include <vector>
 #include <string>
 
@@ -81,4 +79,3 @@ class map_as_vec {
     const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 };
 }  // namespace matya
-#endif  // INCLUDE_MAP_AS_VEC_HPP_

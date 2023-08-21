@@ -1,0 +1,8 @@
+[wrap-git]
+url = https://github.com/sheredom/subprocess.h.git
+revision = cf95c9615953c90177498aed43621cb1cbc8f3e1
+depth=1
+patch_directory = subprocess
+
+[provide]
+subprocess = subprocess_dep

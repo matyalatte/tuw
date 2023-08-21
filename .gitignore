@@ -18,6 +18,12 @@
 *.sh
 !shell_scripts/*.sh
 
+# subprojects
+subprojects/libui
+subprojects/packagecache
+subprojects/rapidjson-1.1.0
+subprojects/subprocess
+
 # built files
 *.exe
 *.new
@@ -28,8 +34,6 @@ SimpleCommandRunner
 
 # intermediate files
 build
-Release*
-Debug*
 *.log
 *.cmake
 
@@ -52,9 +56,6 @@ out
 *.internal
 *.test
 *.make
-
-!wx_fix/build
-!wx_fix/build/cmake/*.cmake
 
 # python
 python
