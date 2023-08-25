@@ -7,9 +7,19 @@
 -   [Meson](https://github.com/mesonbuild/meson/releases) (**0.58** or later)
 -   Batch files in [`./Simple-Command-Runner/batch_files`](../batch_files)
 
+> :warning: MinGW-w64 is not supported.  
+> (It might work, but if you find issues, you need to solve them by yourself.)  
+
 ## Build
 
-Run `batch_files/build.bat`.
+Run `batch_files/build.bat`.  
+The executable will be generated in `build\Release\`.  
+
+## Debug
+
+If you want a debug build, run `batch_files/build.bat Debug` on the command prompt.  
+If you want to debug the exe on Visual Studio, you can open `build/Debug/SimpleCommandRunner.sln` with it.  
+Then, set `SimpleCommandRunner` as the startup project.  
 
 ## Compression
 

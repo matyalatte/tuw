@@ -19,6 +19,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
         bool exists_external_json = stdpath::FileExists("gui_definition.json");
         ExeContainer exe;
+
         result = exe.Read(exe_path);
         if (result.ok) {
             if (exe.HasJson()) {

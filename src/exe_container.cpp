@@ -5,11 +5,6 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/error/en.h"
 
-static void CloseFileIO(FILE* io) {
-    fclose(io);
-    delete io;
-}
-
 static uint32_t ReadUint32(FILE* io) {
     unsigned char int_as_bin[4];
     fread(int_as_bin, 1, 4, io);
@@ -126,7 +121,7 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
     if ( magic != "JSON" ) {
         // Json data not found
         m_exe_size = end_off;
-        CloseFileIO(file_io);
+        fclose(file_io);
         return { true };
     }
 
@@ -135,25 +130,31 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
     m_exe_size = end_off + ReadUint32(file_io);
     if (EXE_SIZE_MAX <= m_exe_size || end_off < m_exe_size) {
         std::string msg = "Unexpected exe size. (" + std::to_string(m_exe_size) + ")";
+        fclose(file_io);
         return { false, msg };
     }
     fseek(file_io, m_exe_size, SEEK_SET);
 
     // Read a header for json data
     magic = ReadMagic(file_io);
-    if (magic != "JSON")
+    if (magic != "JSON") {
+        fclose(file_io);
         return { false, "Invalid magic. (" + magic + ")" };
+    }
 
     uint32_t json_size = ReadUint32(file_io);
     uint32_t stored_hash = ReadUint32(file_io);
     if (JSON_SIZE_MAX <= json_size || end_off < m_exe_size + json_size + 20) {
         std::string msg = "Unexpected json size. (" + std::to_string(json_size) + ")";
+        fclose(file_io);
         return { false, msg };
     }
 
     // Read json data
     std::string json_str = "";
     ReadStr(file_io, json_str, json_size);
+    fclose(file_io);
+
     if (json_str.length() != json_size)
         return { false, "Unexpected char detected." };
 
@@ -170,7 +171,6 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
         return { false, msg };
     }
 
-    CloseFileIO(file_io);
     return { true };
 }
 
@@ -194,6 +194,7 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
     FILE* new_io = fopen(exe_path.c_str(), "wb");
     if (!new_io) {
         std::string msg = "Failed to open a file. (" + exe_path + ")";
+        fclose(old_io);
         return { false, msg };
     }
     m_exe_path = exe_path;
@@ -202,13 +203,16 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
 
     if (Tell(old_io) != Length(old_io)) {
         std::string magic = ReadMagic(old_io);
-        if (magic != "JSON")
+        if (magic != "JSON") {
+            fclose(old_io);
+            fclose(new_io);
             return { false, "Invalid magic. (" + magic + ")" };
+        }
     }
 
-    CloseFileIO(old_io);
+    fclose(old_io);
     if (json_size == 0) {
-        CloseFileIO(new_io);
+        fclose(new_io);
         return { true };
     }
 
@@ -219,6 +223,6 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
     WriteStr(new_io, json_str);
     WriteUint32(new_io, m_exe_size - Tell(new_io) - 8);
     fwrite("JSON", 1, 4, new_io);
-    CloseFileIO(new_io);
+    fclose(new_io);
     return { true };
 }

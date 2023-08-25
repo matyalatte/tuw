@@ -121,11 +121,12 @@ std::string GetLastLine(const std::string& input) {
 ExecuteResult Execute(const std::string& cmd)
 {
     std::vector<std::string> args_str = wxConvertStringToArgs(cmd);
-    std::vector<const char*> argv;
-    argv.reserve(args_str.size());
+    std::vector<char*> argv;
+    argv.reserve(args_str.size() + 1);
 
     for(size_t i = 0; i < args_str.size(); ++i)
         argv.push_back(const_cast<char*>(args_str[i].c_str()));
+    argv.push_back(0);
 
     struct subprocess_s process;
     int options = subprocess_option_inherit_environment
@@ -139,8 +140,8 @@ ExecuteResult Execute(const std::string& cmd)
     char err_buf[BUF_SIZE + 1];
     std::string last_line;
     std::string err_msg;
-    unsigned out_read_size;
-    unsigned err_read_size;
+    unsigned out_read_size = 0;
+    unsigned err_read_size = 0;
 
     while (subprocess_alive(&process) || out_read_size || err_read_size) {
         out_read_size = subprocess_read_stdout(&process, out_buf, BUF_SIZE);

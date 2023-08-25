@@ -21,7 +21,7 @@
 # subprojects
 subprojects/libui
 subprojects/packagecache
-subprojects/rapidjson-1.1.0
+subprojects/rapidjson
 subprojects/subprocess
 
 # built files
