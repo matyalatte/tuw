@@ -8,6 +8,7 @@
 #include "map_as_vec.hpp"
 #include "exe_container.h"
 #include "std_path.h"
+#include "string_utils.h"
 
 int main_app()
 {
@@ -32,7 +33,7 @@ int main_app()
 
 bool AskOverwrite(const std::string& path) {
     if (!stdpath::FileExists(path)) return true;
-    printf("Overwrite %s? (y/n)\n", path.c_str());
+    PrintFmt("Overwrite %s? (y/n)\n", path.c_str());
     char ans;
     int ret = scanf("%c", &ans);
     return ret == 1 && (ans == "y"[0] || ans == "Y"[0]);
@@ -45,22 +46,22 @@ json_utils::JsonResult Merge(const std::string& exe_path, const std::string& jso
     if (!result.ok) return result;
 
     if (json.Size() == 0) {
-        printf("JSON file loaded but it has no data.\n");
+        PrintFmt("JSON file loaded but it has no data.\n");
         return { true };
     }
     ExeContainer exe;
     result = exe.Read(exe_path);
     if (!result.ok) return result;
 
-    printf("Importing a json file... (%s)\n", json_path.c_str());
+    PrintFmt("Importing a json file... (%s)\n", json_path.c_str());
     exe.SetJson(json);
     if (!force && !AskOverwrite(new_path)) {
-        printf("The operation has been cancelled.\n");
+        PrintFmt("The operation has been cancelled.\n");
         return { true };
     }
     result = exe.Write(new_path);
     if (!result.ok) return result;
-    printf("Generated an executable. (%s)\n", new_path.c_str());
+    PrintFmt("Generated an executable. (%s)\n", new_path.c_str());
     return { true };
 }
 
@@ -70,23 +71,23 @@ json_utils::JsonResult Split(const std::string& exe_path, const std::string& jso
     json_utils::JsonResult result = exe.Read(exe_path);
     if (!result.ok) return result;
     if (!exe.HasJson()) {
-        printf("The executable has no json data.\n");
+        PrintFmt("The executable has no json data.\n");
         return { true };
     }
-    printf("Extracting JSON data from the executable...\n");
+    PrintFmt("Extracting JSON data from the executable...\n");
     rapidjson::Document json;
     exe.GetJson(json);
     exe.RemoveJson();
     if (!force && (!AskOverwrite(new_path) || !AskOverwrite(json_path))) {
-        printf("The operation has been cancelled.\n");
+        PrintFmt("The operation has been cancelled.\n");
         return { true };
     }
     result = exe.Write(new_path);
     if (!result.ok) return result;
     result = json_utils::SaveJson(json, json_path);
     if (!result.ok) return result;
-    printf("Generated an executable. (%s)\n", new_path.c_str());
-    printf("Exported a json file. (%s)\n", json_path.c_str());
+    PrintFmt("Generated an executable. (%s)\n", new_path.c_str());
+    PrintFmt("Exported a json file. (%s)\n", json_path.c_str());
     return { true };
 }
 
@@ -111,7 +112,7 @@ void PrintUsage() {
         "    SimpleCommandRunner merge -f -j my_definition.json -e MyGUI.exe\n"
         "\n";
 
-    printf(usage);
+    PrintFmt(usage);
 }
 
 enum Commands: int {
@@ -232,7 +233,7 @@ int main(int argc, char* argv[]) {
             result = Split(exe_path, json_path, new_exe_path, force);
             break;
         case CMD_VERSION:
-            printf("%s\n", scr_constants::VERSION);
+            PrintFmt("%s\n", scr_constants::VERSION);
             break;
         case CMD_HELP:
             PrintUsage();
@@ -245,6 +246,5 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "Error: %s\n", result.msg.c_str());
         return 1;
     }
-
     return 0;
 }

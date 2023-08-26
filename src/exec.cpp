@@ -1,6 +1,7 @@
 #include "exec.h"
 #include <vector>
 #include "subprocess.h"
+#include "string_utils.h"
 
 // from wxWidgets/src/common/cmdline.cpp
 static std::vector<std::string>

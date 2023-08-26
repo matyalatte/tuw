@@ -3,10 +3,11 @@
 #include "exe_container.h"
 #include "std_path.h"
 #include "exec.h"
+#include "string_utils.h"
 
 // Main window
 MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Document& config) {
-    printf("%s v%s by %s\n", scr_constants::TOOL_NAME,
+    PrintFmt("%s v%s by %s\n", scr_constants::TOOL_NAME,
               scr_constants::VERSION, scr_constants::AUTHOR);
 
     std::string exe_path = stdpath::GetExecutablePath();
@@ -23,25 +24,25 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
         result = exe.Read(exe_path);
         if (result.ok) {
             if (exe.HasJson()) {
-                printf("[LoadDefinition] Found JSON in the executable.\n");
+                PrintFmt("[LoadDefinition] Found JSON in the executable.\n");
                 exe.GetJson(m_definition);
                 if (exists_external_json) {
                     const char* msg =
                         "WARNING: Using embedded JSON. gui_definition.json was ignored.\n";
-                    printf("[LoadDefinition] %s", msg);
+                    PrintFmt("[LoadDefinition] %s", msg);
                     //ShowSuccessDialog(msg, "Warning");
                 }
             } else {
-                printf("[LoadDefinition] Embedded JSON not found.\n");
+                PrintFmt("[LoadDefinition] Embedded JSON not found.\n");
                 result = { false };
             }
         } else {
-            printf("[LoadDefinition] ERROR: %s\n", result.msg.c_str());
+            PrintFmt("[LoadDefinition] ERROR: %s\n", result.msg.c_str());
         }
 
         if (!result.ok) {
             if (exists_external_json) {
-                printf("[LoadDefinition] Loaded gui_definition.json\n");
+                PrintFmt("[LoadDefinition] Loaded gui_definition.json\n");
                 result = json_utils::LoadJson("gui_definition.json", m_definition);
                 if (!result.ok)
                     m_definition.SetObject();
@@ -173,13 +174,13 @@ void MainFrame::OpenURL(int id) {
         tag = "[OpenFile] ";
         if (!stdpath::FileExists(url)) {
             std::string msg = "File does not exist. (" + url + ")";
-            printf("%sError: %s\n", tag.c_str(), msg.c_str());
+            PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
             ShowErrorDialog(msg);
             return;
         }
     }
 
-    printf("%s%s\n", tag.c_str(), url.c_str());
+    PrintFmt("%s%s\n", tag.c_str(), url.c_str());
 
     if (type == "file") {
         url = "file:" + url;
@@ -188,7 +189,7 @@ void MainFrame::OpenURL(int id) {
     int status = stdpath::OpenURL(url);
     if (status < 0) {
         std::string msg = "Failed to open a " + type + " by an unexpected error.";
-        printf("%sError: %s\n", tag.c_str(), msg.c_str());
+        PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
         ShowErrorDialog(msg.c_str());
     }
 }
@@ -202,9 +203,9 @@ void MainFrame::UpdatePanel(int definition_id) {
     m_definition_id = definition_id;
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     const char* label = sub_definition["label"].GetString();
-    printf("[UpdatePanel] Lable: %s\n", label);
+    PrintFmt("[UpdatePanel] Lable: %s\n", label);
     const char* cmd_str = sub_definition["command_str"].GetString();
-    printf("[UpdatePanel] Command: %s\n", cmd_str);
+    PrintFmt("[UpdatePanel] Command: %s\n", cmd_str);
     const char* window_name = json_utils::GetString(sub_definition, "window_name", "Simple Command Runner");
     uiWindowSetTitle(m_mainwin, window_name);
 
@@ -282,7 +283,7 @@ std::string MainFrame::GetCommand() {
 
 void MainFrame::RunCommand() {
     std::string cmd = GetCommand();
-    printf("[RunCommand] Command: %s\n", cmd.c_str());
+    PrintFmt("[RunCommand] Command: %s\n", cmd.c_str());
 #ifdef _WIN32
     cmd = "cmd.exe /c " + cmd;
 #endif
@@ -294,7 +295,7 @@ void MainFrame::RunCommand() {
     bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
 
     if (result.err_msg != "") {
-        printf("[RunCommand] Error: %s\n", result.err_msg.c_str());
+        PrintFmt("[RunCommand] Error: %s\n", result.err_msg.c_str());
         ShowErrorDialog(result.err_msg);
         return;
     }
@@ -305,7 +306,7 @@ void MainFrame::RunCommand() {
             err_msg = result.last_line;
         else
             err_msg = "Invalid exit code (" + std::to_string(result.exit_code) + ")";
-        printf("[RunCommand] Error: %s\n", err_msg.c_str());
+        PrintFmt("[RunCommand] Error: %s\n", err_msg.c_str());
         ShowErrorDialog(err_msg);
         return;
     }
@@ -325,7 +326,7 @@ json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definitio
 
     if (definition.HasMember("recommended")) {
         if (definition["not_recommended"].GetBool()) {
-            printf("[LoadDefinition] Warning: Version %s is recommended.\n",
+            PrintFmt("[LoadDefinition] Warning: Version %s is recommended.\n",
                         definition["recommended"].GetString());
         }
     }
@@ -338,7 +339,7 @@ json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definitio
 }
 
 void MainFrame::JsonLoadFailed(const std::string& msg, rapidjson::Document& definition) {
-    printf("[LoadDefinition] Error: %s\n", msg.c_str());
+    PrintFmt("[LoadDefinition] Error: %s\n", msg.c_str());
     ShowErrorDialog(msg);
 }
 
