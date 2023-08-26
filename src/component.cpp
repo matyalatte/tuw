@@ -390,15 +390,56 @@ void TextBox::SetConfig(const rapidjson::Value& config) {
     }
 }
 
+static void onSpin(uiSpinbox *sender, void* data) {
+    IntPicker* picker = static_cast<IntPicker*>(data);
+    int inc = picker->GetInc();
+    int min = picker->GetMin();
+    int max = picker->GetMax();
+    //bool wrap = picker->GetWrap();
+    int old_val = picker->GetOldVal();
+    int val = uiSpinboxValue(sender);
+    int diff = val - old_val;
+    if (diff == 0) {
+        return;
+    } else if (diff == 1) {
+        val = old_val + inc;
+        val = (val - min) / inc * inc + min;
+        if (val > max)
+            val = max;
+    } else if (diff == -1) {
+        val = old_val - inc;
+        val = max - (max - val) / inc * inc;
+        if (val < min)
+            val = min;
+    } else {
+        picker->SetOldVal(val);
+        return;
+    }
+    picker->SetOldVal(val);
+    uiSpinboxSetValue(sender, val);
+}
+
 IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
-    int min = json_utils::GetInt(j, "min", 0);
-    int max = json_utils::GetInt(j, "max", 100);
-    int inc = json_utils::GetInt(j, "inc", 1);  // not supported yet?
-    int val = json_utils::GetInt(j, "default", min);
-    bool wrap = json_utils::GetBool(j, "wrap", false);  // not supported yet?
-    uiSpinbox* picker = uiNewSpinbox(min, max);
+    m_min = json_utils::GetInt(j, "min", 0);
+    m_max = json_utils::GetInt(j, "max", 100);
+    if (m_min > m_max) {
+        int x = m_min;
+        m_min = m_max;
+        m_max = x;
+    }
+    m_inc = json_utils::GetInt(j, "inc", 1);  // not supported yet?
+    if (m_inc < 0) {
+        m_inc = -m_inc;
+    } else if (m_inc == 0) {
+        m_inc = 1;
+    }
+    int val = json_utils::GetInt(j, "default", m_min);
+    m_wrap = json_utils::GetBool(j, "wrap", false);  // not supported yet?
+    uiSpinbox* picker = uiNewSpinbox(m_min, m_max);
+    uiSpinboxOnChanged(picker, onSpin, this);
     uiSpinboxSetValue(picker, val);
+    m_old_val = uiSpinboxValue(picker);
     uiBoxAppend(box, uiControl(picker), 0);
     // libui doesn't support tooltips yet.
     // if (j.HasMember("tooltip"))
@@ -426,17 +467,59 @@ void IntPicker::SetConfig(const rapidjson::Value& config) {
     }
 }
 
+static void onSpinDouble(uiSpinbox *sender, void* data) {
+    FloatPicker* picker = static_cast<FloatPicker*>(data);
+    int inc = int(picker->GetInc());
+    printf("%d\n", inc);
+    int min = int(picker->GetMin());
+    int max = int(picker->GetMax());
+    //bool wrap = picker->GetWrap();
+    int old_val = int(picker->GetOldVal());
+    int val = uiSpinboxValue(sender);
+    int diff = val - old_val;
+    if (diff == 0) {
+        return;
+    } else if (diff == 1) {
+        val = old_val + inc;
+        val = (val - min) / inc * inc + min;
+        if (val > max)
+            val = max;
+    } else if (diff == -1) {
+        val = old_val - inc;
+        val = max - (max - val) / inc * inc;
+        if (val < min)
+            val = min;
+    } else {
+        picker->SetOldVal(double(val));
+        return;
+    }
+    picker->SetOldVal(double(val));
+    uiSpinboxSetValue(sender, val);
+}
+
 FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
-    double min = json_utils::GetDouble(j, "min", 0.0);
-    double max = json_utils::GetDouble(j, "max", 100.0);
-    double inc = json_utils::GetDouble(j, "inc", 1.0);  // not supported yet?
-    double val = json_utils::GetDouble(j, "default", min);
+    m_min = json_utils::GetDouble(j, "min", 0.0);
+    m_max = json_utils::GetDouble(j, "max", 100.0);
+    if (m_min > m_max) {
+        double x = m_min;
+        m_min = m_max;
+        m_max = x;
+    }
+    m_inc = json_utils::GetDouble(j, "inc", 1.0);  // not supported yet?
+    if (m_inc < 0) {
+        m_inc = -m_inc;
+    } else if (int(m_inc) == 0) {
+        m_inc = 1.0;
+    }
+    int val = json_utils::GetDouble(j, "default", m_min);
     bool wrap = json_utils::GetBool(j, "wrap", false);  // not supported yet?
 
     //uiSpinboxDouble is not supported yet.
-    uiSpinbox* picker = uiNewSpinbox(int(min), int(max));
+    uiSpinbox* picker = uiNewSpinbox(int(m_min), int(m_max));
+    uiSpinboxOnChanged(picker, onSpinDouble, this);
     uiSpinboxSetValue(picker, int(val));
+    m_old_val = double(uiSpinboxValue(picker));
     uiBoxAppend(box, uiControl(picker), 0);
     // libui doesn't support tooltips yet.
     // if (j.HasMember("tooltip"))
