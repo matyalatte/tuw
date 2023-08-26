@@ -1,4 +1,3 @@
-// 2 september 2015
 #include <stdio.h>
 #include <string.h>
 #include <locale.h>
@@ -153,14 +152,27 @@ const matya::map_as_vec<int> OPT_TO_INT = {
     {"y", OPT_FORCE},
 };
 
+#ifdef _WIN32
+int wmain(int argc, wchar_t* argv[]) {
+    std::vector<std::string> args;
+    for (size_t i = 0; i < argc; i++) {
+        args.push_back(UTF16toUTF8(argv[i]));
+    }
+    stdpath::InitStdPath();
+#else
 int main(int argc, char* argv[]) {
-    setlocale(LC_CTYPE, "");
+    std::vector<std::string> args;
+    for (size_t i = 0; i < argc; i++) {
+        args.push_back(argv[i]);
+    }
     stdpath::InitStdPath(argv[0]);
+#endif
+    setlocale(LC_CTYPE, "");
 
     // Launch GUI if no args.
     if (argc == 1) return main_app();
 
-    std::string cmd_str(argv[1]);
+    std::string cmd_str = args[1];
     int cmd_int = CMD_TO_INT.get(cmd_str.c_str(), CMD_UNKNOWN);
     if (cmd_int == CMD_UNKNOWN) {
         PrintUsage();
@@ -175,7 +187,7 @@ int main(int argc, char* argv[]) {
     bool force = false;
 
     for (size_t i = 2; i < argc; i++) {
-        std::string opt_str(argv[i]);
+        std::string opt_str = args[i];
         int opt_int = OPT_TO_INT.get(opt_str.c_str(), OPT_UNKNOWN);
         if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && argc <= i + 1) {
             PrintUsage();
@@ -192,11 +204,11 @@ int main(int argc, char* argv[]) {
                 break;
             case OPT_JSON:
                 i++;
-                json_path = std::string(argv[i]);
+                json_path = args[i];
                 break;
             case OPT_EXE:
                 i++;
-                new_exe_path = std::string(argv[i]);
+                new_exe_path = args[i];
                 break;
             case OPT_FORCE:
                 force = true;
@@ -215,6 +227,9 @@ int main(int argc, char* argv[]) {
 
     if (new_exe_path == "")
         new_exe_path = exe_path + ".new";
+
+    json_path = stdpath::GetFullPath(json_path);
+    new_exe_path = stdpath::GetFullPath(new_exe_path);
 
     if (json_path == exe_path || new_exe_path == exe_path) {
         PrintUsage();

@@ -3,7 +3,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #include <direct.h>
-
+#include "string_utils.h"
 #else
 #include <sys/stat.h>
 #endif
@@ -17,37 +17,47 @@ namespace stdpath {
     std::string g_exe_path;
 
 #ifdef _WIN32
-    void InitStdPath(const char* argv0) {
-        char filename[MAX_PATH];
-        GetModuleFileName(NULL, filename, MAX_PATH);
-        g_exe_path = filename;
+    void InitStdPath() {
+        wchar_t filename[MAX_PATH];
+        GetModuleFileNameW(NULL, filename, MAX_PATH);
+        g_exe_path = UTF16toUTF8(filename);
     }
 
     bool FileExists(const std::string& path) {
-        return GetFileAttributes(path.c_str()) != INVALID_FILE_ATTRIBUTES;
+        std::wstring wpath = UTF8toUTF16(path.c_str());
+        return GetFileAttributesW(wpath.c_str()) != INVALID_FILE_ATTRIBUTES;
     }
 
     std::string GetFullPath(const std::string& path) {
-        char fullpath[MAX_PATH];
-        GetFullPathName(path.c_str(), MAX_PATH, fullpath, nullptr);
-        return fullpath;
+        std::wstring wpath = UTF8toUTF16(path.c_str());
+        wchar_t fullpath[MAX_PATH];
+        GetFullPathNameW(wpath.c_str(), MAX_PATH, fullpath, nullptr);
+        return UTF16toUTF8(fullpath);
     }
 
     std::string GetCwd() {
-        char cwd[MAX_PATH];
-        _getcwd(cwd, MAX_PATH);
-        return cwd;
+        wchar_t cwd[MAX_PATH];
+        _wgetcwd(cwd, MAX_PATH);
+        return UTF16toUTF8(cwd);
     }
 
     void SetCwd(const std::string& path) {
-        _chdir(path.c_str());
+        std::wstring wpath = UTF8toUTF16(path.c_str());
+        _wchdir(wpath.c_str());
     }
 
+    // Todo: support GetHomw()
+    std::string GetHome() {
+        return "";
+    }
+
+    // Todo: use subprocess
     int OpenURL(const std::string& path) {
         std::string cmd = "start " + path;
         return system(cmd.c_str());
     }
 #else
+    // Todo: support InitStdPath()
     void InitStdPath(const char* argv0) {
         g_exe_path = "";
     }
@@ -57,6 +67,7 @@ namespace stdpath {
         return (stat (path.c_str(), &buffer) == 0);
     }
 
+    // Todo: support GetFullPath()
     std::string GetFullPath(const std::string& path) {
         return path;
     }
@@ -66,9 +77,17 @@ namespace stdpath {
         getcwd(cwd, MAX_PATH);
         return cwd;
     }
+
     void SetCwd(const std::string& path) {
         chdir(path.c_str());
     }
+
+    // Todo: support GetHomw()
+    std::string GetHome() {
+        return "";
+    }
+
+    // Todo: use subprocess
     int OpenURL(const std::string& path) {
     #ifdef __linux__
         std::string cmd = "xdg-open " + path;

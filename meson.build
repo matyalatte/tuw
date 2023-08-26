@@ -32,7 +32,7 @@ if host_machine.system() == 'windows'
             '/LARGEADDRESSAWARE',
             '/INCREMENTAL:NO',
             '/MANIFEST:NO',
-            '/ENTRY:mainCRTStartup'
+            '/ENTRY:wmainCRTStartup'
         ]
     else
         scr_link_args += [
@@ -55,7 +55,8 @@ scr_sources += [
     'src/exe_container.cpp',
     'src/json_utils.cpp',
     'src/std_path.cpp',
-    'src/exec.cpp'
+    'src/exec.cpp',
+    'src/string_utils.cpp'
 ]
 
 executable('SimpleCommandRunner',
