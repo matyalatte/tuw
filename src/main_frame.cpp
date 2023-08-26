@@ -270,7 +270,7 @@ std::string MainFrame::GetCommand() {
         } else if (id == CMD_ID_CURRENT_DIR) {
             cmd += stdpath::GetCwd();
         } else if (id == CMD_ID_HOME_DIR) {
-            cmd += "__home__";
+            cmd += stdpath::GetHome();
         } else {
             cmd += comp_strings[id];
         }

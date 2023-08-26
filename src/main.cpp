@@ -153,21 +153,29 @@ const matya::map_as_vec<int> OPT_TO_INT = {
 };
 
 #ifdef _WIN32
-int wmain(int argc, wchar_t* argv[]) {
+int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
+    setlocale(LC_CTYPE, "");
     std::vector<std::string> args;
     for (size_t i = 0; i < argc; i++) {
         args.push_back(UTF16toUTF8(argv[i]));
     }
     stdpath::InitStdPath();
+    while(*envp) {
+        _wputenv(*envp);
+        envp++;
+    }
 #else
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[], char* envp[]) {
     std::vector<std::string> args;
     for (size_t i = 0; i < argc; i++) {
         args.push_back(argv[i]);
     }
     stdpath::InitStdPath(argv[0]);
+    while(*envp) {
+        putenv(*envp);
+        envp++;
+    }
 #endif
-    setlocale(LC_CTYPE, "");
 
     // Launch GUI if no args.
     if (argc == 1) return main_app();
