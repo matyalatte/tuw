@@ -20,8 +20,6 @@ The executable will be generated in `build\Release\`.
 ## Debug
 
 If you want a debug build, run `batch_files/build.bat Debug` on the command prompt.  
-If you want to debug the exe on Visual Studio, you can open `build/Debug/SimpleCommandRunner.sln` with it.  
-Then, set `SimpleCommandRunner` as the startup project.  
 
 ## Compression
 

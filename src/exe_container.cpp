@@ -50,9 +50,7 @@ static void WriteStr(FILE* io, const std::string& str) {
         fwrite(str.substr(pos, pos + 1024).c_str(), 1, 1024, io);
         pos += 1024;
     }
-    fpos_t ft;
-    fgetpos(io, &ft);
-    size_t padding = (8 - (ft) % 8) % 8;
+    size_t padding = (8 - ftell(io) % 8) % 8;
     char buff[8];
     fwrite(buff, 1, padding, io);
 }
@@ -89,16 +87,10 @@ static uint32_t Fnv1Hash32(const std::string& str) {
     return hash;
 }
 
-static uint32_t Tell(FILE* io) {
-    fpos_t cur;
-    fgetpos(io, &cur);
-    return cur;
-}
-
 static uint32_t Length(FILE* io) {
-    uint32_t cur = Tell(io);
+    uint32_t cur = ftell(io);
     fseek(io, 0, SEEK_END);
-    uint32_t len = Tell(io);
+    uint32_t len = ftell(io);
     fseek(io, cur, SEEK_CUR);
     return len;
 }
@@ -114,7 +106,7 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
 
     // Read the last 4 bytes
     fseek(file_io, 0, SEEK_END);
-    uint32_t end_off = Tell(file_io);
+    uint32_t end_off = ftell(file_io);
     fseek(file_io, -4, SEEK_CUR);
     std::string magic = ReadMagic(file_io);
 
@@ -201,7 +193,7 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
 
     CopyBinary(old_io, new_io, m_exe_size);
 
-    if (Tell(old_io) != Length(old_io)) {
+    if (ftell(old_io) != Length(old_io)) {
         std::string magic = ReadMagic(old_io);
         if (magic != "JSON") {
             fclose(old_io);
@@ -221,7 +213,7 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
     WriteUint32(new_io, json_size);
     WriteUint32(new_io, Fnv1Hash32(json_str));
     WriteStr(new_io, json_str);
-    WriteUint32(new_io, m_exe_size - Tell(new_io) - 8);
+    WriteUint32(new_io, m_exe_size - ftell(new_io) - 8);
     fwrite("JSON", 1, 4, new_io);
     fclose(new_io);
     return { true };

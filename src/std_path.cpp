@@ -6,6 +6,7 @@
 #include "string_utils.h"
 #else
 #include <sys/stat.h>
+#include <unistd.h>
 #endif
 
 #ifndef MAX_PATH
