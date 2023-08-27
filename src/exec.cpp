@@ -131,6 +131,7 @@ ExecuteResult Execute(const std::string& cmd)
 
     struct subprocess_s process;
     int options = subprocess_option_inherit_environment
+                  | subprocess_option_search_user_path
                   | subprocess_option_enable_async;
     int result = subprocess_create(&argv[0], options, &process);
     if (0 != result)

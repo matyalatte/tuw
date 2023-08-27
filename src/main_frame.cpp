@@ -94,9 +94,9 @@ static int OnShouldQuit(void *data) {
 }
 
 void MainFrame::CreateFrame() {
-    m_mainwin = uiNewWindow(scr_constants::TOOL_NAME, 400, 100, 1);
-	uiWindowOnClosing(m_mainwin, OnClosing, NULL);
-	uiOnShouldQuit(OnShouldQuit, m_mainwin);
+    m_mainwin = uiNewWindow(scr_constants::TOOL_NAME, 400, 0, 1);
+    uiWindowOnClosing(m_mainwin, OnClosing, NULL);
+    uiOnShouldQuit(OnShouldQuit, m_mainwin);
     uiControlShow(uiControl(m_mainwin));
 }
 
@@ -110,6 +110,7 @@ struct MenuData {
 static void OnUpdatePanel(uiMenuItem *item, uiWindow *w, void *data) {
     MenuData* menu_data = static_cast<MenuData*>(data);
     menu_data->main_frame->UpdatePanel(menu_data->menu_id);
+    menu_data->main_frame->Fit();
 }
 
 static void OnOpenURL(uiMenuItem *item, uiWindow *w, void *data) {
@@ -239,9 +240,20 @@ void MainFrame::UpdatePanel(int definition_id) {
     uiButtonOnClicked(m_run_button, OnClicked, this);
     uiBoxAppend(m_box, uiControl(m_run_button), 0);
 
-    uiWindowSetChild(m_mainwin, uiControl(m_box));
-	uiWindowSetMargined(m_mainwin, 1);
+#ifdef __linux__
+    // Todo: Don't recreate the log frame.
+    // Todo: Make the log frame larger.
+    uiMultilineEntry* log_entry = uiNewMultilineEntry();
+    uiMultilineEntrySetReadOnly(log_entry, 1);
+    uiBoxAppend(m_box, uiControl(log_entry), 1);
+    SetLogEntry(log_entry);
+#endif
 
+    uiWindowSetChild(m_mainwin, uiControl(m_box));
+    uiWindowSetMargined(m_mainwin, 1);
+}
+
+void MainFrame::Fit() {
     // Fit the window size to the new components.
     int width;
     int height;

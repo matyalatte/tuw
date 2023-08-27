@@ -82,9 +82,21 @@ namespace stdpath {
         return system(cmd.c_str());
     }
 #else
-    // Todo: support InitStdPath()
+    // Todo: support InitStdPath() for mac
     void InitStdPath(const char* argv0) {
-        g_exe_path = "";
+    #ifdef __linux__
+        char path[PATH_MAX + 1];
+        const size_t LINKSIZE = 100;
+        char link[LINKSIZE];
+        snprintf(link, LINKSIZE, "/proc/%d/exe", getpid() );
+        readlink(link, path, PATH_MAX);
+        if (path[0] == 0)
+            g_exe_path = "/";
+        else
+            g_exe_path = path;
+    #else
+        g_exe_path = "/";
+    #endif
     }
 
     bool FileExists(const std::string& path) {
@@ -108,9 +120,16 @@ namespace stdpath {
         chdir(path.c_str());
     }
 
-    // Todo: support GetHomw()
     std::string GetHome() {
-        return "";
+        const char *homedir = NULL;
+        struct passwd *p = getpwuid(getuid());
+        if (p != NULL)  // try to get from user info
+            homedir = p->pw_dir;
+        if (homedir == NULL)  // try to get from env
+            homedir = getenv("HOME");
+        if (homedir == NULL)  // failed to get homedir
+            return "/";
+        return homedir;
     }
 
     // Todo: use subprocess

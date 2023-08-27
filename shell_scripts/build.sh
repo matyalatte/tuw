@@ -21,9 +21,11 @@ pushd $(dirname "$0")/..
     meson compile -v || exit 1
 
     # Strip symbols to reduce the binary size
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        strip --strip-all ./SimpleCommandRunner
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        strip ./SimpleCommandRunner
+    if [ "${build_type}" = "Release" ]; then
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            strip --strip-all ./SimpleCommandRunner
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            strip ./SimpleCommandRunner
+        fi
     fi
 popd

@@ -38,5 +38,31 @@ void PrintFmt(const char* fmt, ...) {
     uiprivFree(buf);
     uiprivFree(wfmt);
 }
+
+#elif defined(__linux__)
+#include <stdarg.h>
+#include "ui.h"
+uiMultilineEntry* g_log_entry
+
+void SetLogEntry(void* log_entry) {
+    g_log_entry = static_cast<uiMultilineEntry*>(log_entry);
+}
+
+void PrintFmt(const char* fmt, ...) {
+    va_list va;
+    va_start(va, fmt);
+    va_list va2;
+    va_copy(va2, va);
+    size_t size = vsnprintf(NULL, 0, fmt, va2);
+    va_end(va2);
+    char* buf = new char[size + 1];
+    buf[size] = 0;
+    vsnprintf(buf, size + 1, fmt, va);
+    printf("%s", buf);
+    if (g_log_entry != NULL)
+        uiMultilineEntryAppend(g_log_entry, buf);
+    delete[] buf;
+    va_end(va);
+}
 #endif
 

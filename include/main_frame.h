@@ -39,4 +39,5 @@ class MainFrame {
     //wxResult RunCommand(std::string& last_line);
     //void GetDefinition(rapidjson::Document& json);
     void SaveConfig();
+    void Fit();
 };

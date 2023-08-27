@@ -20,13 +20,17 @@ subprocess_dep = dependency('subprocess', fallback : ['subprocess', 'subprocess_
 scr_sources = []
 scr_link_args = []
 scr_cpp_args = ['-DRAPIDJSON_HAS_STDSTRING']
-if host_machine.system() == 'windows'
+scr_OS = host_machine.system()
+scr_compiler = meson.get_compiler('c').get_id()
+scr_is_release = get_option('buildtype').startswith('release')
+
+if scr_OS == 'windows'
     windows = import('windows')
     scr_sources += [
         windows.compile_resources('src/app.rc',
         depend_files: ['src/app.manifest']),
     ]
-    if meson.get_compiler('c').get_id() == 'msvc'
+    if scr_compiler == 'msvc'
         scr_cpp_args = ['/DRAPIDJSON_HAS_STDSTRING']
         scr_link_args = [
             '/LARGEADDRESSAWARE',
@@ -41,17 +45,29 @@ if host_machine.system() == 'windows'
             '-static-libstdc++',
         ]
     endif
+elif scr_OS == 'darwin'
+    macosx_version_min = '-mmacosx-version-min=10.8'
+    add_project_arguments(macosx_version_min, language: ['c', 'cpp'])
+    add_project_link_arguments(macosx_version_min, language: ['c', 'cpp'])
+elif scr_OS == 'linux'
+    scr_link_args += ['-no-pie']
 else
+    error('This OS is unsupported. (' + scr_OS + ')')
+endif
+
+if scr_OS != 'windows'
     scr_cpp_args += [
         '-Wno-unused-parameter',
         '-Wno-switch',
     ]
-endif
-
-if host_machine.system() == 'darwin'
-    macosx_version_min = '-mmacosx-version-min=10.8'
-    add_project_arguments(macosx_version_min, language: ['c', 'cpp'])
-    add_project_link_arguments(macosx_version_min, language: ['c', 'cpp'])
+    if scr_is_release
+        scr_cpp_args += ['-ffunction-sections', '-fdata-sections']
+        if scr_compiler == 'gcc'
+            scr_link_args += ['-Wl,--gc-sections']
+        elif scr_compiler.startswith('clang')
+            scr_link_args += ['-Wl,-dead_strip']
+        endif
+    endif
 endif
 
 scr_sources += [
