@@ -55,8 +55,9 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     if (!config.IsObject() || config.ObjectEmpty()) {
         json_utils::JsonResult cfg_result =
             json_utils::LoadJson("gui_config.json", m_config);
-        if (!cfg_result.ok)
+        if (!cfg_result.ok) {
             m_config.SetObject();
+        }
     }
 
     if (result.ok)
@@ -196,6 +197,7 @@ void MainFrame::OpenURL(int id) {
 
 static void OnClicked(uiButton *sender, void *data) {
     MainFrame* main_frame = static_cast<MainFrame*>(data);
+    main_frame->SaveConfig();
     main_frame->RunCommand();
 }
 
@@ -282,12 +284,17 @@ std::string MainFrame::GetCommand() {
 }
 
 void MainFrame::RunCommand() {
+
+    char* text = uiButtonText(m_run_button);
+    uiButtonSetText(m_run_button, "processing...");
+
     std::string cmd = GetCommand();
     PrintFmt("[RunCommand] Command: %s\n", cmd.c_str());
 #ifdef _WIN32
     cmd = "cmd.exe /c " + cmd;
 #endif
     ExecuteResult result = Execute(cmd);
+    uiButtonSetText(m_run_button, text);
 
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);
@@ -341,6 +348,24 @@ json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definitio
 void MainFrame::JsonLoadFailed(const std::string& msg, rapidjson::Document& definition) {
     PrintFmt("[LoadDefinition] Error: %s\n", msg.c_str());
     ShowErrorDialog(msg);
+}
+
+void MainFrame::UpdateConfig() {
+    for (Component *c : m_components)
+        c->GetConfig(m_config);
+    if (m_config.HasMember("_mode"))
+        m_config.RemoveMember("_mode");
+    m_config.AddMember("_mode", m_definition_id, m_config.GetAllocator());
+}
+
+void MainFrame::SaveConfig() {
+    UpdateConfig();
+    json_utils::JsonResult result = json_utils::SaveJson(m_config, "gui_config.json");
+    if (result.ok) {
+        PrintFmt("[SaveConfig] Saved gui_config.json\n");
+    } else {
+        PrintFmt("[SaveConfig] Error: %s\n", result.msg.c_str());
+    }
 }
 
 void MainFrame::ShowSuccessDialog(const std::string& msg, const std::string& title) {

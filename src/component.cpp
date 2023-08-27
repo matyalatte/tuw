@@ -346,7 +346,8 @@ void CheckArray::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsArray()) {
         std::vector<uiCheckbox*> checks = *(std::vector<uiCheckbox*>*)m_widget;
         for (int i = 0; i < config[m_id].Size() && i < checks.size(); i++) {
-            uiCheckboxSetChecked(checks[i], config[m_id][i].GetBool());
+            if (config[m_id][i].IsBool())
+                uiCheckboxSetChecked(checks[i], config[m_id][i].GetBool());
         }
     }
 }
@@ -358,7 +359,7 @@ void CheckArray::GetConfig(rapidjson::Document& config) {
     rapidjson::Value ints;
     ints.SetArray();
     for (uiCheckbox* check : *(std::vector<uiCheckbox*>*)m_widget) {
-        ints.PushBack(uiCheckboxChecked(check), config.GetAllocator());
+        ints.PushBack(bool(uiCheckboxChecked(check)), config.GetAllocator());
     }
     rapidjson::Value n(m_id.c_str(), config.GetAllocator());
     config.AddMember(n, ints, config.GetAllocator());

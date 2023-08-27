@@ -22,7 +22,7 @@ class MainFrame {
     void CreateFrame();
     void CreateMenu();
     json_utils::JsonResult CheckDefinition(rapidjson::Document& definition);
-    //void UpdateConfig();
+    void UpdateConfig();
     void ShowSuccessDialog(const std::string& msg, const std::string& title = "Success");
     void ShowErrorDialog(const std::string& msg, const std::string& title = "Error");
     void JsonLoadFailed(const std::string& msg, rapidjson::Document& definition);
@@ -38,5 +38,5 @@ class MainFrame {
     void RunCommand();
     //wxResult RunCommand(std::string& last_line);
     //void GetDefinition(rapidjson::Document& json);
-    //void SaveConfig();
+    void SaveConfig();
 };
