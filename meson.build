@@ -48,6 +48,12 @@ else
     ]
 endif
 
+if host_machine.system() == 'darwin'
+    macosx_version_min = '-mmacosx-version-min=10.8'
+    add_project_arguments(macosx_version_min, language: ['c', 'cpp'])
+    add_project_link_arguments(macosx_version_min, language: ['c', 'cpp'])
+endif
+
 scr_sources += [
     'src/main.cpp',
     'src/main_frame.cpp',

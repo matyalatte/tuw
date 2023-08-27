@@ -3,12 +3,18 @@
 ## Requirements
 
 -   Visual Studio
--   CMake (**3.17** or later)
 -   [Meson](https://github.com/mesonbuild/meson/releases) (**0.58** or later)
 -   Batch files in [`./Simple-Command-Runner/batch_files`](../batch_files)
 
 > :warning: MinGW-w64 is not supported.  
 > (It might work, but if you find issues, you need to solve them by yourself.)  
+
+## Install Meson
+
+Get the installer (*.msi) from [the release page](https://github.com/mesonbuild/meson/releases).  
+And launch it on your machine.  
+
+> If you are a Python user, you can also get meson via pip. (`pip3 install meson`)
 
 ## Build
 
