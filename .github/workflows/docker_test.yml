@@ -22,5 +22,5 @@ jobs:
           docker build -t ${{ matrix.image_name }} -f ${{ matrix.dockerfile }} ./
           docker run ${{ matrix.image_name }}
           id=$(docker ps -a --filter ancestor=${{ matrix.image_name }} --format "{{.ID}}")
-          docker cp $id:/Simple-Command-Runner/Release/SimpleCommandRunner ./
+          docker cp $id:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
           ls -l | grep SimpleCommandRunner

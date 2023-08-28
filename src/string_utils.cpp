@@ -42,7 +42,7 @@ void PrintFmt(const char* fmt, ...) {
 #elif defined(__linux__)
 #include <stdarg.h>
 #include "ui.h"
-uiMultilineEntry* g_log_entry
+uiMultilineEntry* g_log_entry = NULL;
 
 void SetLogEntry(void* log_entry) {
     g_log_entry = static_cast<uiMultilineEntry*>(log_entry);

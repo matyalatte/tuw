@@ -30,13 +30,6 @@ jobs:
       
       - uses: actions/checkout@v3
 
-      - name: Check wxWidget version
-        id: wx-version
-        run: |
-          VERSION=$(cat WX_VERSION.txt)
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-        shell: bash
-
       - name: Create Release Draft
         id: create-release
         uses: softprops/action-gh-release@v1
@@ -76,39 +69,33 @@ jobs:
     needs: setup
     steps:
       - uses: actions/checkout@v3
-      
-      - name: Cache wxWidgets
-        uses: actions/cache@v3
-        id: cache-wx
+      - uses: actions/setup-python@v4
+
+      - name: Install Meson for Windows
+        if: runner.os == 'Windows'
+        run: pip install meson
+
+      - name: Install Meson for Unix
+        if: runner.os != 'Windows'
+        run: pip3 install meson ninja
+
+      - name: Prepare MSVC
+        if: runner.os == 'Windows'
+        uses: bus1/cabuild/action/msdevshell@v1
         with:
-            path: "~/wxWidgets-${{ needs.setup.outputs.wx_version }}"
-            key: ${{ runner.os }}-wx${{ needs.setup.outputs.wx_version }}-Release
-            
+          architecture: x64
+
       - name: Install gtk for Linux
         if: runner.os == 'Linux'
         run: sudo apt -y install libgtk-3-dev
 
-      - name: Build wxWidgets for Windows
-        if: (steps.cache-wx.outputs.cache-hit != 'true') && (runner.os == 'Windows')
-        run: |
-          cd batch_files
-          ./download_wxWidgets.bat
-          ./build_wxWidgets.bat NoTest
-
-      - name: Build wxWidgets for Unix
-        if: (steps.cache-wx.outputs.cache-hit != 'true') && (runner.os != 'Windows')
-        run: |
-          cd shell_scripts
-          bash download_wxWidgets.sh
-          bash build_wxWidgets.sh NoTest
-          
       - name: Build exe for Windows
         if: runner.os == 'Windows'
-        run: batch_files/build_exe.bat
+        run: batch_files/build.bat
           
       - name: Build exe for Unix
         if: runner.os != 'Windows'
-        run: bash shell_scripts/build_exe.sh
+        run: bash shell_scripts/build.sh
 
       - name: Show info about exe
         run: bash shell_scripts/exe_info.sh

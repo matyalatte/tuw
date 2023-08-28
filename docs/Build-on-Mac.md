@@ -7,6 +7,9 @@
 -   [Meson](https://github.com/mesonbuild/meson) (**0.58** or later)
 -   Shell scripts in [`./Simple-Command-Runner/shell_scripts`](../shell_scripts)
 
+> :warning: GCC is not supported.  
+> (It might work, but if you find issues, you need to solve them by yourself.)  
+
 ## Install Meson and Ninja
 
 You can install meson and ninja via Homebrew. (`brew install meson ninja`)
@@ -15,12 +18,12 @@ You can install meson and ninja via Homebrew. (`brew install meson ninja`)
 
 ## Build
 
-Run `shell_scripts/build.sh`.  
+Run `bash shell_scripts/build.sh`.  
 The executable will be generated in `build\Release\`.  
 
 ## Debug
 
-If you want a debug build, run `batch_files/build.bat Debug` on the command prompt.  
+If you want a debug build, run `bash shell_scripts/build.sh Debug` on the terminal.  
 
 ## Compression
 

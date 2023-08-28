@@ -23,32 +23,18 @@ jobs:
         shell: bash
 
       - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+      - run: pip install meson
 
-      - name: Check wxWidgets version
-        id: wx-version
-        run: |
-          VERSION=$(cat WX_VERSION.txt)
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-        shell: bash
-
-      - name: Cache wxWidgets
-        uses: actions/cache@v3
-        id: cache-wx
+      - name: Prepare MSVC
+        uses: bus1/cabuild/action/msdevshell@v1
         with:
-          path: "~/wxWidgets-${{ steps.wx-version.outputs.version }}"
-          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}-Release
-        
-      - name: install wxWidgets
-        if: steps.cache-wx.outputs.cache-hit != 'true'
-        run: |
-          cd batch_files
-          ./download_wxWidgets.bat
-          ./build_wxWidgets.bat NoTest
+          architecture: x64
 
       - name: build exe
         run: |
           cd batch_files
-          ./build_exe.bat
+          ./build.bat
 
       - name: Copy files
         run: |
@@ -64,29 +50,10 @@ jobs:
         with:
           directory: 'archive'
           type: 'zip'
-          filename: '${{ env.ZIP_NAME }}-win-x64.zip'
-
-      - name: Run UPX
-        uses: crazy-max/ghaction-upx@v2
-        with:
-          version: latest
-          files: |
-            ./archive/SimpleCommandRunner.exe
-          args: --best
+          filename: '${{ env.ZIP_NAME }}-win.zip'
 
       - name: Copy files
-        run: mv archive/${{ env.ZIP_NAME }}-win-x64.zip ./
-        shell: bash
-
-      - name: Archive Release
-        uses: thedoctor0/zip-release@master
-        with:
-          directory: 'archive'
-          type: 'zip'
-          filename: '${{ env.ZIP_NAME }}-win-x64-upx.zip'
-
-      - name: Copy files
-        run: mv archive/${{ env.ZIP_NAME }}-win-x64-upx.zip ./
+        run: mv archive/${{ env.ZIP_NAME }}-win.zip ./
         shell: bash
 
       - name: Create Release Draft
@@ -106,5 +73,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ steps.check-tag.outputs.tag }}-win ${{ env.ZIP_NAME }}-win-x64.zip
-          gh release upload ${{ steps.check-tag.outputs.tag }}-win ${{ env.ZIP_NAME }}-win-x64-upx.zip
+          gh release upload ${{ steps.check-tag.outputs.tag }}-win ${{ env.ZIP_NAME }}-win.zip

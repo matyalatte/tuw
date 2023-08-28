@@ -2,7 +2,7 @@
 
 ## Platforms
 
-Simple Command Runner uses cross-platform framework.  
+Simple Command Runner uses cross-platform libraries.  
 I made sure I can build it with the following platforms and compilers.
 
 -   Windows10 + MSVC 19.31
@@ -10,7 +10,7 @@ I made sure I can build it with the following platforms and compilers.
 -   Ubuntu 20.04 + GCC 9.4
 -   Alpine Linux 3.16 + GCC 11.2
 
-And it should support your platform as well if [wxWidgets library](https://github.com/wxWidgets/wxWidgets) supports.  
+And it should support your platform as well if [libui](https://github.com/libui-ng/libui-ng) supports.  
 
 ## CMake
 

@@ -23,35 +23,16 @@ jobs:
         shell: bash
 
       - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+      - run: pip3 install meson ninja
 
-      - name: Check wxWidgets version
-        id: wx-version
-        run: |
-          VERSION=$(cat WX_VERSION.txt)
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-        shell: bash
-      
-      - name: Cache wxWidgets
-        uses: actions/cache@v3
-        id: cache-wx
-        with:
-          path: "~/wxWidgets-${{ steps.wx-version.outputs.version }}"
-          key: ${{ runner.os }}-wx${{ steps.wx-version.outputs.version }}-Release
-            
       - name: install gtk
         run: |
           sudo apt -y install libgtk-3-dev
-      
-      - name: build wxWidgets
-        if: steps.cache-wx.outputs.cache-hit != 'true'
-        run: |
-          cd shell_scripts
-          bash download_wxWidgets.sh
-          bash build_wxWidgets.sh NoTest
-          
+
       - name: build exe
         run: |
-          bash shell_scripts/build_exe.sh
+          bash shell_scripts/build.sh
           
       - name: Archive Release
         run: |
@@ -61,24 +42,8 @@ jobs:
           cp changelog.txt archive/${{ env.ZIP_NAME }}
           cp license.txt archive/${{ env.ZIP_NAME }}
           cd archive
-          tar -jcvf ${{ env.ZIP_NAME }}-ubu-x64.tar.bz2 ${{ env.ZIP_NAME }}
-          mv ${{ env.ZIP_NAME }}-ubu-x64.tar.bz2 ../
-
-      - name: Install UPX
-        uses: crazy-max/ghaction-upx@v2
-        with:
-          install-only: true
-
-      - name: Run UPX
-        run: |
-          cd archive/${{ env.ZIP_NAME }}
-          upx SimpleCommandRunner --best
-
-      - name: Archive UPX Release
-        run: |
-          cd archive
-          tar -jcvf ${{ env.ZIP_NAME }}-ubu-x64-upx.tar.bz2 ${{ env.ZIP_NAME }}
-          mv ${{ env.ZIP_NAME }}-ubu-x64-upx.tar.bz2 ../
+          tar -jcvf ${{ env.ZIP_NAME }}-ubu.tar.bz2 ${{ env.ZIP_NAME }}
+          mv ${{ env.ZIP_NAME }}-ubu.tar.bz2 ../
 
       - name: Create Release Draft
         id: create-release
@@ -97,5 +62,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ steps.check-tag.outputs.tag }}-ubu ${{ env.ZIP_NAME }}-ubu-x64.tar.bz2
-          gh release upload ${{ steps.check-tag.outputs.tag }}-ubu ${{ env.ZIP_NAME }}-ubu-x64-upx.tar.bz2
+          gh release upload ${{ steps.check-tag.outputs.tag }}-ubu ${{ env.ZIP_NAME }}-ubu.tar.bz2

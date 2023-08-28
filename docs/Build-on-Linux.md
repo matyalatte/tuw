@@ -9,6 +9,9 @@
 -   bash
 -   Shell scripts in [`./Simple-Command-Runner/shell_scripts`](../shell_scripts)
 
+> :warning: Clang is not supported.  
+> (It might work, but if you find issues, you need to solve them by yourself.)  
+
 ## Install Meson and Ninja
 
 You can install meson and ninja via apt. (`sudo apt install meson ninja`)
@@ -17,17 +20,16 @@ You can install meson and ninja via apt. (`sudo apt install meson ninja`)
 
 ## Build
 
-Run `shell_scripts/build.sh`.  
+Run `bash shell_scripts/build.sh`.  
 The executable will be generated in `build\Release\`.  
 
 ## Debug
 
-If you want a debug build, run `batch_files/build.bat Debug` on the command prompt.  
+If you want a debug build, run `bash shell_scripts/build.sh Debug` on the terminal.  
 
 ## Compression
 
-The built binary will be 2 or 3 MB.  
-You should use [UPX](https://github.com/upx/upx/releases/latest) if you want smaller exe.  
+You can use [UPX](https://github.com/upx/upx/releases/latest) if you want smaller exe.  
 
 ```bash
 upx SimpleCommandRunner --best
@@ -43,4 +45,7 @@ Not yet
 
 ## Dockerfiles
 
-Not yet
+You can see some dockerfiles to understand the workflow.  
+
+-   [Dockerfile_Ubuntu](../Dockerfile_Ubuntu): Dockerfile to build SimpleCommandRunner on Ubuntu20.04
+-   [Dockerfile_Alpine](../Dockerfile_Alpine): Dockerfile to build SimpleCommandRunner on Alpine3.16
