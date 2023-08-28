@@ -1,6 +1,4 @@
-# Simple Command Runner ver 0.5.1
-
-> :warning: This branch has tons of issues. Don't use it for your project.    
+# Simple Command Runner ver 0.6.0
 
 ![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/test.yml/badge.svg)
@@ -9,7 +7,25 @@
 
 Small and simple GUI wrapper for command-line tools.  
 
-## Only 1MB for a portable GUI!
+## About this branch
+
+This branch will use [libui](https://github.com/libui-ng/libui-ng) as a GUI library.  
+It still has some issues and lacks some features I want.  
+But it'll be the best GUI library for Simple Command Runner in the future.  
+  
+Here is the list of changes from the main branch.
+
+- EXE became smaller. (600KB for the windows build and 300KB for the unix builds!)  
+- Compilation time became faster.  
+- Support older build systems. (No need CMake 3.25!)
+- User-friendly workflows. (Just by running meson via command-line!)
+- Float pickers are unavaiable.
+- The `tooltip` option is unavailable.
+- The `placeholder` option is unavailable.
+- The layout is a little bit ugly.
+- Haven't beed tested yet.
+
+## Only 600KB for a portable GUI!
 
 Simple Command Runner will give a very simple GUI to your scripts.  
 All you need is write a `.json` file and run a small executable.  
@@ -36,7 +52,7 @@ It can make a GUI to run commands of your scripts.
 You can download executables from [the release page](https://github.com/matyalatte/Simple-Command-Runner/releases)
 
 -   `SimpleCommandRunner*-Windows*.zip` is for Windows (7 or later).  
--   `SimpleCommandRunner*-macOS*.tar.bz2` is for macOS (10.10 or later).  
+-   `SimpleCommandRunner*-macOS*.tar.bz2` is for macOS (10.9 or later).  
 -   `SimpleCommandRunner*-Linux*.tar.bz2` is for Ubuntu (20.04 or later).  
 
 > The linux builds only support Ubuntu due to the glibc dependences.  
@@ -79,7 +95,7 @@ You can also make `gui_definition.json` with [web forms](https://rjsf-team.githu
 ## Want Smaller Executables?
 
 You can use [UPX to compress the executables](./UPX.md).  
-They will be **under 400KB**!  
+They will be **under 300KB**!  
 
 ## License
 

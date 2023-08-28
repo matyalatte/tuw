@@ -20,7 +20,7 @@ There are platform-specific documents for building the executable with CMake.
 -   [Building Workflow for macOS](./Build-on-Mac.md)  
 -   [Building Workflow for Linux](./Build-on-Linux.md)  
 
-You can also see [batch files](../batch_files/), [shell scripts](../shell_scripts/), and [CMakePresets.json](../CMakePresets.json) to understand the workflow.  
+You can also see [batch files](../batch_files/) and [shell scripts](../shell_scripts/) to understand the workflow.  
 
 ## Docker
 

@@ -2,8 +2,8 @@
 namespace scr_constants {
     constexpr char TOOL_NAME[] = "Simple Command Runner";
     constexpr char AUTHOR[] = "matyalatte";
-    constexpr char VERSION[] = "0.5.1";
-    constexpr int VERSION_INT = 501;
+    constexpr char VERSION[] = "0.6.0";
+    constexpr int VERSION_INT = 600;
 
 #ifdef _WIN32
     constexpr char OS[] = "win";

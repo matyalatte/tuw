@@ -79,7 +79,7 @@ jobs:
         if: runner.os != 'Windows'
         run: pip3 install meson ninja
 
-      - name: Prepare MSVC
+      - name: Prepare MSVC for Windows
         if: runner.os == 'Windows'
         uses: bus1/cabuild/action/msdevshell@v1
         with:
