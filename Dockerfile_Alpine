@@ -13,20 +13,21 @@
 #    docker cp <CONTAINER ID>:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
 
 # Base image
-FROM matyalatte/alpine3.16-cmake3.25
+FROM alpine:3.16.5
 
 # Install packages
 RUN apk update && \
-    apk add --no-cache bash gtk+3.0-dev
+    apk add --no-cache \
+        alpine-sdk linux-headers bash gtk+3.0-dev \
+        py3-pip python3
+
+# Install meson
+RUN pip3 install meson ninja
 
 # Clone the repo
 WORKDIR /
-RUN git clone https://github.com/matyalatte/Simple-Command-Runner.git
+RUN git clone -b libui --depth 1 https://github.com/matyalatte/Simple-Command-Runner.git
 
-# Build wxWidgets
+# Build
 WORKDIR /Simple-Command-Runner/shell_scripts
-RUN bash download_wxWidgets.sh; \
-    bash build_wxWidgets.sh NoTest
-
-# Build SimpleCommandRunner
-RUN bash build_exe.sh
+RUN bash build.sh

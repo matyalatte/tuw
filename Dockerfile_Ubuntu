@@ -1,7 +1,7 @@
 # Building workflow for ubuntu 20.04 or later.
 #
 # 1. Use this docker file to build the executable.
-#    docker build -t scr_ubuntu ./
+#    docker build -t scr_ubuntu -f Dockerfile_Ubuntu ./
 #
 # 2. Run the built image.
 #    docker run scr_ubuntu
@@ -13,23 +13,23 @@
 #    docker cp <CONTAINER ID>:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
 
 # Base image
-FROM matyalatte/ubuntu20.04-cmake3.25:latest
+FROM ubuntu:20.04
 
 # Install packages
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends libgtk-3-dev git && \
+    apt-get install -y --no-install-recommends \
+            ca-certificates build-essential libgtk-3-dev git python3-pip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Install meson
+RUN pip3 install meson ninja
+
 # Clone the repo
 WORKDIR /
-RUN git clone https://github.com/matyalatte/Simple-Command-Runner.git
+RUN git clone -b libui --depth 1 https://github.com/matyalatte/Simple-Command-Runner.git
 
-# Build wxWidgets
+# Build
 WORKDIR /Simple-Command-Runner/shell_scripts
-RUN bash download_wxWidgets.sh; \
-    bash build_wxWidgets.sh NoTest
-
-# Build SimpleCommandRunner
-RUN bash build_exe.sh
+RUN bash build.sh

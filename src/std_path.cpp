@@ -4,14 +4,22 @@
 #include <Windows.h>
 #include <direct.h>
 #include "string_utils.h"
-#else
-#include <sys/stat.h>
-#include <unistd.h>
-#endif
-
 #ifndef MAX_PATH
     #define MAX_PATH  260
 #endif
+
+#else  // _WIN32
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+#include <sys/stat.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <limits.h>
+#ifndef PATH_MAX
+    #define PATH_MAX  260
+#endif
+#endif  // _WIN32
 
 namespace stdpath {
 
@@ -81,22 +89,24 @@ namespace stdpath {
         std::string cmd = "start " + path;
         return system(cmd.c_str());
     }
-#else
-    // Todo: support InitStdPath() for mac
+
+#else  // _WIN32
     void InitStdPath(const char* argv0) {
-    #ifdef __linux__
         char path[PATH_MAX + 1];
+        path[PATH_MAX] = 0;
+    #ifdef __linux__
         const size_t LINKSIZE = 100;
         char link[LINKSIZE];
         snprintf(link, LINKSIZE, "/proc/%d/exe", getpid() );
         readlink(link, path, PATH_MAX);
+    #else
+        uint32_t bufsize = PATH_MAX;        
+        _NSGetExecutablePath(path, &bufsize);
+    #endif
         if (path[0] == 0)
             g_exe_path = "/";
         else
             g_exe_path = path;
-    #else
-        g_exe_path = "/";
-    #endif
     }
 
     bool FileExists(const std::string& path) {
@@ -110,9 +120,9 @@ namespace stdpath {
     }
 
     std::string GetCwd() {
-        char cwd[MAX_PATH + 1];
-        cwd[MAX_PATH] = 0;
-        getcwd(cwd, MAX_PATH);
+        char cwd[PATH_MAX + 1];
+        cwd[PATH_MAX] = 0;
+        getcwd(cwd, PATH_MAX);
         return cwd;
     }
 
@@ -141,7 +151,7 @@ namespace stdpath {
     #endif
         return system(cmd.c_str());
     }
-#endif
+#endif  // _WIN32
 
     std::string GetDirectory(const std::string& path) {
         size_t pos = path.find_last_of("/\\");

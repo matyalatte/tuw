@@ -4,15 +4,16 @@
 
 -   Build tools (e.g. `build-essential` for Ubuntu)
 -   GTK3.0 (e.g. `libgtk-3-dev` for Ubuntu)
+-   Ninja
 -   [Meson](https://github.com/mesonbuild/meson) (**0.58** or later)
 -   bash
 -   Shell scripts in [`./Simple-Command-Runner/shell_scripts`](../shell_scripts)
 
-## Install Meson
+## Install Meson and Ninja
 
-You can install meson via apt. (`sudo apt install meson`)
+You can install meson and ninja via apt. (`sudo apt install meson ninja`)
 
-> If you are a Python user, you can also get meson via pip. (`sudo pip3 install meson ninja`)
+> If you are a Python user, you can also get them via pip. (`sudo pip3 install meson ninja`)
 
 ## Build
 

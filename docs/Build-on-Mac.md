@@ -2,15 +2,16 @@
 
 ## Requirements
 
--   xcode
+-   Xcode
+-   Ninja
 -   [Meson](https://github.com/mesonbuild/meson) (**0.58** or later)
 -   Shell scripts in [`./Simple-Command-Runner/shell_scripts`](../shell_scripts)
 
-## Install Meson
+## Install Meson and Ninja
 
-You can install meson via Homebrew. (`brew install meson`)
+You can install meson and ninja via Homebrew. (`brew install meson ninja`)
 
-> If you are a Python user, you can also get meson via pip. (`pip3 install meson ninja`)
+> If you are a Python user, you can also get them via pip. (`pip3 install meson ninja`)
 
 ## Build
 

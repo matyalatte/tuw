@@ -1,5 +1,5 @@
 project('SimpleCommandRunner', ['c', 'cpp'],
-    meson_version: '>=0.58.0',
+    meson_version: '>=0.63.0',
     default_options: [
         'buildtype=debug',              # build debug by default
         'default_library=shared',       # build shared libraries by default
@@ -39,6 +39,7 @@ if scr_OS == 'windows'
             '/ENTRY:wmainCRTStartup'
         ]
     else
+        warning('This project is NOT tested with your compiler. (' + scr_compiler + ')')
         scr_link_args += [
             '-static',
             '-static-libgcc',
@@ -46,11 +47,17 @@ if scr_OS == 'windows'
         ]
     endif
 elif scr_OS == 'darwin'
-    macosx_version_min = '-mmacosx-version-min=10.8'
+    macosx_version_min = '-mmacosx-version-min=10.9'
     add_project_arguments(macosx_version_min, language: ['c', 'cpp'])
     add_project_link_arguments(macosx_version_min, language: ['c', 'cpp'])
+    if not scr_compiler.startswith('clang')
+        warning('This project is NOT tested with your compiler. (' + scr_compiler + ')')
+    endif
 elif scr_OS == 'linux'
     scr_link_args += ['-no-pie']
+    if scr_compiler != 'gcc'
+        warning('This project is NOT tested with your compiler. (' + scr_compiler + ')')
+    endif
 else
     error('This OS is unsupported. (' + scr_OS + ')')
 endif
@@ -60,6 +67,9 @@ if scr_OS != 'windows'
         '-Wno-unused-parameter',
         '-Wno-switch',
     ]
+    if scr_compiler.startswith('clang')
+        scr_cpp_args += ['-stdlib=libc++']
+    endif
     if scr_is_release
         scr_cpp_args += ['-ffunction-sections', '-fdata-sections']
         if scr_compiler == 'gcc'
