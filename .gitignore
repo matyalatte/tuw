@@ -2,15 +2,12 @@
 *.json
 !examples/**/gui_definition.json
 !tests/**/*.json
-!CMakePresets.json
 !schema/*.json
 
 *.txt
 !changelog.txt
-!CMakeLists.txt
 !license.txt
-!WX_VERSION.txt
-!wx_fix/*.txt
+!meson_options.txt
 
 *.bat
 !batch_files/*.bat
@@ -23,6 +20,7 @@ subprojects/libui
 subprojects/packagecache
 subprojects/rapidjson
 subprojects/subprocess
+subprojects/google*
 
 # built files
 *.exe

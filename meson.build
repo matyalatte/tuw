@@ -18,6 +18,7 @@ rapidjson_dep = dependency('rapidjson', fallback : ['rapidjson', 'rapidjson_dep'
 subprocess_dep = dependency('subprocess', fallback : ['subprocess', 'subprocess_dep'])
 
 scr_sources = []
+scr_manifest = []
 scr_link_args = []
 scr_cpp_args = ['-DRAPIDJSON_HAS_STDSTRING']
 scr_OS = host_machine.system()
@@ -26,7 +27,7 @@ scr_is_release = get_option('buildtype').startswith('release')
 
 if scr_OS == 'windows'
     windows = import('windows')
-    scr_sources += [
+    scr_manifest += [
         windows.compile_resources('src/app.rc',
         depend_files: ['src/app.manifest']),
     ]
@@ -39,7 +40,7 @@ if scr_OS == 'windows'
             '/ENTRY:wmainCRTStartup'
         ]
     else
-        warning('This project is NOT tested with your compiler. (' + scr_compiler + ')')
+        warning('This project has NOT been tested with your compiler. (' + scr_compiler + ')')
         scr_link_args += [
             '-static',
             '-static-libgcc',
@@ -51,15 +52,16 @@ elif scr_OS == 'darwin'
     add_project_arguments(macosx_version_min, language: ['c', 'cpp'])
     add_project_link_arguments(macosx_version_min, language: ['c', 'cpp'])
     if not scr_compiler.startswith('clang')
-        warning('This project is NOT tested with your compiler. (' + scr_compiler + ')')
-    endif
-elif scr_OS == 'linux'
-    scr_link_args += ['-no-pie']
-    if scr_compiler != 'gcc'
-        warning('This project is NOT tested with your compiler. (' + scr_compiler + ')')
+        warning('This project has NOT been tested with your compiler. (' + scr_compiler + ')')
     endif
 else
-    error('This OS is unsupported. (' + scr_OS + ')')
+    if scr_OS != 'linux'
+        warning('This OS is unsupported. (' + scr_OS + ')')
+    endif
+    scr_link_args += ['-no-pie']
+    if scr_compiler != 'gcc'
+        warning('This project has NOT been tested with your compiler. (' + scr_compiler + ')')
+    endif
 endif
 
 if scr_OS != 'windows'
@@ -81,7 +83,6 @@ if scr_OS != 'windows'
 endif
 
 scr_sources += [
-    'src/main.cpp',
     'src/main_frame.cpp',
     'src/component.cpp',
     'src/exe_container.cpp',
@@ -91,10 +92,41 @@ scr_sources += [
     'src/string_utils.cpp'
 ]
 
-executable('SimpleCommandRunner',
-    scr_sources,
-    dependencies : [libui_dep, rapidjson_dep, subprocess_dep],
-    cpp_args: scr_cpp_args,
-    link_args: scr_link_args,
-    include_directories: include_directories('include'),
-    install : false)
+if get_option('build_exe')
+    executable('SimpleCommandRunner',
+        scr_manifest + scr_sources + ['src/main.cpp'],
+        dependencies : [libui_dep, rapidjson_dep, subprocess_dep],
+        cpp_args: scr_cpp_args,
+        link_args: scr_link_args,
+        include_directories: include_directories('include'),
+        install : false)
+endif
+
+if get_option('build_test')
+    # build codes as a library
+    scr_lib = library('scr_lib',
+        scr_manifest + scr_sources,
+        dependencies : [libui_dep, rapidjson_dep, subprocess_dep],
+        cpp_args: scr_cpp_args,
+        link_args: scr_link_args,
+        include_directories: include_directories('include'),
+        build_rpath: '',
+        install_rpath: '',
+        name_prefix: 'lib',		# always call it libui, even in Windows DLLs
+        install: false,
+        gnu_symbol_visibility: 'hidden',
+        soversion: '',
+        darwin_versions: [])
+
+    scr_dep = declare_dependency(include_directories: include_directories('include'),
+        dependencies : [libui_dep, rapidjson_dep, subprocess_dep],
+	    link_with : scr_lib)
+
+    # get gtest
+    gtest_proj = subproject('gtest')
+    gtest_dep = gtest_proj.get_variable('gtest_dep')
+    gmock_dep = gtest_proj.get_variable('gmock_dep')
+
+    # build tests
+    subdir('tests')
+endif

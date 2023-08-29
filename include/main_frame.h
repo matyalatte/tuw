@@ -28,16 +28,19 @@ class MainFrame {
     void JsonLoadFailed(const std::string& msg, rapidjson::Document& definition);
 
  public:
-    MainFrame(const rapidjson::Document& definition = rapidjson::Document(rapidjson::kObjectType),
-              const rapidjson::Document& config = rapidjson::Document(rapidjson::kObjectType));
-
+    explicit MainFrame(const rapidjson::Document& definition = rapidjson::Document(rapidjson::kObjectType),
+                       const rapidjson::Document& config = rapidjson::Document(rapidjson::kObjectType));
     void UpdatePanel(int definition_id);
     void OpenURL(int id);
     //void UpdateFrame(wxCommandEvent& event);
     std::string GetCommand();
     void RunCommand();
     //wxResult RunCommand(std::string& last_line);
-    //void GetDefinition(rapidjson::Document& json);
+    void GetDefinition(rapidjson::Document& json);
     void SaveConfig();
     void Fit();
+    void Close() {
+        if (m_mainwin == NULL) return;
+        uiControlDestroy(uiControl(m_mainwin));
+    }
 };

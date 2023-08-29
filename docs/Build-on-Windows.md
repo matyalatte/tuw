@@ -35,8 +35,8 @@ You can use [UPX](https://github.com/upx/upx/releases/latest) if you want smalle
 
 ## Test
 
-Not yet
+If you want to run tests, run [`test.bat`](../batch_files/test.bat) or type `test.bat Debug` on the command prompt.  
 
 ## Coverage
 
-Not yet
+`test.bat Debug` will make coverage report if [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage/releases) is installed.  

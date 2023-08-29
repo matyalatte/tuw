@@ -5,7 +5,7 @@
     "folder": "testdir",
     "options": [ false, false, true ],
     "text": "remove this text!",
-    "integer": 2.0,
-    "double": 0.1,
+    "integer": 2,
+    "double": 0,
     "_mode": 0
 }

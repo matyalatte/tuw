@@ -1,0 +1,2 @@
+option('build_exe', type : 'boolean', value : true, description : 'Build executable')
+option('build_test', type : 'boolean', value : false, description : 'Build tests')

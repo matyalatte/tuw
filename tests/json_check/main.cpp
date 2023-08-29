@@ -3,16 +3,27 @@
 
 #include <gtest/gtest.h>
 #include "json_utils.h"
+#include "string_utils.h"
+#include "scr_constants.h"
 
-char const * broken;
-char const * json_file;
+std::string broken;
+std::string json_file;
 
-int main(int argc, char * argv[]) {
+#ifdef _WIN32
+int wmain(int argc, wchar_t* argv[]) {
+#else
+int main(int argc, char* argv[]) {
+#endif
     ::testing::InitGoogleTest(&argc, argv);
     assert(argc == 3);
 
+#ifdef _WIN32
+    broken = UTF16toUTF8(argv[1]);
+    json_file = UTF16toUTF8(argv[2]);
+#else
     broken = argv[1];
     json_file = argv[2];
+#endif
 
     return RUN_ALL_TESTS();
 }

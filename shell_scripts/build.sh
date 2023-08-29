@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds an executable file with cmake.
+# Build an executable.
 # SimpleCommandRunner will be generated in ../build/${build_type}
 
 # You can specify build type as an argument like "bash build.sh Debug"

@@ -3,9 +3,9 @@
 
 namespace stdpath {
 #ifdef _WIN32
-    void InitStdPath();
+    void InitStdPath(wchar_t* envp[]);
 #else
-    void InitStdPath(const char* argv0);
+    void InitStdPath(char* envp[]);
 #endif
     std::string GetExecutablePath();
     bool FileExists(const std::string& path);

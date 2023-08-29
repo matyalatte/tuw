@@ -36,4 +36,4 @@ upx SimpleCommandRunner --best
 
 ## Test
 
-Not yet
+If you want to build tests, type `bash test.sh` or `bash test.sh Debug` on the terminal.

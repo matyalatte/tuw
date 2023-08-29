@@ -11,22 +11,22 @@
 
 int main_app()
 {
-	uiInitOptions options;
-	const char *err;
-	uiTab *tab;
+    uiInitOptions options;
+    const char *err;
+    uiTab *tab;
 
-	memset(&options, 0, sizeof (uiInitOptions));
-	err = uiInit(&options);
-	if (err != NULL) {
-		fprintf(stderr, "error initializing libui: %s", err);
-		uiFreeInitError(err);
-		return 1;
-	}
+    memset(&options, 0, sizeof (uiInitOptions));
+    err = uiInit(&options);
+    if (err != NULL) {
+        fprintf(stderr, "error initializing libui: %s", err);
+        uiFreeInitError(err);
+        return 1;
+    }
 
     MainFrame main_frame = MainFrame();
-	
-	uiMain();
-	return 0;
+
+    uiMain();
+    return 0;
 }
 
 
@@ -159,23 +159,14 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
     for (size_t i = 0; i < argc; i++) {
         args.push_back(UTF16toUTF8(argv[i]));
     }
-    stdpath::InitStdPath();
-    while(*envp) {
-        _wputenv(*envp);
-        envp++;
-    }
 #else
 int main(int argc, char* argv[], char* envp[]) {
     std::vector<std::string> args;
     for (size_t i = 0; i < argc; i++) {
         args.push_back(argv[i]);
     }
-    stdpath::InitStdPath(argv[0]);
-    while(*envp) {
-        putenv(*envp);
-        envp++;
-    }
 #endif
+    stdpath::InitStdPath(envp);
 
     // Launch GUI if no args.
     if (argc == 1) return main_app();

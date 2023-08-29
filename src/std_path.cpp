@@ -23,14 +23,19 @@
 
 namespace stdpath {
 
-    std::string g_exe_path;
-
 #ifdef _WIN32
-    void InitStdPath() {
+    void InitStdPath(wchar_t* envp[]) {
+        while(*envp) {
+            _wputenv(*envp);
+            envp++;
+        }
+    }
+
+    std::string GetExecutablePath() {
         wchar_t filename[MAX_PATH + 1];
         filename[MAX_PATH] = 0;
         GetModuleFileNameW(NULL, filename, MAX_PATH);
-        g_exe_path = UTF16toUTF8(filename);
+        return UTF16toUTF8(filename);
     }
 
     bool FileExists(const std::string& path) {
@@ -91,7 +96,14 @@ namespace stdpath {
     }
 
 #else  // _WIN32
-    void InitStdPath(const char* argv0) {
+    void InitStdPath(char* envp[]) {
+        while(*envp) {
+            putenv(*envp);
+            envp++;
+        }
+    }
+
+    std::string GetExecutablePath() {
         char path[PATH_MAX + 1];
         path[PATH_MAX] = 0;
     #ifdef __linux__
@@ -104,9 +116,8 @@ namespace stdpath {
         _NSGetExecutablePath(path, &bufsize);
     #endif
         if (path[0] == 0)
-            g_exe_path = "/";
-        else
-            g_exe_path = path;
+            return "/";
+        return path;
     }
 
     bool FileExists(const std::string& path) {
@@ -158,9 +169,5 @@ namespace stdpath {
         return (std::string::npos == pos)
          ? ""
          : path.substr(0, pos);
-    }
-
-    std::string GetExecutablePath() {
-        return g_exe_path;
     }
 }  // namespace stdpath

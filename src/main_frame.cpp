@@ -387,3 +387,7 @@ void MainFrame::ShowSuccessDialog(const std::string& msg, const std::string& tit
 void MainFrame::ShowErrorDialog(const std::string& msg, const std::string& title) {
     uiMsgBoxError(m_mainwin, title.c_str(), msg.c_str());
 }
+
+void MainFrame::GetDefinition(rapidjson::Document& json) {
+    json.CopyFrom(m_definition, json.GetAllocator());
+}

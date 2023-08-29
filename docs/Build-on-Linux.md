@@ -37,11 +37,14 @@ upx SimpleCommandRunner --best
 
 ## Test
 
-Not yet
+If you want to build tests, type `bash test.sh` or `bash test.sh Debug` on the terminal.
 
 ## Coverage
 
-Not yet
+If you will use GCC, you can get coverage reports.  
+Install lcov with `sudo apt install lcov`.  
+Then, type `bash coverage.sh` or `bash coverage.sh Debug` on the Terminal.  
+It'll generate html files in `./Simple-Command-Runner/coverage-report/`.
 
 ## Dockerfiles
 
