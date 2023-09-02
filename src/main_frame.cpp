@@ -172,7 +172,7 @@ void MainFrame::OpenURL(int id) {
         }
 
     } else if (type == "file") {
-        url = help["path"].GetString();
+        url = env_utils::GetFullPath(help["path"].GetString());
         tag = "[OpenFile] ";
         if (!env_utils::FileExists(url)) {
             std::string msg = "File does not exist. (" + url + ")";
@@ -188,8 +188,8 @@ void MainFrame::OpenURL(int id) {
         url = "file:" + url;
     }
 
-    int status = env_utils::OpenURL(url);
-    if (status < 0) {
+    ExecuteResult result = LaunchDefaultApp(url);
+    if (result.exit_code != 0) {
         std::string msg = "Failed to open a " + type + " by an unexpected error.";
         PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
         ShowErrorDialog(msg.c_str());

@@ -89,12 +89,6 @@ namespace env_utils {
         return drive + path;
     }
 
-    // Todo: use subprocess
-    int OpenURL(const std::string& path) {
-        std::string cmd = "start " + path;
-        return system(cmd.c_str());
-    }
-
 #else  // _WIN32
     void InitEnv(char* envp[]) {
         while(*envp) {
@@ -151,16 +145,6 @@ namespace env_utils {
         if (homedir == NULL)  // failed to get homedir
             return "/";
         return homedir;
-    }
-
-    // Todo: use subprocess
-    int OpenURL(const std::string& path) {
-    #ifdef __linux__
-        std::string cmd = "xdg-open " + path;
-    #else
-        std::string cmd = "open " + path;
-    #endif
-        return system(cmd.c_str());
     }
 #endif  // _WIN32
 

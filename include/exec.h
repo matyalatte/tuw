@@ -8,3 +8,4 @@ struct ExecuteResult {
 };
 
 ExecuteResult Execute(const std::string& cmd);
+ExecuteResult LaunchDefaultApp(const std::string& url);

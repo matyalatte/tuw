@@ -175,3 +175,30 @@ ExecuteResult Execute(const std::string& cmd)
     return { return_code, err_msg, last_line };
 
 }
+
+ExecuteResult LaunchDefaultApp(const std::string& url) {
+#ifdef _WIN32
+    const char* argv[] = {"cmd.exe", "/c", "start", url.c_str(), NULL};
+#elif defined(__linux__)
+    const char* argv[] = {"xdg-open", url.c_str(), NULL};
+#else
+    const char* argv[] = {"open", url.c_str(), NULL};
+#endif
+    struct subprocess_s process;
+    int options = subprocess_option_inherit_environment
+                  | subprocess_option_search_user_path;
+    int result = subprocess_create(argv, options, &process);
+    if (0 != result)
+        return { -1, "Failed to create a subprocess.\n"};
+
+    int return_code;
+    result = subprocess_join(&process, &return_code);
+    if (0 != result)
+        return { -1, "Failed to join a subprocess.\n"};
+
+    result = subprocess_destroy(&process);
+    if (0 != result)
+        return { -1, "Failed to destroy a subprocess.\n"};
+
+    return { 0 };
+}

@@ -14,6 +14,5 @@ namespace env_utils {
     std::string GetCwd();
     void SetCwd(const std::string& path);
     std::string GetHome();
-    int OpenURL(const std::string& url);
 }  // namespace stdpath
 
