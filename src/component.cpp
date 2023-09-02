@@ -176,7 +176,10 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
 }
 
 std::string FilePicker::GetRawString() {
-    return uiEntryText(static_cast<uiEntry*>(m_widget));
+    char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
+    std::string str = text;
+    uiFreeText(text);
+    return str;
 }
 
 void FilePicker::SetConfig(const rapidjson::Value& config) {
@@ -232,7 +235,10 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
 }
 
 std::string DirPicker::GetRawString() {
-    return uiEntryText(static_cast<uiEntry*>(m_widget));
+    char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
+    std::string str = text;
+    uiFreeText(text);
+    return str;
 }
 
 void DirPicker::SetConfig(const rapidjson::Value& config) {
@@ -394,7 +400,10 @@ TextBox::TextBox(uiBox* box, const rapidjson::Value& j)
 }
 
 std::string TextBox::GetRawString() {
-    return uiEntryText(static_cast<uiEntry*>(m_widget));
+    char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
+    std::string str = text;
+    uiFreeText(text);
+    return str;
 }
 
 void TextBox::SetConfig(const rapidjson::Value& config) {

@@ -82,26 +82,17 @@ TEST(MainFrameTest, InvalidHelp) {
 }
 */
 
-int unitTestSetup()
-{
+int unitTestSetup() {
     uiInitOptions options;
     const char *err;
     uiTab *tab;
 
     memset(&options, 0, sizeof (uiInitOptions));
-    err = uiInit(&options);
-    if (err != NULL) {
-        fprintf(stderr, "error initializing libui: %s", err);
-        uiFreeInitError(err);
-        return 1;
-    }
-	return 0;
+    EXPECT_TRUE(uiInit(&options) == NULL);
+    return 0;
 }
 
-int unitTestTeardown(MainFrame& main_frame)
-{
-    uiMainSteps();
-    uiMainStep(1);
+int unitTestTeardown(MainFrame& main_frame) {
     main_frame.Close();
     uiUninit();
     return 0;

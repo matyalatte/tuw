@@ -193,7 +193,8 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
 
     CopyBinary(old_io, new_io, m_exe_size);
 
-    if (ftell(old_io) != Length(old_io)) {
+    uint32_t pos = ftell(old_io);
+    if (pos != Length(old_io)) {
         std::string magic = ReadMagic(old_io);
         if (magic != "JSON") {
             fclose(old_io);
