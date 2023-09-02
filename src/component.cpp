@@ -162,10 +162,10 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
 
     uiGrid* grid = uiNewGrid();
     uiGridAppend(grid, uiControl(button),
-        0, 0, 1, 1,
-        0, uiAlignFill, 0, uiAlignFill);
-    uiGridAppend(grid, uiControl(entry),
         1, 0, 1, 1,
+        0, uiAlignEnd, 0, uiAlignFill);
+    uiGridAppend(grid, uiControl(entry),
+        0, 0, 1, 1,
         1, uiAlignFill, 0, uiAlignFill);
 
     uiBoxAppend(box, uiControl(grid), 0);
@@ -206,6 +206,7 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
     const char* value = json_utils::GetString(j, "default", "");
     const char* empty_message = json_utils::GetString(j, "empty_message", "");
     const char* button_label = json_utils::GetString(j, "button", "Browse");
+
     uiEntry* entry = uiNewEntry();
     uiEntryOnFilesDropped(entry, onFilesDropped, NULL);
     uiEntrySetAcceptDrops(entry, 1);
@@ -217,10 +218,10 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
 
     uiGrid* grid = uiNewGrid();
     uiGridAppend(grid, uiControl(button),
-        0, 0, 1, 1,
-        0, uiAlignFill, 0, uiAlignFill);
-    uiGridAppend(grid, uiControl(entry),
         1, 0, 1, 1,
+        0, uiAlignEnd, 0, uiAlignFill);
+    uiGridAppend(grid, uiControl(entry),
+        0, 0, 1, 1,
         1, uiAlignFill, 0, uiAlignFill);
 
     uiBoxAppend(box, uiControl(grid), 0);

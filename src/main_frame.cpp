@@ -217,6 +217,7 @@ void MainFrame::UpdatePanel(int definition_id) {
         uiControlDestroy(uiControl(m_box));
     }
     m_box = uiNewVerticalBox();
+    uiBoxSetPadded(m_box, 1);
 
     // put components
     m_components.clear();
@@ -224,13 +225,15 @@ void MainFrame::UpdatePanel(int definition_id) {
     Component* new_comp = nullptr;
     if (sub_definition["components"].Size() > 0) {
         for (rapidjson::Value& c : sub_definition["components"].GetArray()) {
-            new_comp = Component::PutComponent(m_box, c);
+            uiBox* priv_box = uiNewVerticalBox();
+            new_comp = Component::PutComponent(priv_box, c);
             if (new_comp == nullptr) {
                 ShowErrorDialog("Unknown component type detected. This is unexpected.");
             } else {
                 new_comp->SetConfig(m_config);
                 m_components.push_back(new_comp);
             }
+        uiBoxAppend(m_box, uiControl(priv_box), 0);
         }
     }
 

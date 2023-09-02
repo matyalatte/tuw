@@ -21,9 +21,7 @@ Here is the list of changes from the main branch.
 - User-friendly workflows. (Just by running meson via command-line!)
 - Float pickers are unavaiable.
 - The `tooltip` option is unavailable.
-- The `placeholder` option is unavailable.
-- The layout is a little bit ugly.
-- Haven't beed tested yet.
+- Haven't beed tested enough.
 
 ## Only 600KB for a portable GUI!
 
