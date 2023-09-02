@@ -181,8 +181,6 @@ int main(int argc, char* argv[], char* envp[]) {
         return 1;
     }
 
-    std::string exe_path = env_utils::GetExecutablePath();
-
     std::string json_path = "";
     std::string new_exe_path = "";
     bool force = false;

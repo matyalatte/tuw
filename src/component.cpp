@@ -161,12 +161,12 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     uiButtonOnClicked(button, onOpenFileClicked, entry);
 
     uiGrid* grid = uiNewGrid();
-    uiGridAppend(grid, uiControl(button),
-        1, 0, 1, 1,
-        0, uiAlignEnd, 0, uiAlignFill);
     uiGridAppend(grid, uiControl(entry),
         0, 0, 1, 1,
         1, uiAlignFill, 0, uiAlignFill);
+    uiGridAppend(grid, uiControl(button),
+        1, 0, 1, 1,
+        0, uiAlignFill, 0, uiAlignFill);
 
     uiBoxAppend(box, uiControl(grid), 0);
     // libui doesn't support tooltips yet.
@@ -217,12 +217,12 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
     uiButtonOnClicked(button, onOpenFolderClicked, entry);
 
     uiGrid* grid = uiNewGrid();
-    uiGridAppend(grid, uiControl(button),
-        1, 0, 1, 1,
-        0, uiAlignEnd, 0, uiAlignFill);
     uiGridAppend(grid, uiControl(entry),
         0, 0, 1, 1,
         1, uiAlignFill, 0, uiAlignFill);
+    uiGridAppend(grid, uiControl(button),
+        1, 0, 1, 1,
+        0, uiAlignFill, 0, uiAlignFill);
 
     uiBoxAppend(box, uiControl(grid), 0);
     // libui doesn't support tooltips yet.

@@ -156,13 +156,13 @@ void MainFrame::OpenURL(int id) {
             // scheme should be http or https
             if (scheme == "file") {
                 std::string msg = "Use 'file' type for a path, not 'url' type. (" + url + ")";
-                PrintFmt("%sError: %s\n", tag, msg.c_str());
+                PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
                 ShowErrorDialog(msg);
                 return;
             } else if (scheme != "https" && scheme != "http") {
                 std::string msg = "Unsupported scheme detected. "
                                   "It should be http or https. (" + scheme + ")";
-                PrintFmt("%sError: %s\n", tag, msg.c_str());
+                PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
                 ShowErrorDialog(msg);
                 return;
             }
