@@ -137,6 +137,12 @@ static void onOpenFileClicked(uiButton *b, void *data)
     uiFreeText(filename);
 }
 
+static void onFilesDropped(uiEntry *e, int count, char** names, void *data)
+{
+    if (count < 1) return;
+    uiEntrySetText(e, names[0]);
+}
+
 // File Picker
 FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
@@ -146,7 +152,10 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     const char* button_label = json_utils::GetString(j, "button", "Browse");
 
     uiEntry* entry = uiNewEntry();
+    uiEntryOnFilesDropped(entry, onFilesDropped, NULL);
+    uiEntrySetAcceptDrops(entry, 1);
     uiEntrySetText(entry, value);
+    uiEntrySetPlaceholder(entry, empty_message);
 
     uiButton* button = uiNewButton(button_label);
     uiButtonOnClicked(button, onOpenFileClicked, entry);
@@ -198,7 +207,10 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
     const char* empty_message = json_utils::GetString(j, "empty_message", "");
     const char* button_label = json_utils::GetString(j, "button", "Browse");
     uiEntry* entry = uiNewEntry();
+    uiEntryOnFilesDropped(entry, onFilesDropped, NULL);
+    uiEntrySetAcceptDrops(entry, 1);
     uiEntrySetText(entry, value);
+    uiEntrySetPlaceholder(entry, empty_message);
 
     uiButton* button = uiNewButton(button_label);
     uiButtonOnClicked(button, onOpenFolderClicked, entry);
@@ -372,6 +384,7 @@ TextBox::TextBox(uiBox* box, const rapidjson::Value& j)
     const char* empty_message = json_utils::GetString(j, "empty_message", "");
     uiEntry* entry = uiNewEntry();
     uiEntrySetText(entry, value);
+    uiEntrySetPlaceholder(entry, empty_message);
     uiBoxAppend(box, uiControl(entry), 0);
     // libui doesn't support tooltips yet.
     // if (j.HasMember("tooltip"))
