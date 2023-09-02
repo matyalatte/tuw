@@ -1,11 +1,11 @@
 #pragma once
 #include <string>
 
-namespace stdpath {
+namespace env_utils {
 #ifdef _WIN32
-    void InitStdPath(wchar_t* envp[]);
+    void InitEnv(wchar_t* envp[]);
 #else
-    void InitStdPath(char* envp[]);
+    void InitEnv(char* envp[]);
 #endif
     std::string GetExecutablePath();
     bool FileExists(const std::string& path);

@@ -1,4 +1,4 @@
-#include "std_path.h"
+#include "env_utils.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -21,10 +21,10 @@
 #endif
 #endif  // _WIN32
 
-namespace stdpath {
+namespace env_utils {
 
 #ifdef _WIN32
-    void InitStdPath(wchar_t* envp[]) {
+    void InitEnv(wchar_t* envp[]) {
         while(*envp) {
             _wputenv(*envp);
             envp++;
@@ -96,7 +96,7 @@ namespace stdpath {
     }
 
 #else  // _WIN32
-    void InitStdPath(char* envp[]) {
+    void InitEnv(char* envp[]) {
         while(*envp) {
             putenv(*envp);
             envp++;

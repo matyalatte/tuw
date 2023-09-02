@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 #include "main_frame.h"
 #include "string_utils.h"
-#include "std_path.h"
+#include "env_utils.h"
 
 std::string json_file;
 std::string config_ascii;
@@ -29,7 +29,7 @@ int main(int argc, char* argv[], char* envp[]) {
     config_utf = argv[3];
 #endif
 
-    stdpath::InitStdPath(envp);
+    env_utils::InitEnv(envp);
 
     return RUN_ALL_TESTS();
 }

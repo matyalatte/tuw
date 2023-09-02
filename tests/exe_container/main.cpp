@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 #include "exe_container.h"
 #include "string_utils.h"
-#include "std_path.h"
+#include "env_utils.h"
 
 std::string json_file;
 
@@ -22,9 +22,9 @@ int main(int argc, char* argv[], char* envp[]) {
     json_file = argv[1];
 #endif
 
-    stdpath::InitStdPath(envp);
-    std::string exe_path = stdpath::GetExecutablePath();
-    stdpath::SetCwd(stdpath::GetDirectory(exe_path));
+    env_utils::InitEnv(envp);
+    std::string exe_path = env_utils::GetExecutablePath();
+    env_utils::SetCwd(env_utils::GetDirectory(exe_path));
 
     return RUN_ALL_TESTS();
 }

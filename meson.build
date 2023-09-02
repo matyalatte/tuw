@@ -87,7 +87,7 @@ scr_sources += [
     'src/component.cpp',
     'src/exe_container.cpp',
     'src/json_utils.cpp',
-    'src/std_path.cpp',
+    'src/env_utils.cpp',
     'src/exec.cpp',
     'src/string_utils.cpp'
 ]

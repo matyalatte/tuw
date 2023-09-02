@@ -1,5 +1,9 @@
 #include "string_utils.h"
 
+int StartsWith(const char *str, const char* pattern) {
+    return strncmp(str, pattern, strlen(pattern));
+}
+
 #ifdef _WIN32
 #include "windows/uipriv_windows.hpp"
 

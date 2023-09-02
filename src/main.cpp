@@ -6,7 +6,7 @@
 #include "main_frame.h"
 #include "map_as_vec.hpp"
 #include "exe_container.h"
-#include "std_path.h"
+#include "env_utils.h"
 #include "string_utils.h"
 
 int main_app()
@@ -31,7 +31,7 @@ int main_app()
 
 
 bool AskOverwrite(const std::string& path) {
-    if (!stdpath::FileExists(path)) return true;
+    if (!env_utils::FileExists(path)) return true;
     PrintFmt("Overwrite %s? (y/n)\n", path.c_str());
     char ans;
     int ret = scanf("%c", &ans);
@@ -166,7 +166,7 @@ int main(int argc, char* argv[], char* envp[]) {
         args.push_back(argv[i]);
     }
 #endif
-    stdpath::InitStdPath(envp);
+    env_utils::InitEnv(envp);
 
     // Launch GUI if no args.
     if (argc == 1) return main_app();
@@ -179,7 +179,7 @@ int main(int argc, char* argv[], char* envp[]) {
         return 1;
     }
 
-    std::string exe_path = stdpath::GetExecutablePath();
+    std::string exe_path = env_utils::GetExecutablePath();
 
     std::string json_path = "";
     std::string new_exe_path = "";
@@ -227,8 +227,8 @@ int main(int argc, char* argv[], char* envp[]) {
     if (new_exe_path == "")
         new_exe_path = exe_path + ".new";
 
-    json_path = stdpath::GetFullPath(json_path);
-    new_exe_path = stdpath::GetFullPath(new_exe_path);
+    json_path = env_utils::GetFullPath(json_path);
+    new_exe_path = env_utils::GetFullPath(new_exe_path);
 
     if (json_path == exe_path || new_exe_path == exe_path) {
         PrintUsage();

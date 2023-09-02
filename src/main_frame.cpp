@@ -1,7 +1,7 @@
 #include "main_frame.h"
 #include "rapidjson/error/en.h"
 #include "exe_container.h"
-#include "std_path.h"
+#include "env_utils.h"
 #include "exec.h"
 #include "string_utils.h"
 
@@ -10,15 +10,15 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     PrintFmt("%s v%s by %s\n", scr_constants::TOOL_NAME,
               scr_constants::VERSION, scr_constants::AUTHOR);
 
-    std::string exe_path = stdpath::GetExecutablePath();
-    stdpath::SetCwd(stdpath::GetDirectory(exe_path));
+    std::string exe_path = env_utils::GetExecutablePath();
+    env_utils::SetCwd(env_utils::GetDirectory(exe_path));
 
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
     json_utils::JsonResult result = { true };
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
 
-        bool exists_external_json = stdpath::FileExists("gui_definition.json");
+        bool exists_external_json = env_utils::FileExists("gui_definition.json");
         ExeContainer exe;
 
         result = exe.Read(exe_path);
@@ -150,31 +150,31 @@ void MainFrame::OpenURL(int id) {
     if (type == "url") {
         url = help["url"].GetString();
         tag = "[OpenURL] ";
-        /*
-        int pos = url.Find("://");
-        if (pos !=wxNOT_FOUND) {
-            wxString scheme = url.Left(pos);
+
+        int pos = url.find("://");
+        if (pos != std::string::npos) {
+            std::string scheme = url.substr(0, pos);
             // scheme should be http or https
-            if (scheme.IsSameAs("file", false)) {
-                wxString msg = "Use 'file' type for a path, not 'url' type. (" + url + ")";
-                PRINT_FMT("%sError: %s\n", tag, msg);
+            if (scheme == "file") {
+                std::string msg = "Use 'file' type for a path, not 'url' type. (" + url + ")";
+                PrintFmt("%sError: %s\n", tag, msg.c_str());
                 ShowErrorDialog(msg);
                 return;
-            } else if (!scheme.IsSameAs("https", false) && !scheme.IsSameAs("http", false)) {
-                wxString msg = "Unsupported scheme detected. "
-                                    "It should be http or https. (" + scheme + ")";
-                PRINT_FMT("%sError: %s\n", tag, msg);
+            } else if (scheme != "https" && scheme != "http") {
+                std::string msg = "Unsupported scheme detected. "
+                                  "It should be http or https. (" + scheme + ")";
+                PrintFmt("%sError: %s\n", tag, msg.c_str());
                 ShowErrorDialog(msg);
                 return;
             }
         } else {
             url = "https://" + url;
         }
-        */
+
     } else if (type == "file") {
         url = help["path"].GetString();
         tag = "[OpenFile] ";
-        if (!stdpath::FileExists(url)) {
+        if (!env_utils::FileExists(url)) {
             std::string msg = "File does not exist. (" + url + ")";
             PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
             ShowErrorDialog(msg);
@@ -188,7 +188,7 @@ void MainFrame::OpenURL(int id) {
         url = "file:" + url;
     }
 
-    int status = stdpath::OpenURL(url);
+    int status = env_utils::OpenURL(url);
     if (status < 0) {
         std::string msg = "Failed to open a " + type + " by an unexpected error.";
         PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
@@ -285,9 +285,9 @@ std::string MainFrame::GetCommand() {
         if (id == CMD_ID_PERCENT) {
             cmd += "%";
         } else if (id == CMD_ID_CURRENT_DIR) {
-            cmd += stdpath::GetCwd();
+            cmd += env_utils::GetCwd();
         } else if (id == CMD_ID_HOME_DIR) {
-            cmd += stdpath::GetHome();
+            cmd += env_utils::GetHome();
         } else {
             cmd += comp_strings[id];
         }
