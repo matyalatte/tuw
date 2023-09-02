@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <limits.h>
+#include <vector>
+#include <cstring>
 #ifndef PATH_MAX
     #define PATH_MAX  260
 #endif
@@ -119,9 +121,56 @@ namespace env_utils {
         return (stat (path.c_str(), &buffer) == 0);
     }
 
-    // Todo: support GetFullPath()
+    static void ResolvePath(std::string path, std::vector<std::string>& segments) {
+        size_t size = path.length();
+        char* buf = new char[size + 1];
+        buf[size] = 0;
+        memcpy(buf, path.c_str(), size);
+        size_t pos = 0;
+        for (size_t i = 0; i < size; i++) {
+            if (buf[i] == "/"[0]) {
+                buf[i] = 0;
+                std::string seg = &buf[pos];
+                if (seg == "..") {
+                    if (!segments.empty())
+                        segments.pop_back();
+                } else if (seg != ".") {
+                    segments.push_back(seg);
+                }
+                pos = i + 1;
+            }
+        }
+        segments.push_back(&buf[pos]);
+        delete[] buf;
+    }
+
+    static std::string GetFullPathOriginal(const std::string& path) {
+        size_t size = path.length();
+        if (size == 0)
+            return "/";
+        if (path[0] == "/"[0])
+            return path;
+
+        std::vector<std::string> segments;
+        ResolvePath(GetCwd(), segments);
+        ResolvePath(path, segments);
+
+        std::string fullpath;
+        for(const std::string& seg: segments) {
+            fullpath += seg + "/";
+        }
+        return fullpath.substr(0, fullpath.length() - 1);
+    }
+
     std::string GetFullPath(const std::string& path) {
-        return path;
+        // try the native API first.
+        char* fullpath = realpath(path.c_str(), NULL);
+
+        if (fullpath == NULL)
+            return GetFullPathOriginal(path);
+        std::string ret = fullpath;
+        free(fullpath);
+        return ret;
     }
 
     std::string GetCwd() {

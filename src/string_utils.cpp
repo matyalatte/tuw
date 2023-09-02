@@ -1,12 +1,16 @@
 #include "string_utils.h"
 
+#ifdef _WIN32
+#include "windows/uipriv_windows.hpp"
+#else
+#include <cstring>
+#endif
+
 int StartsWith(const char *str, const char* pattern) {
     return strncmp(str, pattern, strlen(pattern));
 }
 
 #ifdef _WIN32
-#include "windows/uipriv_windows.hpp"
-
 std::string UTF16toUTF8(const wchar_t* str) {
     char* uchar = toUTF8(str);
     std::string ustr = uchar;

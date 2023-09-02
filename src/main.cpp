@@ -167,6 +167,8 @@ int main(int argc, char* argv[], char* envp[]) {
     }
 #endif
     env_utils::InitEnv(envp);
+    std::string exe_path = env_utils::GetExecutablePath();
+    env_utils::SetCwd(env_utils::GetDirectory(exe_path));
 
     // Launch GUI if no args.
     if (argc == 1) return main_app();

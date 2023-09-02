@@ -11,7 +11,6 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
               scr_constants::VERSION, scr_constants::AUTHOR);
 
     std::string exe_path = env_utils::GetExecutablePath();
-    env_utils::SetCwd(env_utils::GetDirectory(exe_path));
 
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
