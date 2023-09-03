@@ -55,8 +55,10 @@ std::string g_log_buffer = "";
 
 void SetLogEntry(void* log_entry) {
     g_log_entry = static_cast<uiMultilineEntry*>(log_entry);
-    uiMultilineEntrySetText(g_log_entry, g_log_buffer.c_str());
-    g_log_buffer = "";
+    if (g_log_entry != NULL) {
+        uiMultilineEntrySetText(g_log_entry, g_log_buffer.c_str());
+        g_log_buffer = "";
+    }
 }
 
 void PrintFmt(const char* fmt, ...) {

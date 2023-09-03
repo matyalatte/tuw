@@ -95,6 +95,10 @@ int unitTestSetup() {
 int unitTestTeardown(MainFrame& main_frame) {
     main_frame.Close();
     uiUninit();
+#ifdef __linux__
+    // Need to reset the pointer to the log.
+    SetLogEntry(NULL);
+#endif
     return 0;
 }
 
