@@ -44,10 +44,10 @@ jobs:
 
             ## Notes
 
-            - The linux builds only support Ubuntu 20.04 or later due to the glibc dependencies.
-              Build the executable by yourself if you want to use it on other linux distros.
+            - Linux build only supports Ubuntu 20.04 or later due to the glibc dependencies.
+            - Linux build and Windows build only support x64 architecture. (macOS build supports ARM chips like Apple M1.)
 
-            - The released builds does NOT support ARM devices.
+            > [Build the executable](https://github.com/matyalatte/Simple-Command-Runner/blob/libui/docs/Building.md) by yourself if you want to use it on unsupported devices.
           draft: true
           prerelease: false
 
