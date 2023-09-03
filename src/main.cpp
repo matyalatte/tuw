@@ -22,8 +22,10 @@ int main_app() {
         return 1;
     }
 
-    MainFrame main_frame = MainFrame();
+    // Need this for uiMainStep(1)
+    uiMainSteps();
 
+    MainFrame main_frame = MainFrame();
     uiMain();
     return 0;
 }

@@ -14,7 +14,7 @@
 
 ## Install Meson and Ninja
 
-You can install meson and ninja via apt. (`sudo apt install meson ninja`)
+You can install meson and ninja via apt. (`sudo apt install meson ninja`)  
 
 > If you are a Python user, you can also get them via pip. (`sudo pip3 install meson ninja`)
 

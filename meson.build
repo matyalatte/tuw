@@ -13,10 +13,6 @@ project('SimpleCommandRunner', ['c', 'cpp'],
         'cpp_winlibs=',                 # likewise as with c_winlibs
     ],)
 
-libui_dep = dependency('libui', fallback : ['libui', 'libui_dep'])
-rapidjson_dep = dependency('rapidjson', fallback : ['rapidjson', 'rapidjson_dep'])
-subprocess_dep = dependency('subprocess', fallback : ['subprocess', 'subprocess_dep'])
-
 scr_sources = []
 scr_manifest = []
 scr_link_args = []
@@ -48,9 +44,16 @@ if scr_OS == 'windows'
         ]
     endif
 elif scr_OS == 'darwin'
+    add_languages('objc', required: true)
+    languages = ['c', 'cpp', 'objc']
     macosx_version_min = '-mmacosx-version-min=10.9'
-    add_project_arguments(macosx_version_min, language: ['c', 'cpp'])
-    add_project_link_arguments(macosx_version_min, language: ['c', 'cpp'])
+    add_project_arguments(macosx_version_min, language: languages)
+    add_project_link_arguments(macosx_version_min, language: languages)
+    if get_option('macos_build_universal')
+        arch = ['-arch', 'x86_64', '-arch', 'arm64']
+        add_global_arguments(arch, language: languages)
+        add_global_link_arguments(arch, language: languages)
+    endif
     if not scr_compiler.startswith('clang')
         warning('This project has NOT been tested with your compiler. (' + scr_compiler + ')')
     endif
@@ -81,6 +84,10 @@ if scr_OS != 'windows'
         endif
     endif
 endif
+
+libui_dep = dependency('libui', fallback : ['libui', 'libui_dep'])
+rapidjson_dep = dependency('rapidjson', fallback : ['rapidjson', 'rapidjson_dep'])
+subprocess_dep = dependency('subprocess', fallback : ['subprocess', 'subprocess_dep'])
 
 scr_sources += [
     'src/main_frame.cpp',

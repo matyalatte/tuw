@@ -10,6 +10,17 @@ else
     build_type="Release"
     options="-Dbuildtype=release -Dlibui:buildtype=release -Db_ndebug=true -Dcpp_rtti=false -Db_lto=true"
 fi
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # You can build universal binaries with the secound argument like "bash build.sh Release Universal"
+    if [ "$2" = "Universal" ]; then
+        options="${options} -Dmacos_build_universal=true"
+        echo "Universal build: On"
+    else
+        echo "Universal build: Off"
+    fi
+fi
+
 echo "Build type: ${build_type}"
 
 common_opt="-Ddefault_library=static -Dlibui:default_library=static

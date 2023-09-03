@@ -82,7 +82,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
         JsonLoadFailed(result.msg, m_definition);
 
     UpdatePanel(definition_id);
-    // Don't use Fit() before uiMain();
+    Fit();
 }
 
 static int OnClosing(uiWindow *w, void *data) {

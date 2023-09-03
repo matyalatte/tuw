@@ -1,7 +1,7 @@
 #!/bin/bash
 # Run tests.
 
-# You can specify build type as an argument like "bash build.sh Debug"
+# You can specify build type as an argument like "bash test.sh Debug"
 if [ "$1" = "Debug" ]; then
     build_type="Debug"
     options="-Dbuildtype=debug -Dlibui:buildtype=debug"
@@ -10,6 +10,16 @@ else
     options="-Dbuildtype=release -Dlibui:buildtype=release -Db_ndebug=true -Dcpp_rtti=false -Db_lto=true"
 fi
 echo "Build type: ${build_type}"
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # You can build universal binaries with the secound argument like "bash test.sh Release Universal"
+    if [ "$2" = "Universal" ]; then
+        options="${options} -Dmacos_build_universal=true"
+        echo "Universal build: On"
+    else
+        echo "Universal build: Off"
+    fi
+fi
 
 common_opt="-Ddefault_library=static -Dlibui:default_library=static
  -Dbuild_exe=false -Dbuild_test=true

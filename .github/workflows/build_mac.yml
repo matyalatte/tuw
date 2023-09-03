@@ -28,7 +28,7 @@ jobs:
 
       - name: build exe
         run: |
-          bash shell_scripts/build.sh
+          bash shell_scripts/build.sh Release Universal
           
       - name: Archive Release
         run: |

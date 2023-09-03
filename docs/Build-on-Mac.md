@@ -25,6 +25,10 @@ The executable will be generated in `build\Release\`.
 
 If you want a debug build, run `bash shell_scripts/build.sh Debug` on the terminal.  
 
+## Unversal Binaries
+
+If you want to build universal binaries, run `bash shell_scripts/build.sh Release Universal` on the terminal.  
+
 ## Compression
 
 You can use [UPX](https://github.com/upx/upx) if you want smaller exe.  
@@ -36,4 +40,4 @@ upx SimpleCommandRunner --best
 
 ## Test
 
-If you want to build tests, type `bash test.sh` or `bash test.sh Debug` on the terminal.
+If you want to build tests, type `bash test.sh` or `bash test.sh Debug` on the terminal.  
