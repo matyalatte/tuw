@@ -51,9 +51,12 @@ void PrintFmt(const char* fmt, ...) {
 #include <stdarg.h>
 #include "ui.h"
 uiMultilineEntry* g_log_entry = NULL;
+std::string g_log_buffer = "";
 
 void SetLogEntry(void* log_entry) {
     g_log_entry = static_cast<uiMultilineEntry*>(log_entry);
+    uiMultilineEntrySetText(g_log_entry, g_log_buffer.c_str());
+    g_log_buffer = "";
 }
 
 void PrintFmt(const char* fmt, ...) {
@@ -67,8 +70,11 @@ void PrintFmt(const char* fmt, ...) {
     buf[size] = 0;
     vsnprintf(buf, size + 1, fmt, va);
     printf("%s", buf);
-    if (g_log_entry != NULL)
+    if (g_log_entry == NULL) {
+        g_log_buffer += buf;
+    } else {
         uiMultilineEntryAppend(g_log_entry, buf);
+    }
     delete[] buf;
     va_end(va);
 }

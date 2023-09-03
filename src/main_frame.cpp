@@ -10,6 +10,8 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     PrintFmt("%s v%s by %s\n", scr_constants::TOOL_NAME,
               scr_constants::VERSION, scr_constants::AUTHOR);
 
+    m_box = NULL;
+    m_log_entry = NULL;
     std::string exe_path = env_utils::GetExecutablePath();
 
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
@@ -79,6 +81,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
         JsonLoadFailed(result.msg, m_definition);
 
     UpdatePanel(definition_id);
+    // Don't use Fit() before uiMain();
 }
 
 static int OnClosing(uiWindow *w, void *data) {
@@ -93,7 +96,7 @@ static int OnShouldQuit(void *data) {
 }
 
 void MainFrame::CreateFrame() {
-    m_mainwin = uiNewWindow(scr_constants::TOOL_NAME, 400, 0, 1);
+    m_mainwin = uiNewWindow(scr_constants::TOOL_NAME, 400, 1, 1);
     uiWindowOnClosing(m_mainwin, OnClosing, NULL);
     uiOnShouldQuit(OnShouldQuit, m_mainwin);
     uiControlShow(uiControl(m_mainwin));
@@ -211,10 +214,17 @@ void MainFrame::UpdatePanel(int definition_id) {
     const char* window_name = json_utils::GetString(sub_definition, "window_name", "Simple Command Runner");
     uiWindowSetTitle(m_mainwin, window_name);
 
-    if (!m_box) {
-        uiControlSetParent(uiControl(m_box), NULL);
-        uiControlDestroy(uiControl(m_box));
+#ifdef __linux__
+    if (m_log_entry == NULL) {
+        m_log_entry = uiNewMultilineEntry();
+        uiMultilineEntrySetReadOnly(m_log_entry, 1);
+        SetLogEntry(m_log_entry);
+    } else {
+        uiBoxDelete(m_box, uiBoxNumChildren(m_box) - 1);
     }
+#endif
+
+    uiBox* old_box = m_box;
     m_box = uiNewVerticalBox();
     uiBoxSetPadded(m_box, 1);
 
@@ -243,16 +253,16 @@ void MainFrame::UpdatePanel(int definition_id) {
     uiBoxAppend(m_box, uiControl(m_run_button), 0);
 
 #ifdef __linux__
-    // Todo: Don't recreate the log frame.
     // Todo: Make the log frame larger.
-    uiMultilineEntry* log_entry = uiNewMultilineEntry();
-    uiMultilineEntrySetReadOnly(log_entry, 1);
-    uiBoxAppend(m_box, uiControl(log_entry), 1);
-    SetLogEntry(log_entry);
+    uiBoxAppend(m_box, uiControl(m_log_entry), 1);
 #endif
 
     uiWindowSetChild(m_mainwin, uiControl(m_box));
     uiWindowSetMargined(m_mainwin, 1);
+
+    if (old_box != NULL) {
+        uiControlDestroy(uiControl(old_box));
+    }
 }
 
 void MainFrame::Fit() {
@@ -260,7 +270,12 @@ void MainFrame::Fit() {
     int width;
     int height;
     uiWindowContentSize(m_mainwin, &width, &height);
-    uiWindowSetContentSize(m_mainwin, width, 0);
+    uiWindowSetContentSize(m_mainwin, width, 1);
+#ifdef __linux__
+    // Expand the log entry.
+    uiWindowContentSize(m_mainwin, &width, &height);
+    uiWindowSetContentSize(m_mainwin, width, height + 100);
+#endif
 }
 
 // Make command string
