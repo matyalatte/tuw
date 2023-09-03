@@ -12,6 +12,7 @@ fi
 echo "Build type: ${build_type}"
 
 common_opt="-Ddefault_library=static -Dlibui:default_library=static
+ -Dbuild_exe=false -Dbuild_test=true
  -Dlibui:tests=false -Dlibui:examples=false -Db_coverage=true"
 
 # Build and test
@@ -19,4 +20,5 @@ pushd $(dirname "$0")/..
     meson setup build/${build_type}-Test ${common_opt} ${options} || exit 1
     cd build/${build_type}-Test
     meson compile -v || exit 1
+    meson test -v || exit 1
 popd
