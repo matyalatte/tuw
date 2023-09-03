@@ -10,6 +10,15 @@ int StartsWith(const char *str, const char* pattern) {
     return strncmp(str, pattern, strlen(pattern));
 }
 
+static const uint32_t FNV_OFFSET_BASIS_32 = 2166136261U;
+static const uint32_t FNV_PRIME_32 = 16777619U;
+
+uint32_t Fnv1Hash32(const std::string& str) {
+    uint32_t hash = FNV_OFFSET_BASIS_32;
+    for (const char& c : str) hash = (FNV_PRIME_32 * hash) ^ c;
+    return hash;
+}
+
 #ifdef _WIN32
 std::string UTF16toUTF8(const wchar_t* str) {
     char* uchar = toUTF8(str);
@@ -56,10 +65,7 @@ class Logger {
     std::string m_log_buffer;
 
  public:
-    Logger() {
-        m_log_entry = NULL;
-        m_log_buffer = "";
-    }
+    Logger() : m_log_entry(NULL), m_log_buffer("") {}
     ~Logger() {}
 
     void SetLogEntry(void* log_entry) {

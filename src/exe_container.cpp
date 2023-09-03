@@ -5,6 +5,8 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/error/en.h"
 
+#include "string_utils.h"
+
 static uint32_t ReadUint32(FILE* io) {
     unsigned char int_as_bin[4];
     fread(int_as_bin, 1, 4, io);
@@ -76,15 +78,6 @@ static std::string ReadMagic(FILE* io) {
     magic[4] = 0;
     fread(magic, 1, 4, io);
     return std::string(magic);
-}
-
-static const uint32_t FNV_OFFSET_BASIS_32 = 2166136261U;
-static const uint32_t FNV_PRIME_32 = 16777619U;
-
-static uint32_t Fnv1Hash32(const std::string& str) {
-    uint32_t hash = FNV_OFFSET_BASIS_32;
-    for (const char& c : str) hash = (FNV_PRIME_32 * hash) ^ c;
-    return hash;
 }
 
 static uint32_t Length(FILE* io) {

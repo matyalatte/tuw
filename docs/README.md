@@ -15,13 +15,13 @@ But it'll be the best GUI library for Simple Command Runner in the future.
   
 Here is the list of changes from the main branch.
 
-- EXE became smaller. (600KB for the windows build and 300KB for the unix builds!)  
-- Compilation time became faster.  
-- Support older build systems. (No need CMake 3.25!)
-- User-friendly workflows. (Just by running meson via command-line!)
-- Float pickers are unavaiable.
-- The `tooltip` option is unavailable.
-- Haven't beed tested enough.
+-   EXE became smaller. (600KB for the windows build and 300KB for the unix builds!)
+-   Compilation time became faster.
+-   Support older build systems. (No need CMake 3.25!)
+-   User-friendly workflows. (Just by running meson via command-line!)
+-   Float pickers are unavaiable.
+-   The `tooltip` option is unavailable.
+-   Haven't beed tested enough.
 
 ## Only 600KB for a portable GUI!
 

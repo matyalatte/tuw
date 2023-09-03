@@ -1,5 +1,6 @@
 #include "component.h"
 #include "json_utils.h"
+#include "string_utils.h"
 
 enum ComponentType: int {
     COMP_UNKNOWN = 0,
@@ -15,15 +16,6 @@ enum ComponentType: int {
     COMP_FLOAT,
     COMP_MAX
 };
-
-static const uint32_t FNV_OFFSET_BASIS_32 = 2166136261U;
-static const uint32_t FNV_PRIME_32 = 16777619U;
-
-static uint32_t Fnv1Hash32(const std::string& str) {
-    uint32_t hash = FNV_OFFSET_BASIS_32;
-    for (const char& c : str) hash = (FNV_PRIME_32 * hash) ^ c;
-    return hash;
-}
 
 // Base class for GUI components (file picker, combo box, etc.)
 Component::Component(const rapidjson::Value& j) {

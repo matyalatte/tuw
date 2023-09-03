@@ -121,7 +121,7 @@ namespace env_utils {
         return (stat (path.c_str(), &buffer) == 0);
     }
 
-    static void ResolvePath(std::string path, std::vector<std::string>& segments) {
+    static void ResolvePath(const std::string& path, std::vector<std::string>& segments) {
         size_t size = path.length();
         char* buf = new char[size + 1];
         buf[size] = 0;
@@ -149,6 +149,7 @@ namespace env_utils {
         if (size == 0)
             return "/";
         if (path[0] == "/"[0])
+            // Todo: might not be a fullpath (e.g. /a/../b/./c)
             return path;
 
         std::vector<std::string> segments;
