@@ -14,5 +14,5 @@ namespace env_utils {
     std::string GetCwd();
     void SetCwd(const std::string& path);
     std::string GetHome();
-}  // namespace stdpath
+}  // namespace env_utils
 

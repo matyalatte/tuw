@@ -16,7 +16,7 @@ class Component {
     bool m_add_quotes;
 
  public:
-    Component(const rapidjson::Value& j);
+    explicit Component(const rapidjson::Value& j);
     ~Component() {}
     virtual std::string GetRawString() { return "";}
     std::string GetString();

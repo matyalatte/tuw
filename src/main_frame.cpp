@@ -11,14 +11,15 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
               scr_constants::VERSION, scr_constants::AUTHOR);
 
     m_box = NULL;
+#ifdef __linux__
     m_log_entry = NULL;
+#endif
     std::string exe_path = env_utils::GetExecutablePath();
 
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
     json_utils::JsonResult result = { true };
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
-
         bool exists_external_json = env_utils::FileExists("gui_definition.json");
         ExeContainer exe;
 
@@ -31,7 +32,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
                     const char* msg =
                         "WARNING: Using embedded JSON. gui_definition.json was ignored.\n";
                     PrintFmt("[LoadDefinition] %s", msg);
-                    //ShowSuccessDialog(msg, "Warning");
+                    // ShowSuccessDialog(msg, "Warning");
                 }
             } else {
                 PrintFmt("[LoadDefinition] Embedded JSON not found.\n");
@@ -85,14 +86,14 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 }
 
 static int OnClosing(uiWindow *w, void *data) {
-	uiQuit();
-	return 1;
+    uiQuit();
+    return 1;
 }
 
 static int OnShouldQuit(void *data) {
-	uiWindow *mainwin = uiWindow(data);
-	uiControlDestroy(uiControl(mainwin));
-	return 1;
+    uiWindow *mainwin = uiWindow(data);
+    uiControlDestroy(uiControl(mainwin));
+    return 1;
 }
 
 void MainFrame::CreateFrame() {
@@ -121,7 +122,6 @@ static void OnOpenURL(uiMenuItem *item, uiWindow *w, void *data) {
 }
 
 void MainFrame::CreateMenu() {
-    
     uiMenuItem* item;
     uiMenu* menu = uiNewMenu("Menu");
     if (m_definition["gui"].Size() > 1) {
@@ -211,7 +211,8 @@ void MainFrame::UpdatePanel(int definition_id) {
     PrintFmt("[UpdatePanel] Lable: %s\n", label);
     const char* cmd_str = sub_definition["command_str"].GetString();
     PrintFmt("[UpdatePanel] Command: %s\n", cmd_str);
-    const char* window_name = json_utils::GetString(sub_definition, "window_name", "Simple Command Runner");
+    const char* window_name = json_utils::GetString(sub_definition,
+                                                    "window_name", "Simple Command Runner");
     uiWindowSetTitle(m_mainwin, window_name);
 
 #ifdef __linux__
@@ -313,7 +314,6 @@ std::string MainFrame::GetCommand() {
 }
 
 void MainFrame::RunCommand() {
-
     char* text = uiButtonText(m_run_button);
     uiButtonSetText(m_run_button, "processing...");
 

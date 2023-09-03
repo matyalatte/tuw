@@ -6,8 +6,8 @@
 #include "string_utils.h"
 #include "scr_constants.h"
 
-std::string broken;
-std::string json_file;
+const char* broken;
+const char* json_file;
 
 #ifdef _WIN32
 int wmain(int argc, wchar_t* argv[]) {
@@ -18,8 +18,10 @@ int main(int argc, char* argv[]) {
     assert(argc == 3);
 
 #ifdef _WIN32
-    broken = UTF16toUTF8(argv[1]);
-    json_file = UTF16toUTF8(argv[2]);
+    std::string argv1 = UTF16toUTF8(argv[1]);
+    std::string argv2 = UTF16toUTF8(argv[2]);
+    broken = &argv1[0];
+    json_file = &argv2[0];
 #else
     broken = argv[1];
     json_file = argv[2];

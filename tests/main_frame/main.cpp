@@ -6,9 +6,9 @@
 #include "string_utils.h"
 #include "env_utils.h"
 
-std::string json_file;
-std::string config_ascii;
-std::string config_utf;
+const char* json_file;
+const char* config_ascii;
+const char* config_utf;
 
 #ifdef _WIN32
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
@@ -20,9 +20,12 @@ int main(int argc, char* argv[], char* envp[]) {
     assert(argc == 4);
 
 #ifdef _WIN32
-    json_file = UTF16toUTF8(argv[1]);
-    config_ascii = UTF16toUTF8(argv[2]);
-    config_utf = UTF16toUTF8(argv[3]);
+    std::string argv1 = UTF16toUTF8(argv[1]);
+    std::string argv2 = UTF16toUTF8(argv[2]);
+    std::string argv3 = UTF16toUTF8(argv[3]);
+    json_file = &argv1[0];
+    config_ascii = &argv2[0];
+    config_utf = &argv3[0];
 #else
     json_file = argv[1];
     config_ascii = argv[2];

@@ -5,25 +5,8 @@ on:
     branches:
       - main
   workflow_dispatch:
-  
-env:
-  ZIP_NAME: SimpleCommandRunner
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      wx_version: ${{ steps.wx-version.outputs.version }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Check wxWidget version
-        id: wx-version
-        run: |
-          VERSION=$(cat WX_VERSION.txt)
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-        shell: bash
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -38,7 +21,7 @@ jobs:
       matrix:
         os: [windows-2022, ubuntu-20.04, macos-11]
     runs-on: ${{ matrix.os }}
-    needs: [setup, lint]
+    needs: lint
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4

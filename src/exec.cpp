@@ -5,8 +5,7 @@
 
 // from wxWidgets/src/common/cmdline.cpp
 static std::vector<std::string>
-wxConvertStringToArgs(const std::string& cmdline)
-{
+wxConvertStringToArgs(const std::string& cmdline) {
     std::vector<std::string> args;
 
     std::string arg;
@@ -15,8 +14,7 @@ wxConvertStringToArgs(const std::string& cmdline)
     const std::string::const_iterator end = cmdline.end();
     std::string::const_iterator p = cmdline.begin();
 
-    for ( ;; )
-    {
+    for ( ;; ) {
         // skip white space
         while ( p != end && (*p == ' ' || *p == '\t') )
             ++p;
@@ -29,28 +27,23 @@ wxConvertStringToArgs(const std::string& cmdline)
         bool lastBS = false,
              isInsideQuotes = false;
         char chDelim = '\0';
-        for ( arg.clear(); p != end; ++p )
-        {
+        for ( arg.clear(); p != end; ++p ) {
             const char ch = *p;
 
         #ifdef _WIN32
             {
-                if ( ch == '"' )
-                {
-                    if ( !lastBS )
-                    {
+                if ( ch == '"' ) {
+                    if ( !lastBS ) {
                         isInsideQuotes = !isInsideQuotes;
 
                         // don't put quote in arg
                         continue;
                     }
-                    //else: quote has no special meaning but the backslash
-                    //      still remains -- makes no sense but this is what
-                    //      Windows does
-                }
+                    // else: quote has no special meaning but the backslash
+                    //       still remains -- makes no sense but this is what
+                    //       Windows does
+                } else if ( !isInsideQuotes && (ch == ' ' || ch == '\t') ) {
                 // note that backslash does *not* quote the space, only quotes do
-                else if ( !isInsideQuotes && (ch == ' ' || ch == '\t') )
-                {
                     ++p;    // skip this space anyhow
                     break;
                 }
@@ -59,29 +52,22 @@ wxConvertStringToArgs(const std::string& cmdline)
             }
         #else
             {
-                if ( !lastBS )
-                {
-                    if ( isInsideQuotes )
-                    {
-                        if ( ch == chDelim )
-                        {
+                if ( !lastBS ) {
+                    if ( isInsideQuotes ) {
+                        if ( ch == chDelim ) {
                             isInsideQuotes = false;
-
                             continue;   // don't use the quote itself
                         }
-                    }
-                    else // not in quotes and not escaped
-                    {
-                        if ( ch == '\'' || ch == '"' )
-                        {
+                    } else {
+                    // not in quotes and not escaped
+                        if ( ch == '\'' || ch == '"' ) {
                             isInsideQuotes = true;
                             chDelim = ch;
 
                             continue;   // don't use the quote itself
                         }
 
-                        if ( ch == ' ' || ch == '\t' )
-                        {
+                        if ( ch == ' ' || ch == '\t' ) {
                             ++p;    // skip this space anyhow
                             break;
                         }
@@ -90,9 +76,8 @@ wxConvertStringToArgs(const std::string& cmdline)
                     lastBS = ch == '\\';
                     if ( lastBS )
                         continue;
-                }
-                else // escaped by backslash, just use as is
-                {
+                } else {
+                // escaped by backslash, just use as is
                     lastBS = false;
                 }
             }
@@ -119,13 +104,12 @@ std::string GetLastLine(const std::string& input) {
     return input.substr(position);
 }
 
-ExecuteResult Execute(const std::string& cmd)
-{
+ExecuteResult Execute(const std::string& cmd) {
     std::vector<std::string> args_str = wxConvertStringToArgs(cmd);
     std::vector<char*> argv;
     argv.reserve(args_str.size() + 1);
 
-    for(size_t i = 0; i < args_str.size(); ++i)
+    for (size_t i = 0; i < args_str.size(); ++i)
         argv.push_back(const_cast<char*>(args_str[i].c_str()));
     argv.push_back(0);
 
@@ -150,7 +134,7 @@ ExecuteResult Execute(const std::string& cmd)
         out_buf[out_read_size] = 0;
         err_read_size = subprocess_read_stderr(&process, err_buf, BUF_SIZE);
         err_buf[err_read_size] = 0;
-        printf(out_buf);
+        printf("%s", out_buf);
         last_line += out_buf;
         err_msg += err_buf;
         if (last_line.length() > 2048) {
@@ -173,7 +157,6 @@ ExecuteResult Execute(const std::string& cmd)
     last_line = GetLastLine(last_line);
 
     return { return_code, err_msg, last_line };
-
 }
 
 ExecuteResult LaunchDefaultApp(const std::string& url) {

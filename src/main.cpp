@@ -9,8 +9,7 @@
 #include "env_utils.h"
 #include "string_utils.h"
 
-int main_app()
-{
+int main_app() {
     uiInitOptions options;
     const char *err;
     uiTab *tab;
@@ -38,8 +37,8 @@ bool AskOverwrite(const std::string& path) {
     return ret == 1 && (ans == "y"[0] || ans == "Y"[0]);
 }
 
-json_utils::JsonResult Merge(const std::string& exe_path, const std::string& json_path, const std::string& new_path,
-           const bool force) {
+json_utils::JsonResult Merge(const std::string& exe_path, const std::string& json_path,
+                             const std::string& new_path, const bool force) {
     rapidjson::Document json;
     json_utils::JsonResult result = json_utils::LoadJson(json_path, json);
     if (!result.ok) return result;
@@ -64,8 +63,8 @@ json_utils::JsonResult Merge(const std::string& exe_path, const std::string& jso
     return { true };
 }
 
-json_utils::JsonResult Split(const std::string& exe_path, const std::string& json_path, const std::string& new_path,
-           const bool force) {
+json_utils::JsonResult Split(const std::string& exe_path, const std::string& json_path,
+                             const std::string& new_path, const bool force) {
     ExeContainer exe;
     json_utils::JsonResult result = exe.Read(exe_path);
     if (!result.ok) return result;
@@ -177,7 +176,7 @@ int main(int argc, char* argv[], char* envp[]) {
     int cmd_int = CMD_TO_INT.get(cmd_str.c_str(), CMD_UNKNOWN);
     if (cmd_int == CMD_UNKNOWN) {
         PrintUsage();
-    	fprintf(stderr, "Error: Unknown command detected. (%s)", cmd_str.c_str());
+        fprintf(stderr, "Error: Unknown command detected. (%s)", cmd_str.c_str());
         return 1;
     }
 
@@ -232,12 +231,12 @@ int main(int argc, char* argv[], char* envp[]) {
 
     if (json_path == exe_path || new_exe_path == exe_path) {
         PrintUsage();
-    	fprintf(stderr, "Error: Can NOT overwrite the executable itself.\n");
+        fprintf(stderr, "Error: Can NOT overwrite the executable itself.\n");
         return 1;
     }
 
     rapidjson::Document json(rapidjson::kObjectType);
-	json_utils::JsonResult result;
+    json_utils::JsonResult result;
 
     switch (cmd_int) {
         case CMD_MERGE:

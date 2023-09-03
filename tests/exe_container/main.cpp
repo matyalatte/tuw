@@ -6,7 +6,7 @@
 #include "string_utils.h"
 #include "env_utils.h"
 
-std::string json_file;
+const char* json_file;
 
 #ifdef _WIN32
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
@@ -17,7 +17,8 @@ int main(int argc, char* argv[], char* envp[]) {
     assert(argc == 2);
 
 #ifdef _WIN32
-    json_file = UTF16toUTF8(argv[1]);
+    std::string argv1 = UTF16toUTF8(argv[1]);
+    json_file = &argv1[0];
 #else
     json_file = argv[1];
 #endif

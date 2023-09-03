@@ -26,7 +26,6 @@ std::wstring UTF8toUTF16(const char* str) {
 }
 
 void PrintFmt(const char* fmt, ...) {
-
     va_list va;
     va_start(va, fmt);
 
@@ -36,7 +35,7 @@ void PrintFmt(const char* fmt, ...) {
     va_end(va2);
     n++;
 
-    char* buf = (char *) uiprivAlloc(n * sizeof (char), "char[]");
+    char* buf = reinterpret_cast<char *>(uiprivAlloc(n * sizeof (char), "char[]"));
     vsprintf_s(buf, n, fmt, va);
     va_end(va);
 
@@ -50,15 +49,40 @@ void PrintFmt(const char* fmt, ...) {
 #elif defined(__linux__)
 #include <stdarg.h>
 #include "ui.h"
-uiMultilineEntry* g_log_entry = NULL;
-std::string g_log_buffer = "";
+
+class Logger {
+ private:
+    uiMultilineEntry* m_log_entry;
+    std::string m_log_buffer;
+
+ public:
+    Logger() {
+        m_log_entry = NULL;
+        m_log_buffer = "";
+    }
+    ~Logger() {}
+
+    void SetLogEntry(void* log_entry) {
+        m_log_entry = static_cast<uiMultilineEntry*>(log_entry);
+        if (m_log_entry != NULL) {
+            uiMultilineEntrySetText(m_log_entry, m_log_buffer.c_str());
+            m_log_buffer = "";
+        }
+    }
+
+    void Log(const char* str) {
+        if (m_log_entry == NULL) {
+            m_log_buffer += str;
+        } else {
+            uiMultilineEntryAppend(m_log_entry, str);
+        }
+    }
+};
+
+Logger g_logger = Logger();
 
 void SetLogEntry(void* log_entry) {
-    g_log_entry = static_cast<uiMultilineEntry*>(log_entry);
-    if (g_log_entry != NULL) {
-        uiMultilineEntrySetText(g_log_entry, g_log_buffer.c_str());
-        g_log_buffer = "";
-    }
+    g_logger.SetLogEntry(log_entry);
 }
 
 void PrintFmt(const char* fmt, ...) {
@@ -72,11 +96,7 @@ void PrintFmt(const char* fmt, ...) {
     buf[size] = 0;
     vsnprintf(buf, size + 1, fmt, va);
     printf("%s", buf);
-    if (g_log_entry == NULL) {
-        g_log_buffer += buf;
-    } else {
-        uiMultilineEntryAppend(g_log_entry, buf);
-    }
+    g_logger.Log(buf);
     delete[] buf;
     va_end(va);
 }

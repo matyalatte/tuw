@@ -27,7 +27,7 @@ namespace env_utils {
 
 #ifdef _WIN32
     void InitEnv(wchar_t* envp[]) {
-        while(*envp) {
+        while (*envp) {
             _wputenv(*envp);
             envp++;
         }
@@ -93,7 +93,7 @@ namespace env_utils {
 
 #else  // _WIN32
     void InitEnv(char* envp[]) {
-        while(*envp) {
+        while (*envp) {
             putenv(*envp);
             envp++;
         }
@@ -108,7 +108,7 @@ namespace env_utils {
         snprintf(link, LINKSIZE, "/proc/%d/exe", getpid() );
         readlink(link, path, PATH_MAX);
     #else
-        uint32_t bufsize = PATH_MAX;        
+        uint32_t bufsize = PATH_MAX;
         _NSGetExecutablePath(path, &bufsize);
     #endif
         if (path[0] == 0)
@@ -156,7 +156,7 @@ namespace env_utils {
         ResolvePath(path, segments);
 
         std::string fullpath;
-        for(const std::string& seg: segments) {
+        for (const std::string& seg : segments) {
             fullpath += seg + "/";
         }
         return fullpath.substr(0, fullpath.length() - 1);
@@ -185,8 +185,14 @@ namespace env_utils {
     }
 
     std::string GetHome() {
-        const char *homedir = NULL;
-        struct passwd *p = getpwuid(getuid());
+        char buf[PATH_MAX + 1];
+        buf[0] = 0;
+        buf[PATH_MAX] = 0;
+        struct passwd pbuf;
+        struct passwd *p = NULL;
+        getpwuid_r(getuid(), &pbuf, buf, PATH_MAX, &p);
+
+        char* homedir = NULL;
         if (p != NULL)  // try to get from user info
             homedir = p->pw_dir;
         if (homedir == NULL)  // try to get from env
@@ -203,4 +209,4 @@ namespace env_utils {
          ? ""
          : path.substr(0, pos);
     }
-}  // namespace stdpath
+}  // namespace env_utils

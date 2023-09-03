@@ -124,8 +124,7 @@ static uiWindow* GetToplevel(uiControl* c) {
     return GetToplevel(uiControlParent(c));
 }
 
-static void onOpenFileClicked(uiButton *b, void *data)
-{
+static void onOpenFileClicked(uiButton *b, void *data) {
     uiEntry *entry = uiEntry(data);
     char *filename;
 
@@ -137,8 +136,7 @@ static void onOpenFileClicked(uiButton *b, void *data)
     uiFreeText(filename);
 }
 
-static void onFilesDropped(uiEntry *e, int count, char** names, void *data)
-{
+static void onFilesDropped(uiEntry *e, int count, char** names, void *data) {
     if (count < 1) return;
     uiEntrySetText(e, names[0]);
 }
@@ -190,17 +188,16 @@ void FilePicker::SetConfig(const rapidjson::Value& config) {
     }
 }
 
-static void onOpenFolderClicked(uiButton *b, void *data)
-{
-	uiEntry *entry = uiEntry(data);
-	char *filename;
+static void onOpenFolderClicked(uiButton *b, void *data) {
+    uiEntry *entry = uiEntry(data);
+    char *filename;
 
     filename = uiOpenFolder(GetToplevel(uiControl(entry)));
-	if (filename == NULL) {
-		return;
-	}
-	uiEntrySetText(entry, filename);
-	uiFreeText(filename);
+    if (filename == NULL) {
+        return;
+    }
+    uiEntrySetText(entry, filename);
+    uiFreeText(filename);
 }
 
 // Dir Picker
@@ -378,7 +375,8 @@ void CheckArray::GetConfig(rapidjson::Document& config) {
     rapidjson::Value ints;
     ints.SetArray();
     for (uiCheckbox* check : *(std::vector<uiCheckbox*>*)m_widget) {
-        ints.PushBack(bool(uiCheckboxChecked(check)), config.GetAllocator());
+        ints.PushBack(static_cast<bool>(uiCheckboxChecked(check)),
+                      config.GetAllocator());
     }
     rapidjson::Value n(m_id.c_str(), config.GetAllocator());
     config.AddMember(n, ints, config.GetAllocator());
@@ -419,7 +417,7 @@ static void onSpin(uiSpinbox *sender, void* data) {
     int inc = picker->GetInc();
     int min = picker->GetMin();
     int max = picker->GetMax();
-    //bool wrap = picker->GetWrap();
+    // bool wrap = picker->GetWrap();
     int old_val = picker->GetOldVal();
     int val = uiSpinboxValue(sender);
     int diff = val - old_val;
@@ -493,12 +491,12 @@ void IntPicker::SetConfig(const rapidjson::Value& config) {
 
 static void onSpinDouble(uiSpinbox *sender, void* data) {
     FloatPicker* picker = static_cast<FloatPicker*>(data);
-    int inc = int(picker->GetInc());
+    int inc = static_cast<int>(picker->GetInc());
     printf("%d\n", inc);
-    int min = int(picker->GetMin());
-    int max = int(picker->GetMax());
-    //bool wrap = picker->GetWrap();
-    int old_val = int(picker->GetOldVal());
+    int min = static_cast<int>(picker->GetMin());
+    int max = static_cast<int>(picker->GetMax());
+    // bool wrap = picker->GetWrap();
+    int old_val = static_cast<int>(picker->GetOldVal());
     int val = uiSpinboxValue(sender);
     int diff = val - old_val;
     if (diff == 0) {
@@ -514,10 +512,10 @@ static void onSpinDouble(uiSpinbox *sender, void* data) {
         if (val < min)
             val = min;
     } else {
-        picker->SetOldVal(double(val));
+        picker->SetOldVal(static_cast<double>(val));
         return;
     }
-    picker->SetOldVal(double(val));
+    picker->SetOldVal(static_cast<double>(val));
     uiSpinboxSetValue(sender, val);
 }
 
@@ -533,17 +531,17 @@ FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
     m_inc = json_utils::GetDouble(j, "inc", 1.0);  // not supported yet?
     if (m_inc < 0) {
         m_inc = -m_inc;
-    } else if (int(m_inc) == 0) {
+    } else if (static_cast<int>(m_inc) == 0) {
         m_inc = 1.0;
     }
     int val = json_utils::GetDouble(j, "default", m_min);
     bool wrap = json_utils::GetBool(j, "wrap", false);  // not supported yet?
 
-    //uiSpinboxDouble is not supported yet.
-    uiSpinbox* picker = uiNewSpinbox(int(m_min), int(m_max));
+    // uiSpinboxDouble is not supported yet.
+    uiSpinbox* picker = uiNewSpinbox(static_cast<int>(m_min), static_cast<int>(m_max));
     uiSpinboxOnChanged(picker, onSpinDouble, this);
-    uiSpinboxSetValue(picker, int(val));
-    m_old_val = double(uiSpinboxValue(picker));
+    uiSpinboxSetValue(picker, static_cast<int>(val));
+    m_old_val = static_cast<double>(uiSpinboxValue(picker));
     uiBoxAppend(box, uiControl(picker), 0);
     // libui doesn't support tooltips yet.
     // if (j.HasMember("tooltip"))
