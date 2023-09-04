@@ -1,3 +1,6 @@
 option('build_exe', type : 'boolean', value : true, description : 'Build executable')
 option('build_test', type : 'boolean', value : false, description : 'Build tests')
-option('macos_build_universal', type : 'boolean', value : false, description : 'Build universal binaries for macOS')
+option('macosx_build_universal', type : 'boolean', value : true,
+       description : 'Build universal binaries for macOS. This will affect to subprojects')
+option('macosx_version_min', type : 'string', value : '10.9',
+       description : 'Deployment target for macOS. This will affect to subprojects')

@@ -1,5 +1,5 @@
 project('SimpleCommandRunner', ['c', 'cpp'],
-    meson_version: '>=0.63.0',
+    meson_version: '>=0.58.0',
     default_options: [
         'buildtype=debug',              # build debug by default
         'default_library=shared',       # build shared libraries by default
@@ -46,10 +46,10 @@ if scr_OS == 'windows'
 elif scr_OS == 'darwin'
     add_languages('objc', required: true)
     languages = ['c', 'cpp', 'objc']
-    macosx_version_min = '-mmacosx-version-min=10.9'
-    add_project_arguments(macosx_version_min, language: languages)
-    add_project_link_arguments(macosx_version_min, language: languages)
-    if get_option('macos_build_universal')
+    macosx_version_min = '-mmacosx-version-min=' + get_option('macosx_version_min')
+    add_global_arguments(macosx_version_min, language: languages)
+    add_global_link_arguments(macosx_version_min, language: languages)
+    if get_option('macosx_build_universal')
         arch = ['-arch', 'x86_64', '-arch', 'arm64']
         add_global_arguments(arch, language: languages)
         add_global_link_arguments(arch, language: languages)
