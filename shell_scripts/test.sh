@@ -14,9 +14,9 @@ echo "Build type: ${build_type}"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # You can build universal binaries with the secound argument like "bash test.sh Release Universal"
     if [ "$2" = "Universal" ]; then
-        options="${options} -Dmacos_build_universal=true"
         echo "Universal build: On"
     else
+        options="${options} -Dmacosx_build_universal=false"
         echo "Universal build: Off"
     fi
 fi

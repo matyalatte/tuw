@@ -442,7 +442,7 @@ IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
         m_min = m_max;
         m_max = x;
     }
-    m_inc = json_utils::GetInt(j, "inc", 1);  // not supported yet?
+    m_inc = json_utils::GetInt(j, "inc", 1);
     if (m_inc < 0) {
         m_inc = -m_inc;
     } else if (m_inc == 0) {
@@ -462,8 +462,10 @@ IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
 }
 
 std::string IntPicker::GetRawString() {
-    int val = uiSpinboxValue(static_cast<uiSpinbox*>(m_widget));
-    return std::to_string(val);
+    char* text = uiSpinboxValueText(static_cast<uiSpinbox*>(m_widget));
+    std::string str(text);
+    uiFreeText(text);
+    return str;
 }
 
 void IntPicker::GetConfig(rapidjson::Document& config) {
@@ -481,36 +483,6 @@ void IntPicker::SetConfig(const rapidjson::Value& config) {
     }
 }
 
-static void onSpinDouble(uiSpinbox *sender, void* data) {
-    FloatPicker* picker = static_cast<FloatPicker*>(data);
-    int inc = static_cast<int>(picker->GetInc());
-    printf("%d\n", inc);
-    int min = static_cast<int>(picker->GetMin());
-    int max = static_cast<int>(picker->GetMax());
-    // bool wrap = picker->GetWrap();
-    int old_val = static_cast<int>(picker->GetOldVal());
-    int val = uiSpinboxValue(sender);
-    int diff = val - old_val;
-    if (diff == 0) {
-        return;
-    } else if (diff == 1) {
-        val = old_val + inc;
-        val = (val - min) / inc * inc + min;
-        if (val > max)
-            val = max;
-    } else if (diff == -1) {
-        val = old_val - inc;
-        val = max - (max - val) / inc * inc;
-        if (val < min)
-            val = min;
-    } else {
-        picker->SetOldVal(static_cast<double>(val));
-        return;
-    }
-    picker->SetOldVal(static_cast<double>(val));
-    uiSpinboxSetValue(sender, val);
-}
-
 FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
     m_min = json_utils::GetDouble(j, "min", 0.0);
@@ -526,14 +498,14 @@ FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
     } else if (static_cast<int>(m_inc) == 0) {
         m_inc = 1.0;
     }
-    int val = json_utils::GetDouble(j, "default", m_min);
+    m_digits = json_utils::GetInt(j, "digits", 1);
+    m_digits = std::max(1, std::min(20, m_digits));
+    double val = json_utils::GetDouble(j, "default", m_min);
     bool wrap = json_utils::GetBool(j, "wrap", false);  // not supported yet?
 
-    // uiSpinboxDouble is not supported yet.
-    uiSpinbox* picker = uiNewSpinbox(static_cast<int>(m_min), static_cast<int>(m_max));
-    uiSpinboxOnChanged(picker, onSpinDouble, this);
-    uiSpinboxSetValue(picker, static_cast<int>(val));
-    m_old_val = static_cast<double>(uiSpinboxValue(picker));
+    uiSpinbox* picker = uiNewSpinboxDouble(m_min, m_max, m_digits);
+    uiSpinboxSetValueDouble(picker, val);
+    m_old_val = uiSpinboxValueDouble(picker);
     uiBoxAppend(box, uiControl(picker), 0);
     // libui doesn't support tooltips yet.
     // if (j.HasMember("tooltip"))
@@ -542,21 +514,23 @@ FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
 }
 
 std::string FloatPicker::GetRawString() {
-    int val = uiSpinboxValue(static_cast<uiSpinbox*>(m_widget));
-    return std::to_string(val);
+    char* text = uiSpinboxValueText(static_cast<uiSpinbox*>(m_widget));
+    std::string str(text);
+    uiFreeText(text);
+    return str;
 }
 
 void FloatPicker::GetConfig(rapidjson::Document& config) {
     if (config.HasMember(m_id))
         config.RemoveMember(m_id);
     rapidjson::Value n(m_id.c_str(), config.GetAllocator());
-    int val = uiSpinboxValue(static_cast<uiSpinbox*>(m_widget));
+    double val = uiSpinboxValueDouble(static_cast<uiSpinbox*>(m_widget));
     config.AddMember(n, val, config.GetAllocator());
 }
 
 void FloatPicker::SetConfig(const rapidjson::Value& config) {
-    if (config.HasMember(m_id) && config[m_id].IsInt()) {
-        int val = config[m_id].GetInt();
-        uiSpinboxSetValue(static_cast<uiSpinbox*>(m_widget), val);
+    if (config.HasMember(m_id) && config[m_id].IsDouble()) {
+        double val = config[m_id].GetDouble();
+        uiSpinboxSetValueDouble(static_cast<uiSpinbox*>(m_widget), val);
     }
 }

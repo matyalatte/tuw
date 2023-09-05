@@ -6,6 +6,6 @@
     "options": [ false, false, true ],
     "text": "текстове поле",
     "integer": 2,
-    "double": 0,
+    "double": 0.1,
     "_mode": 0
 }

@@ -92,6 +92,7 @@ int unitTestSetup() {
 
     memset(&options, 0, sizeof (uiInitOptions));
     EXPECT_TRUE(uiInit(&options) == NULL);
+    uiMainSteps();
     return 0;
 }
 
@@ -129,8 +130,7 @@ TEST(MainFrameTest, GetCommand2) {
     std::string expected = "echo file: \"test.txt\" & echo folder: \"testdir\"";
     expected += " & echo choice: value3 & echo check: flag!";
     expected += " & echo check_array:  --f2 & echo textbox: remove this text!";
-    expected += " & echo int: 10 & echo float: 0";
-    // expected += " & echo int: 10 & echo float: 0.01";
+    expected += " & echo int: 10 & echo float: 0.01";
     EXPECT_STREQ(expected.c_str(), main_frame.GetCommand().c_str());
     unitTestTeardown(main_frame);
 }
@@ -144,8 +144,7 @@ TEST(MainFrameTest, GetCommand3) {
     MainFrame main_frame = MainFrame(test_json, dummy_config);
     std::string expected = "echo file:  & echo folder:  & echo choice: value1";
     expected += " & echo check:  & echo check_array:  & echo textbox: ";
-    expected += " & echo int: 0 & echo float: 0";
-    // expected += " & echo int: 0 & echo float: 0.0";
+    expected += " & echo int: 0 & echo float: 0.0";
     EXPECT_STREQ(expected.c_str(), main_frame.GetCommand().c_str());
     unitTestTeardown(main_frame);
 }

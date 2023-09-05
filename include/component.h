@@ -133,6 +133,7 @@ class FloatPicker : public StringComponentBase {
     double m_min;
     double m_max;
     double m_old_val;
+    int m_digits;
  public:
     FloatPicker(uiBox* box, const rapidjson::Value& j);
     std::string GetRawString() override;
@@ -144,5 +145,6 @@ class FloatPicker : public StringComponentBase {
     double GetMax() { return m_max; }
     double GetOldVal() { return m_old_val; }
     void SetOldVal(double val) { m_old_val = val; }
+    int GetDigits() { return m_digits; }
 };
 
