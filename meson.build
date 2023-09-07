@@ -89,6 +89,8 @@ libui_dep = dependency('libui', fallback : ['libui', 'libui_dep'])
 rapidjson_dep = dependency('rapidjson', fallback : ['rapidjson', 'rapidjson_dep'])
 subprocess_dep = dependency('subprocess', fallback : ['subprocess', 'subprocess_dep'])
 
+scr_dependencies = [libui_dep, rapidjson_dep, subprocess_dep]
+
 scr_sources += [
     'src/main_frame.cpp',
     'src/component.cpp',
@@ -96,14 +98,13 @@ scr_sources += [
     'src/json_utils.cpp',
     'src/env_utils.cpp',
     'src/exec.cpp',
-    'src/string_utils.cpp',
-    'src/tooltip.cpp'
+    'src/string_utils.cpp'
 ]
 
 if get_option('build_exe')
     executable('SimpleCommandRunner',
         scr_manifest + scr_sources + ['src/main.cpp'],
-        dependencies : [libui_dep, rapidjson_dep, subprocess_dep],
+        dependencies : scr_dependencies,
         cpp_args: scr_cpp_args,
         link_args: scr_link_args,
         include_directories: include_directories('include'),
@@ -114,7 +115,7 @@ if get_option('build_test')
     # build codes as a library
     scr_lib = library('scr_lib',
         scr_manifest + scr_sources,
-        dependencies : [libui_dep, rapidjson_dep, subprocess_dep],
+        dependencies : scr_dependencies,
         cpp_args: scr_cpp_args,
         link_args: scr_link_args,
         include_directories: include_directories('include'),
@@ -127,7 +128,7 @@ if get_option('build_test')
         darwin_versions: [])
 
     scr_dep = declare_dependency(include_directories: include_directories('include'),
-        dependencies : [libui_dep, rapidjson_dep, subprocess_dep],
+        dependencies : scr_dependencies,
 	    link_with : scr_lib)
 
     # get gtest

@@ -1,7 +1,6 @@
 #include "component.h"
 #include "json_utils.h"
 #include "string_utils.h"
-#include "tooltip.h"
 
 enum ComponentType: int {
     COMP_UNKNOWN = 0,
@@ -34,7 +33,7 @@ Component::Component(const rapidjson::Value& j) {
 
 Component::~Component() {
     if (m_tooltip != NULL)
-        DestroyTooltip(m_tooltip);
+        uiTooltipDestroy(m_tooltip);
 }
 
 std::string Component::GetString() {
@@ -94,7 +93,7 @@ StaticText::StaticText(uiBox* box, const rapidjson::Value& j)
     uiLabel* text = uiNewLabel(m_label.c_str());
     uiBoxAppend(box, uiControl(text), 0);
     if (j.HasMember("tooltip"))
-        m_tooltip = ControlSetTooltip(uiControl(text), json_utils::GetString(j, "tooltip", ""));
+        m_tooltip = uiTooltipSetControl(uiControl(text), json_utils::GetString(j, "tooltip", ""));
 }
 
 // Base Class for strings
@@ -163,7 +162,7 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
 
     uiBoxAppend(box, uiControl(grid), 0);
     if (j.HasMember("tooltip"))
-        m_tooltip = ControlSetTooltip(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
+        m_tooltip = uiTooltipSetControl(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
     m_widget = entry;
 }
 
@@ -220,7 +219,7 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
 
     uiBoxAppend(box, uiControl(grid), 0);
     if (j.HasMember("tooltip"))
-        m_tooltip = ControlSetTooltip(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
+        m_tooltip = uiTooltipSetControl(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
     m_widget = entry;
 }
 
@@ -255,7 +254,7 @@ Choice::Choice(uiBox* box, const rapidjson::Value& j)
 
     SetValues(values);
     if (j.HasMember("tooltip"))
-        m_tooltip = ControlSetTooltip(uiControl(choice), json_utils::GetString(j, "tooltip", ""));
+        m_tooltip = uiTooltipSetControl(uiControl(choice), json_utils::GetString(j, "tooltip", ""));
     m_widget = choice;
 }
 
@@ -291,7 +290,7 @@ CheckBox::CheckBox(uiBox* box, const rapidjson::Value& j)
     m_value = json_utils::GetString(j, "value", m_label.c_str());
 
     if (j.HasMember("tooltip"))
-        m_tooltip = ControlSetTooltip(uiControl(check), json_utils::GetString(j, "tooltip", ""));
+        m_tooltip = uiTooltipSetControl(uiControl(check), json_utils::GetString(j, "tooltip", ""));
     m_widget = check;
 }
 
@@ -326,7 +325,7 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
         uiCheckboxSetChecked(check, json_utils::GetBool(i, "default", false));
         uiBoxAppend(box, uiControl(check), 0);
         if (i.HasMember("tooltip"))
-            m_tooltip = ControlSetTooltip(uiControl(check), json_utils::GetString(i, "tooltip", ""));
+            m_tooltip = uiTooltipSetControl(uiControl(check), json_utils::GetString(i, "tooltip", ""));
         checks->push_back(check);
         const char* value = json_utils::GetString(i, "value", label);
         values.push_back(value);
@@ -382,7 +381,7 @@ TextBox::TextBox(uiBox* box, const rapidjson::Value& j)
     uiEntrySetPlaceholder(entry, empty_message);
     uiBoxAppend(box, uiControl(entry), 0);
     if (j.HasMember("tooltip"))
-        m_tooltip = ControlSetTooltip(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
+        m_tooltip = uiTooltipSetControl(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
     m_widget = entry;
 }
 
@@ -453,7 +452,7 @@ IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
     m_old_val = uiSpinboxValue(picker);
     uiBoxAppend(box, uiControl(picker), 0);
     if (j.HasMember("tooltip"))
-        m_tooltip = SpinboxSetTooltip(picker, json_utils::GetString(j, "tooltip", ""));
+        m_tooltip = uiTooltipSetSpinbox(picker, json_utils::GetString(j, "tooltip", ""));
     m_widget = picker;
 }
 
@@ -504,7 +503,7 @@ FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
     m_old_val = uiSpinboxValueDouble(picker);
     uiBoxAppend(box, uiControl(picker), 0);
     if (j.HasMember("tooltip"))
-        m_tooltip = SpinboxSetTooltip(picker, json_utils::GetString(j, "tooltip", ""));
+        m_tooltip = uiTooltipSetSpinbox(picker, json_utils::GetString(j, "tooltip", ""));
     m_widget = picker;
 }
 
