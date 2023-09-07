@@ -229,9 +229,14 @@ void MainFrame::UpdatePanel(int definition_id) {
     m_box = uiNewVerticalBox();
     uiBoxSetPadded(m_box, 1);
 
-    // put components
+    // Delete old components
+    for (Component* comp: m_components) {
+        delete comp;
+    }
     m_components.clear();
     m_components.shrink_to_fit();
+
+    // Put new components
     Component* new_comp = nullptr;
     if (sub_definition["components"].Size() > 0) {
         for (rapidjson::Value& c : sub_definition["components"].GetArray()) {

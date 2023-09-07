@@ -11,13 +11,14 @@ class Component {
     std::string m_label;
     std::string m_id;
     bool m_has_string;
+    uintptr_t m_tooltip;  // handler for tooltip window
 
  private:
     bool m_add_quotes;
 
  public:
     explicit Component(const rapidjson::Value& j);
-    ~Component() {}
+    ~Component();
     virtual std::string GetRawString() { return "";}
     std::string GetString();
     std::string const GetID();

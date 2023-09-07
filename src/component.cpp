@@ -1,6 +1,7 @@
 #include "component.h"
 #include "json_utils.h"
 #include "string_utils.h"
+#include "tooltip.h"
 
 enum ComponentType: int {
     COMP_UNKNOWN = 0,
@@ -23,11 +24,17 @@ Component::Component(const rapidjson::Value& j) {
     m_has_string = false;
     m_label = j["label"].GetString();
     m_id = json_utils::GetString(j, "id", "");
+    m_tooltip = NULL;
     if (m_id == "") {
         uint32_t hash = Fnv1Hash32(j["label"].GetString());
         m_id = "_" + std::to_string(hash);
     }
     m_add_quotes = json_utils::GetBool(j, "add_quotes", false);
+}
+
+Component::~Component() {
+    if (m_tooltip != NULL)
+        DestroyTooltip(m_tooltip);
 }
 
 std::string Component::GetString() {
@@ -86,9 +93,8 @@ StaticText::StaticText(uiBox* box, const rapidjson::Value& j)
     : Component(j) {
     uiLabel* text = uiNewLabel(m_label.c_str());
     uiBoxAppend(box, uiControl(text), 0);
-    // libui doesn't support tooltips yet.
-    // if (j.HasMember("tooltip"))
-    //     uiControlSetTooltip(text, json_utils::GetString(j, "tooltip", ""));
+    if (j.HasMember("tooltip"))
+        m_tooltip = ControlSetTooltip(uiControl(text), json_utils::GetString(j, "tooltip", ""));
 }
 
 // Base Class for strings
@@ -98,9 +104,6 @@ StringComponentBase::StringComponentBase(
     m_has_string = false;
     uiLabel* text = uiNewLabel(m_label.c_str());
     uiBoxAppend(box, uiControl(text), 0);
-    // libui doesn't support tooltips yet.
-    // if (j.HasMember("tooltip"))
-    //     uiControlSetTooltip(text, json_utils::GetString(j, "tooltip", ""));
 }
 
 void StringComponentBase::GetConfig(rapidjson::Document& config) {
@@ -159,9 +162,8 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
         0, uiAlignFill, 0, uiAlignFill);
 
     uiBoxAppend(box, uiControl(grid), 0);
-    // libui doesn't support tooltips yet.
-    // if (j.HasMember("tooltip"))
-    //     uiControlSetTooltip(text, json_utils::GetString(j, "tooltip", ""));
+    if (j.HasMember("tooltip"))
+        m_tooltip = ControlSetTooltip(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
     m_widget = entry;
 }
 
@@ -217,9 +219,8 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
         0, uiAlignFill, 0, uiAlignFill);
 
     uiBoxAppend(box, uiControl(grid), 0);
-    // libui doesn't support tooltips yet.
-    // if (j.HasMember("tooltip"))
-    //     uiControlSetTooltip(text, json_utils::GetString(j, "tooltip", ""));
+    if (j.HasMember("tooltip"))
+        m_tooltip = ControlSetTooltip(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
     m_widget = entry;
 }
 
@@ -253,9 +254,8 @@ Choice::Choice(uiBox* box, const rapidjson::Value& j)
     uiComboboxSetSelected(choice, json_utils::GetInt(j, "default", 0) % j["items"].Size());
 
     SetValues(values);
-    // libui doesn't support tooltips yet.
-    // if (j.HasMember("tooltip"))
-    //     uiControlSetTooltip(choice, json_utils::GetString(j, "tooltip", ""));
+    if (j.HasMember("tooltip"))
+        m_tooltip = ControlSetTooltip(uiControl(choice), json_utils::GetString(j, "tooltip", ""));
     m_widget = choice;
 }
 
@@ -290,9 +290,8 @@ CheckBox::CheckBox(uiBox* box, const rapidjson::Value& j)
 
     m_value = json_utils::GetString(j, "value", m_label.c_str());
 
-    // libui doesn't support tooltips yet.
-    // if (j.HasMember("tooltip"))
-    //     uiControlSetTooltip(check, json_utils::GetString(j, "tooltip", ""));
+    if (j.HasMember("tooltip"))
+        m_tooltip = ControlSetTooltip(uiControl(check), json_utils::GetString(j, "tooltip", ""));
     m_widget = check;
 }
 
@@ -326,9 +325,8 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
         uiCheckbox* check = uiNewCheckbox(label);
         uiCheckboxSetChecked(check, json_utils::GetBool(i, "default", false));
         uiBoxAppend(box, uiControl(check), 0);
-        // libui doesn't support tooltips yet.
-        // if (j.HasMember("tooltip"))
-        //     uiControlSetTooltip(check, json_utils::GetString(j, "tooltip", ""));
+        if (i.HasMember("tooltip"))
+            m_tooltip = ControlSetTooltip(uiControl(check), json_utils::GetString(i, "tooltip", ""));
         checks->push_back(check);
         const char* value = json_utils::GetString(i, "value", label);
         values.push_back(value);
@@ -383,9 +381,8 @@ TextBox::TextBox(uiBox* box, const rapidjson::Value& j)
     uiEntrySetText(entry, value);
     uiEntrySetPlaceholder(entry, empty_message);
     uiBoxAppend(box, uiControl(entry), 0);
-    // libui doesn't support tooltips yet.
-    // if (j.HasMember("tooltip"))
-    //     uiControlSetTooltip(text, json_utils::GetString(j, "tooltip", ""));
+    if (j.HasMember("tooltip"))
+        m_tooltip = ControlSetTooltip(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
     m_widget = entry;
 }
 
@@ -455,9 +452,8 @@ IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
     uiSpinboxSetValue(picker, val);
     m_old_val = uiSpinboxValue(picker);
     uiBoxAppend(box, uiControl(picker), 0);
-    // libui doesn't support tooltips yet.
-    // if (j.HasMember("tooltip"))
-    //     uiControlSetTooltip(picker, json_utils::GetString(j, "tooltip", ""));
+    if (j.HasMember("tooltip"))
+        m_tooltip = SpinboxSetTooltip(picker, json_utils::GetString(j, "tooltip", ""));
     m_widget = picker;
 }
 
@@ -507,9 +503,8 @@ FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
     uiSpinboxSetValueDouble(picker, val);
     m_old_val = uiSpinboxValueDouble(picker);
     uiBoxAppend(box, uiControl(picker), 0);
-    // libui doesn't support tooltips yet.
-    // if (j.HasMember("tooltip"))
-    //     uiControlSetTooltip(picker, json_utils::GetString(j, "tooltip", ""));
+    if (j.HasMember("tooltip"))
+        m_tooltip = SpinboxSetTooltip(picker, json_utils::GetString(j, "tooltip", ""));
     m_widget = picker;
 }
 
