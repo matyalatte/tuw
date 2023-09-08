@@ -324,9 +324,6 @@ void MainFrame::RunCommand() {
 
     std::string cmd = GetCommand();
     PrintFmt("[RunCommand] Command: %s\n", cmd.c_str());
-#ifdef _WIN32
-    cmd = "cmd.exe /c " + cmd;
-#endif
     ExecuteResult result = Execute(cmd);
     uiButtonSetText(m_run_button, text);
 

@@ -2,95 +2,9 @@
 #include <vector>
 #include "subprocess.h"
 #include "string_utils.h"
-
-// from wxWidgets/src/common/cmdline.cpp
-static std::vector<std::string>
-wxConvertStringToArgs(const std::string& cmdline) {
-    std::vector<std::string> args;
-
-    std::string arg;
-    arg.reserve(1024);
-
-    const std::string::const_iterator end = cmdline.end();
-    std::string::const_iterator p = cmdline.begin();
-
-    for ( ;; ) {
-        // skip white space
-        while ( p != end && (*p == ' ' || *p == '\t') )
-            ++p;
-
-        // anything left?
-        if ( p == end )
-            break;
-
-        // parse this parameter
-        bool lastBS = false,
-             isInsideQuotes = false;
-        char chDelim = '\0';
-        for ( arg.clear(); p != end; ++p ) {
-            const char ch = *p;
-
-        #ifdef _WIN32
-            {
-                if ( ch == '"' ) {
-                    if ( !lastBS ) {
-                        isInsideQuotes = !isInsideQuotes;
-
-                        // don't put quote in arg
-                        continue;
-                    }
-                    // else: quote has no special meaning but the backslash
-                    //       still remains -- makes no sense but this is what
-                    //       Windows does
-                } else if ( !isInsideQuotes && (ch == ' ' || ch == '\t') ) {
-                // note that backslash does *not* quote the space, only quotes do
-                    ++p;    // skip this space anyhow
-                    break;
-                }
-
-                lastBS = !lastBS && ch == '\\';
-            }
-        #else
-            {
-                if ( !lastBS ) {
-                    if ( isInsideQuotes ) {
-                        if ( ch == chDelim ) {
-                            isInsideQuotes = false;
-                            continue;   // don't use the quote itself
-                        }
-                    } else {
-                    // not in quotes and not escaped
-                        if ( ch == '\'' || ch == '"' ) {
-                            isInsideQuotes = true;
-                            chDelim = ch;
-
-                            continue;   // don't use the quote itself
-                        }
-
-                        if ( ch == ' ' || ch == '\t' ) {
-                            ++p;    // skip this space anyhow
-                            break;
-                        }
-                    }
-
-                    lastBS = ch == '\\';
-                    if ( lastBS )
-                        continue;
-                } else {
-                // escaped by backslash, just use as is
-                    lastBS = false;
-                }
-            }
-        #endif
-
-            arg += ch;
-        }
-
-        args.push_back(arg);
-    }
-
-    return args;
-}
+#ifdef _WIN32
+#include "windows.h"
+#endif
 
 inline bool IsReturn(const char& input) {
     return input == '\n' || input == '\r';
@@ -105,19 +19,35 @@ std::string GetLastLine(const std::string& input) {
 }
 
 ExecuteResult Execute(const std::string& cmd) {
-    std::vector<std::string> args_str = wxConvertStringToArgs(cmd);
-    std::vector<char*> argv;
-    argv.reserve(args_str.size() + 1);
+#ifdef _WIN32
+    std::wstring wcmd = UTF8toUTF16(cmd.c_str());
 
-    for (size_t i = 0; i < args_str.size(); ++i)
-        argv.push_back(const_cast<char*>(args_str[i].c_str()));
-    argv.push_back(0);
+    int argc;
+    wchar_t** parsed = CommandLineToArgvW(wcmd.c_str(), &argc);
+    wchar_t** argv = new wchar_t*[argc + 3];
+    wchar_t a[] = L"cmd.exe";
+    wchar_t b[] = L"/c";
+    argv[0] = &a[0];
+    argv[1] = &b[0];
+    for (int i = 0; i < argc; i++) {
+        argv[i + 2] = parsed[i];
+    }
+    argv[argc + 2] = 0;
+#else
+    const char* argv[] = {"/bin/sh", "-c", cmd.c_str(), NULL};
+#endif
 
     struct subprocess_s process;
     int options = subprocess_option_inherit_environment
                   | subprocess_option_search_user_path
                   | subprocess_option_enable_async;
     int result = subprocess_create(&argv[0], options, &process);
+
+#ifdef _WIN32
+    LocalFree((LPWSTR)parsed);
+    delete[] argv;
+#endif
+
     if (0 != result)
         return { -1, "Failed to create a subprocess.\n"};
 
@@ -134,7 +64,7 @@ ExecuteResult Execute(const std::string& cmd) {
         out_buf[out_read_size] = 0;
         err_read_size = subprocess_read_stderr(&process, err_buf, BUF_SIZE);
         err_buf[err_read_size] = 0;
-        printf("%s", out_buf);
+        PrintFmt("%s", out_buf);
         last_line += out_buf;
         err_msg += err_buf;
         if (last_line.length() > 2048) {
@@ -161,7 +91,7 @@ ExecuteResult Execute(const std::string& cmd) {
 
 ExecuteResult LaunchDefaultApp(const std::string& url) {
 #ifdef _WIN32
-    const char* argv[] = {"cmd.exe", "/c", "start", url.c_str(), NULL};
+    const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", UTF8toUTF16(url.c_str()).c_str(), NULL};
 #elif defined(__linux__)
     const char* argv[] = {"xdg-open", url.c_str(), NULL};
 #else
