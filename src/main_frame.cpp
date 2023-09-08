@@ -230,7 +230,7 @@ void MainFrame::UpdatePanel(int definition_id) {
     uiBoxSetPadded(m_box, 1);
 
     // Delete old components
-    for (Component* comp: m_components) {
+    for (Component* comp : m_components) {
         delete comp;
     }
     m_components.clear();

@@ -324,8 +324,10 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
         uiCheckbox* check = uiNewCheckbox(label);
         uiCheckboxSetChecked(check, json_utils::GetBool(i, "default", false));
         uiBoxAppend(box, uiControl(check), 0);
-        if (i.HasMember("tooltip"))
-            m_tooltip = uiTooltipSetControl(uiControl(check), json_utils::GetString(i, "tooltip", ""));
+        if (i.HasMember("tooltip")) {
+            m_tooltip = uiTooltipSetControl(uiControl(check),
+                                            json_utils::GetString(i, "tooltip", ""));
+        }
         checks->push_back(check);
         const char* value = json_utils::GetString(i, "value", label);
         values.push_back(value);
