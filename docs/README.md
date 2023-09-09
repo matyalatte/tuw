@@ -15,15 +15,15 @@ But it'll be the best GUI library for Simple Command Runner in the future.
   
 Here is the list of changes from the main branch.
 
--   EXE became smaller. (600KB for the windows build and 300KB for the unix builds!)
+-   EXE became smaller. (Under 800KB!)
 -   Compilation time became faster.
 -   Support older build systems. (No need CMake 3.25!)
 -   User-friendly workflows. (Just by running meson via command-line!)
--   Float pickers are unavaiable.
--   The `tooltip` option is unavailable.
 -   Haven't beed tested enough.
+-   Support universal binary for macOS.
+-   MIT license!
 
-## Only 600KB for a portable GUI!
+## Only 1MB for a portable GUI!
 
 Simple Command Runner will give a very simple GUI to your scripts.  
 All you need is write a `.json` file and run a small executable.  
@@ -98,13 +98,12 @@ They will be **under 300KB**!
 
 ## License
 
-Files in this repository are available under the [GPL2+](../license.txt).  
+Files in this repository are available under the [MIT license](../license.txt).  
 
 ## External Projects
 
 | Project | Used for | License |
 | -- | -- | -- |
 | [libui-ng](https://github.com/libui-ng/libui-ng) | GUI framework | [MIT](http://opensource.org/licenses/MIT) | 
-| [subprocess.h](https://github.com/sheredom/subprocess.h) | Command processing | [Unlicense](https://github.com/sheredom/subprocess.h/blob/master/LICENSE) | 
 | [RapidJSON](https://github.com/Tencent/rapidjson) | JSON handling | [MIT](http://opensource.org/licenses/MIT) |
-| [wxWidgets library](https://github.com/wxWidgets/wxWidgets) | Some utils | [Modified LGPL](https://github.com/wxWidgets/wxWidgets/blob/master/docs/licence.txt) | 
+| [subprocess.h](https://github.com/sheredom/subprocess.h) | Command processing | [Unlicense](https://github.com/sheredom/subprocess.h/blob/master/LICENSE) | 
