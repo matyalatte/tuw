@@ -54,7 +54,9 @@ You can download executables from [the release page](https://github.com/matyalat
 -   `SimpleCommandRunner*-Linux*.tar.bz2` is for Ubuntu (20.04 or later).  
 
 > Linux build only supports Ubuntu due to the glibc dependences.  
+
 > Linux build and Windows build only support x64 architecture. (macOS build supports ARM chips like Apple M1.)  
+
 > [Build the executable](./Building.md) by yourself if you want to use it on unsupported devices.  
 
 ## Examples

@@ -19,7 +19,7 @@ And launch it on your machine.
 ## Build
 
 Run `batch_files/build.bat`.  
-The executable will be generated in `build\Release\`.  
+The executable will be generated in `build/Release/`.  
 
 ## Debug
 
@@ -35,8 +35,8 @@ You can use [UPX](https://github.com/upx/upx/releases/latest) if you want smalle
 
 ## Test
 
-If you want to run tests, run [`test.bat`](../batch_files/test.bat) or type `test.bat Debug` on the command prompt.  
+If you want to run tests, run [`batch_files/test.bat`](../batch_files/test.bat) or type `batch_files/test.bat Debug` on the command prompt.  
 
 ## Coverage
 
-`test.bat Debug` will make coverage report if [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage/releases) is installed.  
+`batch_files/test.bat Debug` will make coverage report if [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage/releases) is installed.  

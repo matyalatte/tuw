@@ -107,45 +107,19 @@ class TextBox : public StringComponentBase {
 };
 
 class IntPicker : public StringComponentBase {
- private:
-    bool m_wrap;
-    int m_inc;
-    int m_min;
-    int m_max;
-    int m_old_val;
  public:
     IntPicker(uiBox* box, const rapidjson::Value& j);
     std::string GetRawString() override;
     void GetConfig(rapidjson::Document& config) override;
     void SetConfig(const rapidjson::Value& config) override;
-    bool GetWrap() { return m_wrap; }
-    int GetInc() { return m_inc; }
-    int GetMin() { return m_min; }
-    int GetMax() { return m_max; }
-    int GetOldVal() { return m_old_val; }
-    void SetOldVal(int val) { m_old_val = val; }
 };
 
 // This is the same as IntPicker cause uiSpinboxDouble is not supported yet.
 class FloatPicker : public StringComponentBase {
- private:
-    bool m_wrap;
-    double m_inc;
-    double m_min;
-    double m_max;
-    double m_old_val;
-    int m_digits;
  public:
     FloatPicker(uiBox* box, const rapidjson::Value& j);
     std::string GetRawString() override;
     void GetConfig(rapidjson::Document& config) override;
     void SetConfig(const rapidjson::Value& config) override;
-    bool GetWrap() { return m_wrap; }
-    double GetInc() { return m_inc; }
-    double GetMin() { return m_min; }
-    double GetMax() { return m_max; }
-    double GetOldVal() { return m_old_val; }
-    void SetOldVal(double val) { m_old_val = val; }
-    int GetDigits() { return m_digits; }
 };
 

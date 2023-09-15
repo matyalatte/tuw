@@ -70,7 +70,7 @@ class Logger {
 
     void SetLogEntry(void* log_entry) {
         m_log_entry = static_cast<uiMultilineEntry*>(log_entry);
-        if (m_log_entry != NULL) {
+        if (m_log_buffer != "") {
             uiMultilineEntrySetText(m_log_entry, m_log_buffer.c_str());
             m_log_buffer = "";
         }
@@ -101,8 +101,8 @@ void PrintFmt(const char* fmt, ...) {
     char* buf = new char[size + 1];
     buf[size] = 0;
     vsnprintf(buf, size + 1, fmt, va);
-    printf("%s", buf);
     g_logger.Log(buf);
+    printf("%s", buf);
     delete[] buf;
     va_end(va);
 }

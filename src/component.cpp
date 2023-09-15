@@ -402,56 +402,30 @@ void TextBox::SetConfig(const rapidjson::Value& config) {
     }
 }
 
-static void onSpin(uiSpinbox *sender, void* data) {
-    IntPicker* picker = static_cast<IntPicker*>(data);
-    int inc = picker->GetInc();
-    int min = picker->GetMin();
-    int max = picker->GetMax();
-    // bool wrap = picker->GetWrap();
-    int old_val = picker->GetOldVal();
-    int val = uiSpinboxValue(sender);
-    int diff = val - old_val;
-    if (diff == 0) {
-        return;
-    } else if (diff == 1) {
-        val = old_val + inc;
-        val = (val - min) / inc * inc + min;
-        if (val > max)
-            val = max;
-    } else if (diff == -1) {
-        val = old_val - inc;
-        val = max - (max - val) / inc * inc;
-        if (val < min)
-            val = min;
-    } else {
-        picker->SetOldVal(val);
-        return;
-    }
-    picker->SetOldVal(val);
-    uiSpinboxSetValue(sender, val);
-}
-
 IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
-    m_min = json_utils::GetInt(j, "min", 0);
-    m_max = json_utils::GetInt(j, "max", 100);
-    if (m_min > m_max) {
-        int x = m_min;
-        m_min = m_max;
-        m_max = x;
+    int min = json_utils::GetInt(j, "min", 0);
+    int max = json_utils::GetInt(j, "max", 100);
+    if (min > max) {
+        int x = min;
+        min = max;
+        max = x;
     }
-    m_inc = json_utils::GetInt(j, "inc", 1);
-    if (m_inc < 0) {
-        m_inc = -m_inc;
-    } else if (m_inc == 0) {
-        m_inc = 1;
+    int inc = json_utils::GetInt(j, "inc", 1);
+    if (inc < 0) {
+        inc = -inc;
+    } else if (inc == 0) {
+        inc = 1;
     }
-    int val = json_utils::GetInt(j, "default", m_min);
-    m_wrap = json_utils::GetBool(j, "wrap", false);  // not supported yet?
-    uiSpinbox* picker = uiNewSpinbox(m_min, m_max);
-    uiSpinboxOnChanged(picker, onSpin, this);
+    int val = json_utils::GetInt(j, "default", min);
+    bool wrap = json_utils::GetBool(j, "wrap", false);  // not supported yet?
+    uiSpinbox* picker = uiNewSpinboxDoubleEx(
+        static_cast<double>(min),
+        static_cast<double>(max),
+        0,
+        static_cast<double>(inc),
+        static_cast<int>(wrap));
     uiSpinboxSetValue(picker, val);
-    m_old_val = uiSpinboxValue(picker);
     uiBoxAppend(box, uiControl(picker), 0);
     if (j.HasMember("tooltip"))
         m_tooltip = uiTooltipSetSpinbox(picker, json_utils::GetString(j, "tooltip", ""));
@@ -482,27 +456,24 @@ void IntPicker::SetConfig(const rapidjson::Value& config) {
 
 FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
-    m_min = json_utils::GetDouble(j, "min", 0.0);
-    m_max = json_utils::GetDouble(j, "max", 100.0);
-    if (m_min > m_max) {
-        double x = m_min;
-        m_min = m_max;
-        m_max = x;
+    double min = json_utils::GetDouble(j, "min", 0.0);
+    double max = json_utils::GetDouble(j, "max", 100.0);
+    if (min > max) {
+        double x = min;
+        min = max;
+        max = x;
     }
-    m_inc = json_utils::GetDouble(j, "inc", 1.0);  // not supported yet?
-    if (m_inc < 0) {
-        m_inc = -m_inc;
-    } else if (static_cast<int>(m_inc) == 0) {
-        m_inc = 1.0;
+    double inc = json_utils::GetDouble(j, "inc", 1.0);
+    if (inc < 0) {
+        inc = -inc;
+    } else if (inc == 0) {
+        inc = 1.0;
     }
-    m_digits = json_utils::GetInt(j, "digits", 1);
-    m_digits = std::max(1, std::min(20, m_digits));
-    double val = json_utils::GetDouble(j, "default", m_min);
-    bool wrap = json_utils::GetBool(j, "wrap", false);  // not supported yet?
-
-    uiSpinbox* picker = uiNewSpinboxDouble(m_min, m_max, m_digits);
+    int digits = json_utils::GetInt(j, "digits", 1);
+    double val = json_utils::GetDouble(j, "default", min);
+    bool wrap = json_utils::GetBool(j, "wrap", false);
+    uiSpinbox* picker = uiNewSpinboxDoubleEx(min, max, digits, inc, static_cast<int>(wrap));
     uiSpinboxSetValueDouble(picker, val);
-    m_old_val = uiSpinboxValueDouble(picker);
     uiBoxAppend(box, uiControl(picker), 0);
     if (j.HasMember("tooltip"))
         m_tooltip = uiTooltipSetSpinbox(picker, json_utils::GetString(j, "tooltip", ""));

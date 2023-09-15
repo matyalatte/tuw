@@ -19,7 +19,7 @@ You can install meson and ninja via Homebrew. (`brew install meson ninja`)
 ## Build
 
 Run `bash shell_scripts/build.sh`.  
-The executable will be generated in `build\Release\`.  
+The executable will be generated in `build/Release/`.  
 
 ## Debug
 
@@ -40,4 +40,4 @@ upx SimpleCommandRunner --best
 
 ## Test
 
-If you want to build tests, type `bash test.sh` or `bash test.sh Debug` on the terminal.  
+If you want to build tests, type `bash shell_scripts/test.sh` or `bash shell_scripts/test.sh Debug` on the terminal.  

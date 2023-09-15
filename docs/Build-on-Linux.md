@@ -21,7 +21,7 @@ You can install meson and ninja via apt. (`sudo apt install meson ninja`)
 ## Build
 
 Run `bash shell_scripts/build.sh`.  
-The executable will be generated in `build\Release\`.  
+The executable will be generated in `build/Release/`.  
 
 ## Debug
 
@@ -37,13 +37,13 @@ upx SimpleCommandRunner --best
 
 ## Test
 
-If you want to build tests, type `bash test.sh` or `bash test.sh Debug` on the terminal.
+If you want to build tests, type `bash shell_scripts/test.sh` or `bash shell_scripts/test.sh Debug` on the terminal.
 
 ## Coverage
 
 If you will use GCC, you can get coverage reports.  
 Install lcov with `sudo apt install lcov`.  
-Then, type `bash coverage.sh` or `bash coverage.sh Debug` on the Terminal.  
+Then, type `bash shell_scripts/coverage.sh` or `bash shell_scripts/coverage.sh Debug` on the Terminal.  
 It'll generate html files in `./Simple-Command-Runner/coverage-report/`.
 
 ## Dockerfiles
