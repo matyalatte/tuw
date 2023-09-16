@@ -78,8 +78,10 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     CreateMenu();
     CreateFrame();
 
-    if (!result.ok)
+    if (!result.ok) {
+        uiMainStep(1);
         JsonLoadFailed(result.msg, m_definition);
+    }
 
     UpdatePanel(definition_id);
     Fit();
