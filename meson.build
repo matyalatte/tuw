@@ -19,7 +19,7 @@ scr_link_args = []
 scr_cpp_args = ['-DRAPIDJSON_HAS_STDSTRING']
 scr_OS = host_machine.system()
 scr_compiler = meson.get_compiler('c').get_id()
-scr_is_release = get_option('buildtype').startswith('release')
+scr_is_release = get_option('buildtype').startswith('release') or (get_option('buildtype').startswith('custom') and not get_option('debug'))
 
 if scr_OS == 'windows'
     windows = import('windows')
@@ -35,6 +35,15 @@ if scr_OS == 'windows'
             '/MANIFEST:NO',
             '/ENTRY:wmainCRTStartup'
         ]
+
+        if (get_option('optimization') == 's')
+            scr_cpp_args += ['/Os']
+        endif
+
+        if (scr_is_release)
+            scr_cpp_args += ['/GL']
+            scr_link_args += ['/OPT:ICF', '/LTCG']
+        endif
     else
         warning('This project has NOT been tested with your compiler. (' + scr_compiler + ')')
         scr_link_args += [

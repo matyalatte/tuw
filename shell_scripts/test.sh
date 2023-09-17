@@ -7,7 +7,8 @@ if [ "$1" = "Debug" ]; then
     options="-Dbuildtype=debug -Dlibui:buildtype=debug"
 else
     build_type="Release"
-    options="-Dbuildtype=release -Dlibui:buildtype=release -Db_ndebug=true -Dcpp_rtti=false -Db_lto=true"
+    options="-Dbuildtype=custom -Dlibui:buildtype=custom -Db_ndebug=true -Dcpp_rtti=false -Db_lto=true"
+    options="${options} -Dcpp_eh=none -Dlibui:cpp_eh=none -Ddebug=false -Doptimization=s"
 fi
 echo "Build type: ${build_type}"
 

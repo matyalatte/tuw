@@ -7,7 +7,9 @@ if /I "%~1"=="Debug" (
     set OPTIONS=-Dbuildtype=debug -Dlibui:buildtype=debug
 ) else (
     set BUILD_TYPE=Release
-    set OPTIONS=-Dbuildtype=release  -Dlibui:buildtype=release -Db_vscrt=mt -Db_ndebug=true -Dcpp_rtti=false -Db_lto=true -Dcpp_eh=none -Dlibui:cpp_eh=none
+    set OPTIONS=-Dbuildtype=custom -Dlibui:buildtype=custom -Db_vscrt=mt^
+                -Db_ndebug=true -Dcpp_rtti=false -Db_lto=true -Dcpp_eh=none -Dlibui:cpp_eh=none^
+                -Ddebug=false -Doptimization=s
 )
 echo Build type: %BUILD_TYPE%
 
