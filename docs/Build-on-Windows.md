@@ -23,14 +23,14 @@ The executable will be generated in `build/Release/`.
 
 ## Debug
 
-If you want a debug build, run `batch_files/build.bat Debug` on the command prompt.  
+If you want a debug build, run `batch_files/build_debug.bat`.  
 If you want to debug the exe on Visual Studio, you can open `build/Debug/SimpleCommandRunner.sln` with it.  
 Then, set `SimpleCommandRunner` as the startup project.  
 
 ## Cross Compile for ARM64
 
 If you installed ARM64 components in Visual Studio, you can build ARM64 binary on x64 machine.  
-Run `batch_files/build.bat Release ARM` on the command prompt.  
+Run `batch_files/build_arm.bat` on the command prompt.  
 The ARM64 version will be generated in `build/ReleaseARM/`.  
 
 ## Compression
@@ -41,8 +41,8 @@ You can use [UPX](https://github.com/upx/upx/releases/latest) if you want smalle
 
 ## Test
 
-If you want to run tests, run [`batch_files/test.bat`](../batch_files/test.bat) or type `batch_files/test.bat Debug` on the command prompt.  
+If you want to run tests, run [`batch_files/test.bat`](../batch_files/test.bat) or `batch_files/test_debug.bat`.  
 
 ## Coverage
 
-`batch_files/test.bat Debug` will make coverage report if [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage/releases) is installed.  
+`batch_files/test_debug.bat` will make coverage report if [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage/releases) is installed.  

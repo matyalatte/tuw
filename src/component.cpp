@@ -180,7 +180,7 @@ class Filter {
     const char* name;
     std::vector<const char*> patterns;
  public:
-    Filter() {}
+    Filter(): name(), patterns() {}
     void SetName(const char* n) {
         name = n;
     }
@@ -201,8 +201,9 @@ class FilterList {
     char* filter_buf;
     std::vector<Filter*> filters;
     uiFileDialogParamsFilter* ui_filters;
+
  public:
-    explicit FilterList(const std::string& ext) {
+    explicit FilterList(const std::string& ext): filter_buf(), filters(), ui_filters() {
         filter_buf =  new char[ext.length() + 1];
         size_t i = 0;
         size_t start = 0;
@@ -244,10 +245,13 @@ class FilterList {
 
     ~FilterList() {
         for (Filter* f : filters) {
-            delete f;
+            if (f != NULL)
+                delete f;
         }
-        delete[] filter_buf;
-        delete[] ui_filters;
+        if (filter_buf != NULL)
+            delete[] filter_buf;
+        if (ui_filters != NULL)
+            delete[] ui_filters;
     }
 
     void AddFilter(Filter* f) {

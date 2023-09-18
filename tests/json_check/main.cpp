@@ -42,11 +42,7 @@ TEST(JsonCheckTest, LoadJsonFail2) {
     rapidjson::Document test_json;
     json_utils::JsonResult result = json_utils::LoadJson(broken, test_json);
     const char* expected = "Failed to parse JSON: Missing a comma or '}'"
-    #ifdef _WIN32
-                            " after an object member. (offset: 128)";
-    #else
                             " after an object member. (offset: 122)";
-    #endif
     EXPECT_FALSE(result.ok);
     EXPECT_STREQ(expected, result.msg.c_str());
 }
