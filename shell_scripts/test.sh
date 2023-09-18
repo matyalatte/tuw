@@ -4,10 +4,10 @@
 # You can specify build type as an argument like "bash test.sh Debug"
 if [ "$1" = "Debug" ]; then
     build_type="Debug"
-    preset="--native-file presets\debug.ini --native-file presets\test.ini"
+    preset="--native-file presets/debug.ini --native-file presets/test.ini"
 else
     build_type="Release"
-    preset="--native-file presets\release.ini --native-file presets\test.ini"
+    preset="--native-file presets/release.ini --native-file presets/test.ini"
 fi
 echo "Build type: ${build_type}"
 

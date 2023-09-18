@@ -11,6 +11,10 @@
 #
 # 4. Use "docker cp" to get the built executable.
 #    docker cp <CONTAINER ID>:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
+#
+# Note: You can also use buildx for cross compiling
+#    sudo apt install -y qemu-user-static binfmt-support
+#    docker buildx build --platform linux/arm64 -t scr_ubuntu -f Dockerfile_Ubuntu ./
 
 # Base image
 FROM ubuntu:20.04

@@ -11,6 +11,10 @@
 #
 # 4. Use "docker cp" to get the built executable.
 #    docker cp <CONTAINER ID>:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
+#
+# Note: You can also use buildx for cross compiling
+#    sudo apt install -y qemu-user-static binfmt-support
+#    docker buildx build --platform linux/arm64 -t scr_alpine_arm -f Dockerfile_Alpine ./
 
 # Base image
 FROM alpine:3.16.5

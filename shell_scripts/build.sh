@@ -5,10 +5,10 @@
 # You can specify build type as an argument like "bash build.sh Debug"
 if [ "$1" = "Debug" ]; then
     build_type="Debug"
-    preset="--native-file presets\debug.ini"
+    preset="--native-file presets/debug.ini"
 else
     build_type="Release"
-    preset="--native-file presets\release.ini"
+    preset="--native-file presets/release.ini"
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
