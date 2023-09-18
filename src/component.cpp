@@ -1,5 +1,6 @@
 #include "component.h"
 #include "json_utils.h"
+#include "env_utils.h"
 #include "string_utils.h"
 
 enum ComponentType: int {
@@ -119,15 +120,8 @@ static uiWindow* GetToplevel(uiControl* c) {
 }
 
 static void onOpenFileClicked(uiButton *b, void *data) {
-    uiEntry *entry = uiEntry(data);
-    char *filename;
-
-    filename = uiOpenFile(GetToplevel(uiControl(entry)));
-    if (filename == NULL) {
-        return;
-    }
-    uiEntrySetText(entry, filename);
-    uiFreeText(filename);
+    FilePicker* picker = static_cast<FilePicker*>(data);
+    picker->OpenFile();
 }
 
 static void onFilesDropped(uiEntry *e, int count, char** names, void *data) {
@@ -138,7 +132,7 @@ static void onFilesDropped(uiEntry *e, int count, char** names, void *data) {
 // File Picker
 FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
-    const char* ext = json_utils::GetString(j, "extension", "any files (*)|*");
+    m_ext = json_utils::GetString(j, "extension", "any files (*.*)|*.*");
     const char* value = json_utils::GetString(j, "default", "");
     const char* empty_message = json_utils::GetString(j, "empty_message", "");
     const char* button_label = json_utils::GetString(j, "button", "Browse");
@@ -150,7 +144,7 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     uiEntrySetPlaceholder(entry, empty_message);
 
     uiButton* button = uiNewButton(button_label);
-    uiButtonOnClicked(button, onOpenFileClicked, entry);
+    uiButtonOnClicked(button, onOpenFileClicked, this);
 
     uiGrid* grid = uiNewGrid();
     uiGridAppend(grid, uiControl(entry),
@@ -181,16 +175,119 @@ void FilePicker::SetConfig(const rapidjson::Value& config) {
     }
 }
 
-static void onOpenFolderClicked(uiButton *b, void *data) {
-    uiEntry *entry = uiEntry(data);
+class Filter {
+ private:
+    const char* name;
+    std::vector<const char*> patterns;
+ public:
+    Filter() {}
+    void SetName(const char* n) {
+        name = n;
+    }
+    void AddPattern(const char* pattern) {
+        patterns.push_back(pattern);
+    }
+    uiFileDialogParamsFilter ToLibuiFilter() {
+        return {
+            name,
+            patterns.size(),
+            &patterns[0]
+        };
+    }
+};
+
+class FilterList {
+ private:
+    char* filter_buf;
+    std::vector<Filter*> filters;
+    uiFileDialogParamsFilter* ui_filters;
+ public:
+    explicit FilterList(const std::string& ext) {
+        filter_buf =  new char[ext.length() + 1];
+        size_t i = 0;
+        size_t start = 0;
+        bool is_reading_pattern = false;
+        Filter* filter = new Filter();
+        for (const char c : ext) {
+            if (c == "|"[0]) {
+                filter_buf[i] = 0;
+                if (is_reading_pattern) {
+                    filter->AddPattern(&filter_buf[start]);
+                    AddFilter(filter);
+                    filter = new Filter();
+                } else {
+                    filter->SetName(&filter_buf[start]);
+                }
+                is_reading_pattern = !is_reading_pattern;
+                start = i + 1;
+            } else if (is_reading_pattern && (c == ";"[0])) {
+                filter_buf[i] = 0;
+                filter->AddPattern(&filter_buf[start]);
+                start = i + 1;
+            } else {
+                filter_buf[i] = c;
+            }
+            i++;
+        }
+        filter_buf[i] = 0;
+        if (is_reading_pattern) {
+            filter->AddPattern(&filter_buf[start]);
+            AddFilter(filter);
+            filter = new Filter();
+        }
+
+        ui_filters = new uiFileDialogParamsFilter[filters.size()];
+        for (size_t i = 0; i < filters.size(); i++) {
+            ui_filters[i] = filters[i]->ToLibuiFilter();
+        }
+    }
+
+    ~FilterList() {
+        for (Filter* f : filters) {
+            delete f;
+        }
+        delete[] filter_buf;
+        delete[] ui_filters;
+    }
+
+    void AddFilter(Filter* f) {
+        filters.push_back(f);
+    }
+
+    size_t GetSize() {
+        return filters.size();
+    }
+
+    uiFileDialogParamsFilter* ToLibuiFilterList() {
+        return ui_filters;
+    }
+};
+
+void FilePicker::OpenFile() {
+    uiEntry *entry = static_cast<uiEntry*>(m_widget);
     char *filename;
 
-    filename = uiOpenFolder(GetToplevel(uiControl(entry)));
+    uiFileDialogParams params;
+    params.defaultPath = NULL;
+    params.defaultName = NULL;
+
+    FilterList filter_list(m_ext);
+
+    params.filterCount = filter_list.GetSize();
+    params.filters = filter_list.ToLibuiFilterList();
+
+    filename = uiOpenFileWithParams(GetToplevel(uiControl(entry)), &params);
     if (filename == NULL) {
         return;
     }
+
     uiEntrySetText(entry, filename);
     uiFreeText(filename);
+}
+
+static void onOpenFolderClicked(uiButton *b, void *data) {
+    DirPicker* picker = static_cast<DirPicker*>(data);
+    picker->OpenFolder();
 }
 
 // Dir Picker
@@ -207,7 +304,7 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
     uiEntrySetPlaceholder(entry, empty_message);
 
     uiButton* button = uiNewButton(button_label);
-    uiButtonOnClicked(button, onOpenFolderClicked, entry);
+    uiButtonOnClicked(button, onOpenFolderClicked, this);
 
     uiGrid* grid = uiNewGrid();
     uiGridAppend(grid, uiControl(entry),
@@ -236,6 +333,25 @@ void DirPicker::SetConfig(const rapidjson::Value& config) {
         uiEntry* entry = static_cast<uiEntry*>(m_widget);
         uiEntrySetText(entry, str);
     }
+}
+
+void DirPicker::OpenFolder() {
+    uiEntry *entry = uiEntry(m_widget);
+    char *filename;
+
+    uiFileDialogParams params;
+    params.defaultPath = NULL;
+    params.defaultName = NULL;
+    params.filterCount = 0;
+    params.filters = NULL;
+
+    filename = uiOpenFolderWithParams(GetToplevel(uiControl(entry)), &params);
+    if (filename == NULL) {
+        return;
+    }
+
+    uiEntrySetText(entry, filename);
+    uiFreeText(filename);
 }
 
 // Choice

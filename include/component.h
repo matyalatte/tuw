@@ -60,10 +60,13 @@ class StringComponentBase : public Component {
 };
 
 class FilePicker : public StringComponentBase {
+ private:
+    std::string m_ext;
  public:
     std::string GetRawString() override;
     FilePicker(uiBox* box, const rapidjson::Value& j);
     void SetConfig(const rapidjson::Value& config) override;
+    void OpenFile();
 };
 
 class DirPicker : public StringComponentBase {
@@ -71,6 +74,7 @@ class DirPicker : public StringComponentBase {
     std::string GetRawString() override;
     DirPicker(uiBox* box, const rapidjson::Value& j);
     void SetConfig(const rapidjson::Value& config) override;
+    void OpenFolder();
 };
 
 class Choice : public StringComponentBase, MultipleValuesContainer {
