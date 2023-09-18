@@ -4,12 +4,10 @@ REM You can also get coverage report if OpenCppCoverage is installed.
 
 if /I "%~1"=="Debug" (
     set BUILD_TYPE=Debug
-    set OPTIONS=-Dbuildtype=debug -Dlibui:buildtype=debug
+    set PRESET=--native-file presets\debug.ini --native-file presets\test.ini
 ) else (
     set BUILD_TYPE=Release
-    set OPTIONS=-Dbuildtype=custom -Dlibui:buildtype=custom -Db_vscrt=mt^
-                -Db_ndebug=true -Dcpp_rtti=false -Db_lto=true -Dcpp_eh=none -Dlibui:cpp_eh=none^
-                -Ddebug=false -Doptimization=s
+    set PRESET=--native-file presets\release.ini --native-file presets\test.ini
 )
 echo Build type: %BUILD_TYPE%
 
@@ -23,12 +21,8 @@ if %ERRORLEVEL% NEQ 0 (
     set GET_COVERAGE=1
 )
 
-set COMMON_OPT=-Ddefault_library=static -Dlibui:default_library=static^
- -Dbuild_exe=false -Dbuild_test=true^
- -Dlibui:tests=false -Dlibui:examples=false
-
 @pushd %~dp0\..
-    meson setup build\%BUILD_TYPE%-Test --backend=vs %COMMON_OPT% %OPTIONS%
+    meson setup build\%BUILD_TYPE%-Test --backend=vs %PRESET%
     if %ERRORLEVEL% neq 0 goto :testend
     meson compile -v -C build\%BUILD_TYPE%-Test
     if %ERRORLEVEL% neq 0 goto :testend

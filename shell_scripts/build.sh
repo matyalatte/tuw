@@ -5,11 +5,10 @@
 # You can specify build type as an argument like "bash build.sh Debug"
 if [ "$1" = "Debug" ]; then
     build_type="Debug"
-    options="-Dbuildtype=debug -Dlibui:buildtype=debug"
+    preset="--native-file presets\debug.ini"
 else
     build_type="Release"
-    options="-Dbuildtype=custom -Dlibui:buildtype=custom -Db_ndebug=true -Dcpp_rtti=false -Db_lto=true"
-    options="${options} -Dcpp_eh=none -Dlibui:cpp_eh=none -Ddebug=false -Doptimization=s"
+    preset="--native-file presets\release.ini"
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -17,18 +16,15 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     if [ "$2" = "Universal" ]; then
         echo "Universal build: On"
     else
-        options="${options} -Dmacosx_build_universal=false"
+        preset="${preset} -Dmacosx_build_universal=false"
         echo "Universal build: Off"
     fi
 fi
 
 echo "Build type: ${build_type}"
 
-common_opt="-Ddefault_library=static -Dlibui:default_library=static
- -Dlibui:tests=false -Dlibui:examples=false"
-
 pushd $(dirname "$0")/..
-    meson setup build/${build_type} ${common_opt} ${options} || exit 1
+    meson setup build/${build_type} ${preset} || exit 1
     cd build/${build_type}
     meson compile -v || exit 1
 

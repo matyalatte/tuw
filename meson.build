@@ -42,7 +42,7 @@ if scr_OS == 'windows'
 
         if (scr_is_release)
             scr_cpp_args += ['/GL']
-            scr_link_args += ['/OPT:ICF', '/LTCG']
+            scr_link_args += ['/OPT:REF', '/OPT:ICF', '/LTCG']
         endif
     else
         warning('This project has NOT been tested with your compiler. (' + scr_compiler + ')')

@@ -27,6 +27,12 @@ If you want a debug build, run `batch_files/build.bat Debug` on the command prom
 If you want to debug the exe on Visual Studio, you can open `build/Debug/SimpleCommandRunner.sln` with it.  
 Then, set `SimpleCommandRunner` as the startup project.  
 
+## Cross Compile for ARM64
+
+If you installed ARM64 components in Visual Studio, you can build ARM64 binary on x64 machine.  
+Run `batch_files/build.bat Release ARM` on the command prompt.  
+The ARM64 version will be generated in `build/ReleaseARM/`.  
+
 ## Compression
 
 You can use [UPX](https://github.com/upx/upx/releases/latest) if you want smaller exe.  
