@@ -33,12 +33,6 @@ If you installed ARM64 components in Visual Studio, you can build ARM64 binary o
 Run `batch_files/build_arm.bat` on the command prompt.  
 The ARM64 version will be generated in `build/ReleaseARM/`.  
 
-## Compression
-
-You can use [UPX](https://github.com/upx/upx/releases/latest) if you want smaller exe.  
-  
-`upx SimpleCommandRunner.exe --best`  
-
 ## Test
 
 If you want to run tests, run [`batch_files/test.bat`](../batch_files/test.bat) or `batch_files/test_debug.bat`.  

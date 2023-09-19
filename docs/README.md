@@ -55,8 +55,6 @@ You can download executables from [the release page](https://github.com/matyalat
 
 > Linux build only supports Ubuntu due to the glibc dependences.  
 
-> Linux build and Windows build only support x64 architecture. (macOS build supports ARM chips like Apple M1.)  
-
 > [Build the executable](./Building.md) by yourself if you want to use it on unsupported devices.  
 
 ## Examples
@@ -92,11 +90,6 @@ You can also make `gui_definition.json` with [web forms](https://rjsf-team.githu
 ## Building
 
 [Building Executables](./Building.md)
-
-## Want Smaller Executables?
-
-You can use [UPX to compress the executables](./UPX.md).  
-They will be **under 300KB**!  
 
 ## License
 

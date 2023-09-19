@@ -29,15 +29,6 @@ If you want a debug build, run `bash shell_scripts/build.sh Debug` on the termin
 
 If you want to build universal binaries, run `bash shell_scripts/build.sh Release Universal` on the terminal.  
 
-## Compression
-
-You can use [UPX](https://github.com/upx/upx) if you want smaller exe.  
-
-```bash
-brew install upx
-upx SimpleCommandRunner --best
-```
-
 ## Test
 
 If you want to build tests, type `bash shell_scripts/test.sh` or `bash shell_scripts/test.sh Debug` on the terminal.  
