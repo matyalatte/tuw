@@ -87,8 +87,6 @@ TEST(MainFrameTest, InvalidHelp) {
 
 int unitTestSetup() {
     uiInitOptions options;
-    const char *err;
-    uiTab *tab;
 
     memset(&options, 0, sizeof (uiInitOptions));
     const char* msg = uiInit(&options);

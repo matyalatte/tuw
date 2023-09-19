@@ -59,12 +59,25 @@ jobs:
           - os: windows-2022
             exe_ext: .exe
             zip_ext: zip
+            arch: ""
+            arch_suffix: -x64
+          - os: windows-2022
+            exe_ext: .exe
+            zip_ext: zip
+            arch: ARM
+            arch_suffix: -arm64
           - os: ubuntu-20.04
             exe_ext: ""
             zip_ext: tar.bz2
+            arch: ""
+            arch_suffix: -x64
           - os: macos-11
             exe_ext: ""
             zip_ext: tar.bz2
+            arch: ""
+            arch_suffix: ""
+
+    name: build-${{ matrix.os }}${{ matrix.arch_suffix }}
     runs-on: ${{ matrix.os }}
     needs: setup
     steps:
@@ -91,20 +104,20 @@ jobs:
 
       - name: Build exe for Windows
         if: runner.os == 'Windows'
-        run: batch_files/build.bat
+        run: batch_files/build.bat Release ${{ matrix.arch }}
           
       - name: Build exe for Unix
         if: runner.os != 'Windows'
         run: bash shell_scripts/build.sh Release Universal
 
       - name: Show info about exe
-        run: bash shell_scripts/exe_info.sh
+        run: bash shell_scripts/exe_info.sh build/Release${{ matrix.arch }}/SimpleCommandRunner${{ matrix.exe_ext }}
         shell: bash
 
       - name: Copy files
         run: |
           mkdir -p archive/${{ env.ZIP_NAME }}
-          cp build/Release/SimpleCommandRunner${{ matrix.exe_ext }} archive/${{ env.ZIP_NAME }}
+          cp build/Release${{ matrix.arch }}/SimpleCommandRunner${{ matrix.exe_ext }} archive/${{ env.ZIP_NAME }}
           cp examples/other_features/help/gui_definition.json archive/${{ env.ZIP_NAME }}
           cp changelog.txt archive/${{ env.ZIP_NAME }}
           cp license.txt archive/${{ env.ZIP_NAME }}
@@ -114,16 +127,54 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           cd archive/${{ env.ZIP_NAME }}
-          powershell Compress-Archive -Force -Path * -Destination ../${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.${{ matrix.zip_ext }}
+          powershell Compress-Archive -Force -Path * -Destination ../${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}${{ matrix.arch_suffix }}.${{ matrix.zip_ext }}
 
       - name: Archive release for Unix
         if: runner.os != 'Windows'
         run: |
           cd archive
-          tar -jcvf ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.${{ matrix.zip_ext }} ${{ env.ZIP_NAME }}
+          tar -jcvf ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}${{ matrix.arch_suffix }}.${{ matrix.zip_ext }} ${{ env.ZIP_NAME }}
 
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}.${{ matrix.zip_ext }}
+          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}${{ matrix.arch_suffix }}.${{ matrix.zip_ext }}
+
+  build-ubuntu-arm64:
+    runs-on: ubuntu-latest
+    needs: setup
+    env:
+      zip_ext: tar.bz2
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build ARM64 version on Ubuntu
+        run: |
+          sudo apt-get install -y qemu-user-static binfmt-support
+          docker buildx build --platform linux/arm64 -t scr_ubuntu_arm -f Dockerfile_Ubuntu ./
+          docker run --name scr_ubuntu_arm scr_ubuntu_arm
+          docker cp scr_ubuntu_arm:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
+
+      - name: Copy files
+        run: |
+          mkdir -p archive/${{ env.ZIP_NAME }}
+          cp SimpleCommandRunner archive/${{ env.ZIP_NAME }}
+          cp examples/other_features/help/gui_definition.json archive/${{ env.ZIP_NAME }}
+          cp changelog.txt archive/${{ env.ZIP_NAME }}
+          cp license.txt archive/${{ env.ZIP_NAME }}
+        shell: bash
+
+      - name: Show info about exe
+        run: bash shell_scripts/exe_info.sh SimpleCommandRunner
+        shell: bash
+
+      - name: Archive release for Unix
+        run: |
+          cd archive
+          tar -jcvf ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-arm64.tar.bz2 ${{ env.ZIP_NAME }}
+
+      - name: Upload Release Asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-arm64.tar.bz2
