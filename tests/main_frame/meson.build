@@ -1,5 +1,5 @@
 test_exe = executable('main_frame',
-    scr_manifest + 'main.cpp',
+    scr_manifest + ['main.cpp'],
     dependencies : [scr_dep, gtest_dep, gmock_dep],
     cpp_args: scr_cpp_args,
     link_args: scr_link_args,

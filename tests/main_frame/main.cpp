@@ -91,7 +91,10 @@ int unitTestSetup() {
     uiTab *tab;
 
     memset(&options, 0, sizeof (uiInitOptions));
-    EXPECT_TRUE(uiInit(&options) == NULL);
+    const char* msg = uiInit(&options);
+    if (msg != NULL)
+        printf("%s\n", msg);
+    EXPECT_TRUE(msg == NULL);
     uiMainSteps();
     return 0;
 }

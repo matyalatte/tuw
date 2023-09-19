@@ -4,26 +4,33 @@
 #    docker build -t scr_ubuntu -f Dockerfile_Ubuntu ./
 #
 # 2. Run the built image.
-#    docker run scr_ubuntu
+#    docker run -name scr_ubuntu scr_ubuntu
 #
-# 3. Check the created container id.
-#    docker ps -a
+# 3. Use "docker cp" to get the built executable.
+#    docker cp scr_ubuntu:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
 #
-# 4. Use "docker cp" to get the built executable.
-#    docker cp <CONTAINER ID>:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
-#
-# Note: You can also use buildx for cross compiling
+# Notes:
+#   -You can use buildx for cross compiling
 #    sudo apt install -y qemu-user-static binfmt-support
 #    docker buildx build --platform linux/arm64 -t scr_ubuntu -f Dockerfile_Ubuntu ./
+#
+#   -You can run tests on the container.
+#    docker build -t scr_ubuntu -f Dockerfile_Ubuntu ./
+#    docker create -it --name scr_ubuntu_test scr_ubuntu
+#    docker start scr_ubuntu_test
+#    docker exec -it scr_ubuntu_test xvfb-run bash test.sh
+#    docker stop scr_ubuntu_test
 
 # Base image
-FROM ubuntu:20.04
+ARG OS=ubuntu:20.04
+FROM ${OS}
 
 # Install packages
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-            ca-certificates build-essential libgtk-3-dev git python3-pip && \
+            ca-certificates build-essential libgtk-3-dev git python3-pip \
+            xvfb at-spi2-core && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -31,7 +38,6 @@ RUN apt-get update && \
 RUN pip3 install meson ninja
 
 # Clone the repo
-WORKDIR /
 RUN git clone -b libui --depth 1 https://github.com/matyalatte/Simple-Command-Runner.git
 
 # Build

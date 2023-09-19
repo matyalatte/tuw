@@ -1,0 +1,1 @@
+test.bat Release ARM

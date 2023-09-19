@@ -24,7 +24,7 @@ Component::Component(const rapidjson::Value& j) {
     m_has_string = false;
     m_label = j["label"].GetString();
     m_id = json_utils::GetString(j, "id", "");
-    m_tooltip = NULL;
+    m_tooltip = 0;
     if (m_id == "") {
         uint32_t hash = Fnv1Hash32(j["label"].GetString());
         m_id = "_" + std::to_string(hash);
@@ -33,7 +33,7 @@ Component::Component(const rapidjson::Value& j) {
 }
 
 Component::~Component() {
-    if (m_tooltip != NULL)
+    if (m_tooltip != 0)
         uiTooltipDestroy(m_tooltip);
 }
 
