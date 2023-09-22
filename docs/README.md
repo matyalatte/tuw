@@ -23,7 +23,7 @@ Here is the list of changes from the main branch.
 -   Support universal binary for macOS.
 -   MIT license!
 
-## Only 1MB for a portable GUI!
+## Only 500KB for a portable GUI!
 
 Simple Command Runner will give a very simple GUI to your scripts.  
 All you need is write a `.json` file and run a small executable.  
@@ -51,11 +51,11 @@ You can download executables from [the release page](https://github.com/matyalat
 
 -   `SimpleCommandRunner*-Windows*.zip` is for Windows (7 or later).  
 -   `SimpleCommandRunner*-macOS*.tar.bz2` is for macOS (10.9 or later).  
--   `SimpleCommandRunner*-Linux*.tar.bz2` is for Ubuntu (20.04 or later).  
+-   `SimpleCommandRunner*-Linux*.tar.bz2` is for Linux.  
 
-> Linux build only supports Ubuntu due to the glibc dependences.  
+> Linux builds only support distributions that use glibc.  
 
-> [Build the executable](./Building.md) by yourself if you want to use it on unsupported devices.  
+> [Build the executable](./Building.md) by yourself if you want to use it on unsupported distros.  
 
 ## Examples
 

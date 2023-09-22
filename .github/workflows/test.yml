@@ -66,18 +66,21 @@ jobs:
           brew install --cask xquartz
           bash shell_scripts/test.sh
 
-  test_ubuntu_arm64:
+  test_linux_arm64:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [Ubuntu, Alpine]
     steps:
       - uses: actions/checkout@v3
       - name: Run tests on arm64 image
         run: |
           sudo apt-get install -y qemu-user-static binfmt-support
-          docker buildx build --platform linux/arm64 -t scr_ubuntu_arm_test -f Dockerfile_Ubuntu ./
-          docker create -i --name scr_ubuntu_arm_test scr_ubuntu_arm_test
-          docker start scr_ubuntu_arm_test
-          docker exec -i scr_ubuntu_arm_test xvfb-run bash test.sh
-          docker stop scr_ubuntu_arm_test
+          docker buildx build --platform linux/arm64 -t scr_${{ matrix.os }}_arm_test -f Dockerfile_${{ matrix.os }} ./
+          docker create -i --name scr_${{ matrix.os }}_arm_test scr_${{ matrix.os }}_arm_test
+          docker start scr_${{ matrix.os }}_arm_test
+          docker exec -i scr_${{ matrix.os }}_arm_test xvfb-run bash test.sh
+          docker stop scr_${{ matrix.os }}_arm_test
 
   test_alpine:
     runs-on: ubuntu-latest
