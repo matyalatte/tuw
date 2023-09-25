@@ -9,12 +9,12 @@ You can put some documents in menu bar.
     {
         "type": "url",
         "label": "About Simple Command Runner",
-        "url": "https://github.com/matyalatte/Simple-Command-Runner"
+        "url": "https://github.com/matyalatte/Tuw"
     },
     {
         "type": "url",
         "label": "Releases",
-        "url": "https://github.com/matyalatte/Simple-Command-Runner/releases"
+        "url": "https://github.com/matyalatte/Tuw/releases"
     },
     {
         "type": "file",

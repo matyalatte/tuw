@@ -1,6 +1,6 @@
 #!/bin/bash
 # Build an executable.
-# SimpleCommandRunner will be generated in ../build/${build_type}
+# Tuw will be generated in ../build/${build_type}
 
 # You can specify build type as an argument like "bash build.sh Debug"
 if [ "$1" = "Debug" ]; then
@@ -31,9 +31,9 @@ pushd $(dirname "$0")/..
     # Strip symbols to reduce the binary size
     if [ "${build_type}" = "Release" ]; then
         if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            strip --strip-all ./SimpleCommandRunner
+            strip --strip-all ./Tuw
         elif [[ "$OSTYPE" == "darwin"* ]]; then
-            strip ./SimpleCommandRunner
+            strip ./Tuw
         fi
     fi
 popd

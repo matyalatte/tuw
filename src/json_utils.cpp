@@ -8,7 +8,7 @@
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/error/en.h"
 
-#include "scr_constants.h"
+#include "tuw_constants.h"
 #include "map_as_vec.hpp"
 
 namespace json_utils {
@@ -479,7 +479,7 @@ namespace json_utils {
             if (c.HasMember("platforms")) {
                 ignore = true;
                 for (rapidjson::Value& v : c["platforms"].GetArray()) {
-                    if (v.GetString() == std::string(scr_constants::OS)) {
+                    if (v.GetString() == std::string(tuw_constants::OS)) {
                         ignore = false;
                         break;
                     }
@@ -512,7 +512,7 @@ namespace json_utils {
         if (!result.ok) return;
 
         // Overwrite ["command"] with ["command_'os'"] if exists.
-        std::string command_os_key = std::string("command_") + scr_constants::OS;
+        std::string command_os_key = std::string("command_") + tuw_constants::OS;
         if (sub_definition.HasMember(command_os_key)) {
             CheckJsonType(result, sub_definition, command_os_key, JsonType::STRING);
             if (!result.ok) return;
@@ -560,7 +560,7 @@ namespace json_utils {
             int recom_int = VersionStringToInt(result, definition["recommended"].GetString());
             if (definition.HasMember("not_recommended")) definition.RemoveMember("not_recommended");
             definition.AddMember("not_recommended",
-                                 scr_constants::VERSION_INT != recom_int,
+                                 tuw_constants::VERSION_INT != recom_int,
                                  definition.GetAllocator());
         }
         CorrectKey(definition, "minimum_required_version",
@@ -571,7 +571,7 @@ namespace json_utils {
             std::string required = definition["minimum_required"].GetString();
             if (!result.ok) return;
             int required_int = VersionStringToInt(result, required);
-            if (scr_constants::VERSION_INT < required_int) {
+            if (tuw_constants::VERSION_INT < required_int) {
                 result.ok = false;
                 result.msg = "Version " + required + " is required.";
             }

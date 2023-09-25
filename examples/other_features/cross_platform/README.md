@@ -7,7 +7,7 @@ No need to write JSON files for each platform.
 
 There are optional keys to overwrite commands.  
 `command_win` is for Windows, `command_mac` is for macOS, and `command_linux` is for Linux.  
-Simple Command Runner will use the platform specific commands instead of the value of `command`.  
+Tuw will use the platform specific commands instead of the value of `command`.  
 
 ```json
 {
@@ -23,7 +23,7 @@ Simple Command Runner will use the platform specific commands instead of the val
 ## "platforms"
 
 `platforms` is an optional key for components.  
-Simple Command Runner will ignore the component if the running OS is not in the values of `platforms`.  
+Tuw  will ignore the component if the running OS is not in the values of `platforms`.  
 `win` for Windows components, `mac` for macOS, and `linux` for Linux.  
 
 ```json

@@ -1,33 +1,24 @@
-# Simple Command Runner ver 0.6.0
+# Tuw: a tiny GUI wrapper for command-line tools
 
-![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
-![test](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/test.yml/badge.svg)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4aee3ee5172e4c38915d07f9c62725d3)](https://www.codacy.com/gh/matyalatte/Simple-Command-Runner/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matyalatte/Simple-Command-Runner&amp;utm_campaign=Badge_Grade)
+```
+  _____  
+ |_   _|   ___      __
+   | || | | \ \ /\ / /
+   | || |_| |\ V  V / 
+   |_| \__,_| \_/\_/
+  Tiny UI wrapper for
+       CLI tools
+```
+
+![build](https://github.com/matyalatte/tuw/actions/workflows/build_all.yml/badge.svg)
+![test](https://github.com/matyalatte/tuw/actions/workflows/test.yml/badge.svg)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4aee3ee5172e4c38915d07f9c62725d3)](https://www.codacy.com/gh/matyalatte/tuw/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matyalatte/tuw&amp;utm_campaign=Badge_Grade)
 <a href="https://www.buymeacoffee.com/matyalatteQ" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>  
-
-Small and simple GUI wrapper for command-line tools.  
-
-## About this branch
-
-This branch will use [libui](https://github.com/libui-ng/libui-ng) as a GUI library.  
-It still has some issues and lacks some features I want.  
-But it'll be the best GUI library for Simple Command Runner in the future.  
-  
-Here is the list of changes from the main branch.
-
--   EXE became smaller. (Under 800KB!)
--   Compilation time became faster.
--   Support older build systems. (No need CMake 3.25!)
--   User-friendly workflows. (Just by running meson via command-line!)
--   Haven't beed tested enough.
--   Support universal binary for macOS.
--   MIT license!
 
 ## Only 500KB for a portable GUI!
 
-Simple Command Runner will give a very simple GUI to your scripts.  
-All you need is write a `.json` file and run a small executable.  
-It can make a GUI to run commands of your scripts.  
+Tuw will give a very simple GUI to your scripts.  
+All you need is a JSON file and a tiny executable.  
 **No need coding, no need browsers, and no need stupidly large executables**!  
 
 ![sample](https://user-images.githubusercontent.com/69258547/192090786-11a3f5ef-988e-442f-8ba9-fd1636b9f350.png)
@@ -47,11 +38,11 @@ It can make a GUI to run commands of your scripts.
 
 ## Downloads
 
-You can download executables from [the release page](https://github.com/matyalatte/Simple-Command-Runner/releases)
+You can download executables from [the release page](https://github.com/matyalatte/tuw/releases)
 
--   `SimpleCommandRunner*-Windows*.zip` is for Windows (7 or later).  
--   `SimpleCommandRunner*-macOS*.tar.bz2` is for macOS (10.9 or later).  
--   `SimpleCommandRunner*-Linux*.tar.bz2` is for Linux.  
+-   `Tuw*-Windows*.zip` is for Windows (7 or later).  
+-   `Tuw*-macOS*.tar.bz2` is for macOS (10.9 or later).  
+-   `Tuw*-Linux*.tar.bz2` is for Linux.  
 
 > Linux builds only support distributions that use glibc.  
 
@@ -74,7 +65,7 @@ For VSCode, you can add the schema path to `settings.json` (`File > Preferences 
 "json.schemas": [    
     {
         "fileMatch": [ "gui_definition.json" ],
-        "url": "https://raw.githubusercontent.com/matyalatte/Simple-Command-Runner/main/schema/schema.json"
+        "url": "https://raw.githubusercontent.com/matyalatte/tuw/main/schema/schema.json"
     }
 ]
 ```

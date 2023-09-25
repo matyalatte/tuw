@@ -2,7 +2,7 @@
 
 ## Platforms
 
-Simple Command Runner uses cross-platform libraries.  
+Tuw uses cross-platform libraries.  
 I made sure I can build it with the following platforms and compilers.
 
 -   Windows10 + MSVC 19.31
@@ -27,8 +27,8 @@ You can also see [batch files](../batch_files/) and [shell scripts](../shell_scr
 Linux users can use dockerfiles to build the executable.  
 See the dockerfiles for the details.
 
--   [Dockerfile_Ubuntu](../Dockerfile_Ubuntu): Builds SimpleCommandRunner on Ubuntu20.04  
--   [Dockerfile_Alpine](../Dockerfile_Alpine): Builds SimpleCommandRunner on Alpine3.16  
+-   [Dockerfile_Ubuntu](../Dockerfile_Ubuntu): Builds Tuw on Ubuntu20.04  
+-   [Dockerfile_Alpine](../Dockerfile_Alpine): Builds Tuw on Alpine3.16  
 
 ## Github Actions
 

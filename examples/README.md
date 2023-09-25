@@ -1,6 +1,6 @@
 # Examples
 
-You can see some JSON files to learn how to use Simple Command Runner.
+You can see some JSON files to learn how to use Tuw.
 
 ## 1. Getting Started
 
@@ -43,7 +43,7 @@ There are more features you can use.
 -   [Multiple Definition](./other_features/multiple/): You can put multiple definitions in a JSON file.
 -   [Cross-platform Support](./other_features/cross_platform): You can make platform specific GUIs.
 -   [Version Checking](./other_features/version_check/): Constraints on the tool version.
--   [Alternate Spellings](./other_features/alternate_spellings/): Simple Command Runner supports multiple spellings for some JSON keys and values.
+-   [Alternate Spellings](./other_features/alternate_spellings/): Tuw supports multiple spellings for some JSON keys and values.
 
 ![help](https://user-images.githubusercontent.com/69258547/222972599-bab3ff85-2c6c-432d-91e7-8244a8a8e514.png)  
 
@@ -56,4 +56,4 @@ There are more features you can use.
 Not about the JSON format, but they might help you.
 
 -   [Multiple Lines](./tips/multi_lines): How to run multiple commands in a process.
--   [Unicode Characters](./tips/unicode): Simple Command Runner supports UTF-8!
+-   [Unicode Characters](./tips/unicode): Tuw supports UTF-8!

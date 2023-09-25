@@ -1,6 +1,6 @@
 # Unicode Characters
 
-Simple Command Runner supports UTF-8 strings.  
+Tuw supports UTF-8 strings.  
 
 ![unicode](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/72c60172-3081-48b3-b72f-0a81bd1be397)
 

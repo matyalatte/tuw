@@ -4,7 +4,7 @@
 
 -   Visual Studio
 -   [Meson](https://github.com/mesonbuild/meson/releases) (**0.58** or later)
--   Batch files in [`./Simple-Command-Runner/batch_files`](../batch_files)
+-   Batch files in [`./Tuw/batch_files`](../batch_files)
 
 > :warning: MinGW-w64 is not supported.  
 > (It might work, but if you find issues, you need to solve them by yourself.)  
@@ -24,8 +24,8 @@ The executable will be generated in `build/Release/`.
 ## Debug
 
 If you want a debug build, run `batch_files/build_debug.bat`.  
-If you want to debug the exe on Visual Studio, you can open `build/Debug/SimpleCommandRunner.sln` with it.  
-Then, set `SimpleCommandRunner` as the startup project.  
+If you want to debug the exe on Visual Studio, you can open `build/Debug/Tuw.sln` with it.  
+Then, set `Tuw` as the startup project.  
 
 ## Cross Compile for ARM64
 

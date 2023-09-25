@@ -1,6 +1,6 @@
 # Alternate Spellings
 
-Simple Command Runner supports multiple spellings for some json keys and values.  
+Tuw supports multiple spellings for some json keys and values.  
 You can use them if the standard one is uncomfortable for you.  
 
 ## Component Types

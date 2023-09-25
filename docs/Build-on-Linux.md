@@ -7,7 +7,7 @@
 -   Ninja
 -   [Meson](https://github.com/mesonbuild/meson) (**0.58** or later)
 -   bash
--   Shell scripts in [`./Simple-Command-Runner/shell_scripts`](../shell_scripts)
+-   Shell scripts in [`./Tuw/shell_scripts`](../shell_scripts)
 
 > :warning: Clang is not supported.  
 > (It might work, but if you find issues, you need to solve them by yourself.)  
@@ -36,11 +36,11 @@ If you want to build tests, type `bash shell_scripts/test.sh` or `bash shell_scr
 If you will use GCC, you can get coverage reports.  
 Install lcov with `sudo apt install lcov`.  
 Then, type `bash shell_scripts/coverage.sh` or `bash shell_scripts/coverage.sh Debug` on the Terminal.  
-It'll generate html files in `./Simple-Command-Runner/coverage-report/`.
+It'll generate html files in `./Tuw/coverage-report/`.
 
 ## Dockerfiles
 
 You can see some dockerfiles to understand the workflow.  
 
--   [Dockerfile_Ubuntu](../Dockerfile_Ubuntu): Dockerfile to build SimpleCommandRunner on Ubuntu20.04
--   [Dockerfile_Alpine](../Dockerfile_Alpine): Dockerfile to build SimpleCommandRunner on Alpine3.16
+-   [Dockerfile_Ubuntu](../Dockerfile_Ubuntu): Dockerfile to build Tuw on Ubuntu20.04
+-   [Dockerfile_Alpine](../Dockerfile_Alpine): Dockerfile to build Tuw on Alpine3.16

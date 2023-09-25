@@ -8,6 +8,7 @@
 #include "exe_container.h"
 #include "env_utils.h"
 #include "string_utils.h"
+#include "tuw_constants.h"
 
 int main_app() {
     uiInitOptions options;
@@ -93,7 +94,7 @@ json_utils::JsonResult Split(const std::string& exe_path, const std::string& jso
 
 void PrintUsage() {
     static const char* const usage =
-        "Usage: SimpleCommandRunner [<command> [<options>]]\n"
+        "Usage: Tuw [<command> [<options>]]\n"
         "\n"
         "    command:\n"
         "        merge : merge this executable and a JSON file into a new exe.\n"
@@ -109,7 +110,7 @@ void PrintUsage() {
         "       -f     : Force to overwrite files."
         "\n"
         "Example:\n"
-        "    SimpleCommandRunner merge -f -j my_definition.json -e MyGUI.exe\n"
+        "    Tuw merge -f -j my_definition.json -e MyGUI.exe\n"
         "\n";
 
     PrintFmt(usage);
@@ -248,7 +249,7 @@ int main(int argc, char* argv[], char* envp[]) {
             result = Split(exe_path, json_path, new_exe_path, force);
             break;
         case CMD_VERSION:
-            PrintFmt("%s\n", scr_constants::VERSION);
+            PrintFmt("%s\n", tuw_constants::VERSION);
             break;
         case CMD_HELP:
             PrintUsage();

@@ -1,6 +1,6 @@
 # Minimal GUI
 
-Simple Command Runner will read `./gui_definition.json` when launching the executable.  
+Tuw will read `./gui_definition.json` when launching the executable.  
 You can define a GUI in the JSON file.  
   
 The following JSON is for a minimal GUI that you can make.  

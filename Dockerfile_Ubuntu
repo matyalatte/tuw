@@ -1,25 +1,25 @@
 # Building workflow for ubuntu 20.04 or later.
 #
 # 1. Use this docker file to build the executable.
-#    docker build -t scr_ubuntu -f Dockerfile_Ubuntu ./
+#    docker build -t tuw_ubuntu -f Dockerfile_Ubuntu ./
 #
 # 2. Run the built image.
-#    docker run -name scr_ubuntu scr_ubuntu
+#    docker run -name tuw_ubuntu tuw_ubuntu
 #
 # 3. Use "docker cp" to get the built executable.
-#    docker cp scr_ubuntu:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
+#    docker cp tuw_ubuntu:/Tuw/build/Release/Tuw ./
 #
 # Notes:
 #   -You can use buildx for cross compiling
 #    sudo apt install -y qemu-user-static binfmt-support
-#    docker buildx build --platform linux/arm64 -t scr_ubuntu -f Dockerfile_Ubuntu ./
+#    docker buildx build --platform linux/arm64 -t tuw_ubuntu -f Dockerfile_Ubuntu ./
 #
 #   -You can run tests on the container.
-#    docker build -t scr_ubuntu -f Dockerfile_Ubuntu ./
-#    docker create -it --name scr_ubuntu_test scr_ubuntu
-#    docker start scr_ubuntu_test
-#    docker exec -it scr_ubuntu_test xvfb-run bash test.sh
-#    docker stop scr_ubuntu_test
+#    docker build -t tuw_ubuntu -f Dockerfile_Ubuntu ./
+#    docker create -it --name tuw_ubuntu_test tuw_ubuntu
+#    docker start tuw_ubuntu_test
+#    docker exec -it tuw_ubuntu_test xvfb-run bash test.sh
+#    docker stop tuw_ubuntu_test
 
 # Base image
 ARG OS=ubuntu:20.04
@@ -38,8 +38,8 @@ RUN apt-get update && \
 RUN pip3 install meson ninja
 
 # Clone the repo
-RUN git clone -b libui --depth 1 https://github.com/matyalatte/Simple-Command-Runner.git
+RUN git clone -b libui --depth 1 https://github.com/matyalatte/Tuw.git
 
 # Build
-WORKDIR /Simple-Command-Runner/shell_scripts
+WORKDIR /Tuw/shell_scripts
 RUN bash build.sh

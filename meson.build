@@ -1,4 +1,4 @@
-project('SimpleCommandRunner', ['c', 'cpp'],
+project('Tuw', ['c', 'cpp'],
     meson_version: '>=0.58.0',
     default_options: [
         'buildtype=debug',              # build debug by default
@@ -13,23 +13,23 @@ project('SimpleCommandRunner', ['c', 'cpp'],
         'cpp_winlibs=',                 # likewise as with c_winlibs
     ],)
 
-scr_sources = []
-scr_manifest = []
-scr_link_args = []
-scr_cpp_args = ['-DRAPIDJSON_HAS_STDSTRING']
-scr_OS = host_machine.system()
-scr_compiler = meson.get_compiler('c').get_id()
-scr_is_release = get_option('buildtype').startswith('release') or (get_option('buildtype').startswith('custom') and not get_option('debug'))
+tuw_sources = []
+tuw_manifest = []
+tuw_link_args = []
+tuw_cpp_args = ['-DRAPIDJSON_HAS_STDSTRING']
+tuw_OS = host_machine.system()
+tuw_compiler = meson.get_compiler('c').get_id()
+tuw_is_release = get_option('buildtype').startswith('release') or (get_option('buildtype').startswith('custom') and not get_option('debug'))
 
-if scr_OS == 'windows'
+if tuw_OS == 'windows'
     windows = import('windows')
-    scr_manifest += [
+    tuw_manifest += [
         windows.compile_resources('src/app.rc',
         depend_files: ['src/app.manifest']),
     ]
-    if scr_compiler == 'msvc'
-        scr_cpp_args = ['/DRAPIDJSON_HAS_STDSTRING']
-        scr_link_args = [
+    if tuw_compiler == 'msvc'
+        tuw_cpp_args = ['/DRAPIDJSON_HAS_STDSTRING']
+        tuw_link_args = [
             '/LARGEADDRESSAWARE',
             '/INCREMENTAL:NO',
             '/MANIFEST:NO',
@@ -37,22 +37,22 @@ if scr_OS == 'windows'
         ]
 
         if (get_option('optimization') == 's')
-            scr_cpp_args += ['/Os']
+            tuw_cpp_args += ['/Os']
         endif
 
-        if (scr_is_release)
-            scr_cpp_args += ['/GL']
-            scr_link_args += ['/OPT:REF', '/OPT:ICF', '/LTCG']
+        if (tuw_is_release)
+            tuw_cpp_args += ['/GL']
+            tuw_link_args += ['/OPT:REF', '/OPT:ICF', '/LTCG']
         endif
     else
-        warning('This project has NOT been tested with your compiler. (' + scr_compiler + ')')
-        scr_link_args += [
+        warning('This project has NOT been tested with your compiler. (' + tuw_compiler + ')')
+        tuw_link_args += [
             '-static',
             '-static-libgcc',
             '-static-libstdc++',
         ]
     endif
-elif scr_OS == 'darwin'
+elif tuw_OS == 'darwin'
     add_languages('objc', required: true)
     languages = ['c', 'cpp', 'objc']
     macosx_version_min = '-mmacosx-version-min=' + get_option('macosx_version_min')
@@ -63,33 +63,33 @@ elif scr_OS == 'darwin'
         add_global_arguments(arch, language: languages)
         add_global_link_arguments(arch, language: languages)
     endif
-    if not scr_compiler.startswith('clang')
-        warning('This project has NOT been tested with your compiler. (' + scr_compiler + ')')
+    if not tuw_compiler.startswith('clang')
+        warning('This project has NOT been tested with your compiler. (' + tuw_compiler + ')')
     endif
 else
-    if scr_OS != 'linux'
-        warning('This OS is unsupported. (' + scr_OS + ')')
+    if tuw_OS != 'linux'
+        warning('This OS is unsupported. (' + tuw_OS + ')')
     endif
-    scr_link_args += ['-no-pie']
-    if scr_compiler != 'gcc'
-        warning('This project has NOT been tested with your compiler. (' + scr_compiler + ')')
+    tuw_link_args += ['-no-pie']
+    if tuw_compiler != 'gcc'
+        warning('This project has NOT been tested with your compiler. (' + tuw_compiler + ')')
     endif
 endif
 
-if scr_OS != 'windows'
-    scr_cpp_args += [
+if tuw_OS != 'windows'
+    tuw_cpp_args += [
         '-Wno-unused-parameter',
         '-Wno-switch',
     ]
-    if scr_compiler.startswith('clang')
-        scr_cpp_args += ['-stdlib=libc++']
+    if tuw_compiler.startswith('clang')
+        tuw_cpp_args += ['-stdlib=libc++']
     endif
-    if scr_is_release
-        scr_cpp_args += ['-ffunction-sections', '-fdata-sections']
-        if scr_compiler == 'gcc'
-            scr_link_args += ['-Wl,--gc-sections']
-        elif scr_compiler.startswith('clang')
-            scr_link_args += ['-Wl,-dead_strip']
+    if tuw_is_release
+        tuw_cpp_args += ['-ffunction-sections', '-fdata-sections']
+        if tuw_compiler == 'gcc'
+            tuw_link_args += ['-Wl,--gc-sections']
+        elif tuw_compiler.startswith('clang')
+            tuw_link_args += ['-Wl,-dead_strip']
         endif
     endif
 endif
@@ -98,9 +98,9 @@ libui_dep = dependency('libui', fallback : ['libui', 'libui_dep'])
 rapidjson_dep = dependency('rapidjson', fallback : ['rapidjson', 'rapidjson_dep'])
 subprocess_dep = dependency('subprocess', fallback : ['subprocess', 'subprocess_dep'])
 
-scr_dependencies = [libui_dep, rapidjson_dep, subprocess_dep]
+tuw_dependencies = [libui_dep, rapidjson_dep, subprocess_dep]
 
-scr_sources += [
+tuw_sources += [
     'src/main_frame.cpp',
     'src/component.cpp',
     'src/exe_container.cpp',
@@ -111,22 +111,22 @@ scr_sources += [
 ]
 
 if get_option('build_exe')
-    executable('SimpleCommandRunner',
-        scr_manifest + scr_sources + ['src/main.cpp'],
-        dependencies : scr_dependencies,
-        cpp_args: scr_cpp_args,
-        link_args: scr_link_args,
+    executable('Tuw',
+        tuw_manifest + tuw_sources + ['src/main.cpp'],
+        dependencies : tuw_dependencies,
+        cpp_args: tuw_cpp_args,
+        link_args: tuw_link_args,
         include_directories: include_directories('include'),
         install : false)
 endif
 
 if get_option('build_test')
     # build codes as a library
-    scr_lib = library('scr_lib',
-        scr_manifest + scr_sources,
-        dependencies : scr_dependencies,
-        cpp_args: scr_cpp_args,
-        link_args: scr_link_args,
+    tuw_lib = library('tuw_lib',
+        tuw_manifest + tuw_sources,
+        dependencies : tuw_dependencies,
+        cpp_args: tuw_cpp_args,
+        link_args: tuw_link_args,
         include_directories: include_directories('include'),
         build_rpath: '',
         install_rpath: '',
@@ -136,9 +136,9 @@ if get_option('build_test')
         soversion: '',
         darwin_versions: [])
 
-    scr_dep = declare_dependency(include_directories: include_directories('include'),
-        dependencies : scr_dependencies,
-	    link_with : scr_lib)
+    tuw_dep = declare_dependency(include_directories: include_directories('include'),
+        dependencies : tuw_dependencies,
+	    link_with : tuw_lib)
 
     # get gtest
     gtest_proj = subproject('gtest')

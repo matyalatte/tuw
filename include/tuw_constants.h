@@ -1,6 +1,6 @@
 #pragma once
-namespace scr_constants {
-    constexpr char TOOL_NAME[] = "Simple Command Runner";
+namespace tuw_constants {
+    constexpr char TOOL_NAME[] = "Tuw";
     constexpr char AUTHOR[] = "matyalatte";
     constexpr char VERSION[] = "0.6.0";
     constexpr int VERSION_INT = 600;
@@ -12,4 +12,4 @@ namespace scr_constants {
 #else
     constexpr char OS[] = "mac";
 #endif
-}  // namespace scr_constants
+}  // namespace tuw_constants

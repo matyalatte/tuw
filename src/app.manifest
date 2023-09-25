@@ -6,7 +6,7 @@
     name="CompanyName.ProductName.YourApplication"
     type="win32"
 />
-<description>Cross platform music player for professionals.</description>
+<description>Tiny GUI wrapper for command-line tools.</description>
 <dependency>
     <dependentAssembly>
         <assemblyIdentity

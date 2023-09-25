@@ -1,5 +1,5 @@
 @echo off
-REM Builds tests for SimpleCommandRunner.
+REM Builds tests for Tuw.
 REM You can also get coverage report if OpenCppCoverage is installed.
 
 if /I "%~1"=="Debug" (

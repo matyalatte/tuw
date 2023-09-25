@@ -1,8 +1,8 @@
 test_exe = executable('main_frame',
-    scr_manifest + ['main.cpp'],
-    dependencies : [scr_dep, gtest_dep, gmock_dep],
-    cpp_args: scr_cpp_args,
-    link_args: scr_link_args,
+    tuw_manifest + ['main.cpp'],
+    dependencies : [tuw_dep, gtest_dep, gmock_dep],
+    cpp_args: tuw_cpp_args,
+    link_args: tuw_link_args,
     install : false)
 
 test_args = [

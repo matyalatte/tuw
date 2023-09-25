@@ -3,7 +3,7 @@
 `empty_message` is an optional key for path pickers and text boxes.  
 It will show a message when the text box is empty.  
 
-![Placeholder](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/7694fdec-c739-45b9-980c-64e2f81203d7)
+![Placeholder](https://github.com/matyalatte/Tuw/assets/69258547/7694fdec-c739-45b9-980c-64e2f81203d7)
 
 ```json
 {

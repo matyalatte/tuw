@@ -4,7 +4,6 @@
 #include "rapidjson/document.h"
 #include "component.h"
 #include "json_utils.h"
-#include "scr_constants.h"
 #include "ui.h"
 
 // Main window

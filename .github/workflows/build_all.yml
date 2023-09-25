@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   
 env:
-  ZIP_NAME: SimpleCommandRunner
+  TOOL_NAME: Tuw
 
 jobs:
   setup:
@@ -46,7 +46,7 @@ jobs:
 
             - Linux builds only support distributions that use glibc.
 
-            - [Build the executable](https://github.com/matyalatte/Simple-Command-Runner/blob/libui/docs/Building.md) by yourself if you want to use it on unsupported distros.
+            - [Build the executable](https://github.com/matyalatte/${{ env.TOOL_NAME }}/blob/libui/docs/Building.md) by yourself if you want to use it on unsupported distros.
           draft: true
           prerelease: false
 
@@ -110,35 +110,35 @@ jobs:
         run: bash shell_scripts/build.sh Release Universal
 
       - name: Show info about exe
-        run: bash shell_scripts/exe_info.sh build/Release${{ matrix.arch }}/SimpleCommandRunner${{ matrix.exe_ext }}
+        run: bash shell_scripts/exe_info.sh build/Release${{ matrix.arch }}/${{ env.TOOL_NAME }}${{ matrix.exe_ext }}
         shell: bash
 
       - name: Copy files
         run: |
-          mkdir -p archive/${{ env.ZIP_NAME }}
-          cp build/Release${{ matrix.arch }}/SimpleCommandRunner${{ matrix.exe_ext }} archive/${{ env.ZIP_NAME }}
-          cp examples/other_features/help/gui_definition.json archive/${{ env.ZIP_NAME }}
-          cp changelog.txt archive/${{ env.ZIP_NAME }}
-          cp license.txt archive/${{ env.ZIP_NAME }}
+          mkdir -p archive/${{ env.TOOL_NAME }}
+          cp build/Release${{ matrix.arch }}/${{ env.TOOL_NAME }}${{ matrix.exe_ext }} archive/${{ env.TOOL_NAME }}
+          cp examples/other_features/help/gui_definition.json archive/${{ env.TOOL_NAME }}
+          cp changelog.txt archive/${{ env.TOOL_NAME }}
+          cp license.txt archive/${{ env.TOOL_NAME }}
         shell: bash
 
       - name: Archive release for Windows
         if: runner.os == 'Windows'
         run: |
-          cd archive/${{ env.ZIP_NAME }}
-          powershell Compress-Archive -Force -Path * -Destination ../${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}${{ matrix.arch_suffix }}.${{ matrix.zip_ext }}
+          cd archive/${{ env.TOOL_NAME }}
+          powershell Compress-Archive -Force -Path * -Destination ../${{ env.TOOL_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}${{ matrix.arch_suffix }}.${{ matrix.zip_ext }}
 
       - name: Archive release for Unix
         if: runner.os != 'Windows'
         run: |
           cd archive
-          tar -jcvf ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}${{ matrix.arch_suffix }}.${{ matrix.zip_ext }} ${{ env.ZIP_NAME }}
+          tar -jcvf ${{ env.TOOL_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}${{ matrix.arch_suffix }}.${{ matrix.zip_ext }} ${{ env.TOOL_NAME }}
 
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}${{ matrix.arch_suffix }}.${{ matrix.zip_ext }}
+          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.TOOL_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}${{ matrix.arch_suffix }}.${{ matrix.zip_ext }}
 
   build-ubuntu-arm64:
     runs-on: ubuntu-latest
@@ -150,30 +150,30 @@ jobs:
       - name: Build ARM64 version on Ubuntu
         run: |
           sudo apt-get install -y qemu-user-static binfmt-support
-          docker buildx build --platform linux/arm64 -t scr_ubuntu_arm -f Dockerfile_Ubuntu ./
-          docker run --name scr_ubuntu_arm scr_ubuntu_arm
-          docker cp scr_ubuntu_arm:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
+          docker buildx build --platform linux/arm64 -t tuw_ubuntu_arm -f Dockerfile_Ubuntu ./
+          docker run --name tuw_ubuntu_arm tuw_ubuntu_arm
+          docker cp tuw_ubuntu_arm:/Simple-Command-Runner/build/Release/${{ env.TOOL_NAME }} ./
 
       - name: Copy files
         run: |
-          mkdir -p archive/${{ env.ZIP_NAME }}
-          cp SimpleCommandRunner archive/${{ env.ZIP_NAME }}
-          cp examples/other_features/help/gui_definition.json archive/${{ env.ZIP_NAME }}
-          cp changelog.txt archive/${{ env.ZIP_NAME }}
-          cp license.txt archive/${{ env.ZIP_NAME }}
+          mkdir -p archive/${{ env.TOOL_NAME }}
+          cp ${{ env.TOOL_NAME }} archive/${{ env.TOOL_NAME }}
+          cp examples/other_features/help/gui_definition.json archive/${{ env.TOOL_NAME }}
+          cp changelog.txt archive/${{ env.TOOL_NAME }}
+          cp license.txt archive/${{ env.TOOL_NAME }}
         shell: bash
 
       - name: Show info about exe
-        run: bash shell_scripts/exe_info.sh SimpleCommandRunner
+        run: bash shell_scripts/exe_info.sh ${{ env.TOOL_NAME }}
         shell: bash
 
       - name: Archive release for Unix
         run: |
           cd archive
-          tar -jcvf ${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-arm64.tar.bz2 ${{ env.ZIP_NAME }}
+          tar -jcvf ${{ env.TOOL_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-arm64.tar.bz2 ${{ env.TOOL_NAME }}
 
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.ZIP_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-arm64.tar.bz2
+          gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.TOOL_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}-arm64.tar.bz2

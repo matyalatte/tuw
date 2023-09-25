@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   
 env:
-  ZIP_NAME: SimpleCommandRunner
+  ZIP_NAME: Tuw
 
 jobs:
   build:
@@ -33,7 +33,7 @@ jobs:
       - name: Archive Release
         run: |
           mkdir -p archive/${{ env.ZIP_NAME }}
-          cp build/Release/SimpleCommandRunner archive/${{ env.ZIP_NAME }}
+          cp build/Release/Tuw archive/${{ env.ZIP_NAME }}
           cp examples/other_features/help/gui_definition.json archive/${{ env.ZIP_NAME }}
           cp changelog.txt archive/${{ env.ZIP_NAME }}
           cp license.txt archive/${{ env.ZIP_NAME }}

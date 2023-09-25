@@ -1,25 +1,25 @@
 # Building workflow for Alpine.
 #
 # 1. Use this docker file to build the executable.
-#    docker build -t scr_alpine -f Dockerfile_Alpine ./
+#    docker build -t tuw_alpine -f Dockerfile_Alpine ./
 #
 # 2. Run the built image.
-#    docker run --name scr_alpine scr_alpine
+#    docker run --name tuw_alpine tuw_alpine
 #
 # 3. Use "docker cp" to get the built executable.
-#    docker cp scr_alpine:/Simple-Command-Runner/build/Release/SimpleCommandRunner ./
+#    docker cp tuw_alpine:/Tuw/build/Release/Tuw ./
 #
 # Notes:
 #   -You can use buildx for cross compiling
 #    sudo apt install -y qemu-user-static binfmt-support
-#    docker buildx build --platform linux/arm64 -t scr_alpine_arm -f Dockerfile_Alpine ./
+#    docker buildx build --platform linux/arm64 -t tuw_alpine_arm -f Dockerfile_Alpine ./
 #
 #   -You can run tests on the container.
-#    docker build -t scr_alpine -f Dockerfile_Alpine ./
-#    docker create -it --name scr_alpine_test scr_alpine
-#    docker start scr_alpine_test
-#    docker exec -it scr_alpine_test xvfb-run bash test.sh
-#    docker stop scr_alpine_test
+#    docker build -t tuw_alpine -f Dockerfile_Alpine ./
+#    docker create -it --name tuw_alpine_test tuw_alpine
+#    docker start tuw_alpine_test
+#    docker exec -it tuw_alpine_test xvfb-run bash test.sh
+#    docker stop tuw_alpine_test
 
 # ARGs
 ARG OS=alpine:3.16.5
@@ -40,8 +40,8 @@ RUN apk update && \
 RUN pip3 install meson ninja
 
 # Clone the repo
-RUN git clone -b libui --depth 1 https://github.com/matyalatte/Simple-Command-Runner.git
+RUN git clone -b libui --depth 1 https://github.com/matyalatte/Tuw.git
 
 # Build
-WORKDIR /Simple-Command-Runner/shell_scripts
+WORKDIR /Tuw/shell_scripts
 RUN bash build.sh

@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 #include "json_utils.h"
 #include "string_utils.h"
-#include "scr_constants.h"
+#include "tuw_constants.h"
 
 const char* broken;
 const char* json_file;
@@ -191,7 +191,7 @@ TEST(JsonCheckTest, checkHelpFail2) {
 TEST(JsonCheckTest, checkVersionSuccess) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
-    test_json["recommended"].SetString(scr_constants::VERSION);
+    test_json["recommended"].SetString(tuw_constants::VERSION);
     json_utils::JsonResult result = { true };
     json_utils::CheckVersion(result, test_json);
     EXPECT_TRUE(result.ok);
@@ -211,7 +211,7 @@ TEST(JsonCheckTest, checkVersionFail) {
 TEST(JsonCheckTest, checkVersionSuccess2) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
-    test_json["minimum_required"].SetString(scr_constants::VERSION);
+    test_json["minimum_required"].SetString(tuw_constants::VERSION);
     json_utils::JsonResult result = { true };
     json_utils::CheckVersion(result, test_json);
     EXPECT_TRUE(result.ok);

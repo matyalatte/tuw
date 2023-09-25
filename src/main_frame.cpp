@@ -4,11 +4,12 @@
 #include "env_utils.h"
 #include "exec.h"
 #include "string_utils.h"
+#include "tuw_constants.h"
 
 // Main window
 MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Document& config) {
-    PrintFmt("%s v%s by %s\n", scr_constants::TOOL_NAME,
-              scr_constants::VERSION, scr_constants::AUTHOR);
+    PrintFmt("%s v%s by %s\n", tuw_constants::TOOL_NAME,
+              tuw_constants::VERSION, tuw_constants::AUTHOR);
 
     m_box = NULL;
 #ifdef __linux__
@@ -99,7 +100,7 @@ static int OnShouldQuit(void *data) {
 }
 
 void MainFrame::CreateFrame() {
-    m_mainwin = uiNewWindow(scr_constants::TOOL_NAME, 400, 1, 1);
+    m_mainwin = uiNewWindow(tuw_constants::TOOL_NAME, 400, 1, 1);
     uiWindowOnClosing(m_mainwin, OnClosing, NULL);
     uiOnShouldQuit(OnShouldQuit, m_mainwin);
     uiControlShow(uiControl(m_mainwin));
@@ -214,7 +215,7 @@ void MainFrame::UpdatePanel(int definition_id) {
     const char* cmd_str = sub_definition["command_str"].GetString();
     PrintFmt("[UpdatePanel] Command: %s\n", cmd_str);
     const char* window_name = json_utils::GetString(sub_definition,
-                                                    "window_name", "Simple Command Runner");
+                                                    "window_name", tuw_constants::TOOL_NAME);
     uiWindowSetTitle(m_mainwin, window_name);
 
 #ifdef __linux__
