@@ -68,6 +68,7 @@ jobs:
 
   test_linux_arm64:
     runs-on: ubuntu-latest
+    needs: lint
     strategy:
       matrix:
         os: [Ubuntu, Alpine]
@@ -84,6 +85,7 @@ jobs:
 
   test_alpine:
     runs-on: ubuntu-latest
+    needs: lint
     steps:
       - uses: actions/checkout@v3
       - name: Run tests on alpine
@@ -93,3 +95,60 @@ jobs:
           docker start tuw_alpine_test
           docker exec -i tuw_alpine_test xvfb-run bash test.sh
           docker stop tuw_alpine_test
+
+  build_tests_windows_arm64:
+    runs-on: windows-2022
+    needs: lint
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+
+      - name: Install Meson
+        run: pip install meson
+
+      - name: Prepare MSVC
+        uses: bus1/cabuild/action/msdevshell@v1
+        with:
+          architecture: x64
+
+      - name: build tests
+        run: |
+          cd batch_files
+          ./test_arm.bat
+
+      - name: copy test files to ./workspace
+        run: |
+          mkdir workspace
+          mkdir workspace/exe_container
+          cp build/ReleaseARM-Test/tests/exe_container/exe_container.exe workspace/exe_container
+          mkdir workspace/json_check
+          cp build/ReleaseARM-Test/tests/json_check/json_check.exe workspace/json_check
+          cp tests/json_check/*.json workspace/json_check
+          mkdir workspace/main_frame
+          cp build/ReleaseARM-Test/tests/main_frame/main_frame.exe workspace/main_frame
+          cp tests/main_frame/*.json workspace/main_frame
+          cp examples/all_keys/gui_definition.json workspace
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: tests-windows-arm64
+          path: workspace
+
+  run_tests_windows_arm64:
+    runs-on: ubuntu-latest
+    needs: [lint, build_tests_windows_arm64]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: tests-windows-arm64
+          path: workspace
+
+      - name: Run tests with wine-arm64
+        run: |
+          sudo apt-get install -y qemu-user-static xvfb
+          docker run --rm --init -i -v $(pwd)/workspace/:/workspace docker.io/linaro/wine-arm64 xvfb-run wine-arm64 cmd.exe /c '/workspace/exe_container/exe_container.exe /workspace/gui_definition.json'
+          docker run --rm --init -i -v $(pwd)/workspace/:/workspace docker.io/linaro/wine-arm64 xvfb-run wine-arm64 cmd.exe /c '/workspace/json_check/json_check.exe /workspace/json_check/broken.json /workspace/gui_definition.json'
+          docker run --rm --init -i -v $(pwd)/workspace/:/workspace docker.io/linaro/wine-arm64 xvfb-run wine-arm64 cmd.exe /c '/workspace/main_frame/main_frame.exe /workspace/gui_definition.json /workspace/main_frame/config_ascii.json /workspace/main_frame/config_utf.json'
