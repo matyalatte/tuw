@@ -71,7 +71,7 @@ class Logger {
     void SetLogEntry(void* log_entry) {
         m_log_entry = static_cast<uiMultilineEntry*>(log_entry);
         if (m_log_buffer != "") {
-            uiMultilineEntrySetText(m_log_entry, m_log_buffer.c_str());
+            Log(m_log_buffer.c_str());
             m_log_buffer = "";
         }
     }
@@ -81,6 +81,7 @@ class Logger {
             m_log_buffer += str;
         } else {
             uiMultilineEntryAppend(m_log_entry, str);
+            uiUnixMuntilineEntryScrollToEnd(m_log_entry);
         }
     }
 };
