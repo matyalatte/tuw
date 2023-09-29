@@ -19,11 +19,7 @@ It can build and upload the executable from any branches and tags.
 
 <img src=https://user-images.githubusercontent.com/69258547/154954954-2816f461-eb5d-4813-bdc3-f37ce2feeee3.png width=500>
 
-## 5. Select `build_*` from workflows
-
--   [`build_windows`](../.github/workflows/build_windows.yml) is for Windows.
--   [`build_mac`](../.github/workflows/build_mac.yml) is for MacOS.
--   [`build_ubuntu`](../.github/workflows/build_ubuntu.yml) is for Ubuntu (20.04 or later).
+## 5. Select `build_all` from workflows
 
 <img src=https://user-images.githubusercontent.com/69258547/154954961-1bb8b185-c463-4241-b5d2-d2988cbb08be.png width=500>
 

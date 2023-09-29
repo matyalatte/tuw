@@ -32,12 +32,8 @@ See the dockerfiles for the details.
 
 ## Github Actions
 
-There are some building workflows for Github Actions.  
-You can make Github build and upload the executable for your platform.  
-
--   [`build_windows`](../.github/workflows/build_windows.yml) is for Windows.
--   [`build_mac`](../.github/workflows/build_mac.yml) is for MacOS.
--   [`build_ubuntu`](../.github/workflows/build_ubuntu.yml) is for Ubuntu (20.04 or later).
+There is a building workflow for Github Actions.  
+You can make Github build and upload the executables.  
 
 See here for the details.  
 [How to Build With Github Actions](./Github-Actions.md)
