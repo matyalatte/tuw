@@ -76,9 +76,10 @@ jobs:
       - uses: actions/checkout@v3
       - name: Run tests on arm64 image
         run: |
+          sudo apt-get update
           sudo apt-get install -y qemu-user-static binfmt-support
-          docker buildx build --platform linux/arm64 -t tuw_${{ matrix.os }}_arm_test -f Dockerfile_${{ matrix.os }} ./
-          docker run --rm --init -i tuw_${{ matrix.os }}_arm_test xvfb-run bash test.sh
+          docker buildx build --platform linux/arm64 -t tuw_arm_test -f Dockerfile_${{ matrix.os }} ./
+          docker run --rm --init -i tuw_arm_test xvfb-run bash test.sh
 
   test_alpine:
     runs-on: ubuntu-latest
@@ -142,6 +143,7 @@ jobs:
 
       - name: Run tests with wine-arm64
         run: |
+          sudo apt-get update
           sudo apt-get install -y qemu-user-static xvfb
           docker run --rm --init -i -v $(pwd)/workspace/:/workspace docker.io/linaro/wine-arm64 xvfb-run wine-arm64 cmd.exe /c '/workspace/exe_container/exe_container.exe /workspace/gui_definition.json'
           docker run --rm --init -i -v $(pwd)/workspace/:/workspace docker.io/linaro/wine-arm64 xvfb-run wine-arm64 cmd.exe /c '/workspace/json_check/json_check.exe /workspace/json_check/broken.json /workspace/gui_definition.json'

@@ -149,10 +149,11 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build ARM64 version on Ubuntu
         run: |
+          sudo apt-get update
           sudo apt-get install -y qemu-user-static binfmt-support
           docker buildx build --platform linux/arm64 -t tuw_ubuntu_arm -f Dockerfile_Ubuntu ./
           docker run --name tuw_ubuntu_arm tuw_ubuntu_arm
-          docker cp tuw_ubuntu_arm:/Simple-Command-Runner/build/Release/${{ env.TOOL_NAME }} ./
+          docker cp tuw_ubuntu_arm:/Tuw/build/Release/${{ env.TOOL_NAME }} ./
 
       - name: Copy files
         run: |
