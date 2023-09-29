@@ -17,9 +17,6 @@ class MainFrame {
     std::vector<Component*> m_components;
     uiBox* m_box;
     uiButton* m_run_button;
-#ifdef __linux__
-    uiMultilineEntry* m_log_entry;
-#endif
 
     void CreateFrame();
     void CreateMenu();
