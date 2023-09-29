@@ -11,16 +11,6 @@ else
     preset="--native-file presets/release.ini"
 fi
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # You can build universal binaries with the secound argument like "bash build.sh Release Universal"
-    if [ "$2" = "Universal" ]; then
-        echo "Universal build: On"
-    else
-        preset="${preset} -Dmacosx_build_universal=false"
-        echo "Universal build: Off"
-    fi
-fi
-
 echo "Build type: ${build_type}"
 
 pushd $(dirname "$0")/..

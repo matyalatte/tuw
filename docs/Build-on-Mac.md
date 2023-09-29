@@ -25,10 +25,6 @@ The executable will be generated in `build/Release/`.
 
 If you want a debug build, run `bash shell_scripts/build.sh Debug` on the terminal.  
 
-## Unversal Binaries
-
-If you want to build universal binaries, run `bash shell_scripts/build.sh Release Universal` on the terminal.  
-
 ## Test
 
 If you want to build tests, type `bash shell_scripts/test.sh` or `bash shell_scripts/test.sh Debug` on the terminal.  

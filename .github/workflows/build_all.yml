@@ -107,7 +107,7 @@ jobs:
           
       - name: Build exe for Unix
         if: runner.os != 'Windows'
-        run: bash shell_scripts/build.sh Release Universal
+        run: bash shell_scripts/build.sh Release
 
       - name: Show info about exe
         run: bash shell_scripts/exe_info.sh build/Release${{ matrix.arch }}/${{ env.TOOL_NAME }}${{ matrix.exe_ext }}
