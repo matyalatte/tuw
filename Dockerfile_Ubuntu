@@ -16,10 +16,7 @@
 #
 #   -You can run tests on the container.
 #    docker build -t tuw_ubuntu -f Dockerfile_Ubuntu ./
-#    docker create -it --name tuw_ubuntu_test tuw_ubuntu
-#    docker start tuw_ubuntu_test
-#    docker exec -it tuw_ubuntu_test xvfb-run bash test.sh
-#    docker stop tuw_ubuntu_test
+#    docker run --rm --init -i tuw_ubuntu xvfb-run bash test.sh
 
 # Base image
 ARG OS=ubuntu:20.04
@@ -38,7 +35,9 @@ RUN apt-get update && \
 RUN pip3 install meson ninja
 
 # Clone the repo
-RUN git clone -b libui --depth 1 https://github.com/matyalatte/Tuw.git
+COPY . /Tuw
+WORKDIR /Tuw
+RUN rm -rf build
 
 # Build
 WORKDIR /Tuw/shell_scripts

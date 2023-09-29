@@ -1,46 +1,43 @@
-# Building workflow for Alpine.
+# Building workflow for ubuntu 20.04 or later.
 #
 # 1. Use this docker file to build the executable.
-#    docker build -t tuw_alpine -f Dockerfile_Alpine ./
+#    docker build -t tuw_ubuntu -f Dockerfile_Ubuntu ./
 #
 # 2. Run the built image.
-#    docker run --name tuw_alpine tuw_alpine
+#    docker run -name tuw_ubuntu tuw_ubuntu
 #
 # 3. Use "docker cp" to get the built executable.
-#    docker cp tuw_alpine:/Tuw/build/Release/Tuw ./
+#    docker cp tuw_ubuntu:/Tuw/build/Release/Tuw ./
 #
 # Notes:
 #   -You can use buildx for cross compiling
 #    sudo apt install -y qemu-user-static binfmt-support
-#    docker buildx build --platform linux/arm64 -t tuw_alpine_arm -f Dockerfile_Alpine ./
+#    docker buildx build --platform linux/arm64 -t tuw_ubuntu -f Dockerfile_Ubuntu ./
 #
 #   -You can run tests on the container.
-#    docker build -t tuw_alpine -f Dockerfile_Alpine ./
-#    docker create -it --name tuw_alpine_test tuw_alpine
-#    docker start tuw_alpine_test
-#    docker exec -it tuw_alpine_test xvfb-run bash test.sh
-#    docker stop tuw_alpine_test
-
-# ARGs
-ARG OS=alpine:3.16.5
+#    docker build -t tuw_ubuntu -f Dockerfile_Ubuntu ./
+#    docker run --rm --init -i tuw_ubuntu xvfb-run bash test.sh
 
 # Base image
+ARG OS=ubuntu:20.04
 FROM ${OS}
 
 # Install packages
-RUN apk update && \
-    apk add --no-cache \
-        alpine-sdk linux-headers bash gtk+3.0-dev \
-        py3-pip python3 ttf-freefont xvfb-run at-spi2-core
-
-# Need ttf-freefont to avoid a GTK warning
-# "Native Windows wider or taller than * pixels are not supported"
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+            ca-certificates build-essential libgtk-3-dev git python3-pip \
+            xvfb at-spi2-core && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install meson
 RUN pip3 install meson ninja
 
 # Clone the repo
-RUN git clone -b libui --depth 1 https://github.com/matyalatte/Tuw.git
+COPY . /Tuw
+WORKDIR /Tuw
+RUN rm -rf build
 
 # Build
 WORKDIR /Tuw/shell_scripts

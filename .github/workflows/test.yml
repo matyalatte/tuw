@@ -78,10 +78,7 @@ jobs:
         run: |
           sudo apt-get install -y qemu-user-static binfmt-support
           docker buildx build --platform linux/arm64 -t tuw_${{ matrix.os }}_arm_test -f Dockerfile_${{ matrix.os }} ./
-          docker create -i --name tuw_${{ matrix.os }}_arm_test tuw_${{ matrix.os }}_arm_test
-          docker start tuw_${{ matrix.os }}_arm_test
-          docker exec -i tuw_${{ matrix.os }}_arm_test xvfb-run bash test.sh
-          docker stop tuw_${{ matrix.os }}_arm_test
+          docker run --rm --init -i tuw_${{ matrix.os }}_arm_test xvfb-run bash test.sh
 
   test_alpine:
     runs-on: ubuntu-latest
@@ -91,10 +88,7 @@ jobs:
       - name: Run tests on alpine
         run: |
           docker build -t tuw_alpine_test -f Dockerfile_Alpine ./
-          docker create -i --name tuw_alpine_test tuw_alpine_test
-          docker start tuw_alpine_test
-          docker exec -i tuw_alpine_test xvfb-run bash test.sh
-          docker stop tuw_alpine_test
+          docker run --rm --init -i tuw_alpine_test xvfb-run bash test.sh
 
   build_tests_windows_arm64:
     runs-on: windows-2022
