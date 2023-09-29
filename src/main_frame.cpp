@@ -10,6 +10,7 @@
 MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Document& config) {
     PrintFmt("%s v%s by %s\n", tuw_constants::TOOL_NAME,
               tuw_constants::VERSION, tuw_constants::AUTHOR);
+    PrintFmt(tuw_constants::LOGO);
 
     m_box = NULL;
     std::string exe_path = env_utils::GetExecutablePath();
@@ -106,6 +107,7 @@ void MainFrame::CreateFrame() {
     uiWindow* log_win = uiNewWindow(env_utils::GetExecutablePath().c_str(), 600, 400, 0);
     uiWindowOnClosing(log_win, OnClosing, NULL);
     uiMultilineEntry* log_entry = uiNewMultilineEntry();
+    uiUnixMultilineEntrySetMonospace(log_entry, 1);
     uiMultilineEntrySetReadOnly(log_entry, 1);
     SetLogEntry(log_entry);
     uiBox* log_box = uiNewVerticalBox();
