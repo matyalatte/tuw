@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/matyalatte/libui-ng.git
-revision = 048e64d00714cb856cd276c6bda7fdd53edd3a31
+revision = 3dbfbe6295e179ec85868c690b54a5ccaac218f0
 depth = 1
 
 [provide]

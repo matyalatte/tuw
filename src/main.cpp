@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#ifdef _WIN32
 #include <locale.h>
+#endif
 #include "ui.h"
 #include "json_utils.h"
 #include "main_frame.h"
