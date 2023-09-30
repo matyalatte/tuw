@@ -1,6 +1,7 @@
 #include "json_utils.h"
 #include <cstdio>
 #include <cassert>
+#include <vector>
 
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/filewritestream.h"
@@ -9,7 +10,6 @@
 #include "rapidjson/error/en.h"
 
 #include "tuw_constants.h"
-#include "map_as_vec.hpp"
 
 namespace json_utils {
 
@@ -351,22 +351,38 @@ namespace json_utils {
         sub_definition.AddMember("command_ids", cmd_int_ids, alloc);
     }
 
-    static const matya::map_as_vec<int> COMPTYPE_TO_INT = {
-        {"static_text", COMP_STATIC_TEXT},
-        {"file", COMP_FILE},
-        {"folder", COMP_FOLDER},
-        {"dir", COMP_FOLDER},
-        {"choice", COMP_CHOICE},
-        {"combo", COMP_CHOICE},
-        {"check", COMP_CHECK},
-        {"check_array", COMP_CHECK_ARRAY},
-        {"checks", COMP_CHECK_ARRAY},
-        {"text", COMP_TEXT},
-        {"text_box", COMP_TEXT},
-        {"int", COMP_INT},
-        {"integer", COMP_INT},
-        {"float", COMP_FLOAT},
-    };
+    // don't use map. it will make exe larger.
+    int ComptypeToInt(const char* comptype) {
+        if (strcmp(comptype, "static_text") == 0)
+            return COMP_STATIC_TEXT;
+        else if (strcmp(comptype, "file") == 0)
+            return COMP_FILE;
+        else if (strcmp(comptype, "folder") == 0)
+            return COMP_FOLDER;
+        else if (strcmp(comptype, "dir") == 0)
+            return COMP_FOLDER;
+        else if (strcmp(comptype, "choice") == 0)
+            return COMP_CHOICE;
+        else if (strcmp(comptype, "combo") == 0)
+            return COMP_CHOICE;
+        else if (strcmp(comptype, "check") == 0)
+            return COMP_CHECK;
+        else if (strcmp(comptype, "check_array") == 0)
+            return COMP_CHECK_ARRAY;
+        else if (strcmp(comptype, "checks") == 0)
+            return COMP_CHECK_ARRAY;
+        else if (strcmp(comptype, "text") == 0)
+            return COMP_TEXT;
+        else if (strcmp(comptype, "text_box") == 0)
+            return COMP_TEXT;
+        else if (strcmp(comptype, "int") == 0)
+            return COMP_INT;
+        else if (strcmp(comptype, "integer") == 0)
+            return COMP_INT;
+        else if (strcmp(comptype, "float") == 0)
+            return COMP_FLOAT;
+        return COMP_UNKNOWN;
+    }
 
     // validate one of definitions (["gui"][i]) and store parsed info
     void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
@@ -400,7 +416,7 @@ namespace json_utils {
             CheckJsonType(result, c, "type", JsonType::STRING, label);
             if (!result.ok) return;
             std::string type_str = c["type"].GetString();
-            int type = COMPTYPE_TO_INT.get(type_str, COMP_UNKNOWN);
+            int type = ComptypeToInt(type_str.c_str());
             if (c.HasMember("type_int"))
                 c.RemoveMember("type_int");
             c.AddMember("type_int", type, alloc);

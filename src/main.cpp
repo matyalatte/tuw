@@ -4,7 +4,6 @@
 #include "ui.h"
 #include "json_utils.h"
 #include "main_frame.h"
-#include "map_as_vec.hpp"
 #include "exe_container.h"
 #include "env_utils.h"
 #include "string_utils.h"
@@ -125,16 +124,26 @@ enum Commands: int {
     CMD_MAX
 };
 
-const matya::map_as_vec<int> CMD_TO_INT = {
-    {"merge", CMD_MERGE},
-    {"m", CMD_MERGE},
-    {"split", CMD_SPLIT},
-    {"s", CMD_SPLIT},
-    {"ver", CMD_VERSION},
-    {"v", CMD_VERSION},
-    {"help", CMD_HELP},
-    {"h", CMD_HELP},
-};
+// don't use map. it will make exe larger.
+int CmdToInt(const char* cmd) {
+    if (strcmp(cmd, "merge") == 0)
+        return CMD_MERGE;
+    else if (strcmp(cmd, "m") == 0)
+        return CMD_MERGE;
+    else if (strcmp(cmd, "split") == 0)
+        return CMD_SPLIT;
+    else if (strcmp(cmd, "s") == 0)
+        return CMD_SPLIT;
+    else if (strcmp(cmd, "ver") == 0)
+        return CMD_VERSION;
+    else if (strcmp(cmd, "v") == 0)
+        return CMD_VERSION;
+    else if (strcmp(cmd, "help") == 0)
+        return CMD_HELP;
+    else if (strcmp(cmd, "h") == 0)
+        return CMD_HELP;
+    return CMD_UNKNOWN;
+}
 
 enum Options: int {
     OPT_UNKNOWN = 0,
@@ -144,15 +153,23 @@ enum Options: int {
     OPT_MAX
 };
 
-const matya::map_as_vec<int> OPT_TO_INT = {
-    {"json", OPT_JSON},
-    {"j", OPT_JSON},
-    {"exe", OPT_EXE},
-    {"e", OPT_EXE},
-    {"force", OPT_FORCE},
-    {"f", OPT_FORCE},
-    {"y", OPT_FORCE},
-};
+int OptToInt(const char* opt) {
+    if (strcmp(opt, "json") == 0)
+        return OPT_JSON;
+    else if (strcmp(opt, "j") == 0)
+        return OPT_JSON;
+    else if (strcmp(opt, "exe") == 0)
+        return OPT_EXE;
+    else if (strcmp(opt, "e") == 0)
+        return OPT_EXE;
+    else if (strcmp(opt, "force") == 0)
+        return OPT_FORCE;
+    else if (strcmp(opt, "f") == 0)
+        return OPT_FORCE;
+    else if (strcmp(opt, "y") == 0)
+        return OPT_FORCE;
+    return OPT_UNKNOWN;
+}
 
 #ifdef _WIN32
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
@@ -176,7 +193,7 @@ int main(int argc, char* argv[], char* envp[]) {
     if (argc == 1) return main_app();
 
     std::string cmd_str = args[1];
-    int cmd_int = CMD_TO_INT.get(cmd_str.c_str(), CMD_UNKNOWN);
+    int cmd_int = CmdToInt(cmd_str.c_str());
     if (cmd_int == CMD_UNKNOWN) {
         PrintUsage();
         fprintf(stderr, "Error: Unknown command detected. (%s)", cmd_str.c_str());
@@ -189,7 +206,7 @@ int main(int argc, char* argv[], char* envp[]) {
 
     for (size_t i = 2; i < argc; i++) {
         std::string opt_str = args[i];
-        int opt_int = OPT_TO_INT.get(opt_str.c_str(), OPT_UNKNOWN);
+        int opt_int = OptToInt(opt_str.c_str());
         if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && argc <= i + 1) {
             PrintUsage();
             fprintf(stderr, "Error: This option requires a file path. (%s)\n", opt_str.c_str());
