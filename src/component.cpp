@@ -2,6 +2,7 @@
 #include "json_utils.h"
 #include "env_utils.h"
 #include "string_utils.h"
+#include "tuw_constants.h"
 
 enum ComponentType: int {
     COMP_UNKNOWN = 0,
@@ -153,6 +154,7 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     uiGridAppend(grid, uiControl(button),
         1, 0, 1, 1,
         0, uiAlignFill, 0, uiAlignFill);
+    uiGridSetSpacing(grid, tuw_constants::GRID_XSPACE, tuw_constants::GRID_YSPACE);
 
     uiBoxAppend(box, uiControl(grid), 0);
     if (j.HasMember("tooltip"))
@@ -317,6 +319,7 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
     uiGridAppend(grid, uiControl(button),
         1, 0, 1, 1,
         0, uiAlignFill, 0, uiAlignFill);
+    uiGridSetSpacing(grid, tuw_constants::GRID_XSPACE, tuw_constants::GRID_YSPACE);
 
     uiBoxAppend(box, uiControl(grid), 0);
     if (j.HasMember("tooltip"))
@@ -438,12 +441,14 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
     std::vector<uiCheckbox*>* checks = new std::vector<uiCheckbox*>();
     std::vector<std::string> values;
+    uiBox* check_array_box = uiNewVerticalBox();
+    uiBoxSetSpacing(check_array_box, tuw_constants::BOX_CHECKS_SPACE);
     size_t id = 0;
     for (const rapidjson::Value& i : j["items"].GetArray()) {
         const char* label = i["label"].GetString();
         uiCheckbox* check = uiNewCheckbox(label);
         uiCheckboxSetChecked(check, json_utils::GetBool(i, "default", false));
-        uiBoxAppend(box, uiControl(check), 0);
+        uiBoxAppend(check_array_box, uiControl(check), 0);
         if (i.HasMember("tooltip")) {
             m_tooltip = uiTooltipSetControl(uiControl(check),
                                             json_utils::GetString(i, "tooltip", ""));
@@ -453,6 +458,7 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
         values.push_back(value);
         id++;
     }
+    uiBoxAppend(box, uiControl(check_array_box), 0);
     SetValues(values);
     m_widget = checks;
 }

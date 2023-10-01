@@ -231,7 +231,7 @@ void MainFrame::UpdatePanel(int definition_id) {
 
     uiBox* old_box = m_box;
     m_box = uiNewVerticalBox();
-    uiBoxSetPadded(m_box, 1);
+    uiBoxSetSpacing(m_box, tuw_constants::BOX_MAIN_SPACE);
 
     // Delete old components
     for (Component* comp : m_components) {
@@ -245,6 +245,7 @@ void MainFrame::UpdatePanel(int definition_id) {
     if (sub_definition["components"].Size() > 0) {
         for (rapidjson::Value& c : sub_definition["components"].GetArray()) {
             uiBox* priv_box = uiNewVerticalBox();
+            uiBoxSetSpacing(priv_box, tuw_constants::BOX_SUB_SPACE);
             new_comp = Component::PutComponent(priv_box, c);
             if (new_comp == nullptr) {
                 ShowErrorDialog("Unknown component type detected. This is unexpected.");
