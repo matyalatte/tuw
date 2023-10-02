@@ -372,7 +372,9 @@ Choice::Choice(uiBox* box, const rapidjson::Value& j)
         const char* value = json_utils::GetString(i, "value", label);
         values.push_back(value);
     }
-    uiBoxAppend(box, uiControl(choice), 0);
+    uiBox* hbox = uiNewHorizontalBox();
+    uiBoxAppend(hbox, uiControl(choice), 0);
+    uiBoxAppend(box, uiControl(hbox), 0);
     uiComboboxSetSelected(choice, json_utils::GetInt(j, "default", 0) % j["items"].Size());
 
     SetValues(values);
@@ -544,7 +546,7 @@ IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
         inc = 1;
     }
     int val = json_utils::GetInt(j, "default", min);
-    bool wrap = json_utils::GetBool(j, "wrap", false);  // not supported yet?
+    bool wrap = json_utils::GetBool(j, "wrap", false);
     uiSpinbox* picker = uiNewSpinboxDoubleEx(
         static_cast<double>(min),
         static_cast<double>(max),
@@ -552,7 +554,9 @@ IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
         static_cast<double>(inc),
         static_cast<int>(wrap));
     uiSpinboxSetValue(picker, val);
-    uiBoxAppend(box, uiControl(picker), 0);
+    uiBox* hbox = uiNewHorizontalBox();
+    uiBoxAppend(hbox, uiControl(picker), 0);
+    uiBoxAppend(box, uiControl(hbox), 0);
     if (j.HasMember("tooltip"))
         m_tooltip = uiTooltipSetSpinbox(picker, json_utils::GetString(j, "tooltip", ""));
     m_widget = picker;
@@ -600,7 +604,9 @@ FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
     bool wrap = json_utils::GetBool(j, "wrap", false);
     uiSpinbox* picker = uiNewSpinboxDoubleEx(min, max, digits, inc, static_cast<int>(wrap));
     uiSpinboxSetValueDouble(picker, val);
-    uiBoxAppend(box, uiControl(picker), 0);
+    uiBox* hbox = uiNewHorizontalBox();
+    uiBoxAppend(hbox, uiControl(picker), 0);
+    uiBoxAppend(box, uiControl(hbox), 0);
     if (j.HasMember("tooltip"))
         m_tooltip = uiTooltipSetSpinbox(picker, json_utils::GetString(j, "tooltip", ""));
     m_widget = picker;
