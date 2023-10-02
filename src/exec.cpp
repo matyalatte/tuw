@@ -64,7 +64,11 @@ ExecuteResult Execute(const std::string& cmd) {
         out_buf[out_read_size] = 0;
         err_read_size = subprocess_read_stderr(&process, err_buf, BUF_SIZE);
         err_buf[err_read_size] = 0;
+#ifdef _WIN32
+        printf("%s", out_buf);
+#else
         PrintFmt("%s", out_buf);
+#endif
         last_line += out_buf;
         err_msg += err_buf;
         if (last_line.length() > 2048) {
