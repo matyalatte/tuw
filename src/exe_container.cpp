@@ -84,7 +84,7 @@ static uint32_t Length(FILE* io) {
     uint32_t cur = ftell(io);
     fseek(io, 0, SEEK_END);
     uint32_t len = ftell(io);
-    fseek(io, cur, SEEK_CUR);
+    fseek(io, cur, SEEK_SET);
     return len;
 }
 

@@ -38,6 +38,7 @@ bool AskOverwrite(const std::string& path) {
     PrintFmt("Overwrite %s? (y/n)\n", path.c_str());
     char ans;
     int ret = scanf("%c", &ans);
+    fseek(stdin, 0, SEEK_END);
     return ret == 1 && (ans == "y"[0] || ans == "Y"[0]);
 }
 
@@ -173,6 +174,13 @@ int OptToInt(const char* opt) {
     return OPT_UNKNOWN;
 }
 
+static std::string RemoveHyphen(const char* arg) {
+    const char* pos = arg;
+    while (pos[0] == "-"[0])
+        pos++;
+    return pos;
+}
+
 #ifdef _WIN32
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
     setlocale(LC_CTYPE, "");
@@ -194,7 +202,7 @@ int main(int argc, char* argv[], char* envp[]) {
     // Launch GUI if no args.
     if (argc == 1) return main_app();
 
-    std::string cmd_str = args[1];
+    std::string cmd_str = RemoveHyphen(args[1].c_str());
     int cmd_int = CmdToInt(cmd_str.c_str());
     if (cmd_int == CMD_UNKNOWN) {
         PrintUsage();
@@ -207,7 +215,7 @@ int main(int argc, char* argv[], char* envp[]) {
     bool force = false;
 
     for (size_t i = 2; i < argc; i++) {
-        std::string opt_str = args[i];
+        std::string opt_str = RemoveHyphen(args[i].c_str());
         int opt_int = OptToInt(opt_str.c_str());
         if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && argc <= i + 1) {
             PrintUsage();

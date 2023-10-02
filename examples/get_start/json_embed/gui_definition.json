@@ -3,8 +3,8 @@
         {
             "window_name": "Embed JSON into EXE",
             "label": "Embed JSON into EXE",
-            "command": "./SimpleCommandRunner merge -j %json% -e %merged_exe% -f",
-            "command_win": "SimpleCommandRunner.exe merge -j %json% -e %merged_exe% -f",
+            "command": "./Tuw merge -j %json% -e %merged_exe% -f",
+            "command_win": "Tuw.exe merge -j %json% -e %merged_exe% -f",
             "show_last_line": true,
             "components": [
                 {
@@ -18,7 +18,7 @@
                     "type": "file",
                     "label": "New exe path",
                     "id": "merged_exe",
-                    "default": "SimpleCommandRunner.new.exe",
+                    "default": "Tuw.new.exe",
                     "add_quotes": true,
                     "platforms": ["win"]
                 },
@@ -26,7 +26,7 @@
                     "type": "file",
                     "label": "New exe path",
                     "id": "merged_exe",
-                    "default": "./SimpleCommandRunner-new",
+                    "default": "./Tuw-new",
                     "add_quotes": true,
                     "platforms": ["linux", "mac"]
                 }
@@ -43,7 +43,7 @@
                     "type": "file",
                     "label": "Exe file you want to split",
                     "id": "merged_exe",
-                    "default": "SimpleCommandRunner.new.exe",
+                    "default": "Tuw.new.exe",
                     "add_quotes": true,
                     "platforms": ["win"]
                 },
@@ -51,7 +51,7 @@
                     "type": "file",
                     "label": "Exe file you want to split",
                     "id": "merged_exe",
-                    "default": "./SimpleCommandRunner-new",
+                    "default": "./Tuw-new",
                     "add_quotes": true,
                     "platforms": ["linux", "mac"]
                 },
@@ -66,7 +66,7 @@
                     "type": "file",
                     "label": "New exe path",
                     "id": "orig_exe",
-                    "default": "SimpleCommandRunner.orig.exe",
+                    "default": "Tuw.orig.exe",
                     "add_quotes": true,
                     "platforms": ["win"]
                 },
@@ -74,7 +74,7 @@
                     "type": "file",
                     "label": "New exe path",
                     "id": "orig_exe",
-                    "default": "./SimpleCommandRunner-orig",
+                    "default": "./Tuw-orig",
                     "add_quotes": true,
                     "platforms": ["linux", "mac"]
                 }

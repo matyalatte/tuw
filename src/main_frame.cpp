@@ -17,6 +17,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
+    bool ignore_external_json = false;
     json_utils::JsonResult result = { true };
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
         bool exists_external_json = env_utils::FileExists("gui_definition.json");
@@ -27,12 +28,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
             if (exe.HasJson()) {
                 PrintFmt("[LoadDefinition] Found JSON in the executable.\n");
                 exe.GetJson(m_definition);
-                if (exists_external_json) {
-                    const char* msg =
-                        "WARNING: Using embedded JSON. gui_definition.json was ignored.\n";
-                    PrintFmt("[LoadDefinition] %s", msg);
-                    // ShowSuccessDialog(msg, "Warning");
-                }
+                ignore_external_json = exists_external_json;
             } else {
                 PrintFmt("[LoadDefinition] Embedded JSON not found.\n");
                 result = { false };
@@ -76,11 +72,17 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
     CreateMenu();
     CreateFrame();
+    uiMainStep(1);  // Need uiMainStep before using uiMsgBox
 
-    if (!result.ok) {
-        uiMainStep(1);
-        JsonLoadFailed(result.msg, m_definition);
+    if (ignore_external_json) {
+        const char* msg =
+            "WARNING: Using embedded JSON. gui_definition.json was ignored.\n";
+        PrintFmt("[LoadDefinition] %s", msg);
+        ShowSuccessDialog(msg, "Warning");
     }
+
+    if (!result.ok)
+        JsonLoadFailed(result.msg, m_definition);
 
     UpdatePanel(definition_id);
     Fit();
