@@ -1,35 +1,35 @@
-# Building workflow for ubuntu 20.04 or later.
+# Building workflow for distributions using musl.
 #
 # 1. Use this docker file to build the executable.
-#    docker build -t tuw_ubuntu -f Dockerfile_Ubuntu ./
+#    docker build -t tuw_alpine -f Dockerfile_Alpine ./
 #
 # 2. Run the built image.
-#    docker run -name tuw_ubuntu tuw_ubuntu
+#    docker run --name tuw_alpine tuw_alpine
 #
 # 3. Use "docker cp" to get the built executable.
-#    docker cp tuw_ubuntu:/Tuw/build/Release/Tuw ./
+#    docker cp tuw_alpine:/Tuw/build/Release/Tuw ./
 #
 # Notes:
 #   -You can use buildx for cross compiling
 #    sudo apt install -y qemu-user-static binfmt-support
-#    docker buildx build --platform linux/arm64 -t tuw_ubuntu -f Dockerfile_Ubuntu ./
+#    docker buildx build --platform linux/arm64 -t tuw_alpine_arm -f Dockerfile_Alpine ./
 #
 #   -You can run tests on the container.
-#    docker build -t tuw_ubuntu -f Dockerfile_Ubuntu ./
-#    docker run --rm --init -i tuw_ubuntu xvfb-run bash test.sh
+#    docker build -t tuw_alpine -f Dockerfile_Alpine ./
+#    docker run --rm --init -i tuw_alpine xvfb-run bash test.sh
 
 # Base image
-ARG OS=ubuntu:20.04
+ARG OS=alpine:3.16.5
 FROM ${OS}
 
 # Install packages
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-            ca-certificates build-essential libgtk-3-dev git python3-pip \
-            xvfb at-spi2-core && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk update && \
+    apk add --no-cache \
+        alpine-sdk linux-headers bash gtk+3.0-dev \
+        py3-pip python3 ttf-freefont xvfb-run at-spi2-core
+
+# Need ttf-freefont to avoid a GTK warning
+# "Native Windows wider or taller than * pixels are not supported"
 
 # Install meson
 RUN pip3 install meson ninja
