@@ -26,8 +26,10 @@ int main_app() {
         return 1;
     }
 
+#ifdef __linux__
     // Need this for uiMainStep(1)
     uiMainSteps();
+#endif
 
     MainFrame main_frame = MainFrame();
     uiMain();

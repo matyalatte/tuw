@@ -72,7 +72,9 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
     CreateMenu();
     CreateFrame();
+#ifdef __linux__
     uiMainStep(1);  // Need uiMainStep before using uiMsgBox
+#endif
 
     if (ignore_external_json) {
         const char* msg =
@@ -109,6 +111,22 @@ void MainFrame::CreateFrame() {
     uiWindow* log_win = uiNewWindow(env_utils::GetExecutablePath().c_str(), 600, 400, 0);
     uiWindowOnClosing(log_win, OnClosing, NULL);
     uiMultilineEntry* log_entry = uiNewMultilineEntry();
+
+    /*
+    If your monospace font doesn't work,
+    you should make a config file to change the default font.
+    ```
+    <!-- ~/.config/fontconfig/fonts.conf -->
+    <match target="pattern">
+        <test name="family" qual="any">
+            <string>monospace</string>
+        </test>
+        <edit binding="strong" mode="prepend" name="family">
+            <string>Source Code Pro</string>
+        </edit>
+    </match>
+    ```
+    */
     uiUnixMultilineEntrySetMonospace(log_entry, 1);
     uiMultilineEntrySetReadOnly(log_entry, 1);
     SetLogEntry(log_entry);
