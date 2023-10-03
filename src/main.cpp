@@ -2,6 +2,8 @@
 #include <string.h>
 #ifdef _WIN32
 #include <locale.h>
+#else
+#include <sys/stat.h>
 #endif
 #include "ui.h"
 #include "json_utils.h"
@@ -65,6 +67,13 @@ json_utils::JsonResult Merge(const std::string& exe_path, const std::string& jso
     result = exe.Write(new_path);
     if (!result.ok) return result;
     PrintFmt("Generated an executable. (%s)\n", new_path.c_str());
+#ifndef _WIN32
+    // Allow executing file as program.
+    chmod(new_path.c_str(),
+          S_IRUSR | S_IWUSR | S_IXUSR |  // rwx
+          S_IRGRP | S_IXGRP |  // r-x
+          S_IROTH | S_IXOTH);  // r-x
+#endif
     return { true };
 }
 
@@ -91,6 +100,13 @@ json_utils::JsonResult Split(const std::string& exe_path, const std::string& jso
     if (!result.ok) return result;
     PrintFmt("Generated an executable. (%s)\n", new_path.c_str());
     PrintFmt("Exported a json file. (%s)\n", json_path.c_str());
+#ifndef _WIN32
+    // Allow executing file as program.
+    chmod(new_path.c_str(),
+          S_IRUSR | S_IWUSR | S_IXUSR |  // rwx
+          S_IRGRP | S_IXGRP |  // r-x
+          S_IROTH | S_IXOTH);  // r-x
+#endif
     return { true };
 }
 
