@@ -16,7 +16,6 @@
 int main_app() {
     uiInitOptions options;
     const char *err;
-    uiTab *tab;
 
     memset(&options, 0, sizeof (uiInitOptions));
     err = uiInit(&options);
@@ -127,7 +126,7 @@ void PrintUsage() {
         "                default to 'gui_definition.json'\n"
         "       -e str : path to a new executable file.\n"
         "                default to exe name + '.new'\n"
-        "       -f     : Force to overwrite files."
+        "       -f     : Force to overwrite files.\n"
         "\n"
         "Example:\n"
         "    Tuw merge -f -j my_definition.json -e MyGUI.exe\n"
@@ -284,7 +283,7 @@ int main(int argc, char* argv[], char* envp[]) {
     }
 
     rapidjson::Document json(rapidjson::kObjectType);
-    json_utils::JsonResult result;
+    json_utils::JsonResult result = { true };
 
     switch (cmd_int) {
         case CMD_MERGE:
