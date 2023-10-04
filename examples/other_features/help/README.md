@@ -8,7 +8,7 @@ You can put some documents in menu bar.
 "help": [
     {
         "type": "url",
-        "label": "About Simple Command Runner",
+        "label": "About Tuw",
         "url": "https://github.com/matyalatte/Tuw"
     },
     {

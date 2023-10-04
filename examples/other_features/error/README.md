@@ -2,7 +2,7 @@
 
 ## Error Dialogue
 
-When the executed command output something to `stderr`, Simple Command Runner will show an error dialogue.  
+When the executed command output something to `stderr`, Tuw will show an error dialogue.  
 
 ![Error](https://user-images.githubusercontent.com/69258547/236607612-183a72d9-a7f3-4006-b545-8d2f5c9ca890.png)  
 

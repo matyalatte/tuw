@@ -12,9 +12,9 @@ I made sure I can build it with the following platforms and compilers.
 
 And it should support your platform as well if [libui](https://github.com/libui-ng/libui-ng) supports.  
 
-## CMake
+## Meson
 
-There are platform-specific documents for building the executable with CMake.  
+There are platform-specific documents for building the executable with [Meson](https://github.com/mesonbuild/meson).  
 
 -   [Building Workflow for Windows](./Build-on-Windows.md)  
 -   [Building Workflow for macOS](./Build-on-Mac.md)  
