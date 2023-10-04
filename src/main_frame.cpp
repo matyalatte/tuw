@@ -286,6 +286,7 @@ void MainFrame::UpdatePanel(int definition_id) {
     const char* button = json_utils::GetString(sub_definition, "button", "Run");
     m_run_button = uiNewButton(button);
     uiButtonOnClicked(m_run_button, OnClicked, this);
+    uiButtonSetMinSize(m_run_button, tuw_constants::BTN_WIDTH, tuw_constants::BTN_HEIGHT);
     uiGridAppend(m_grid, uiControl(m_run_button), 0, 1, 1, 1, 0, uiAlignCenter, 0, uiAlignFill);
 
     uiWindowSetChild(m_mainwin, uiControl(m_grid));

@@ -20,6 +20,8 @@ namespace tuw_constants {
     const int BOX_MAIN_SPACE = 6;
     const int BOX_SUB_SPACE = 1;
     const int BOX_CHECKS_SPACE = 0;
+    const int BTN_WIDTH = 90;
+    const int BTN_HEIGHT = 24;
 #elif defined(__linux__)
     constexpr char OS[] = "linux";
     const int GRID_COMP_XSPACE = 4;
@@ -27,12 +29,16 @@ namespace tuw_constants {
     const int BOX_MAIN_SPACE = 12;
     const int BOX_SUB_SPACE = 4;
     const int BOX_CHECKS_SPACE = 0;
+    const int BTN_WIDTH = 84;
+    const int BTN_HEIGHT = -1;
 #else
     constexpr char OS[] = "mac";
-    const int GRID_COMP_XSPACE = 3;
-    const int GRID_MAIN_SPACE = 9;
-    const int BOX_MAIN_SPACE = 9;
-    const int BOX_SUB_SPACE = 3;
-    const int BOX_CHECKS_SPACE = 3;
+    const int GRID_COMP_XSPACE = 4;
+    const int GRID_MAIN_SPACE = 12;
+    const int BOX_MAIN_SPACE = 12;
+    const int BOX_SUB_SPACE = 4;
+    const int BOX_CHECKS_SPACE = 4;
+    const int BTN_WIDTH = 84;
+    const int BTN_HEIGHT = 0;
 #endif
 }  // namespace tuw_constants
