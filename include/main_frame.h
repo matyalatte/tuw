@@ -15,7 +15,7 @@ class MainFrame {
     uiWindow* m_mainwin;
 
     std::vector<Component*> m_components;
-    uiBox* m_box;
+    uiGrid* m_grid;
     uiButton* m_run_button;
 
     void CreateFrame();

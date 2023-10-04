@@ -154,7 +154,7 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     uiGridAppend(grid, uiControl(button),
         1, 0, 1, 1,
         0, uiAlignFill, 0, uiAlignFill);
-    uiGridSetSpacing(grid, tuw_constants::GRID_XSPACE, tuw_constants::GRID_YSPACE);
+    uiGridSetSpacing(grid, tuw_constants::GRID_COMP_XSPACE, 0);
 
     uiBoxAppend(box, uiControl(grid), 0);
     if (j.HasMember("tooltip"))
@@ -319,7 +319,7 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
     uiGridAppend(grid, uiControl(button),
         1, 0, 1, 1,
         0, uiAlignFill, 0, uiAlignFill);
-    uiGridSetSpacing(grid, tuw_constants::GRID_XSPACE, tuw_constants::GRID_YSPACE);
+    uiGridSetSpacing(grid, tuw_constants::GRID_COMP_XSPACE, 0);
 
     uiBoxAppend(box, uiControl(grid), 0);
     if (j.HasMember("tooltip"))

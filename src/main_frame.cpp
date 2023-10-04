@@ -12,7 +12,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
               tuw_constants::VERSION, tuw_constants::AUTHOR);
     PrintFmt(tuw_constants::LOGO);
 
-    m_box = NULL;
+    m_grid = NULL;
     std::string exe_path = env_utils::GetExecutablePath();
 
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
@@ -106,6 +106,7 @@ void MainFrame::CreateFrame() {
     uiWindowOnClosing(m_mainwin, OnClosing, NULL);
     uiOnShouldQuit(OnShouldQuit, m_mainwin);
     uiControlShow(uiControl(m_mainwin));
+    uiWindowSetMargined(m_mainwin, 1);
 
 #ifdef __linux__
     uiWindow* log_win = uiNewWindow(env_utils::GetExecutablePath().c_str(), 600, 400, 0);
@@ -249,9 +250,11 @@ void MainFrame::UpdatePanel(int definition_id) {
                                                     "window_name", tuw_constants::TOOL_NAME);
     uiWindowSetTitle(m_mainwin, window_name);
 
-    uiBox* old_box = m_box;
-    m_box = uiNewVerticalBox();
-    uiBoxSetSpacing(m_box, tuw_constants::BOX_MAIN_SPACE);
+    uiGrid* old_grid = m_grid;
+    m_grid = uiNewGrid();
+    uiGridSetSpacing(m_grid, tuw_constants::GRID_MAIN_SPACE, tuw_constants::GRID_MAIN_SPACE);
+    uiBox* main_box = uiNewVerticalBox();
+    uiBoxSetSpacing(main_box, tuw_constants::BOX_MAIN_SPACE);
 
     // Delete old components
     for (Component* comp : m_components) {
@@ -273,21 +276,22 @@ void MainFrame::UpdatePanel(int definition_id) {
                 new_comp->SetConfig(m_config);
                 m_components.push_back(new_comp);
             }
-        uiBoxAppend(m_box, uiControl(priv_box), 0);
+        uiBoxAppend(main_box, uiControl(priv_box), 0);
         }
     }
+
+    uiGridAppend(m_grid, uiControl(main_box), 0, 0, 1, 1, 1, uiAlignFill, 1, uiAlignFill);
 
     // put a button
     const char* button = json_utils::GetString(sub_definition, "button", "Run");
     m_run_button = uiNewButton(button);
     uiButtonOnClicked(m_run_button, OnClicked, this);
-    uiBoxAppend(m_box, uiControl(m_run_button), 0);
+    uiGridAppend(m_grid, uiControl(m_run_button), 0, 1, 1, 1, 0, uiAlignCenter, 0, uiAlignFill);
 
-    uiWindowSetChild(m_mainwin, uiControl(m_box));
-    uiWindowSetMargined(m_mainwin, 1);
+    uiWindowSetChild(m_mainwin, uiControl(m_grid));
 
-    if (old_box != NULL) {
-        uiControlDestroy(uiControl(old_box));
+    if (old_grid != NULL) {
+        uiControlDestroy(uiControl(old_grid));
     }
 }
 
