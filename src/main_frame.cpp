@@ -103,6 +103,10 @@ static int OnShouldQuit(void *data) {
 
 void MainFrame::CreateFrame() {
     m_mainwin = uiNewWindow(tuw_constants::TOOL_NAME, 400, 1, 1);
+#ifdef __APPLE__
+    // Move the default position from bottom left to top left.
+    uiWindowSetPosition(m_mainwin, 0, 0);
+#endif
     uiWindowOnClosing(m_mainwin, OnClosing, NULL);
     uiOnShouldQuit(OnShouldQuit, m_mainwin);
     uiControlShow(uiControl(m_mainwin));
