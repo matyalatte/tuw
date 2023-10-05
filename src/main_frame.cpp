@@ -344,7 +344,12 @@ std::string MainFrame::GetCommand() {
 
 void MainFrame::RunCommand() {
     char* text = uiButtonText(m_run_button);
-    uiButtonSetText(m_run_button, "processing...");
+    uiButtonSetText(m_run_button, "Processing...");
+#ifdef __APPLE__
+    uiMainStep(1);
+#elif defined(__linux__)
+    uiUnixWaitEvents();
+#endif
 
     std::string cmd = GetCommand();
     PrintFmt("[RunCommand] Command: %s\n", cmd.c_str());
