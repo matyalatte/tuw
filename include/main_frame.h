@@ -43,3 +43,5 @@ class MainFrame {
         uiControlDestroy(uiControl(m_mainwin));
     }
 };
+
+void MainFrameDisableDialog();

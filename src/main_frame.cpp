@@ -428,12 +428,20 @@ void MainFrame::SaveConfig() {
     }
 }
 
+bool g_no_dialog = false;
+
 void MainFrame::ShowSuccessDialog(const std::string& msg, const std::string& title) {
+    if (g_no_dialog) return;
     uiMsgBox(m_mainwin, title.c_str(), msg.c_str());
 }
 
 void MainFrame::ShowErrorDialog(const std::string& msg, const std::string& title) {
+    if (g_no_dialog) return;
     uiMsgBoxError(m_mainwin, title.c_str(), msg.c_str());
+}
+
+void MainFrameDisableDialog() {
+    g_no_dialog = true;
 }
 
 void MainFrame::GetDefinition(rapidjson::Document& json) {

@@ -6,16 +6,25 @@
 #include "windows.h"
 #endif
 
-inline bool IsReturn(const char& input) {
-    return input == '\n' || input == '\r';
-}
-
-std::string GetLastLine(const std::string& input) {
-    if (input.length() <= 2) return input;
-    size_t position = input.length() - 3;
-    while ((!IsReturn(input[position])) && position > 0) position--;
-    if (IsReturn(input[position])) position += 1;
-    return input.substr(position);
+static std::string GetLastLine(const std::string& input) {
+    if (input.length() == 0) return "";
+    size_t end = input.length() - 1;
+    if (input[end] == '\n') {
+        if (end == 0) return "";
+        end--;
+    }
+#ifdef _WIN32
+    if (input[end] == '\r') {
+        if (end == 0) return "";
+        end--;
+    }
+#endif
+    if (end == 0) return "";
+    size_t position = end;
+    while ((input[position] != '\n') && position > 0) position--;
+    if (input[position] == '\n') position++;
+    if (end - position <= 0) return "";
+    return input.substr(position, end - position + 1);
 }
 
 ExecuteResult Execute(const std::string& cmd) {
