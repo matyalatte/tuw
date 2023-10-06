@@ -44,9 +44,8 @@ jobs:
 
             ## Notes
 
-            - Linux builds only support distributions that use glibc.
-
-            - [Build the executable](https://github.com/matyalatte/${{ env.TOOL_NAME }}/blob/libui/docs/Building.md) by yourself if you want to use it on unsupported distros.
+            - Linux builds only support distributions using glibc.
+              [Build the executable](https://github.com/matyalatte/${{ env.TOOL_NAME }}/blob/libui/docs/Building.md) by yourself if you want to use it on unsupported distros.
           draft: true
           prerelease: false
 

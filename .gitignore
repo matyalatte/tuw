@@ -27,6 +27,7 @@ subprojects/google*
 *.new
 *.zip
 
+Tuw*
 SimpleCommandRunner
 *.tar.*
 

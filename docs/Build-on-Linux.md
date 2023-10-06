@@ -3,7 +3,7 @@
 ## Requirements
 
 -   Build tools (e.g. `build-essential` for Ubuntu)
--   GTK3.0 (e.g. `libgtk-3-dev` for Ubuntu)
+-   GTK+ 3.10 or later (e.g. `libgtk-3-dev` for Ubuntu)
 -   Ninja
 -   [Meson](https://github.com/mesonbuild/meson) (**0.58** or later)
 -   bash
@@ -37,6 +37,24 @@ If you will use GCC, you can get coverage reports.
 Install lcov with `sudo apt install lcov`.  
 Then, type `bash shell_scripts/coverage.sh` or `bash shell_scripts/coverage.sh Debug` on the Terminal.  
 It'll generate html files in `./Tuw/coverage-report/`.
+
+## GLIBC Dependencies
+
+If you built the binary with GLIBC, you can use `check_glibc_compatibility.sh` to see the required versions of GLIBC and GLIBCXX.  
+
+```console
+$ bash shell_scripts/check_libc_compatibility.sh build/Release/Tuw
+Required GLIBC versions
+2.2.5
+2.3
+2.3.4
+2.4
+2.7
+2.15
+Required GLIBCXX versions
+3.4
+3.4.21
+```
 
 ## Dockerfiles
 

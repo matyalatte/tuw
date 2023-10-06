@@ -9,15 +9,18 @@
                     "type": "file",
                     "label": "文件",
                     "extension": "any files | *",
+                    "default": "ああああ",
                     "id": "รหัส"
                 },
                 {
                     "type": "folder",
-                    "label": "폴더"
+                    "label": "폴더",
+                    "default": "いいいい"
                 },
                 {
                     "type": "check",
-                    "label": "вариант"
+                    "label": "вариант",
+                    "default": true
                 }
             ]
         }

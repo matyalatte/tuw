@@ -3,7 +3,7 @@
 You can use file pickers and folder pickers.  
 Of course, you can drop files on the pickers to specifiy the paths.  
 
-![PathPikcers](https://user-images.githubusercontent.com/69258547/171440880-5948a7f0-5e26-4c38-ab95-8c6daaf67f93.png)
+![PathPikcers](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/47bf541f-7ac4-465b-8bff-512c48d9d2a9)
 
 ```json
 {

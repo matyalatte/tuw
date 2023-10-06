@@ -36,4 +36,4 @@ Tuw.new split -j extracted.json -e Tuw -f
 [The JSON file](./gui_definition.json) in this folder is for the JSON embedding.  
 It means, Tuw will be the GUI wrapper for itself.  
 
-![embed json](https://github.com/matyalatte/Tuw/assets/69258547/5862595c-bf66-4506-9b6a-9ad3b85fcc28)  
+![embed json](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/d28e9bfd-4905-4697-9523-49af8c294e6b)  

@@ -9,7 +9,7 @@ You can see some JSON files to learn how to use Tuw.
 -   [Putting Components](./get_start/put_component/): Example for a text box.
 -   [JSON Embedding](./get_start/json_embed): You can embed JSON into exe!
 
-![minimal](https://user-images.githubusercontent.com/69258547/236601237-38a47373-703c-4bda-a5d9-25a1b0256425.png)  
+![minimal](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/7be563b8-1ee0-4500-94c4-5ca575ad185f)  
 
 ## 2. Components
 
@@ -20,7 +20,7 @@ Examples for GUI components (e.g. file pickers)
 -   [Check Boxes](./components/check_boxes/): Check box and check array.
 -   [Other components](./components/other_components/): There are more components you can use.
 
-![PathPikcers](https://user-images.githubusercontent.com/69258547/171440880-5948a7f0-5e26-4c38-ab95-8c6daaf67f93.png)  
+![PathPikcers](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/47bf541f-7ac4-465b-8bff-512c48d9d2a9)  
 
 ## 3. Options for Components
 
@@ -32,7 +32,7 @@ Examples for component options.
 -   [Placeholder](./comp_options/placeholder/): An option to show a message when the text box is empty.
 -   [Renaming Buttons](./comp_options/button/): An option to rename buttons of path pickers.
 
-![tooltip](https://user-images.githubusercontent.com/69258547/223138605-9a9aa6a7-a5c9-4aa6-b0af-dd674b46160a.png)  
+![tooltip](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/8c7244ee-48ce-4492-973c-a3e6c628b8ed)  
 
 ## 4. Other Features
 
@@ -45,7 +45,7 @@ There are more features you can use.
 -   [Version Checking](./other_features/version_check/): Constraints on the tool version.
 -   [Alternate Spellings](./other_features/alternate_spellings/): Tuw supports multiple spellings for some JSON keys and values.
 
-![help](https://user-images.githubusercontent.com/69258547/222972599-bab3ff85-2c6c-432d-91e7-8244a8a8e514.png)  
+![help](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/e408a179-6f9f-4769-ab3d-57f87d392a4f)  
 
 ## 5. All Keys
 

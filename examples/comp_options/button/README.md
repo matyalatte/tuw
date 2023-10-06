@@ -3,7 +3,7 @@
 `button` is an optional key for path pickers.  
 It'll rename the button of the picker.  
 
-![Button](https://github.com/matyalatte/Tuw/assets/69258547/979d987b-842a-4a20-a2e1-4fde85836a3e)
+![Button](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/8505cd7c-5045-4be5-8bba-0e2bd000523a)
 
 ```json
 {

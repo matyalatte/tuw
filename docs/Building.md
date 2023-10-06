@@ -1,16 +1,15 @@
 # Building Executables
 
-## Platforms
+## Supported Platforms
 
 Tuw uses cross-platform libraries.  
-I made sure I can build it with the following platforms and compilers.
+You can build it on the following platforms.  
 
--   Windows10 + MSVC 19.31
--   MacOS 11 + AppleClang 13.0
--   Ubuntu 20.04 + GCC 9.4
--   Alpine Linux 3.16 + GCC 11.2
+-   Windows 7 or later  
+-   macOS 10.9 or later  
+-   Linux with GTK+ 3.10 or later  
 
-And it should support your platform as well if [libui](https://github.com/libui-ng/libui-ng) supports.  
+You can also see the list of tested platforms [here](./Test-Env.md).
 
 ## Meson
 

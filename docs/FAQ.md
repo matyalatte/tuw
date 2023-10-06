@@ -25,13 +25,10 @@ The executable will use them as default values when launching.
 
 Check `Allow executing file as program.` (Properties->Permissions->Execute)  
 You will be able to launch the executable by double-click.  
-![CloudNotDisplay](https://user-images.githubusercontent.com/69258547/189526464-cd62887b-62b1-4071-ae38-a7ab73600bbf.png)  
+![CloudNotDisplay](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/ecf995a6-cc75-4ba6-a253-ad2104f2e2c9)  
 
-## My Linux machine says nothing when clicking the executable.
+## My Linux machine says `File not found` (or nothing) when clicking the executable.
 
-Launch it from the terminal to see the error messages.  
 It could be due to glibc dependences.  
-![GLIBC](https://user-images.githubusercontent.com/69258547/190676422-ae1af3a0-e9c1-4afd-a6ec-62803dc303c0.png)  
-The Linux build only works on Ubuntu 20.04 or later due to the dependences.  
-Or you need to get the libs.  
-Or need to build the executable by your self.  
+The released binary requires GTK+ 3.10, GLIBC 2.15, and GLIBCXX 3.4.21 (or newer versions of the libraries).  
+You should get the libs, or [build the executable](./Building.md) by yourself.  
