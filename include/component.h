@@ -11,6 +11,7 @@ class Component {
     std::string m_label;
     std::string m_id;
     bool m_has_string;
+    bool m_is_wide;
     uintptr_t m_tooltip;  // handler for tooltip window
 
  private:
@@ -27,6 +28,7 @@ class Component {
     virtual void GetConfig(rapidjson::Document& config) {}
 
     bool HasString() { return m_has_string; }
+    bool IsWide() { return m_is_wide; }
 
     static Component* PutComponent(uiBox* box, const rapidjson::Value& j);
 };

@@ -301,10 +301,15 @@ void MainFrame::UpdatePanel(int definition_id) {
 }
 
 void MainFrame::Fit() {
+    int width = 200;
+    for (Component* c : m_components) {
+        // Widen the window if a component has text box.
+        if (c->IsWide()) {
+            width = 400;
+            break;
+        }
+    }
     // Fit the window size to the new components.
-    int width;
-    int height;
-    uiWindowContentSize(m_mainwin, &width, &height);
     uiWindowSetContentSize(m_mainwin, width, 1);
 }
 

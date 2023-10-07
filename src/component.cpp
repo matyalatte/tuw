@@ -23,6 +23,7 @@ enum ComponentType: int {
 Component::Component(const rapidjson::Value& j) {
     m_widget = nullptr;
     m_has_string = false;
+    m_is_wide = false;
     m_label = j["label"].GetString();
     m_id = json_utils::GetString(j, "id", "");
     m_tooltip = 0;
@@ -133,6 +134,7 @@ static void onFilesDropped(uiEntry *e, int count, char** names, void *data) {
 // File Picker
 FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
+    m_is_wide = true;
     m_ext = json_utils::GetString(j, "extension", "any files (*.*)|*.*");
     const char* value = json_utils::GetString(j, "default", "");
     const char* empty_message = json_utils::GetString(j, "empty_message", "");
@@ -299,6 +301,7 @@ static void onOpenFolderClicked(uiButton *b, void *data) {
 // Dir Picker
 DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
+    m_is_wide = true;
     const char* value = json_utils::GetString(j, "default", "");
     const char* empty_message = json_utils::GetString(j, "empty_message", "");
     const char* button_label = json_utils::GetString(j, "button", "Browse");
@@ -504,6 +507,7 @@ void CheckArray::GetConfig(rapidjson::Document& config) {
 // TextBox
 TextBox::TextBox(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
+    m_is_wide = true;
     const char* value = json_utils::GetString(j, "default", "");
     const char* empty_message = json_utils::GetString(j, "empty_message", "");
     uiEntry* entry = uiNewEntry();
