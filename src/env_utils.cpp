@@ -106,7 +106,7 @@ namespace env_utils {
         const size_t LINKSIZE = 100;
         char link[LINKSIZE];
         snprintf(link, LINKSIZE, "/proc/%d/exe", getpid() );
-        size_t path_size = readlink(link, path, PATH_MAX);
+        int path_size = readlink(link, path, PATH_MAX);
         if (path_size == -1)
             path_size = 0;
         path[path_size] = 0;

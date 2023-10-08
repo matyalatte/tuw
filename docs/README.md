@@ -45,7 +45,7 @@ You can download executables from [the release page](https://github.com/matyalat
 -   `Tuw*-Linux*.tar.bz2` is for Linux (with GTK3.10+, GLIBC2.15+, and GLIBCXX3.4.21+).  
 
 > Linux builds only support distributions using glibc.  
-[Build the executable](./Building.md) by yourself if you want to use it on unsupported distros.  
+> [Build the executable](./Building.md) by yourself if you want to use it on unsupported distros.  
 
 ## Examples
 

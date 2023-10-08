@@ -23,7 +23,7 @@ static std::string GetLastLine(const std::string& input) {
     size_t position = end;
     while ((input[position] != '\n') && position > 0) position--;
     if (input[position] == '\n') position++;
-    if (end - position <= 0) return "";
+    if (end <= position) return "";
     return input.substr(position, end - position + 1);
 }
 

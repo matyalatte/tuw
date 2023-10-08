@@ -207,7 +207,8 @@ class FilterList {
     uiFileDialogParamsFilter* ui_filters;
 
  public:
-    explicit FilterList(const std::string& ext): filter_buf(), filters(), ui_filters() {
+    FilterList(): filter_buf(NULL), filters(), ui_filters(NULL) {}
+    void MakeFilters(const std::string& ext) {
         filter_buf =  new char[ext.length() + 1];
         size_t i = 0;
         size_t start = 0;
@@ -238,7 +239,6 @@ class FilterList {
         if (is_reading_pattern) {
             filter->AddPattern(&filter_buf[start]);
             AddFilter(filter);
-            filter = new Filter();
         }
 
         ui_filters = new uiFileDialogParamsFilter[filters.size()];
@@ -279,7 +279,8 @@ void FilePicker::OpenFile() {
     params.defaultPath = NULL;
     params.defaultName = NULL;
 
-    FilterList filter_list(m_ext);
+    FilterList filter_list = FilterList();
+    filter_list.MakeFilters(m_ext);
 
     params.filterCount = filter_list.GetSize();
     params.filters = filter_list.ToLibuiFilterList();
