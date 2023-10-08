@@ -1,15 +1,8 @@
 # Frequently Asked Questions
 
-## Can I redistribute Simple Command Runner with my scripts?
+## Can I redistribute Tuw with my scripts?
 
 Yes, and you can rename it to `GUI.exe`, `'project name'-GUI.exe`, or `'project name'_GUI.exe`.  
-But note that it's licensed under GPL.  
-You should inform users of the license and the link to the source code.  
-
-## Should my scripts be distributed under the GPL?
-
-No, Simple Command Runner should be under the GPL, but you can use any licneses for other files.
-Because it will execute your command in another process.  
 
 ## How can I insert an input into multiple places in commands?
 
@@ -23,11 +16,6 @@ So, it's the same question as "How can I run multiple commands as a single line 
 It's a little complicated task, but you can find tons of websites that explain about it.  
 Also, you can see [some examples](../examples/tips/multi_lines/) about it.
 
-## 1MB is not small for me...
-
-I mean, it's small as a cross-platform and native looking GUI.  
-Well, you can use [UPX](./UPX.md) if you want smaller executables.  
-
 ## What's `gui_config.json` for?
 
 It saves the previously executed arguments.  
@@ -37,13 +25,10 @@ The executable will use them as default values when launching.
 
 Check `Allow executing file as program.` (Properties->Permissions->Execute)  
 You will be able to launch the executable by double-click.  
-![CloudNotDisplay](https://user-images.githubusercontent.com/69258547/189526464-cd62887b-62b1-4071-ae38-a7ab73600bbf.png)  
+![CloudNotDisplay](https://github.com/matyalatte/tuw/assets/69258547/ecf995a6-cc75-4ba6-a253-ad2104f2e2c9)  
 
-## My Linux machine says nothing when clicking the executable.
+## My Linux machine says `File not found` (or nothing) when clicking the executable.
 
-Launch it from the terminal to see the error messages.  
 It could be due to glibc dependences.  
-![GLIBC](https://user-images.githubusercontent.com/69258547/190676422-ae1af3a0-e9c1-4afd-a6ec-62803dc303c0.png)  
-The Linux build only works on Ubuntu 20.04 or later due to the dependences.  
-Or you need to get the libs.  
-Or need to build the executable by your self.  
+The released binary requires GTK+ 3.10, GLIBC 2.15, and GLIBCXX 3.4.21 (or newer versions of the libraries).  
+You should get the libs, or [build the executable](./Building.md) by yourself.  

@@ -1,20 +1,26 @@
-# Simple Command Runner ver 0.5.1
+# Tuw: a tiny GUI wrapper for command-line tools
 
-![build](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/build_all.yml/badge.svg)
-![test](https://github.com/matyalatte/Simple-Command-Runner/actions/workflows/test.yml/badge.svg)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4aee3ee5172e4c38915d07f9c62725d3)](https://www.codacy.com/gh/matyalatte/Simple-Command-Runner/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matyalatte/Simple-Command-Runner&amp;utm_campaign=Badge_Grade)
-<a href="https://www.buymeacoffee.com/matyalatteQ" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>  
+```
+  _____  
+ |_   _|   ___      __
+   | || | | \ \ /\ / /
+   | || |_| |\ V  V / 
+   |_| \__,_| \_/\_/
+  Tiny UI wrapper for
+       CLI tools
+```
 
-Small and simple GUI wrapper for command-line tools.  
+![build](https://github.com/matyalatte/tuw/actions/workflows/build_all.yml/badge.svg)
+![test](https://github.com/matyalatte/tuw/actions/workflows/test.yml/badge.svg)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4aee3ee5172e4c38915d07f9c62725d3)](https://app.codacy.com/gh/matyalatte/tuw/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
-## Only 1MB for a portable GUI!
+## Only 500KB for a portable GUI!
 
-Simple Command Runner will give a very simple GUI to your scripts.  
-All you need is write a `.json` file and run a small executable.  
-It can make a GUI to run commands of your scripts.  
+Tuw will give a very simple GUI to your scripts.  
+All you need is a JSON file and a tiny executable.  
 **No need coding, no need browsers, and no need stupidly large executables**!  
 
-![sample](https://user-images.githubusercontent.com/69258547/192090786-11a3f5ef-988e-442f-8ba9-fd1636b9f350.png)
+![sample](https://github.com/matyalatte/tuw/assets/69258547/9b3c8487-010e-497b-b66c-95af84906dd0)
 <img src=https://user-images.githubusercontent.com/69258547/192090797-f5e5b52d-59aa-4942-a361-2c8b5c7bd746.png width=387></img>  
 
 ## Features
@@ -31,14 +37,14 @@ It can make a GUI to run commands of your scripts.
 
 ## Downloads
 
-You can download executables from [the release page](https://github.com/matyalatte/Simple-Command-Runner/releases)
+You can download executables from [the release page](https://github.com/matyalatte/tuw/releases)
 
--   `SimpleCommandRunner*-Windows*.zip` is for Windows (7 or later).  
--   `SimpleCommandRunner*-macOS*.tar.bz2` is for macOS (10.10 or later).  
--   `SimpleCommandRunner*-Linux*.tar.bz2` is for Ubuntu (20.04 or later).  
+-   `Tuw*-Windows*.zip` is for Windows (7 or later).  
+-   `Tuw*-macOS*.tar.bz2` is for macOS (10.9 or later).  
+-   `Tuw*-Linux*.tar.bz2` is for Linux (with GTK3.10+, GLIBC2.15+, and GLIBCXX3.4.21+).  
 
-> The linux builds only support Ubuntu due to the glibc dependences.  
-> Build the executable by yourself if you want to use it on other linux distros.  
+> Linux builds only support distributions using glibc.  
+> [Build the executable](./Building.md) by yourself if you want to use it on unsupported distros.  
 
 ## Examples
 
@@ -57,7 +63,7 @@ For VSCode, you can add the schema path to `settings.json` (`File > Preferences 
 "json.schemas": [    
     {
         "fileMatch": [ "gui_definition.json" ],
-        "url": "https://raw.githubusercontent.com/matyalatte/Simple-Command-Runner/main/schema/schema.json"
+        "url": "https://raw.githubusercontent.com/matyalatte/tuw/main/schema/schema.json"
     }
 ]
 ```
@@ -74,18 +80,14 @@ You can also make `gui_definition.json` with [web forms](https://rjsf-team.githu
 
 [Building Executables](./Building.md)
 
-## Want Smaller Executables?
-
-You can use [UPX to compress the executables](./UPX.md).  
-They will be **under 400KB**!  
-
 ## License
 
-Files in this repository are available under the [GPL2+](../license.txt).  
+Files in this repository are available under the [MIT license](../license.txt).  
 
 ## External Projects
 
 | Project | Used for | License |
 | -- | -- | -- |
-| [wxWidgets library](https://github.com/wxWidgets/wxWidgets) | GUI framework | [Modified LGPL](https://github.com/wxWidgets/wxWidgets/blob/master/docs/licence.txt) | 
+| [libui-ng](https://github.com/libui-ng/libui-ng) | GUI framework | [MIT](http://opensource.org/licenses/MIT) | 
 | [RapidJSON](https://github.com/Tencent/rapidjson) | JSON handling | [MIT](http://opensource.org/licenses/MIT) |
+| [subprocess.h](https://github.com/sheredom/subprocess.h) | Command processing | [Unlicense](https://github.com/sheredom/subprocess.h/blob/master/LICENSE) | 

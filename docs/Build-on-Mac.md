@@ -1,48 +1,30 @@
 # Building Workflow for macOS
 
-## 0. Requirements
+## Requirements
 
--   xcode
--   cmake (**3.25** or later)
--   wget
--   Shell scripts in [`./Simple-Command-Runner/shell_scripts`](../shell_scripts)
+-   Xcode
+-   Ninja
+-   [Meson](https://github.com/mesonbuild/meson) (**0.58** or later)
+-   Shell scripts in [`./Tuw/shell_scripts`](../shell_scripts)
 
-## 1. Build wxWidgets
+> :warning: GCC is not supported.  
+> (It might work, but if you find issues, you need to solve them by yourself.)  
 
-wxWidgets is a GUI framework.  
-You can build it with the following steps.
+## Install Meson and Ninja
 
-1.  Open the Terminal.
-2.  Move to `./Simple-Command-Runner/shell_scripts`.
-3.  Type `bash download_wxWidgets.sh`. (Use `bash`. `sh` won't work.)
-4.  Type `bash build_wxWidgets.sh`.
-5.  Type `bash build_wxWidgets.sh Debug` if you want a debug build.
+You can install meson and ninja via Homebrew. (`brew install meson ninja`)
 
-## 2. Build an executable with Shell Scripts
+> If you are a Python user, you can also get them via pip. (`pip3 install meson ninja`)
 
-You can build Simple Command Runner with shell scripts.  
-The steps are as follows.  
+## Build
 
-1.  Open the Terminal.
-2.  Move to `./Simple-Command-Runner/shell_scripts`.
-3.  Type `bash build_exe.sh`.
-4.  An executable file `SimpleCommandRunner` will be generated in `./Simple-Command-Runner/build/Release`.
-5.  Type `bash build_exe.sh Debug` if you want a debug build.
+Run `bash shell_scripts/build.sh`.  
+The executable will be generated in `build/Release/`.  
 
-## Compression
+## Debug
 
-The built binary will be 2 or 3 MB.  
-You should use [UPX](https://github.com/upx/upx) if you want smaller exe.  
-
-```bash
-brew install upx
-upx SimpleCommandRunner --best
-```
+If you want a debug build, run `bash shell_scripts/build.sh Debug` on the terminal.  
 
 ## Test
 
-If you want to build tests, type `bash test.sh` or `bash test.sh Debug` on the terminal.
-
-## Uninstall wxWidgets
-
-If you want to uninstall wxWidgets, remove `~/wxWidgets-*`.
+If you want to build tests, type `bash shell_scripts/test.sh` or `bash shell_scripts/test.sh Debug` on the terminal.  

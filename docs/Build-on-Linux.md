@@ -1,70 +1,64 @@
 # Building Workflow for Linux
 
-## 0. Requirements
+## Requirements
 
 -   Build tools (e.g. `build-essential` for Ubuntu)
--   GTK3.0 (e.g. `libgtk-3-dev` for Ubuntu)
--   cmake (**3.25** or later)
--   wget
+-   GTK+ 3.10 or later (e.g. `libgtk-3-dev` for Ubuntu)
+-   Ninja
+-   [Meson](https://github.com/mesonbuild/meson) (**0.58** or later)
 -   bash
--   Shell scripts in [`./Simple-Command-Runner/shell_scripts`](../shell_scripts)
+-   Shell scripts in [`./Tuw/shell_scripts`](../shell_scripts)
 
-> CMake should be 3.25 or later.  
-> Or use [v0.2.3](https://github.com/matyalatte/Simple-Command-Runner/tree/v0.2.3) that supports old cmake versions.  
+> :warning: Clang is not supported.  
+> (It might work, but if you find issues, you need to solve them by yourself.)  
 
-## 1. Build wxWidgets
+## Install Meson and Ninja
 
-wxWidgets is a GUI framework.  
-You can build it with the following steps.
+You can install meson and ninja via apt. (`sudo apt install meson ninja`)  
 
-1.  Open the Terminal.
-2.  Move to `./Simple-Command-Runner/shell_scripts`.
-3.  Type `bash download_wxWidgets.sh`. (Use `bash`. `sh` won't work.)
-4.  Type `bash build_wxWidgets.sh`.
-5.  Type `bash build_wxWidgets.sh Debug` if you want a debug build.
+> If you are a Python user, you can also get them via pip. (`sudo pip3 install meson ninja`)
 
-> If you won't use GCC, you could need to edit `CXXFLAGS` in `build_wxWidgets.sh`.  
+## Build
 
-## 2. Build an executable with Shell Scripts
+Run `bash shell_scripts/build.sh`.  
+The executable will be generated in `build/Release/`.  
 
-You can build Simple Command Runner with shell scripts.  
-The steps are as follows.
+## Debug
 
-1.  Open the Terminal.
-2.  Move to `./Simple-Command-Runner/shell_scripts`.
-3.  Type `bash build_exe.sh`.
-4.  An executable file `SimpleCommandRunner` will be generated in `./Simple-Command-Runner/build/Release`.
-5.  Type `bash build_exe.sh Debug` if you want a debug build.
-
-## Compression
-
-The built binary will be 2 or 3 MB.  
-You should use [UPX](https://github.com/upx/upx/releases/latest) if you want smaller exe.  
-
-```bash
-upx SimpleCommandRunner --best
-```
+If you want a debug build, run `bash shell_scripts/build.sh Debug` on the terminal.  
 
 ## Test
 
-If you want to build tests, type `bash test.sh` or `bash test.sh Debug` on the terminal.
+If you want to build tests, type `bash shell_scripts/test.sh` or `bash shell_scripts/test.sh Debug` on the terminal.
 
 ## Coverage
 
 If you will use GCC, you can get coverage reports.  
 Install lcov with `sudo apt install lcov`.  
-Then, type `bash coverage.sh` or `bash coverage.sh Debug` on the Terminal.  
-It'll generate html files in `./Simple-Command-Runner/coverage-report/`.
+Then, type `bash shell_scripts/coverage.sh` or `bash shell_scripts/coverage.sh Debug` on the Terminal.  
+It'll generate html files in `./Tuw/coverage-report/`.
 
-## Uninstall wxWidgets
+## GLIBC Dependencies
 
-If you want to uninstall wxWidgets, remove `~/wxWidgets-*`.
+If you built the binary with GLIBC, you can use `check_glibc_compatibility.sh` to see the required versions of GLIBC and GLIBCXX.  
+
+```console
+$ bash shell_scripts/check_libc_compatibility.sh build/Release/Tuw
+Required GLIBC versions
+2.2.5
+2.3
+2.3.4
+2.4
+2.7
+2.15
+Required GLIBCXX versions
+3.4
+3.4.21
+```
 
 ## Dockerfiles
 
 You can see some dockerfiles to understand the workflow.  
 
--   [ubuntu20.04-cmake3.25](https://github.com/matyalatte/Matya-Dockerfiles/blob/main/ubuntu20.04-cmake3.25/Dockerfile): Dockerfile to install cmake3.25 on Ubuntu20.04
--   [alpine3.16-cmake3.25](https://github.com/matyalatte/Matya-Dockerfiles/blob/main/alpine3.16-cmake3.25/Dockerfile): Dockerfile to install cmake3.25 on Alpine3.16
--   [Dockerfile_Ubuntu](../Dockerfile_Ubuntu): Dockerfile to build SimpleCommandRunner on Ubuntu20.04
--   [Dockerfile_Alpine](../Dockerfile_Alpine): Dockerfile to build SimpleCommandRunner on Alpine3.16
+-   [Dockerfile_Ubuntu](../Dockerfile_Ubuntu): Dockerfile to build Tuw on Ubuntu20.04
+-   [Dockerfile_Alpine](../Dockerfile_Alpine): Dockerfile to build Tuw on Alpine3.16

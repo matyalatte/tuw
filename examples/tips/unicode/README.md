@@ -1,8 +1,8 @@
 # Unicode Characters
 
-Simple Command Runner supports UTF-8 strings.  
+Tuw supports UTF-8 strings.  
 
-![unicode](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/72c60172-3081-48b3-b72f-0a81bd1be397)
+![unicode](https://github.com/matyalatte/tuw/assets/69258547/b260277f-9a81-4eed-b6d4-3d9b0bf1924d)
 
 ```json
 {
@@ -14,15 +14,18 @@ Simple Command Runner supports UTF-8 strings.
             "type": "file",
             "label": "文件",
             "extension": "any files | *",
+            "default": "ああああ",
             "id": "รหัส"
         },
         {
             "type": "folder",
-            "label": "폴더"
+            "label": "폴더",
+            "default": "いいいい",
         },
         {
             "type": "check",
-            "label": "вариант"
+            "label": "вариант",
+            "default": true
         }
     ]
 }

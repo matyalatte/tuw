@@ -3,14 +3,29 @@
 
 #include <gtest/gtest.h>
 #include "exe_container.h"
+#include "string_utils.h"
+#include "env_utils.h"
 
-char const * json_file;
+const char* json_file;
 
-int main(int argc, char * argv[]) {
+#ifdef _WIN32
+int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
+#else
+int main(int argc, char* argv[], char* envp[]) {
+#endif
     ::testing::InitGoogleTest(&argc, argv);
     assert(argc == 2);
 
+#ifdef _WIN32
+    std::string argv1 = UTF16toUTF8(argv[1]);
+    json_file = &argv1[0];
+#else
     json_file = argv[1];
+#endif
+
+    env_utils::InitEnv(envp);
+    std::string exe_path = env_utils::GetExecutablePath();
+    env_utils::SetCwd(env_utils::GetDirectory(exe_path));
 
     return RUN_ALL_TESTS();
 }
@@ -26,7 +41,7 @@ TEST(JsonEmbeddingTest, Embed) {
         test_json.SetObject();
         GetTestJson(test_json);
         ExeContainer exe;
-        wxResult result = exe.Read(json_file);
+        json_utils::JsonResult result = exe.Read(json_file);
         EXPECT_TRUE(result.ok);
         exe.SetJson(test_json);
         result = exe.Write("embedded.json");
@@ -39,7 +54,7 @@ TEST(JsonEmbeddingTest, Embed) {
         rapidjson::Document embedded_json;
         embedded_json.SetObject();
         ExeContainer exe;
-        wxResult result = exe.Read("embedded.json");
+        json_utils::JsonResult result = exe.Read("embedded.json");
         EXPECT_TRUE(result.ok);
         exe.GetJson(embedded_json);
         EXPECT_EQ(embedded_json, test_json);

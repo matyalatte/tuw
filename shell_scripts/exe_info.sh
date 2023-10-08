@@ -1,16 +1,11 @@
 #!/bin/bash
 
-pushd $(dirname "$0")/..
-    cd build/Release
-    echo Dynamic lib dependencies:
-    ext=""
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        otool -L SimpleCommandRunner
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        ldd SimpleCommandRunner
-    else
-        ldd SimpleCommandRunner.exe
-        ext=.exe
-    fi
-    ls -l SimpleCommandRunner${ext} | awk '{printf "Executable size: %s\n", $5}'
-popd
+echo Dynamic lib dependencies:
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    otool -L $1
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ldd $1
+else
+    ldd $1
+fi
+ls -l $1 | awk '{printf "Executable size: %s\n", $5}'

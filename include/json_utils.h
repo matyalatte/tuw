@@ -1,19 +1,8 @@
 // Functions related to json.
 
 #pragma once
-#include <cstdio>
-#include <stdexcept>
 #include <string>
-#include <cassert>
 #include "rapidjson/document.h"
-#include "rapidjson/filereadstream.h"
-#include "rapidjson/filewritestream.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/error/en.h"
-#include "scr_constants.h"
-#include "component.h"
-#include "map_as_vec.hpp"
 
 enum CmdPredefinedIds: int {
     CMD_ID_PERCENT = -1,
@@ -36,7 +25,7 @@ JsonResult LoadJson(const std::string& file, rapidjson::Document& json);
 JsonResult SaveJson(rapidjson::Document& json, const std::string& file);
 std::string JsonToString(rapidjson::Document& json);
 
-std::string GetString(const rapidjson::Value& json, const char* key, const char* def);
+const char* GetString(const rapidjson::Value& json, const char* key, const char* def);
 bool GetBool(const rapidjson::Value& json, const char* key, bool def);
 int GetInt(const rapidjson::Value& json, const char* key, int def);
 double GetDouble(const rapidjson::Value& json, const char* key, double def);

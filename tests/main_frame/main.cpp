@@ -2,52 +2,82 @@
 // Todo: Write more tests
 
 #include <gtest/gtest.h>
-#include "wx/app.h"
-#include "wx/modalhook.h"
 #include "main_frame.h"
+#include "string_utils.h"
+#include "env_utils.h"
+#include "exec.h"
 
-char const * json_file;
-char const * config_ascii;
-char const * config_utf;
+const char* json_file;
+const char* config_ascii;
+const char* config_utf;
 
-// Hook to skip message dialogues
-class DialogSkipper : public wxModalDialogHook {
- protected:
-    virtual int Enter(wxDialog* dialog) {
-        if ( wxDynamicCast(dialog, wxMessageDialog) ) {
-            return wxID_CANCEL;
-        }
-        return wxID_NONE;
-    }
-    virtual void Exit(wxDialog* dialog){}
-};
+#ifdef _WIN32
+int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
+#else
+int main(int argc, char* argv[], char* envp[]) {
+#endif
 
-int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
     assert(argc == 4);
 
+#ifdef _WIN32
+    std::string argv1 = UTF16toUTF8(argv[1]);
+    std::string argv2 = UTF16toUTF8(argv[2]);
+    std::string argv3 = UTF16toUTF8(argv[3]);
+    json_file = &argv1[0];
+    config_ascii = &argv2[0];
+    config_utf = &argv3[0];
+#else
     json_file = argv[1];
     config_ascii = argv[2];
     config_utf = argv[3];
+#endif
 
-    // Make dummy app
-    wxApp* app = new wxApp();
-
-    // Initialize app
-    int argc_ = 1;
-    char *argv_[1] = { argv[0] };
-    wxEntryStart(argc_, argv_);
-    app->OnInit();
-
-    // Make hook to skip message dialogues
-    DialogSkipper* hook = new DialogSkipper();
-    hook->Register();
+    env_utils::InitEnv(envp);
+    MainFrameDisableDialog();
 
     return RUN_ALL_TESTS();
 }
 
-TEST(MainFrameTest, MakeDefaultMainFrame) {
-    MainFrame* main_frame = new MainFrame();
+class MainFrameTest : public ::testing::Test {
+ protected:
+    MainFrame* main_frame;
+
+    virtual void SetUp() {
+        uiInitOptions options;
+
+        memset(&options, 0, sizeof (uiInitOptions));
+        const char* msg = uiInit(&options);
+        if (msg != NULL)
+            printf("%s\n", msg);
+        EXPECT_TRUE(msg == NULL);
+        uiMainSteps();
+    }
+
+    virtual void TearDown() {
+        main_frame->Close();
+        uiUninit();
+    #ifdef __linux__
+        // Need to reset the pointer to the log.
+        SetLogEntry(NULL);
+    #endif
+    }
+
+    void TestConfig(rapidjson::Document& test_json, std::string config) {
+        rapidjson::Document test_config;
+        json_utils::JsonResult result = json_utils::LoadJson(config, test_config);
+        EXPECT_TRUE(result.ok);
+        main_frame = new MainFrame(test_json, test_config);
+        main_frame->SaveConfig();
+        rapidjson::Document saved_config;
+        result = json_utils::LoadJson("gui_config.json", saved_config);
+        EXPECT_TRUE(result.ok);
+        EXPECT_EQ(test_config, saved_config);
+    }
+};
+
+TEST_F(MainFrameTest, MakeDefaultMainFrame) {
+    main_frame = new MainFrame();
     rapidjson::Document json1;
     rapidjson::Document json2;
     json_utils::GetDefaultDefinition(json1);
@@ -66,160 +96,134 @@ void GetDummyConfig(rapidjson::Document& dummy_config) {
     dummy_config.AddMember("test", 0, dummy_config.GetAllocator());
 }
 
-TEST(MainFrameTest, InvalidDefinition) {
+TEST_F(MainFrameTest, InvalidDefinition) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["gui"][1]["components"][4]["default"].SetString("number");
     rapidjson::Document dummy_config;
     GetDummyConfig(dummy_config);
-    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
+    main_frame = new MainFrame(test_json, dummy_config);
     json_utils::GetDefaultDefinition(test_json);
     rapidjson::Document actual_json;
     main_frame->GetDefinition(actual_json);
     EXPECT_EQ(test_json, actual_json);
 }
 
-TEST(MainFrameTest, InvalidHelp) {
+TEST_F(MainFrameTest, InvalidHelp) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["help"][0]["url"].SetInt(1);
     rapidjson::Document dummy_config;
     GetDummyConfig(dummy_config);
-    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
+    main_frame = new MainFrame(test_json, dummy_config);
     main_frame->GetDefinition(test_json);
     EXPECT_FALSE(test_json.HasMember("help"));
 }
 
-TEST(MainFrameTest, GetCommand1) {
+TEST_F(MainFrameTest, GetCommand1) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     json_utils::GetDefaultDefinition(test_json);
     test_json["gui"][0]["command"].SetString("command!");
     rapidjson::Document dummy_config;
     GetDummyConfig(dummy_config);
-    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
-    EXPECT_STREQ("command!", main_frame->GetCommand().ToUTF8());
+    main_frame = new MainFrame(test_json, dummy_config);
+    EXPECT_STREQ("command!", main_frame->GetCommand().c_str());
 }
 
-TEST(MainFrameTest, GetCommand2) {
+TEST_F(MainFrameTest, GetCommand2) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["gui"][0].Swap(test_json["gui"][1]);
     rapidjson::Document dummy_config;
     GetDummyConfig(dummy_config);
-    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
+    main_frame = new MainFrame(test_json, dummy_config);
     std::string expected = "echo file: \"test.txt\" & echo folder: \"testdir\"";
     expected += " & echo choice: value3 & echo check: flag!";
     expected += " & echo check_array:  --f2 & echo textbox: remove this text!";
     expected += " & echo int: 10 & echo float: 0.01";
-    EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().ToUTF8());
+    EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().c_str());
 }
 
-TEST(MainFrameTest, GetCommand3) {
+TEST_F(MainFrameTest, GetCommand3) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     rapidjson::Document dummy_config;
     GetDummyConfig(dummy_config);
-    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
+    main_frame = new MainFrame(test_json, dummy_config);
     std::string expected = "echo file:  & echo folder:  & echo choice: value1";
     expected += " & echo check:  & echo check_array:  & echo textbox: ";
     expected += " & echo int: 0 & echo float: 0.0";
-    EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().ToUTF8());
+    EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().c_str());
 }
 
-TEST(MainFrameTest, RunCommandSuccess) {
+TEST_F(MainFrameTest, RunCommandSuccess) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     rapidjson::Document dummy_config;
     GetDummyConfig(dummy_config);
-    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
+    main_frame = new MainFrame(test_json, dummy_config);
 
     rapidjson::Document actual_json;
     main_frame->GetDefinition(actual_json);
     ASSERT_EQ(test_json["help"], actual_json["help"]);
 
-    wxString last_line;
-    wxResult result = main_frame->RunCommand(last_line);
-    EXPECT_TRUE(result.ok);
-    EXPECT_STRNE("", last_line.c_str());
+    std::string cmd = main_frame->GetCommand();
+    ExecuteResult result = Execute(cmd);
+    EXPECT_EQ(0, result.exit_code);
+    EXPECT_STREQ("", result.err_msg.c_str());
 }
 
-TEST(MainFrameTest, RunCommandFail) {
+TEST_F(MainFrameTest, RunCommandFail) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     json_utils::GetDefaultDefinition(test_json);
     test_json["gui"][0]["command"].SetString("I'll fail");
     rapidjson::Document dummy_config;
     GetDummyConfig(dummy_config);
-    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
+    main_frame = new MainFrame(test_json, dummy_config);
 
-    wxString last_line;
-    wxResult result = main_frame->RunCommand(last_line);
-    EXPECT_FALSE(result.ok);
-    EXPECT_STRNE("", result.msg.c_str());
+    std::string cmd = main_frame->GetCommand();
+    ExecuteResult result = Execute(cmd);
+    EXPECT_NE(0, result.exit_code);
+    EXPECT_STRNE("", result.err_msg.c_str());
 }
 
-TEST(MainFrameTest, ClickRunButton) {
+TEST_F(MainFrameTest, UpdateFrame) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     rapidjson::Document dummy_config;
     GetDummyConfig(dummy_config);
-    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
-    wxCommandEvent event = wxCommandEvent();
-    main_frame->ClickButton(event);
+    main_frame = new MainFrame(test_json, dummy_config);
+    main_frame->UpdatePanel(1);
+    main_frame->Fit();
+    main_frame->UpdatePanel(2);
+    main_frame->Fit();
 }
 
-TEST(MainFrameTest, UpdateFrame) {
+TEST_F(MainFrameTest, RunCommandShowLast) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     rapidjson::Document dummy_config;
     GetDummyConfig(dummy_config);
-    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
-    wxCommandEvent event = wxCommandEvent(wxEVT_NULL, wxID_HIGHEST + 2);
-    main_frame->UpdateFrame(event);
+    main_frame = new MainFrame(test_json, dummy_config);
+    main_frame->UpdatePanel(2);
+
+    std::string cmd = main_frame->GetCommand();
+    ExecuteResult result = Execute(cmd);
+    EXPECT_EQ(0, result.exit_code);
+    EXPECT_STREQ("", result.err_msg.c_str());
+    EXPECT_STREQ("sample message!", result.last_line.c_str());
 }
 
-TEST(MainFrameTest, ClickRunButtonShowLast) {
-    rapidjson::Document test_json;
-    GetTestJson(test_json);
-    rapidjson::Document dummy_config;
-    GetDummyConfig(dummy_config);
-    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
-    wxCommandEvent event = wxCommandEvent(wxEVT_NULL, wxID_HIGHEST + 3);
-    main_frame->UpdateFrame(event);
-    main_frame->ClickButton(event);
-}
-
-TEST(MainFrameTest, DeleteFrame) {
-    rapidjson::Document test_json;
-    GetTestJson(test_json);
-    rapidjson::Document dummy_config;
-    GetDummyConfig(dummy_config);
-    MainFrame* main_frame = new MainFrame(test_json, dummy_config);
-    wxCloseEvent event = wxCloseEvent();
-    main_frame->OnClose(event);
-}
-
-void TestConfig(rapidjson::Document& test_json, std::string config) {
-    rapidjson::Document test_config;
-    json_utils::JsonResult result = json_utils::LoadJson(config, test_config);
-    EXPECT_TRUE(result.ok);
-    MainFrame* main_frame = new MainFrame(test_json, test_config);
-    main_frame->SaveConfig();
-    rapidjson::Document saved_config;
-    result = json_utils::LoadJson("gui_config.json", saved_config);
-    EXPECT_TRUE(result.ok);
-    EXPECT_EQ(test_config, saved_config);
-}
-
-TEST(MainFrameTest, LoadSaveConfigAscii) {
+TEST_F(MainFrameTest, LoadSaveConfigAscii) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["gui"][0].Swap(test_json["gui"][1]);
     TestConfig(test_json, config_ascii);
 }
 
-TEST(MainFrameTest, LoadSaveConfigUTF) {
+TEST_F(MainFrameTest, LoadSaveConfigUTF) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["gui"][0].Swap(test_json["gui"][1]);

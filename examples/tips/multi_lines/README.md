@@ -1,8 +1,8 @@
 # Multiple Lines
 
-Simple Command Runner will execute a single line command on the command prompt (or the terminal.)  
+Tuw will execute a single line command on the command prompt (or the terminal.)  
 If you want to executle multiple commands, you should merge them into a single line command.  
-I won't explain the details because it's the thing about the command-line, not the Simple Command Runner.  
+I won't explain the details because it's the thing about the command-line, not about Tuw.  
 But you can see some examples about it.  
 
 ## Windows

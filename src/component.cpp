@@ -1,23 +1,48 @@
 #include "component.h"
+#include "json_utils.h"
+#include "env_utils.h"
+#include "string_utils.h"
+#include "tuw_constants.h"
+
+enum ComponentType: int {
+    COMP_UNKNOWN = 0,
+    COMP_EMPTY,
+    COMP_STATIC_TEXT,
+    COMP_FILE,
+    COMP_FOLDER,
+    COMP_CHOICE,
+    COMP_CHECK,
+    COMP_CHECK_ARRAY,
+    COMP_TEXT,
+    COMP_INT,
+    COMP_FLOAT,
+    COMP_MAX
+};
 
 // Base class for GUI components (file picker, combo box, etc.)
-Component::Component(const rapidjson::Value& j, bool has_string) {
+Component::Component(const rapidjson::Value& j) {
     m_widget = nullptr;
-    m_has_string = has_string;
-    m_label = wxString::FromUTF8(j["label"].GetString());
+    m_has_string = false;
+    m_is_wide = false;
+    m_label = j["label"].GetString();
     m_id = json_utils::GetString(j, "id", "");
+    m_tooltip = 0;
     if (m_id == "") {
-        size_t hash = std::hash<std::string>()(j["label"].GetString());
+        uint32_t hash = Fnv1Hash32(j["label"].GetString());
         m_id = "_" + std::to_string(hash);
     }
     m_add_quotes = json_utils::GetBool(j, "add_quotes", false);
 }
 
-wxString Component::GetString() {
-    wxString str = GetRawString();
-    if (m_add_quotes) {
+Component::~Component() {
+    if (m_tooltip != 0)
+        uiTooltipDestroy(m_tooltip);
+}
+
+std::string Component::GetString() {
+    std::string str = GetRawString();
+    if (m_add_quotes)
         return "\"" + str + "\"";
-    }
     return str;
 }
 
@@ -25,39 +50,39 @@ std::string const Component::GetID() {
     return m_id;
 }
 
-Component* Component::PutComponent(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j) {
+Component* Component::PutComponent(uiBox* box, const rapidjson::Value& j) {
     Component* comp = nullptr;
     int type = j["type_int"].GetInt();
     switch (type) {
         case COMP_EMPTY:
-            comp = new EmptyComponent(panel, sizer, j);
+            comp = new EmptyComponent(box, j);
             break;
         case COMP_STATIC_TEXT:
-            comp = new StaticText(panel, sizer, j);
+            comp = new StaticText(box, j);
             break;
         case COMP_FILE:
-            comp = new FilePicker(panel, sizer, j);
+            comp = new FilePicker(box, j);
             break;
         case COMP_FOLDER:
-            comp = new DirPicker(panel, sizer, j);
+            comp = new DirPicker(box, j);
             break;
         case COMP_CHOICE:
-            comp = new Choice(panel, sizer, j);
+            comp = new Choice(box, j);
             break;
         case COMP_CHECK:
-            comp = new CheckBox(panel, sizer, j);
+            comp = new CheckBox(box, j);
             break;
         case COMP_CHECK_ARRAY:
-            comp = new CheckArray(panel, sizer, j);
+            comp = new CheckArray(box, j);
             break;
         case COMP_TEXT:
-            comp = new TextBox(panel, sizer, j);
+            comp = new TextBox(box, j);
             break;
         case COMP_INT:
-            comp = new IntPicker(panel, sizer, j);
+            comp = new IntPicker(box, j);
             break;
         case COMP_FLOAT:
-            comp = new FloatPicker(panel, sizer, j);
+            comp = new FloatPicker(box, j);
             break;
         default:
             break;
@@ -65,129 +90,305 @@ Component* Component::PutComponent(wxWindow* panel, wxBoxSizer* sizer, const rap
     return comp;
 }
 
-static const bool HAS_STRING = true;
-static const bool NOT_STRING = false;
-static const int DEFAULT_SIZER_FLAG = wxFIXED_MINSIZE | wxALIGN_LEFT | wxBOTTOM;
-
 // Static Text
-StaticText::StaticText(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
-    : Component(j, NOT_STRING) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, m_label);
-    text->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
-    sizer->Add(text, 0, DEFAULT_SIZER_FLAG , 13);
+StaticText::StaticText(uiBox* box, const rapidjson::Value& j)
+    : Component(j) {
+    uiLabel* text = uiNewLabel(m_label.c_str());
+    uiBoxAppend(box, uiControl(text), 0);
+    if (j.HasMember("tooltip"))
+        m_tooltip = uiTooltipSetControl(uiControl(text), json_utils::GetString(j, "tooltip", ""));
 }
 
 // Base Class for strings
 StringComponentBase::StringComponentBase(
-    wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
-    : Component(j, HAS_STRING) {
-    wxStaticText* text = new wxStaticText(panel, wxID_ANY, m_label);
-    if (j.HasMember("tooltip") && !j["tooltip"].IsArray()) {
-        text->SetToolTip(wxString::FromUTF8(j["tooltip"].GetString()));
-    }
-    sizer->Add(text, 0, DEFAULT_SIZER_FLAG, 3);
+    uiBox* box, const rapidjson::Value& j)
+    : Component(j) {
+    m_has_string = false;
+    uiLabel* text = uiNewLabel(m_label.c_str());
+    uiBoxAppend(box, uiControl(text), 0);
 }
 
 void StringComponentBase::GetConfig(rapidjson::Document& config) {
     if (config.HasMember(m_id))
         config.RemoveMember(m_id);
     rapidjson::Value n(m_id.c_str(), config.GetAllocator());
-    rapidjson::Value val(GetRawString().ToUTF8(), config.GetAllocator());
+    rapidjson::Value val(GetRawString(), config.GetAllocator());
     config.AddMember(n, val, config.GetAllocator());
 }
 
-// File Picker
-FilePicker::FilePicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
-    : StringComponentBase(panel, sizer, j) {
-    wxString ext = wxString::FromUTF8(
-                       json_utils::GetString(j, "extension", "any files (*)|*").c_str());
-    wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", "").c_str());
-    wxString empty_message = wxString::FromUTF8(
-                                 json_utils::GetString(j, "empty_message", "").c_str());
-    wxString button_label = wxString::FromUTF8(
-                                json_utils::GetString(j, "button", "Browse").c_str());
-    CustomFilePicker* picker = new CustomFilePicker(panel, wxID_ANY,
-                                                    value, "", ext, empty_message,
-                                                    button_label,
-                                                    wxDefaultPosition, wxSize(350, -1),
-                                                    wxFLP_DEFAULT_STYLE | wxFLP_USE_TEXTCTRL);
-
-    sizer->Add(picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
-    picker->DragAcceptFiles(true);
-    picker->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
-    m_widget = picker;
+static uiWindow* GetToplevel(uiControl* c) {
+    if (uiControlToplevel(c)) return uiWindow(c);
+    return GetToplevel(uiControlParent(c));
 }
 
-wxString FilePicker::GetRawString() {
-    return static_cast<CustomFilePicker*>(m_widget)->GetTextCtrlValue();
+static void onOpenFileClicked(uiButton *b, void *data) {
+    FilePicker* picker = static_cast<FilePicker*>(data);
+    picker->OpenFile();
+}
+
+static void onFilesDropped(uiEntry *e, int count, char** names, void *data) {
+    if (count < 1) return;
+    uiEntrySetText(e, names[0]);
+}
+
+// File Picker
+FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
+    : StringComponentBase(box, j) {
+    m_is_wide = true;
+    m_ext = json_utils::GetString(j, "extension", "any files (*.*)|*.*");
+    const char* value = json_utils::GetString(j, "default", "");
+    const char* empty_message = json_utils::GetString(j, "empty_message", "");
+    const char* button_label = json_utils::GetString(j, "button", "Browse");
+
+    uiEntry* entry = uiNewEntry();
+    uiEntryOnFilesDropped(entry, onFilesDropped, NULL);
+    uiEntrySetAcceptDrops(entry, 1);
+    uiEntrySetText(entry, value);
+    uiEntrySetPlaceholder(entry, empty_message);
+
+    uiButton* button = uiNewButton(button_label);
+    uiButtonOnClicked(button, onOpenFileClicked, this);
+
+    uiGrid* grid = uiNewGrid();
+    uiGridAppend(grid, uiControl(entry),
+        0, 0, 1, 1,
+        1, uiAlignFill, 0, uiAlignFill);
+    uiGridAppend(grid, uiControl(button),
+        1, 0, 1, 1,
+        0, uiAlignFill, 0, uiAlignFill);
+    uiGridSetSpacing(grid, tuw_constants::GRID_COMP_XSPACE, 0);
+
+    uiBoxAppend(box, uiControl(grid), 0);
+    if (j.HasMember("tooltip"))
+        m_tooltip = uiTooltipSetControl(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
+    m_widget = entry;
+}
+
+std::string FilePicker::GetRawString() {
+    char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
+    std::string str = text;
+    uiFreeText(text);
+    return str;
 }
 
 void FilePicker::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsString()) {
-        wxString str = wxString::FromUTF8(config[m_id].GetString());
-        static_cast<CustomFilePicker*>(m_widget)->SetPath(str);
-        static_cast<CustomFilePicker*>(m_widget)->SetInitialDirectory(wxPathOnly(str));
+        const char* str = config[m_id].GetString();
+        uiEntry* entry = static_cast<uiEntry*>(m_widget);
+        uiEntrySetText(entry, str);
     }
 }
 
-// Dir Picker
-DirPicker::DirPicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
-    : StringComponentBase(panel, sizer, j) {
-    wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", "").c_str());
-    wxString empty_message = wxString::FromUTF8(
-                                 json_utils::GetString(j, "empty_message", "").c_str());
-    wxString button_label = wxString::FromUTF8(
-                                json_utils::GetString(j, "button", "Browse").c_str());
-    CustomDirPicker* picker = new CustomDirPicker(panel, wxID_ANY,
-                                                  value, "", empty_message,
-                                                  button_label,
-                                                  wxDefaultPosition, wxSize(350, -1),
-                                                  wxDIRP_DEFAULT_STYLE | wxDIRP_USE_TEXTCTRL);
+class Filter {
+ private:
+    const char* name;
+    std::vector<const char*> patterns;
+ public:
+    Filter(): name(), patterns() {}
+    void SetName(const char* n) {
+        name = n;
+    }
+    void AddPattern(const char* pattern) {
+        patterns.push_back(pattern);
+    }
+    uiFileDialogParamsFilter ToLibuiFilter() {
+        return {
+            name,
+            patterns.size(),
+            &patterns[0]
+        };
+    }
+};
 
-    sizer->Add(picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
-    picker->DragAcceptFiles(true);
-    picker->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
-    m_widget = picker;
+class FilterList {
+ private:
+    char* filter_buf;
+    std::vector<Filter*> filters;
+    uiFileDialogParamsFilter* ui_filters;
+
+ public:
+    FilterList(): filter_buf(NULL), filters(), ui_filters(NULL) {}
+    void MakeFilters(const std::string& ext) {
+        filter_buf =  new char[ext.length() + 1];
+        size_t i = 0;
+        size_t start = 0;
+        bool is_reading_pattern = false;
+        Filter* filter = new Filter();
+        for (const char c : ext) {
+            if (c == "|"[0]) {
+                filter_buf[i] = 0;
+                if (is_reading_pattern) {
+                    filter->AddPattern(&filter_buf[start]);
+                    AddFilter(filter);
+                    filter = new Filter();
+                } else {
+                    filter->SetName(&filter_buf[start]);
+                }
+                is_reading_pattern = !is_reading_pattern;
+                start = i + 1;
+            } else if (is_reading_pattern && (c == ";"[0])) {
+                filter_buf[i] = 0;
+                filter->AddPattern(&filter_buf[start]);
+                start = i + 1;
+            } else {
+                filter_buf[i] = c;
+            }
+            i++;
+        }
+        filter_buf[i] = 0;
+        if (is_reading_pattern) {
+            filter->AddPattern(&filter_buf[start]);
+            AddFilter(filter);
+        }
+
+        ui_filters = new uiFileDialogParamsFilter[filters.size()];
+        for (size_t i = 0; i < filters.size(); i++) {
+            ui_filters[i] = filters[i]->ToLibuiFilter();
+        }
+    }
+
+    ~FilterList() {
+        for (Filter* f : filters) {
+            if (f != NULL)
+                delete f;
+        }
+        if (filter_buf != NULL)
+            delete[] filter_buf;
+        if (ui_filters != NULL)
+            delete[] ui_filters;
+    }
+
+    void AddFilter(Filter* f) {
+        filters.push_back(f);
+    }
+
+    size_t GetSize() {
+        return filters.size();
+    }
+
+    uiFileDialogParamsFilter* ToLibuiFilterList() {
+        return ui_filters;
+    }
+};
+
+void FilePicker::OpenFile() {
+    uiEntry *entry = static_cast<uiEntry*>(m_widget);
+    char *filename;
+
+    uiFileDialogParams params;
+    params.defaultPath = NULL;
+    params.defaultName = NULL;
+
+    FilterList filter_list = FilterList();
+    filter_list.MakeFilters(m_ext);
+
+    params.filterCount = filter_list.GetSize();
+    params.filters = filter_list.ToLibuiFilterList();
+
+    filename = uiOpenFileWithParams(GetToplevel(uiControl(entry)), &params);
+    if (filename == NULL) {
+        return;
+    }
+
+    uiEntrySetText(entry, filename);
+    uiFreeText(filename);
 }
 
-wxString DirPicker::GetRawString() {
-    return static_cast<CustomDirPicker*>(m_widget)->GetTextCtrlValue();
+static void onOpenFolderClicked(uiButton *b, void *data) {
+    DirPicker* picker = static_cast<DirPicker*>(data);
+    picker->OpenFolder();
+}
+
+// Dir Picker
+DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
+    : StringComponentBase(box, j) {
+    m_is_wide = true;
+    const char* value = json_utils::GetString(j, "default", "");
+    const char* empty_message = json_utils::GetString(j, "empty_message", "");
+    const char* button_label = json_utils::GetString(j, "button", "Browse");
+
+    uiEntry* entry = uiNewEntry();
+    uiEntryOnFilesDropped(entry, onFilesDropped, NULL);
+    uiEntrySetAcceptDrops(entry, 1);
+    uiEntrySetText(entry, value);
+    uiEntrySetPlaceholder(entry, empty_message);
+
+    uiButton* button = uiNewButton(button_label);
+    uiButtonOnClicked(button, onOpenFolderClicked, this);
+
+    uiGrid* grid = uiNewGrid();
+    uiGridAppend(grid, uiControl(entry),
+        0, 0, 1, 1,
+        1, uiAlignFill, 0, uiAlignFill);
+    uiGridAppend(grid, uiControl(button),
+        1, 0, 1, 1,
+        0, uiAlignFill, 0, uiAlignFill);
+    uiGridSetSpacing(grid, tuw_constants::GRID_COMP_XSPACE, 0);
+
+    uiBoxAppend(box, uiControl(grid), 0);
+    if (j.HasMember("tooltip"))
+        m_tooltip = uiTooltipSetControl(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
+    m_widget = entry;
+}
+
+std::string DirPicker::GetRawString() {
+    char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
+    std::string str = text;
+    uiFreeText(text);
+    return str;
 }
 
 void DirPicker::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsString()) {
-        wxString str = wxString::FromUTF8(config[m_id].GetString());
-        static_cast<CustomDirPicker*>(m_widget)->SetPath(str);
-        static_cast<CustomDirPicker*>(m_widget)->SetInitialDirectory(str);
+        const char* str = config[m_id].GetString();
+        uiEntry* entry = static_cast<uiEntry*>(m_widget);
+        uiEntrySetText(entry, str);
     }
+}
+
+void DirPicker::OpenFolder() {
+    uiEntry *entry = uiEntry(m_widget);
+    char *filename;
+
+    uiFileDialogParams params;
+    params.defaultPath = NULL;
+    params.defaultName = NULL;
+    params.filterCount = 0;
+    params.filters = NULL;
+
+    filename = uiOpenFolderWithParams(GetToplevel(uiControl(entry)), &params);
+    if (filename == NULL) {
+        return;
+    }
+
+    uiEntrySetText(entry, filename);
+    uiFreeText(filename);
 }
 
 // Choice
-Choice::Choice(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
-    : StringComponentBase(panel, sizer, j) {
-    wxArrayString wxitems;
-    wxArrayString values;
+Choice::Choice(uiBox* box, const rapidjson::Value& j)
+    : StringComponentBase(box, j) {
+    uiCombobox* choice = uiNewCombobox();
+    std::vector<std::string> values;
     for (const rapidjson::Value& i : j["items"].GetArray()) {
-        wxString label = wxString::FromUTF8(i["label"].GetString());
-        wxitems.Add(label);
-        wxString value;
-        if (i.HasMember("value"))
-            value = wxString::FromUTF8(i["value"].GetString());
-        else
-            value = label;
-        values.Add(value);
+        const char* label = i["label"].GetString();
+        uiComboboxAppend(choice, label);
+        const char* value = json_utils::GetString(i, "value", label);
+        values.push_back(value);
     }
-    wxChoice* choice = new wxChoice(panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxitems);
-    sizer->Add(choice, 0, DEFAULT_SIZER_FLAG, 13);
-    choice->SetSelection(json_utils::GetInt(j, "default", 0) % j["items"].Size());
+    uiBox* hbox = uiNewHorizontalBox();
+    uiBoxAppend(hbox, uiControl(choice), 0);
+    uiBoxAppend(box, uiControl(hbox), 0);
+    uiComboboxSetSelected(choice, json_utils::GetInt(j, "default", 0) % j["items"].Size());
 
     SetValues(values);
-    choice->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
+    if (j.HasMember("tooltip"))
+        m_tooltip = uiTooltipSetControl(uiControl(choice), json_utils::GetString(j, "tooltip", ""));
     m_widget = choice;
 }
 
-wxString Choice::GetRawString() {
-    int sel = static_cast<wxChoice*>(m_widget)->GetSelection();
+std::string Choice::GetRawString() {
+    int sel = uiComboboxSelected(static_cast<uiCombobox*>(m_widget));
     return m_values[sel];
 }
 
@@ -195,84 +396,85 @@ void Choice::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsInt()) {
         int  i = config[m_id].GetInt();
         if (i < m_values.size())
-            static_cast<wxChoice*>(m_widget)->SetSelection(i);
+            uiComboboxSetSelected(static_cast<uiCombobox*>(m_widget), i);
     }
 }
 
 void Choice::GetConfig(rapidjson::Document& config) {
     if (config.HasMember(m_id))
         config.RemoveMember(m_id);
-    int sel = static_cast<wxChoice*>(m_widget)->GetSelection();
+    int sel = uiComboboxSelected(static_cast<uiCombobox*>(m_widget));
     rapidjson::Value n(m_id.c_str(), config.GetAllocator());
     config.AddMember(n, sel, config.GetAllocator());
 }
 
 // CheckBox
-CheckBox::CheckBox(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
-    : Component(j, HAS_STRING) {
-    wxCheckBox* check = new wxCheckBox(panel, wxID_ANY, m_label);
-    sizer->Add(check, 0, DEFAULT_SIZER_FLAG, 13);
-    if (j.HasMember("value"))
-        m_value = wxString::FromUTF8(j["value"].GetString());
-    else
-        m_value = m_label;
-    check->SetValue(json_utils::GetBool(j, "default", false));
-    check->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
+CheckBox::CheckBox(uiBox* box, const rapidjson::Value& j)
+    : Component(j) {
+    m_has_string = true;
+    uiCheckbox* check = uiNewCheckbox(m_label.c_str());
+    uiCheckboxSetChecked(check, json_utils::GetBool(j, "default", false));
+    uiBoxAppend(box, uiControl(check), 0);
+
+    m_value = json_utils::GetString(j, "value", m_label.c_str());
+
+    if (j.HasMember("tooltip"))
+        m_tooltip = uiTooltipSetControl(uiControl(check), json_utils::GetString(j, "tooltip", ""));
     m_widget = check;
 }
 
-wxString CheckBox::GetRawString() {
-    if (static_cast<wxCheckBox*>(m_widget)->IsChecked())
+std::string CheckBox::GetRawString() {
+    if (uiCheckboxChecked(static_cast<uiCheckbox*>(m_widget)))
         return m_value;
     return "";
 }
 
 void CheckBox::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsBool())
-        static_cast<wxCheckBox*>(m_widget)->SetValue(config[m_id].GetBool());
+        uiCheckboxSetChecked(static_cast<uiCheckbox*>(m_widget), config[m_id].GetBool());
 }
 
 void CheckBox::GetConfig(rapidjson::Document& config) {
     if (config.HasMember(m_id))
         config.RemoveMember(m_id);
-    bool checked = static_cast<wxCheckBox*>(m_widget)->IsChecked();
+    bool checked = uiCheckboxChecked(static_cast<uiCheckbox*>(m_widget));
     rapidjson::Value n(m_id.c_str(), config.GetAllocator());
     config.AddMember(n, checked, config.GetAllocator());
 }
 
 // CheckArray
-CheckArray::CheckArray(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
-    : StringComponentBase(panel, sizer, j) {
-    std::vector<wxCheckBox*>* checks = new std::vector<wxCheckBox*>();
-    wxArrayString values;
+CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
+    : StringComponentBase(box, j) {
+    std::vector<uiCheckbox*>* checks = new std::vector<uiCheckbox*>();
+    std::vector<std::string> values;
+    uiBox* check_array_box = uiNewVerticalBox();
+    uiBoxSetSpacing(check_array_box, tuw_constants::BOX_CHECKS_SPACE);
     size_t id = 0;
     for (const rapidjson::Value& i : j["items"].GetArray()) {
-        wxString label = wxString::FromUTF8(i["label"].GetString());
-        wxCheckBox* check = new wxCheckBox(panel, wxID_ANY, label);
-        if (i.HasMember("default"))
-            check->SetValue(i["default"].GetBool());
-        if (i.HasMember("tooltip"))
-            check->SetToolTip(wxString::FromUTF8(i["tooltip"].GetString()));
+        const char* label = i["label"].GetString();
+        uiCheckbox* check = uiNewCheckbox(label);
+        uiCheckboxSetChecked(check, json_utils::GetBool(i, "default", false));
+        uiBoxAppend(check_array_box, uiControl(check), 0);
+        if (i.HasMember("tooltip")) {
+            m_tooltip = uiTooltipSetControl(uiControl(check),
+                                            json_utils::GetString(i, "tooltip", ""));
+        }
         checks->push_back(check);
-        sizer->Add(check, 0, DEFAULT_SIZER_FLAG, 3 + 10 * (id + 1 == j["items"].Size()));
-        wxString value;
-        if (i.HasMember("value"))
-            value = wxString::FromUTF8(i["value"].GetString());
-        else
-            value = label;
-        values.Add(value);
+        const char* value = json_utils::GetString(i, "value", label);
+        values.push_back(value);
         id++;
     }
+    uiBoxAppend(box, uiControl(check_array_box), 0);
     SetValues(values);
     m_widget = checks;
 }
 
-wxString CheckArray::GetRawString() {
-    wxString str = "";
-    std::vector<wxCheckBox*> checks;
-    checks = *(std::vector<wxCheckBox*>*)m_widget;
+std::string CheckArray::GetRawString() {
+    std::string str = "";
+    std::vector<uiCheckbox*> checks;
+    checks = *(std::vector<uiCheckbox*>*)m_widget;
     for (int i = 0; i < checks.size(); i++) {
-        if (checks[i]->GetValue()) {
+        if (uiCheckboxChecked(checks[i])) {
             str += m_values[i];
         }
     }
@@ -281,9 +483,10 @@ wxString CheckArray::GetRawString() {
 
 void CheckArray::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsArray()) {
-        std::vector<wxCheckBox*> checks = *(std::vector<wxCheckBox*>*)m_widget;
+        std::vector<uiCheckbox*> checks = *(std::vector<uiCheckbox*>*)m_widget;
         for (int i = 0; i < config[m_id].Size() && i < checks.size(); i++) {
-            checks[i]->SetValue(config[m_id][i].GetBool());
+            if (config[m_id][i].IsBool())
+                uiCheckboxSetChecked(checks[i], config[m_id][i].GetBool());
         }
     }
 }
@@ -294,90 +497,144 @@ void CheckArray::GetConfig(rapidjson::Document& config) {
 
     rapidjson::Value ints;
     ints.SetArray();
-    for (wxCheckBox* check : *(std::vector<wxCheckBox*>*)m_widget) {
-        ints.PushBack(check->GetValue(), config.GetAllocator());
+    for (uiCheckbox* check : *(std::vector<uiCheckbox*>*)m_widget) {
+        ints.PushBack(static_cast<bool>(uiCheckboxChecked(check)),
+                      config.GetAllocator());
     }
     rapidjson::Value n(m_id.c_str(), config.GetAllocator());
     config.AddMember(n, ints, config.GetAllocator());
 }
 
 // TextBox
-TextBox::TextBox(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
-    : StringComponentBase(panel, sizer, j) {
-    wxString value = wxString::FromUTF8(json_utils::GetString(j, "default", "").c_str());
-    wxString empty_message = wxString::FromUTF8(
-                                 json_utils::GetString(j, "empty_message", "").c_str());
-    CustomTextCtrl* textbox = new CustomTextCtrl(panel, wxID_ANY,
-        value, empty_message,
-        wxDefaultPosition, wxSize(350, -1));
-
-    sizer->Add(textbox, 0, wxALIGN_LEFT | wxBOTTOM, 13);
-    textbox->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
-    m_widget = textbox;
+TextBox::TextBox(uiBox* box, const rapidjson::Value& j)
+    : StringComponentBase(box, j) {
+    m_is_wide = true;
+    const char* value = json_utils::GetString(j, "default", "");
+    const char* empty_message = json_utils::GetString(j, "empty_message", "");
+    uiEntry* entry = uiNewEntry();
+    uiEntrySetText(entry, value);
+    uiEntrySetPlaceholder(entry, empty_message);
+    uiBoxAppend(box, uiControl(entry), 0);
+    if (j.HasMember("tooltip"))
+        m_tooltip = uiTooltipSetControl(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
+    m_widget = entry;
 }
 
-wxString TextBox::GetRawString() {
-    return static_cast<CustomTextCtrl*>(m_widget)->GetActualValue();
+std::string TextBox::GetRawString() {
+    char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
+    std::string str = text;
+    uiFreeText(text);
+    return str;
 }
 
 void TextBox::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsString()) {
-        wxString str = wxString::FromUTF8(config[m_id].GetString());
-        static_cast<CustomTextCtrl*>(m_widget)->UpdateText(str);
+        const char* str = config[m_id].GetString();
+        uiEntry* entry = static_cast<uiEntry*>(m_widget);
+        uiEntrySetText(entry, str);
     }
 }
 
-// IntPicker and FloatPicker
-NumPickerBase::NumPickerBase(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
-    : StringComponentBase(panel, sizer, j) {
-    long style = wxSP_ARROW_KEYS;
-    if (j.HasMember("wrap") && j["wrap"].GetBool())
-        style |= wxSP_WRAP;
-
-    m_picker = new wxSpinCtrlDouble(panel, wxID_ANY,
-        wxEmptyString, wxDefaultPosition, wxSize(150, -1), style);
-    double min = json_utils::GetDouble(j, "min", 0.0);
-    double max = json_utils::GetDouble(j, "max", 100.0);
-    m_picker->SetRange(min, max);
-    m_picker->SetToolTip(wxString::FromUTF8(json_utils::GetString(j, "tooltip", "").c_str()));
-
-    sizer->Add(m_picker, 0, wxALIGN_LEFT | wxBOTTOM, 13);
-    m_widget = m_picker;
+IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
+    : StringComponentBase(box, j) {
+    int min = json_utils::GetInt(j, "min", 0);
+    int max = json_utils::GetInt(j, "max", 100);
+    if (min > max) {
+        int x = min;
+        min = max;
+        max = x;
+    }
+    int inc = json_utils::GetInt(j, "inc", 1);
+    if (inc < 0) {
+        inc = -inc;
+    } else if (inc == 0) {
+        inc = 1;
+    }
+    int val = json_utils::GetInt(j, "default", min);
+    bool wrap = json_utils::GetBool(j, "wrap", false);
+    uiSpinbox* picker = uiNewSpinboxDoubleEx(
+        static_cast<double>(min),
+        static_cast<double>(max),
+        0,
+        static_cast<double>(inc),
+        static_cast<int>(wrap));
+    uiSpinboxSetValue(picker, val);
+    uiBox* hbox = uiNewHorizontalBox();
+    uiBoxAppend(hbox, uiControl(picker), 0);
+    uiBoxAppend(box, uiControl(hbox), 0);
+    if (j.HasMember("tooltip"))
+        m_tooltip = uiTooltipSetSpinbox(picker, json_utils::GetString(j, "tooltip", ""));
+    m_widget = picker;
 }
 
-wxString NumPickerBase::GetRawString() {
-    return m_picker->GetTextValue();
+std::string IntPicker::GetRawString() {
+    char* text = uiSpinboxValueText(static_cast<uiSpinbox*>(m_widget));
+    std::string str(text);
+    uiFreeText(text);
+    return str;
 }
 
-void NumPickerBase::GetConfig(rapidjson::Document& config) {
+void IntPicker::GetConfig(rapidjson::Document& config) {
     if (config.HasMember(m_id))
         config.RemoveMember(m_id);
     rapidjson::Value n(m_id.c_str(), config.GetAllocator());
-    config.AddMember(n, m_picker->GetValue(), config.GetAllocator());
+    int val = uiSpinboxValue(static_cast<uiSpinbox*>(m_widget));
+    config.AddMember(n, val, config.GetAllocator());
 }
 
-void NumPickerBase::SetConfig(const rapidjson::Value& config) {
-    if (config.HasMember(m_id) && (config[m_id].IsInt() || config[m_id].IsDouble())) {
-        double val = config[m_id].GetDouble();
-        m_picker->SetValue(val);
+void IntPicker::SetConfig(const rapidjson::Value& config) {
+    if (config.HasMember(m_id) && config[m_id].IsInt()) {
+        int val = config[m_id].GetInt();
+        uiSpinboxSetValue(static_cast<uiSpinbox*>(m_widget), val);
     }
 }
 
-IntPicker::IntPicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
-    : NumPickerBase(panel, sizer, j) {
-    double inc = json_utils::GetDouble(j, "inc", 1);
-    m_picker->SetIncrement(inc);
-    m_picker->SetDigits(0);
-    double val = json_utils::GetDouble(j, "default", 0.0);
-    m_picker->SetValue(val);
+FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
+    : StringComponentBase(box, j) {
+    double min = json_utils::GetDouble(j, "min", 0.0);
+    double max = json_utils::GetDouble(j, "max", 100.0);
+    if (min > max) {
+        double x = min;
+        min = max;
+        max = x;
+    }
+    double inc = json_utils::GetDouble(j, "inc", 1.0);
+    if (inc < 0) {
+        inc = -inc;
+    } else if (inc == 0) {
+        inc = 1.0;
+    }
+    int digits = json_utils::GetInt(j, "digits", 1);
+    double val = json_utils::GetDouble(j, "default", min);
+    bool wrap = json_utils::GetBool(j, "wrap", false);
+    uiSpinbox* picker = uiNewSpinboxDoubleEx(min, max, digits, inc, static_cast<int>(wrap));
+    uiSpinboxSetValueDouble(picker, val);
+    uiBox* hbox = uiNewHorizontalBox();
+    uiBoxAppend(hbox, uiControl(picker), 0);
+    uiBoxAppend(box, uiControl(hbox), 0);
+    if (j.HasMember("tooltip"))
+        m_tooltip = uiTooltipSetSpinbox(picker, json_utils::GetString(j, "tooltip", ""));
+    m_widget = picker;
 }
 
-FloatPicker::FloatPicker(wxWindow* panel, wxBoxSizer* sizer, const rapidjson::Value& j)
-    : NumPickerBase(panel, sizer, j) {
-    double inc = json_utils::GetDouble(j, "inc", 0.1);
-    m_picker->SetIncrement(inc);
-    int digits = json_utils::GetInt(j, "digits", 1);
-    m_picker->SetDigits(digits);
-    double val = json_utils::GetDouble(j, "default", 0.0);
-    m_picker->SetValue(val);
+std::string FloatPicker::GetRawString() {
+    char* text = uiSpinboxValueText(static_cast<uiSpinbox*>(m_widget));
+    std::string str(text);
+    uiFreeText(text);
+    return str;
+}
+
+void FloatPicker::GetConfig(rapidjson::Document& config) {
+    if (config.HasMember(m_id))
+        config.RemoveMember(m_id);
+    rapidjson::Value n(m_id.c_str(), config.GetAllocator());
+    double val = uiSpinboxValueDouble(static_cast<uiSpinbox*>(m_widget));
+    config.AddMember(n, val, config.GetAllocator());
+}
+
+void FloatPicker::SetConfig(const rapidjson::Value& config) {
+    if (config.HasMember(m_id) && config[m_id].IsDouble()) {
+        double val = config[m_id].GetDouble();
+        uiSpinboxSetValueDouble(static_cast<uiSpinbox*>(m_widget), val);
+    }
 }

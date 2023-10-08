@@ -2,9 +2,9 @@
 
 ## Error Dialogue
 
-When the executed command output something to `stderr`, Simple Command Runner will show an error dialogue.  
+When the executed command output something to `stderr`, Tuw will show an error dialogue.  
 
-![Error](https://user-images.githubusercontent.com/69258547/236607612-183a72d9-a7f3-4006-b545-8d2f5c9ca890.png)  
+![Error](https://github.com/matyalatte/tuw/assets/69258547/a023c839-aafc-4beb-a702-596e2ea3a454)  
 
 ```json
 {
@@ -42,7 +42,7 @@ If so, you can use `show_last_line` option.
 It's an option to show the last line from `stdout`.  
 When `check_exit_code` is on, it can also show the last line on the error dialogue.  
 
-![ShowLastLine](https://user-images.githubusercontent.com/69258547/236607913-31d00dbb-6180-4a99-b981-8c6dec3fb8d8.png)  
+![ShowLastLine](https://github.com/matyalatte/tuw/assets/69258547/3915740e-37b3-496c-9e51-9f80334725ae)  
 
 ```json
 {

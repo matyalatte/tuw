@@ -2,15 +2,12 @@
 *.json
 !examples/**/gui_definition.json
 !tests/**/*.json
-!CMakePresets.json
 !schema/*.json
 
 *.txt
 !changelog.txt
-!CMakeLists.txt
 !license.txt
-!WX_VERSION.txt
-!wx_fix/*.txt
+!meson_options.txt
 
 *.bat
 !batch_files/*.bat
@@ -18,18 +15,24 @@
 *.sh
 !shell_scripts/*.sh
 
+# subprojects
+subprojects/libui
+subprojects/packagecache
+subprojects/rapidjson
+subprojects/subprocess
+subprojects/google*
+
 # built files
 *.exe
 *.new
 *.zip
 
+Tuw*
 SimpleCommandRunner
 *.tar.*
 
 # intermediate files
 build
-Release*
-Debug*
 *.log
 *.cmake
 
@@ -42,7 +45,9 @@ out
 *.bin
 *.ninja
 *.manifest
+!src/*.manifest
 *.rc
+!src/*.rc
 *.res
 *.ninja
 
@@ -52,9 +57,6 @@ out
 *.internal
 *.test
 *.make
-
-!wx_fix/build
-!wx_fix/build/cmake/*.cmake
 
 # python
 python

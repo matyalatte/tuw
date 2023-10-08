@@ -1,60 +1,42 @@
 # Building Workflow for Windows
 
-## 0. Requirements
+## Requirements
 
--   Visual Studio 2022
--   CMake (**3.25** or later)
--   Batch files in [`./Simple-Command-Runner/batch_files`](../batch_files)
+-   Visual Studio
+-   [Meson](https://github.com/mesonbuild/meson/releases) (**0.58** or later)
+-   Batch files in [`./Tuw/batch_files`](../batch_files)
 
-> Note that this workflow supports only Visual Studio 2022.  
-> If you don't want to use it, you should edit some variables in [`build_wxWidgets.bat`](../batch_files/build_wxWidgets.bat) and [`CMakePresets.json`](../CMakePresets.json).  
+> :warning: MinGW-w64 is not supported.  
+> (It might work, but if you find issues, you need to solve them by yourself.)  
 
-## 1. Build wxWidgets
+## Install Meson
 
-wxWidgets is a GUI framework.  
-You can build it with the following steps.
+Get the installer (*.msi) from [the release page](https://github.com/mesonbuild/meson/releases).  
+And launch it on your machine.  
 
-1.  Run [`download_wxWidgets.bat`](../batch_files/download_wxWidgets.bat).
-2.  Run [`build_wxWidgets.bat`](../batch_files/build_wxWidgets.bat).
-3.  Type `build_wxWidgets.bat Debug` on the command prompt if you want a debug build.
+> If you are a Python user, you can also get meson via pip. (`pip3 install meson`)
 
-## 2-a. Build .exe with Batch Files
+## Build
 
-You can build Simple Command Runner with batch files.  
-The steps are as follows.
+Run `batch_files/build.bat`.  
+The executable will be generated in `build/Release/`.  
 
-1.  Run [`build_exe.bat`](../batch_files/build_exe.bat).
-2.  `SimpleCommandRunner.exe` will be generated in `./Simple-Command-Runner/build/Release`.
-3.  Type `build_exe.bat Debug` on the command prompt if you want a debug build.
+## Debug
 
-## 2-b. Build .exe with Visual Studio
+If you want a debug build, run `batch_files/build_debug.bat`.  
+If you want to debug the exe on Visual Studio, you can open `build/Debug/Tuw.sln` with it.  
+Then, set `Tuw` as the startup project.  
 
-Of course, you can build the exe with Visual Studio.  
-The steps are as follows.
+## Cross Compile for ARM64
 
-1.  Open `./Simple-Command-Runner` with Visual Studio.
-2.  Select one of the configurations.
-3.  Open [`CMakeLists.txt`](../CMakeLists.txt) in Visual Studio.
-4.  Push `ctrl+s` to run the configuration.
-5.  Select `SimpleCommandRunner.exe` as a startup item.
-6.  Build `SimpleCommandRunner.exe`.
-
-## Compression
-
-The built binary will be 2 or 3 MB.  
-You should use [UPX](https://github.com/upx/upx/releases/latest) if you want smaller exe.  
-  
-`upx SimpleCommandRunner.exe --best`  
+If you installed ARM64 components in Visual Studio, you can build ARM64 binary on x64 machine.  
+Run `batch_files/build_arm.bat` on the command prompt.  
+The ARM64 version will be generated in `build/ReleaseARM/`.  
 
 ## Test
 
-If you want to run tests, run [`test.bat`](../batch_files/test.bat) or type `test.bat Debug` on the command prompt.  
-In Visual Studio, you can also run the tests from `Test->Run CTests for SimpleCommandRunner`.  
+If you want to run tests, run [`batch_files/test.bat`](../batch_files/test.bat) or `batch_files/test_debug.bat`.  
 
 ## Coverage
 
-`test.bat Debug` will make coverage report if [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage/releases) is installed.  
-
-## Uninstall wxWidgets
-
-If you want to uninstall wxWidgets, remove `C:/Users/'username'/wxWidgets-*`.
+`batch_files/test_debug.bat` will make coverage report if [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage/releases) is installed.  

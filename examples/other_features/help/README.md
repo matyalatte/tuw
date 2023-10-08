@@ -2,19 +2,19 @@
 
 You can put some documents in menu bar.  
 
-![sample](https://user-images.githubusercontent.com/69258547/222972599-bab3ff85-2c6c-432d-91e7-8244a8a8e514.png)
+![sample](https://github.com/matyalatte/tuw/assets/69258547/e408a179-6f9f-4769-ab3d-57f87d392a4f)
 
 ```json
 "help": [
     {
         "type": "url",
-        "label": "About Simple Command Runner",
-        "url": "https://github.com/matyalatte/Simple-Command-Runner"
+        "label": "About Tuw",
+        "url": "https://github.com/matyalatte/Tuw"
     },
     {
         "type": "url",
         "label": "Releases",
-        "url": "https://github.com/matyalatte/Simple-Command-Runner/releases"
+        "url": "https://github.com/matyalatte/Tuw/releases"
     },
     {
         "type": "file",

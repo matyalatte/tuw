@@ -1,160 +1,130 @@
 #include "exec.h"
-
-#ifdef __linux__
-// Console window for linux
-LogFrame::LogFrame(wxString exepath) : wxFrame(nullptr, wxID_ANY, exepath,
-    wxDefaultPosition, wxSize(600, 400),
-    wxSYSTEM_MENU |
-    wxRESIZE_BORDER |
-    wxMINIMIZE_BOX |
-    wxMAXIMIZE_BOX |
-    wxCAPTION |
-    wxCLIP_CHILDREN) {
-
-    m_log_box = new wxTextCtrl(this, wxID_ANY,
-        "", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-    m_log_box->SetBackgroundColour(*wxBLACK);
-    m_log_box->SetForegroundColour(*wxWHITE);
-    wxFont font = m_log_box->GetFont();
-    font.SetPointSize(font.GetPointSize() + 1);
-    m_log_box->SetFont(font);
-    m_log_redirector = new wxStreamToTextRedirector(m_log_box);
-    Centre();
-    wxPoint pos = GetPosition();
-    SetPosition(wxPoint(pos.x-300, pos.y));
-    Show();
-}
-
-void LogFrame::OnClose(wxCloseEvent& event) {
-    Destroy();
-}
+#include <vector>
+#include "subprocess.h"
+#include "string_utils.h"
+#ifdef _WIN32
+#include "windows.h"
 #endif
 
-class wxProcessExecute : public wxProcess {
- private:
-    bool m_running = false;
-    int m_exit_code;
-
- public:
-    explicit wxProcessExecute(int flags) : wxProcess(flags), m_exit_code(1), m_running(false) {}
-
-    long Execute(const wxString cmd) {
-        long pid = wxExecute(cmd, wxEXEC_ASYNC, this);
-        if (pid) {
-            m_running = true;
-        }
-        return pid;
+static std::string GetLastLine(const std::string& input) {
+    if (input.length() == 0) return "";
+    size_t end = input.length() - 1;
+    if (input[end] == '\n') {
+        if (end == 0) return "";
+        end--;
     }
-
-    void OnTerminate(int pid, int status) {
-        m_exit_code = status;
-        m_running = false;
-        if (wxProcessExecute::Exists(pid)) {
-            wxProcessExecute::Kill(pid);
-        }
+#ifdef _WIN32
+    if (input[end] == '\r') {
+        if (end == 0) return "";
+        end--;
     }
-
-    static wxProcessExecute* Open(const wxString& cmd) {
-        wxProcessExecute* process = new wxProcessExecute(wxPROCESS_REDIRECT);
-        long pid = process->Execute(cmd);
-        if (!pid) {
-            delete process;
-            return NULL;
-        }
-        process->SetPid(pid);
-        return process;
-    }
-
-    int GetExitCode() { return m_exit_code; }
-    void Wait() { while (m_running) { wxYield(); } }
-};
-
-inline bool IsReturn(const char& input) {
-    return input == '\n' || input == '\r';
+#endif
+    if (end == 0) return "";
+    size_t position = end;
+    while ((input[position] != '\n') && position > 0) position--;
+    if (input[position] == '\n') position++;
+    if (end <= position) return "";
+    return input.substr(position, end - position + 1);
 }
 
-std::string GetLastLine(const std::string& input) {
-    if (input.length() <= 2) return input;
-    size_t position = input.length() - 3;
-    while ((!IsReturn(input[position])) && position > 0) position--;
-    if (IsReturn(input[position])) position += 1;
-    return input.substr(position);
-}
+ExecuteResult Execute(const std::string& cmd) {
+#ifdef _WIN32
+    std::wstring wcmd = UTF8toUTF16(cmd.c_str());
 
-// get string from stream
-std::string ReadStream(wxInputStream* stream, char* buf, size_t size) {
-    if (stream->CanRead()) {
-        size_t read_size;
-        stream->Read(buf, size);
-        read_size = stream->LastRead();
-        return std::string(buf, read_size);
+    int argc;
+    wchar_t** parsed = CommandLineToArgvW(wcmd.c_str(), &argc);
+    wchar_t** argv = new wchar_t*[argc + 3];
+    wchar_t a[] = L"cmd.exe";
+    wchar_t b[] = L"/c";
+    argv[0] = &a[0];
+    argv[1] = &b[0];
+    for (int i = 0; i < argc; i++) {
+        argv[i + 2] = parsed[i];
     }
-    return "";
-}
-
-// run command and return error messages
-#ifdef __linux__
-wxResult Exec(LogFrame& ostream,
+    argv[argc + 2] = 0;
 #else
-wxResult Exec(
+    const char* argv[] = {"/bin/sh", "-c", cmd.c_str(), NULL};
 #endif
-                 wxString& cmd,
-                 bool check_exit_code,
-                 int exit_success,
-                 bool show_last_line,
-                 wxString& last_line) {
-    // open process
-    wxProcessExecute* process = wxProcessExecute::Open(cmd);
-    if (!process)
-        return { false, "Failed to open a process." };
 
-    // get stream
-    wxInputStream* istream = process->GetInputStream();
-    wxInputStream* estream = process->GetErrorStream();
+    struct subprocess_s process;
+    int options = subprocess_option_inherit_environment
+                  | subprocess_option_search_user_path
+                  | subprocess_option_enable_async;
+    int result = subprocess_create(&argv[0], options, &process);
 
-    // set buffers
-    size_t size = 512;
-    char ibuf[512];  // buffer for output
-    char ebuf[512];  // buffer for error messages
-    std::string in_msg = "";
-    std::string err_msg = "";
+#ifdef _WIN32
+    LocalFree((LPWSTR)parsed);
+    delete[] argv;
+#endif
 
-    while ((!istream->Eof() && !estream->Eof()) ||
-        istream->CanRead() || estream->CanRead()) {  // while process is running
-        // print outputs
-        std::string str = ReadStream(istream, ibuf, size);
-    #ifdef __linux__
-        ostream << str;
-    #else
-        wxPrintf(str.c_str());
-    #endif
-        in_msg += str;
-        if (in_msg.length() > 2048) {
-            in_msg = in_msg.substr(in_msg.length() - 1024, 1024);
+    if (0 != result)
+        return { -1, "Failed to create a subprocess.\n"};
+
+    const unsigned BUF_SIZE = 1024;
+    char out_buf[BUF_SIZE + 1];
+    char err_buf[BUF_SIZE + 1];
+    std::string last_line;
+    std::string err_msg;
+    unsigned out_read_size = 0;
+    unsigned err_read_size = 0;
+
+    while (subprocess_alive(&process) || out_read_size || err_read_size) {
+        out_read_size = subprocess_read_stdout(&process, out_buf, BUF_SIZE);
+        out_buf[out_read_size] = 0;
+        err_read_size = subprocess_read_stderr(&process, err_buf, BUF_SIZE);
+        err_buf[err_read_size] = 0;
+#ifdef _WIN32
+        printf("%s", out_buf);
+#else
+        PrintFmt("%s", out_buf);
+#endif
+        last_line += out_buf;
+        err_msg += err_buf;
+        if (last_line.length() > 2048) {
+            last_line = last_line.substr(last_line.length() - 1024, 1024);
         }
-
-        // store error messages
-        err_msg += ReadStream(estream, ebuf, size);
         if (err_msg.length() > 4096) {
             err_msg = err_msg.substr(err_msg.length() - 2048, 2048);
         }
     }
-    // get last line
-    last_line = GetLastLine(in_msg).c_str();
 
-    process->Wait();
+    int return_code;
+    result = subprocess_join(&process, &return_code);
+    if (0 != result)
+        return { -1, "Failed to join a subprocess.\n"};
 
-    // print and return error messages
-    if (err_msg != "")
-        return { false, err_msg.c_str() };
+    result = subprocess_destroy(&process);
+    if (0 != result)
+        return { -1, "Failed to destroy a subprocess.\n"};
 
-    int exit_code = process->GetExitCode();
-    if (check_exit_code && (exit_code != exit_success)) {
-        if (show_last_line)
-            return { false, last_line };
-        else
-            return { false, wxString::Format("Invalid exit code (%d)", exit_code) };
-    }
+    last_line = GetLastLine(last_line);
 
-    return { true };
+    return { return_code, err_msg, last_line };
+}
+
+ExecuteResult LaunchDefaultApp(const std::string& url) {
+#ifdef _WIN32
+    const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", UTF8toUTF16(url.c_str()).c_str(), NULL};
+#elif defined(__linux__)
+    const char* argv[] = {"xdg-open", url.c_str(), NULL};
+#else
+    const char* argv[] = {"open", url.c_str(), NULL};
+#endif
+    struct subprocess_s process;
+    int options = subprocess_option_inherit_environment
+                  | subprocess_option_search_user_path;
+    int result = subprocess_create(argv, options, &process);
+    if (0 != result)
+        return { -1, "Failed to create a subprocess.\n"};
+
+    int return_code;
+    result = subprocess_join(&process, &return_code);
+    if (0 != result)
+        return { -1, "Failed to join a subprocess.\n"};
+
+    result = subprocess_destroy(&process);
+    if (0 != result)
+        return { -1, "Failed to destroy a subprocess.\n"};
+
+    return { 0 };
 }

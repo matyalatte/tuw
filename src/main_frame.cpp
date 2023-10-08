@@ -1,178 +1,418 @@
 #include "main_frame.h"
-
-#ifdef __linux__
-#define PRINT_FMT(fmt, ...) *m_ostream << wxString::Format(fmt, __VA_ARGS__)
-#define PRINT(str) *m_ostream << str
-#else
-#define PRINT_FMT(fmt, ...) wxPrintf(fmt, __VA_ARGS__)
-#define PRINT(str) wxPrintf(str)
-#endif
+#include "rapidjson/error/en.h"
+#include "exe_container.h"
+#include "env_utils.h"
+#include "exec.h"
+#include "string_utils.h"
+#include "tuw_constants.h"
 
 // Main window
-MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Document& config)
-    : wxFrame(nullptr, wxID_ANY, scr_constants::TOOL_NAME,
-              wxDefaultPosition, wxDefaultSize,
-              wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER & ~wxMAXIMIZE_BOX) {
-    // Use the executable directory as the working dir.
-    wxString exe_path = stdpath::GetExecutablePath(wxTheApp->argv[0]);
-    wxSetWorkingDirectory(wxPathOnly(exe_path));
+MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Document& config) {
+    PrintFmt("%s v%s by %s\n", tuw_constants::TOOL_NAME,
+              tuw_constants::VERSION, tuw_constants::AUTHOR);
+    PrintFmt(tuw_constants::LOGO);
 
-#ifdef __linux__
-    // Make console window for Linux
-    m_log_frame = new LogFrame(exe_path);
-    m_ostream = m_log_frame;
-#endif
-
-    PRINT_FMT("%s v%s by %s\n", scr_constants::TOOL_NAME,
-              scr_constants::VERSION, scr_constants::AUTHOR);
+    m_grid = NULL;
+    std::string exe_path = env_utils::GetExecutablePath();
 
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
-
+    bool ignore_external_json = false;
+    json_utils::JsonResult result = { true };
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
-        bool exists_external_json = wxFileExists("gui_definition.json");
+        bool exists_external_json = env_utils::FileExists("gui_definition.json");
         ExeContainer exe;
-        wxResult result = exe.Read(exe_path);
+
+        result = exe.Read(exe_path);
         if (result.ok) {
             if (exe.HasJson()) {
-                PRINT("[LoadDefinition] Found JSON in the executable.\n");
+                PrintFmt("[LoadDefinition] Found JSON in the executable.\n");
                 exe.GetJson(m_definition);
-                if (exists_external_json) {
-                    wxString msg =
-                        "WARNING: Using embedded JSON. gui_definition.json was ignored.\n";
-                    PRINT_FMT("[LoadDefinition] %s", msg);
-                    ShowSuccessDialog(msg, "Warning");
-                }
+                ignore_external_json = exists_external_json;
             } else {
-                PRINT("[LoadDefinition] Embedded JSON not found.\n");
+                PrintFmt("[LoadDefinition] Embedded JSON not found.\n");
                 result = { false };
             }
         } else {
-            PRINT_FMT("[LoadDefinition] ERROR: %s\n", result.msg);
+            PrintFmt("[LoadDefinition] ERROR: %s\n", result.msg.c_str());
         }
 
         if (!result.ok) {
             if (exists_external_json) {
-                PRINT("[LoadDefinition] Loaded gui_definition.json\n");
-                LoadJson("gui_definition.json", m_definition, true);
+                PrintFmt("[LoadDefinition] Loaded gui_definition.json\n");
+                result = json_utils::LoadJson("gui_definition.json", m_definition);
+                if (!result.ok)
+                    m_definition.SetObject();
             } else {
-                JsonLoadFailed("gui_definition.json not found.", m_definition);
+                result = { false, "gui_definition.json not found." };
             }
         }
     }
 
     if (!config.IsObject() || config.ObjectEmpty()) {
-        LoadJson("gui_config.json", m_config, false);
+        json_utils::JsonResult cfg_result =
+            json_utils::LoadJson("gui_config.json", m_config);
+        if (!cfg_result.ok) {
+            m_config.SetObject();
+        }
     }
 
-    CheckDefinition(m_definition);
-    m_definition_id = 0;
+    if (result.ok)
+        result = CheckDefinition(m_definition);
+
+    if (!result.ok)
+        json_utils::GetDefaultDefinition(m_definition);
+
+    int definition_id = 0;
     if (m_config.HasMember("_mode") && m_config["_mode"].IsInt()) {
         int mode = m_config["_mode"].GetInt();
         if (mode < m_definition["gui"].Size())
-            m_definition_id = mode;
+            definition_id = mode;
     }
+
+    CreateMenu();
     CreateFrame();
+#ifdef __linux__
+    uiMainStep(1);  // Need uiMainStep before using uiMsgBox
+#endif
+
+    if (ignore_external_json) {
+        const char* msg =
+            "WARNING: Using embedded JSON. gui_definition.json was ignored.\n";
+        PrintFmt("[LoadDefinition] %s", msg);
+        ShowSuccessDialog(msg, "Warning");
+    }
+
+    if (!result.ok)
+        JsonLoadFailed(result.msg, m_definition);
+
+    UpdatePanel(definition_id);
+    Fit();
 }
 
-void MainFrame::LoadJson(const std::string& file, rapidjson::Document& json, bool is_definition) {
-    json_utils::JsonResult result = json_utils::LoadJson(file, json);
+static int OnClosing(uiWindow *w, void *data) {
+    uiQuit();
+    return 1;
+}
 
-    if (!result.ok) {
-        json.SetObject();
-        if (is_definition)
-            JsonLoadFailed(wxString::FromUTF8(result.msg.c_str()), json);
-    }
+static int OnShouldQuit(void *data) {
+    uiWindow *mainwin = uiWindow(data);
+    uiControlDestroy(uiControl(mainwin));
+    return 1;
 }
 
 void MainFrame::CreateFrame() {
-    // make menu bar
-    wxMenuBar* menu_bar = new wxMenuBar;
-    wxMenu* menu_file = new wxMenu;
-
-    if (m_definition["gui"].Size() > 1) {
-        for (int i = 0; i < m_definition["gui"].Size(); i++) {
-            menu_file->Append(wxID_HIGHEST + i + 1,
-                wxString::FromUTF8(m_definition["gui"][i]["label"].GetString()));
-            menu_file->Bind(wxEVT_MENU,
-                &MainFrame::UpdateFrame, this, wxID_HIGHEST + i + 1);
-        }
-    }
-
-    menu_file->Append(wxID_EXIT, "Quit");
-    menu_bar->Append(menu_file, "Menu");
-
-    // put help urls to menu bar
-    if (m_definition.HasMember("help") && m_definition["help"].Size() > 0) {
-        wxMenu* menu_help = new wxMenu;
-
-        for (int i = 0; i < m_definition["help"].Size(); i++) {
-            menu_help->Append(wxID_HIGHEST + i + 1 + m_definition["gui"].Size(),
-                wxString::FromUTF8(m_definition["help"][i]["label"].GetString()));
-            menu_help->Bind(wxEVT_MENU,
-                &MainFrame::OpenURL, this, wxID_HIGHEST + i + 1 + m_definition["gui"].Size());
-        }
-        menu_bar->Append(menu_help, "Help");
-    }
-    SetMenuBar(menu_bar);
-
-    // set events
-    Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
-    Bind(wxEVT_MENU, &MainFrame::OnCommandClose, this, wxID_EXIT);
-    Connect(wxID_EXECUTE, wxEVT_COMMAND_BUTTON_CLICKED,
-        wxCommandEventHandler(MainFrame::ClickButton));
-
-    // put components
-    m_components = std::vector<Component*>();
-    UpdatePanel();
-    Fit();
+    m_mainwin = uiNewWindow(tuw_constants::TOOL_NAME, 400, 1, 1);
+#ifdef __APPLE__
+    // Move the default position from bottom left to top left.
+    uiWindowSetPosition(m_mainwin, 0, 0);
+#endif
+    uiWindowOnClosing(m_mainwin, OnClosing, NULL);
+    uiOnShouldQuit(OnShouldQuit, m_mainwin);
+    uiControlShow(uiControl(m_mainwin));
+    uiWindowSetMargined(m_mainwin, 1);
 
 #ifdef __linux__
-    // Idk why, but the sizer will ignore the last component on Ubuntu
-    int button_height;
-    m_run_button->GetSize(nullptr, &button_height);
-    SetSize(GetSize() + wxSize(0, button_height));
+    uiWindow* log_win = uiNewWindow(env_utils::GetExecutablePath().c_str(), 600, 400, 0);
+    uiWindowOnClosing(log_win, OnClosing, NULL);
+    uiMultilineEntry* log_entry = uiNewMultilineEntry();
+
+    /*
+    If your monospace font doesn't work,
+    you should make a config file to change the default font.
+    ```
+    <!-- ~/.config/fontconfig/fonts.conf -->
+    <match target="pattern">
+        <test name="family" qual="any">
+            <string>monospace</string>
+        </test>
+        <edit binding="strong" mode="prepend" name="family">
+            <string>Source Code Pro</string>
+        </edit>
+    </match>
+    ```
+    */
+    uiUnixMultilineEntrySetMonospace(log_entry, 1);
+    uiMultilineEntrySetReadOnly(log_entry, 1);
+    SetLogEntry(log_entry);
+    uiBox* log_box = uiNewVerticalBox();
+    uiBoxAppend(log_box, uiControl(log_entry), 1);
+    uiWindowSetChild(log_win, uiControl(log_box));
+    uiControlShow(uiControl(log_win));
 #endif
 }
 
-void MainFrame::JsonLoadFailed(const wxString& msg, rapidjson::Document& definition) {
-    PRINT_FMT("[LoadDefinition] Error: %s\n", msg);
-    ShowErrorDialog(msg);
-    json_utils::GetDefaultDefinition(definition);
+struct MenuData {
+    MenuData(MainFrame* mf, int id):
+        main_frame{mf}, menu_id{id} {}
+    MainFrame* main_frame;
+    int menu_id;
+};
+
+static void OnUpdatePanel(uiMenuItem *item, uiWindow *w, void *data) {
+    MenuData* menu_data = static_cast<MenuData*>(data);
+    menu_data->main_frame->UpdatePanel(menu_data->menu_id);
+    menu_data->main_frame->Fit();
+}
+
+static void OnOpenURL(uiMenuItem *item, uiWindow *w, void *data) {
+    MenuData* menu_data = static_cast<MenuData*>(data);
+    menu_data->main_frame->OpenURL(menu_data->menu_id);
+}
+
+void MainFrame::CreateMenu() {
+    uiMenuItem* item;
+    uiMenu* menu = uiNewMenu("Menu");
+    if (m_definition["gui"].Size() > 1) {
+        for (int i = 0; i < m_definition["gui"].Size(); i++) {
+            item = uiMenuAppendItem(menu, m_definition["gui"][i]["label"].GetString());
+            uiMenuItemOnClicked(item, OnUpdatePanel, new MenuData(this, i));
+        }
+    }
+    item = uiMenuAppendQuitItem(menu);
+
+    // put help urls to menu bar
+    if (m_definition.HasMember("help") && m_definition["help"].Size() > 0) {
+        menu = uiNewMenu("Help");
+
+        for (int i = 0; i < m_definition["help"].Size(); i++) {
+            item = uiMenuAppendItem(menu, m_definition["help"][i]["label"].GetString());
+            uiMenuItemOnClicked(item, OnOpenURL, new MenuData(this, i));
+        }
+    }
+}
+
+void MainFrame::OpenURL(int id) {
+    rapidjson::Value& help = m_definition["help"].GetArray()[id];
+    std::string type = help["type"].GetString();
+    std::string url = "";
+    std::string tag;
+
+    if (type == "url") {
+        url = help["url"].GetString();
+        tag = "[OpenURL] ";
+
+        int pos = url.find("://");
+        if (pos != std::string::npos) {
+            std::string scheme = url.substr(0, pos);
+            // scheme should be http or https
+            if (scheme == "file") {
+                std::string msg = "Use 'file' type for a path, not 'url' type. (" + url + ")";
+                PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
+                ShowErrorDialog(msg);
+                return;
+            } else if (scheme != "https" && scheme != "http") {
+                std::string msg = "Unsupported scheme detected. "
+                                  "It should be http or https. (" + scheme + ")";
+                PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
+                ShowErrorDialog(msg);
+                return;
+            }
+        } else {
+            url = "https://" + url;
+        }
+
+    } else if (type == "file") {
+        url = env_utils::GetFullPath(help["path"].GetString());
+        tag = "[OpenFile] ";
+        if (!env_utils::FileExists(url)) {
+            std::string msg = "File does not exist. (" + url + ")";
+            PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
+            ShowErrorDialog(msg);
+            return;
+        }
+    }
+
+    PrintFmt("%s%s\n", tag.c_str(), url.c_str());
+
+    if (type == "file") {
+        url = "file:" + url;
+    }
+
+    ExecuteResult result = LaunchDefaultApp(url);
+    if (result.exit_code != 0) {
+        std::string msg = "Failed to open a " + type + " by an unexpected error.";
+        PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
+        ShowErrorDialog(msg.c_str());
+    }
+}
+
+static void OnClicked(uiButton *sender, void *data) {
+    MainFrame* main_frame = static_cast<MainFrame*>(data);
+    main_frame->SaveConfig();
+    main_frame->RunCommand();
+}
+
+void MainFrame::UpdatePanel(int definition_id) {
+    m_definition_id = definition_id;
+    rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
+    const char* label = sub_definition["label"].GetString();
+    PrintFmt("[UpdatePanel] Lable: %s\n", label);
+    const char* cmd_str = sub_definition["command_str"].GetString();
+    PrintFmt("[UpdatePanel] Command: %s\n", cmd_str);
+    const char* window_name = json_utils::GetString(sub_definition,
+                                                    "window_name", tuw_constants::TOOL_NAME);
+    uiWindowSetTitle(m_mainwin, window_name);
+
+    uiGrid* old_grid = m_grid;
+    m_grid = uiNewGrid();
+    uiGridSetSpacing(m_grid, tuw_constants::GRID_MAIN_SPACE, tuw_constants::GRID_MAIN_SPACE);
+    uiBox* main_box = uiNewVerticalBox();
+    uiBoxSetSpacing(main_box, tuw_constants::BOX_MAIN_SPACE);
+
+    // Delete old components
+    for (Component* comp : m_components) {
+        delete comp;
+    }
+    m_components.clear();
+    m_components.shrink_to_fit();
+
+    // Put new components
+    Component* new_comp = nullptr;
+    if (sub_definition["components"].Size() > 0) {
+        for (rapidjson::Value& c : sub_definition["components"].GetArray()) {
+            uiBox* priv_box = uiNewVerticalBox();
+            uiBoxSetSpacing(priv_box, tuw_constants::BOX_SUB_SPACE);
+            new_comp = Component::PutComponent(priv_box, c);
+            if (new_comp == nullptr) {
+                ShowErrorDialog("Unknown component type detected. This is unexpected.");
+            } else {
+                new_comp->SetConfig(m_config);
+                m_components.push_back(new_comp);
+            }
+        uiBoxAppend(main_box, uiControl(priv_box), 0);
+        }
+    }
+
+    uiGridAppend(m_grid, uiControl(main_box), 0, 0, 1, 1, 1, uiAlignFill, 1, uiAlignFill);
+
+    // put a button
+    const char* button = json_utils::GetString(sub_definition, "button", "Run");
+    m_run_button = uiNewButton(button);
+    uiButtonOnClicked(m_run_button, OnClicked, this);
+    uiButtonSetMinSize(m_run_button, tuw_constants::BTN_WIDTH, tuw_constants::BTN_HEIGHT);
+    uiGridAppend(m_grid, uiControl(m_run_button), 0, 1, 1, 1, 0, uiAlignCenter, 0, uiAlignFill);
+
+    uiWindowSetChild(m_mainwin, uiControl(m_grid));
+
+    if (old_grid != NULL) {
+        uiControlDestroy(uiControl(old_grid));
+    }
+}
+
+void MainFrame::Fit() {
+    int width = 200;
+    for (Component* c : m_components) {
+        // Widen the window if a component has text box.
+        if (c->IsWide()) {
+            width = 400;
+            break;
+        }
+    }
+    // Fit the window size to the new components.
+    uiWindowSetContentSize(m_mainwin, width, 1);
+}
+
+// Make command string
+std::string MainFrame::GetCommand() {
+    std::vector<std::string> cmd_ary;
+    rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
+    for (rapidjson::Value& c : sub_definition["command_splitted"].GetArray())
+        cmd_ary.push_back(c.GetString());
+    std::vector<int> cmd_ids;
+    for (rapidjson::Value& c : sub_definition["command_ids"].GetArray())
+        cmd_ids.push_back(c.GetInt());
+
+    std::vector<std::string> comp_strings = std::vector<std::string>(m_components.size());
+    for (int i = 0; i < m_components.size(); i++) {
+        comp_strings[i] = m_components[i]->GetString();
+    }
+
+    std::string cmd = cmd_ary[0];
+    for (int i = 0; i < cmd_ids.size(); i++) {
+        int id = cmd_ids[i];
+        if (id == CMD_ID_PERCENT) {
+            cmd += "%";
+        } else if (id == CMD_ID_CURRENT_DIR) {
+            cmd += env_utils::GetCwd();
+        } else if (id == CMD_ID_HOME_DIR) {
+            cmd += env_utils::GetHome();
+        } else {
+            cmd += comp_strings[id];
+        }
+        if (i + 1 < cmd_ary.size()) {
+            cmd += cmd_ary[i + 1];
+        }
+    }
+    return cmd;
+}
+
+void MainFrame::RunCommand() {
+    char* text = uiButtonText(m_run_button);
+    uiButtonSetText(m_run_button, "Processing...");
+#ifdef __APPLE__
+    uiMainStep(1);
+#elif defined(__linux__)
+    uiUnixWaitEvents();
+#endif
+
+    std::string cmd = GetCommand();
+    PrintFmt("[RunCommand] Command: %s\n", cmd.c_str());
+    ExecuteResult result = Execute(cmd);
+    uiButtonSetText(m_run_button, text);
+
+    rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
+    bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);
+    int exit_success = json_utils::GetInt(sub_definition, "exit_success", 0);
+    bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
+
+    if (result.err_msg != "") {
+        PrintFmt("[RunCommand] Error: %s\n", result.err_msg.c_str());
+        ShowErrorDialog(result.err_msg);
+        return;
+    }
+
+    if (check_exit_code && result.exit_code != exit_success) {
+        std::string err_msg;
+        if (show_last_line)
+            err_msg = result.last_line;
+        else
+            err_msg = "Invalid exit code (" + std::to_string(result.exit_code) + ")";
+        PrintFmt("[RunCommand] Error: %s\n", err_msg.c_str());
+        ShowErrorDialog(err_msg);
+        return;
+    }
+
+    if (show_last_line && result.last_line != "") {
+        ShowSuccessDialog(result.last_line);
+    } else {
+        ShowSuccessDialog("Success!");
+    }
 }
 
 // read gui_definition.json
-void MainFrame::CheckDefinition(rapidjson::Document& definition) {
+json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definition) {
     json_utils::JsonResult result = { true };
     json_utils::CheckVersion(result, definition);
-    if (!result.ok) {
-        wxString msg = "Failed to load gui_definition.json ("
-                       + wxString::FromUTF8(result.msg.c_str()) + ")";
-        JsonLoadFailed(msg, definition);
-        return;
-    }
+    if (!result.ok) return result;
+
     if (definition.HasMember("recommended")) {
         if (definition["not_recommended"].GetBool()) {
-            PRINT_FMT("[LoadDefinition] Warning: Version %s is recommended.\n",
+            PrintFmt("[LoadDefinition] Warning: Version %s is recommended.\n",
                         definition["recommended"].GetString());
         }
     }
 
     json_utils::CheckDefinition(result, definition);
-    if (!result.ok) {
-        wxString msg = "Failed to load gui_definition.json ("
-                       + wxString::FromUTF8(result.msg.c_str()) + ")";
-        JsonLoadFailed(msg, definition);
-        return;
-    }
+    if (!result.ok) return result;
 
     json_utils::CheckHelpURLs(result, definition);
-    if (!result.ok) {
-        wxString msg = "Failed to load gui_definition.json ("
-                       + wxString::FromUTF8(result.msg.c_str()) + ")";
-        JsonLoadFailed(msg, definition);
-        return;
-    }
+    return result;
+}
+
+void MainFrame::JsonLoadFailed(const std::string& msg, rapidjson::Document& definition) {
+    PrintFmt("[LoadDefinition] Error: %s\n", msg.c_str());
+    ShowErrorDialog(msg);
 }
 
 void MainFrame::UpdateConfig() {
@@ -187,224 +427,28 @@ void MainFrame::SaveConfig() {
     UpdateConfig();
     json_utils::JsonResult result = json_utils::SaveJson(m_config, "gui_config.json");
     if (result.ok) {
-        PRINT("[SaveConfig] Saved gui_config.json\n");
+        PrintFmt("[SaveConfig] Saved gui_config.json\n");
     } else {
-        PRINT_FMT("[SaveConfig] Error: %s\n", result.msg.c_str());
+        PrintFmt("[SaveConfig] Error: %s\n", result.msg.c_str());
     }
 }
 
-void MainFrame::ShowErrorDialog(const wxString& msg, const wxString& title) {
-    wxMessageDialog* dialog;
-    dialog = new wxMessageDialog(this, msg, title, wxICON_ERROR | wxOK | wxCENTRE);
-    dialog->ShowModal();
-    dialog->Destroy();
+bool g_no_dialog = false;
+
+void MainFrame::ShowSuccessDialog(const std::string& msg, const std::string& title) {
+    if (g_no_dialog) return;
+    uiMsgBox(m_mainwin, title.c_str(), msg.c_str());
 }
 
-void MainFrame::ShowSuccessDialog(const wxString& msg, const wxString& title) {
-    wxMessageDialog* dialog;
-    dialog = new wxMessageDialog(this, msg, title);
-    dialog->ShowModal();
-    dialog->Destroy();
+void MainFrame::ShowErrorDialog(const std::string& msg, const std::string& title) {
+    if (g_no_dialog) return;
+    uiMsgBoxError(m_mainwin, title.c_str(), msg.c_str());
 }
 
-// Make command string
-wxString MainFrame::GetCommand() {
-    std::vector<std::string> cmd_ary;
-    rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
-    for (rapidjson::Value& c : sub_definition["command_splitted"].GetArray())
-        cmd_ary.push_back(c.GetString());
-    std::vector<int> cmd_ids;
-    for (rapidjson::Value& c : sub_definition["command_ids"].GetArray())
-        cmd_ids.push_back(c.GetInt());
-
-    std::vector<wxString> comp_strings = std::vector<wxString>(m_components.size());
-    for (int i = 0; i < m_components.size(); i++) {
-        comp_strings[i] = m_components[i]->GetString();
-    }
-
-    wxString cmd = wxString::FromUTF8(cmd_ary[0].c_str());
-    for (int i = 0; i < cmd_ids.size(); i++) {
-        int id = cmd_ids[i];
-        if (id == CMD_ID_PERCENT) {
-            cmd += "%";
-        } else if (id == CMD_ID_CURRENT_DIR) {
-            cmd += wxGetCwd();
-        } else if (id == CMD_ID_HOME_DIR) {
-            cmd += wxGetHomeDir();
-        } else {
-            cmd += comp_strings[id];
-        }
-        if (i + 1 < cmd_ary.size()) {
-            cmd += wxString::FromUTF8(cmd_ary[i + 1].c_str());
-        }
-    }
-    return cmd;
-}
-
-wxResult MainFrame::RunCommand(wxString& last_line) {
-    wxString cmd = GetCommand();
-
-    PRINT_FMT("[RunCommand] Command: %s\n", cmd);
-#ifdef _WIN32
-    cmd = "cmd.exe /c " + cmd;
-#endif
-    rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
-    bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);
-    int exit_success = json_utils::GetInt(sub_definition, "exit_success", 0);
-    bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
-#ifdef __linux__
-    return Exec(*m_ostream, cmd,
-#else
-    return Exec(cmd,
-#endif
-                check_exit_code, exit_success,
-                show_last_line, last_line);
-}
-
-// run command
-void MainFrame::ClickButton(wxCommandEvent& event) {
-    // save config
-    SaveConfig();
-
-    wxString text = m_run_button->GetLabel();
-    wxString last_line;
-
-    m_run_button->SetLabel("Processing...");
-    wxResult result = RunCommand(last_line);
-    m_run_button->SetLabel(text);
-
-    if (!result.ok) {
-        PRINT_FMT("[RunCommand] Error: %s\n", result.msg);
-        ShowErrorDialog(result.msg);
-        return;
-    }
-
-    rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
-    if (json_utils::GetBool(sub_definition, "show_last_line", false) && last_line != "") {
-        ShowSuccessDialog(last_line);
-    } else {
-        ShowSuccessDialog("Success!");
-    }
-}
-
-void MainFrame::OpenURL(wxCommandEvent& event) {
-    size_t id = event.GetId() - 1 - wxID_HIGHEST - m_definition["gui"].Size();
-    rapidjson::Value& help = m_definition["help"].GetArray()[id];
-    std::string type = help["type"].GetString();
-    wxString url = "";
-    wxString tag;
-
-    if (type == "url") {
-        url = wxString::FromUTF8(help["url"].GetString());
-        tag = "[OpenURL] ";
-        int pos = url.Find("://");
-        if (pos !=wxNOT_FOUND) {
-            wxString scheme = url.Left(pos);
-            // scheme should be http or https
-            if (scheme.IsSameAs("file", false)) {
-                wxString msg = "Use 'file' type for a path, not 'url' type. (" + url + ")";
-                PRINT_FMT("%sError: %s\n", tag, msg);
-                ShowErrorDialog(msg);
-                return;
-            } else if (!scheme.IsSameAs("https", false) && !scheme.IsSameAs("http", false)) {
-                wxString msg = "Unsupported scheme detected. "
-                                    "It should be http or https. (" + scheme + ")";
-                PRINT_FMT("%sError: %s\n", tag, msg);
-                ShowErrorDialog(msg);
-                return;
-            }
-        } else {
-            url = "https://" + url;
-        }
-    } else if (type == "file") {
-        url = wxString::FromUTF8(help["path"].GetString());
-        tag = "[OpenFile] ";
-        if (!wxFileExists(url) && !wxDirExists(url)) {
-            wxString msg = "File does not exist. (" + url + ")";
-            PRINT_FMT("%sError: %s\n", tag, msg);
-            ShowErrorDialog(msg);
-            return;
-        }
-    }
-
-    PRINT_FMT("%s%s\n", tag.c_str(), url);
-    if (type == "file") {
-        url = "file:" + url;
-    }
-    bool success = wxLaunchDefaultBrowser(url);
-    if (!success) {
-        std::string msg = "Failed to open a " + type + " by an unexpected error.";
-        PRINT_FMT("%sError: %s\n", tag, msg.c_str());
-        ShowErrorDialog(msg.c_str());
-    }
-}
-
-void MainFrame::UpdateFrame(wxCommandEvent& event) {
-    m_definition_id = event.GetId() - 1 - wxID_HIGHEST;
-
-    UpdateConfig();
-
-    wxPanel* unused_panel = m_panel;
-    UpdatePanel();
-
-    unused_panel->Destroy();
-    Fit();
-
-    Refresh();
-}
-
-void MainFrame::UpdatePanel() {
-    rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
-    wxString label = wxString::FromUTF8(sub_definition["label"].GetString());
-    PRINT_FMT("[UpdatePanel] Lable: %s\n", label);
-    wxString cmd_str = wxString::FromUTF8(sub_definition["command_str"].GetString());
-    PRINT_FMT("[UpdatePanel] Command: %s\n", cmd_str);
-    wxString window_name = wxString::FromUTF8(
-        json_utils::GetString(sub_definition, "window_name", "Simple Command Runner").c_str());
-    SetLabel(window_name);
-
-    wxBoxSizer* main_sizer = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* comp_sizer = new wxBoxSizer(wxVERTICAL);
-    comp_sizer->SetMinSize(wxSize(200, 25));
-    m_panel = new wxPanel(this);
-
-    // put components
-    m_components.clear();
-    m_components.shrink_to_fit();
-    Component* new_comp = nullptr;
-    if (sub_definition["components"].Size() > 0) {
-        for (rapidjson::Value& c : sub_definition["components"].GetArray()) {
-            new_comp = Component::PutComponent(m_panel, comp_sizer, c);
-            if (new_comp == nullptr) {
-                ShowErrorDialog("Unknown component type detected. This is unexpected.");
-            } else {
-                new_comp->SetConfig(m_config);
-                m_components.push_back(new_comp);
-            }
-        }
-    }
-
-    // put a button
-    wxString button = wxString::FromUTF8(
-        json_utils::GetString(sub_definition, "button", "Run").c_str());
-    m_run_button = new wxButton(m_panel, wxID_EXECUTE, button);
-    comp_sizer->Add(m_run_button, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_HORIZONTAL);
-
-    main_sizer->Add(comp_sizer, 0, wxALL, 15);
-    m_panel->SetSizerAndFit(main_sizer);
-    m_panel->Show();
-}
-
-void MainFrame::OnClose(wxCloseEvent& event) {
-#ifdef __linux__
-    m_log_frame->Destroy();
-#endif
-    Destroy();
+void MainFrameDisableDialog() {
+    g_no_dialog = true;
 }
 
 void MainFrame::GetDefinition(rapidjson::Document& json) {
     json.CopyFrom(m_definition, json.GetAllocator());
 }
-
-#undef PRINT_FMT
-#undef PRINT
