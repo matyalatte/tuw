@@ -12,7 +12,7 @@
 
 ![build](https://github.com/matyalatte/tuw/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/tuw/actions/workflows/test.yml/badge.svg)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4aee3ee5172e4c38915d07f9c62725d3)](https://www.codacy.com/gh/matyalatte/tuw/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=matyalatte/tuw&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4aee3ee5172e4c38915d07f9c62725d3)](https://app.codacy.com/gh/matyalatte/tuw/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 <a href="https://www.buymeacoffee.com/matyalatteQ" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>  
 
 ## Only 500KB for a portable GUI!
@@ -21,7 +21,7 @@ Tuw will give a very simple GUI to your scripts.
 All you need is a JSON file and a tiny executable.  
 **No need coding, no need browsers, and no need stupidly large executables**!  
 
-![sample](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/9b3c8487-010e-497b-b66c-95af84906dd0)
+![sample](https://github.com/matyalatte/tuw/assets/69258547/9b3c8487-010e-497b-b66c-95af84906dd0)
 <img src=https://user-images.githubusercontent.com/69258547/192090797-f5e5b52d-59aa-4942-a361-2c8b5c7bd746.png width=387></img>  
 
 ## Features

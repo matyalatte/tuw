@@ -2,7 +2,7 @@
 
 You can put a text box in the GUI.  
 
-![text_box](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/0fffa15a-2bae-48b3-be07-947e42175be5)  
+![text_box](https://github.com/matyalatte/tuw/assets/69258547/0fffa15a-2bae-48b3-be07-947e42175be5)  
 
 ```json
 {

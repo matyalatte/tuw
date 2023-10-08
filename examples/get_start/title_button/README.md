@@ -2,7 +2,7 @@
 
 You can rename the window title and the execution button.  
 
-![title](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/7be563b8-1ee0-4500-94c4-5ca575ad185f)  
+![title](https://github.com/matyalatte/tuw/assets/69258547/7be563b8-1ee0-4500-94c4-5ca575ad185f)  
 
 ```json
 {

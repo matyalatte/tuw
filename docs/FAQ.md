@@ -25,7 +25,7 @@ The executable will use them as default values when launching.
 
 Check `Allow executing file as program.` (Properties->Permissions->Execute)  
 You will be able to launch the executable by double-click.  
-![CloudNotDisplay](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/ecf995a6-cc75-4ba6-a253-ad2104f2e2c9)  
+![CloudNotDisplay](https://github.com/matyalatte/tuw/assets/69258547/ecf995a6-cc75-4ba6-a253-ad2104f2e2c9)  
 
 ## My Linux machine says `File not found` (or nothing) when clicking the executable.
 

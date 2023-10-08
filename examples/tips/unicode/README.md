@@ -2,7 +2,7 @@
 
 Tuw supports UTF-8 strings.  
 
-![unicode](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/b260277f-9a81-4eed-b6d4-3d9b0bf1924d)
+![unicode](https://github.com/matyalatte/tuw/assets/69258547/b260277f-9a81-4eed-b6d4-3d9b0bf1924d)
 
 ```json
 {

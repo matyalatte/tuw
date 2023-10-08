@@ -2,7 +2,7 @@
 
 You can use int pickers and float pickers.
 
-![Num pikcers](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/2b0d8299-b400-43da-8cf4-c21ca1e11f09)
+![Num pikcers](https://github.com/matyalatte/tuw/assets/69258547/2b0d8299-b400-43da-8cf4-c21ca1e11f09)
 
 ```json
 "components": [

@@ -2,7 +2,7 @@
 
 You can put some documents in menu bar.  
 
-![sample](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/e408a179-6f9f-4769-ab3d-57f87d392a4f)
+![sample](https://github.com/matyalatte/tuw/assets/69258547/e408a179-6f9f-4769-ab3d-57f87d392a4f)
 
 ```json
 "help": [

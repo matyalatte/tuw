@@ -2,7 +2,7 @@
 
 There are more components you can use.
 
-![others](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/3e178f69-3db7-4c43-b08f-d962912f096a)
+![others](https://github.com/matyalatte/tuw/assets/69258547/3e178f69-3db7-4c43-b08f-d962912f096a)
 
 ```json
 "components": [

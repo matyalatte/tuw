@@ -2,7 +2,7 @@
 
 You can use check boxes.  
 
-![check box](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/205ffb2e-355b-4619-a132-c2a2293c18f7)
+![check box](https://github.com/matyalatte/tuw/assets/69258547/205ffb2e-355b-4619-a132-c2a2293c18f7)
 
 ```json
 "components": [

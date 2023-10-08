@@ -2,7 +2,7 @@
 
 `tooltip` is an optional key for components to show a message when the mouse cursor is on a component.  
 
-![tooltip](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/8c7244ee-48ce-4492-973c-a3e6c628b8ed)  
+![tooltip](https://github.com/matyalatte/tuw/assets/69258547/8c7244ee-48ce-4492-973c-a3e6c628b8ed)  
 
 ```json
 {

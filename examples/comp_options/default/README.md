@@ -2,7 +2,7 @@
 
 `default` is an optional key for components to set default values.  
 
-![default](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/e7daec5f-398b-4ec5-9c91-32c2df049432)  
+![default](https://github.com/matyalatte/tuw/assets/69258547/e7daec5f-398b-4ec5-9c91-32c2df049432)  
 
 ```json
 {

@@ -4,7 +4,7 @@
 
 When the executed command output something to `stderr`, Tuw will show an error dialogue.  
 
-![Error](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/a023c839-aafc-4beb-a702-596e2ea3a454)  
+![Error](https://github.com/matyalatte/tuw/assets/69258547/a023c839-aafc-4beb-a702-596e2ea3a454)  
 
 ```json
 {
@@ -42,7 +42,7 @@ If so, you can use `show_last_line` option.
 It's an option to show the last line from `stdout`.  
 When `check_exit_code` is on, it can also show the last line on the error dialogue.  
 
-![ShowLastLine](https://github.com/matyalatte/Simple-Command-Runner/assets/69258547/3915740e-37b3-496c-9e51-9f80334725ae)  
+![ShowLastLine](https://github.com/matyalatte/tuw/assets/69258547/3915740e-37b3-496c-9e51-9f80334725ae)  
 
 ```json
 {
