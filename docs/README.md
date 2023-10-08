@@ -13,7 +13,6 @@
 ![build](https://github.com/matyalatte/tuw/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/tuw/actions/workflows/test.yml/badge.svg)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4aee3ee5172e4c38915d07f9c62725d3)](https://app.codacy.com/gh/matyalatte/tuw/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-<a href="https://www.buymeacoffee.com/matyalatteQ" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>  
 
 ## Only 500KB for a portable GUI!
 

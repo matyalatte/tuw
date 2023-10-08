@@ -1,5 +1,6 @@
 ver 0.6.0
-- Switched GUI library from wxWidgets to libui
+- Switched GUI library from wxWidgets to libui.
+- Changed license from GPL to MIT.
 - Fixed a bug that old components won't be freed when putting new components.
 
 ver 0.5.1
