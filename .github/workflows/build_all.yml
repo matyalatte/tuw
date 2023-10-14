@@ -117,7 +117,7 @@ jobs:
           mkdir -p archive/${{ env.TOOL_NAME }}
           cp build/Release${{ matrix.arch }}/${{ env.TOOL_NAME }}${{ matrix.exe_ext }} archive/${{ env.TOOL_NAME }}
           cp examples/other_features/help/gui_definition.json archive/${{ env.TOOL_NAME }}
-          cp changelog.txt archive/${{ env.TOOL_NAME }}
+          cp docs/changelog.txt archive/${{ env.TOOL_NAME }}
           cp license.txt archive/${{ env.TOOL_NAME }}
         shell: bash
 
@@ -159,7 +159,7 @@ jobs:
           mkdir -p archive/${{ env.TOOL_NAME }}
           cp ${{ env.TOOL_NAME }} archive/${{ env.TOOL_NAME }}
           cp examples/other_features/help/gui_definition.json archive/${{ env.TOOL_NAME }}
-          cp changelog.txt archive/${{ env.TOOL_NAME }}
+          cp docs/changelog.txt archive/${{ env.TOOL_NAME }}
           cp license.txt archive/${{ env.TOOL_NAME }}
         shell: bash
 
