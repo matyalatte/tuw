@@ -60,5 +60,5 @@ Required GLIBCXX versions
 
 You can see some dockerfiles to understand the workflow.  
 
--   [Dockerfile_Ubuntu](../Dockerfile_Ubuntu): Dockerfile to build Tuw on Ubuntu20.04
--   [Dockerfile_Alpine](../Dockerfile_Alpine): Dockerfile to build Tuw on Alpine3.16
+-   [docker/ubuntu.dockerfile](../docker/ubuntu.dockerfile): Builds Tuw on Ubuntu20.04  
+-   [docker/alpine.dockerfile](../docker/alpine.dockerfile): Builds Tuw on Alpine3.16  

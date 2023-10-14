@@ -26,8 +26,8 @@ You can also see [batch files](../batch_files/) and [shell scripts](../shell_scr
 Linux users can use dockerfiles to build the executable.  
 See the dockerfiles for the details.
 
--   [Dockerfile_Ubuntu](../Dockerfile_Ubuntu): Builds Tuw on Ubuntu20.04  
--   [Dockerfile_Alpine](../Dockerfile_Alpine): Builds Tuw on Alpine3.16  
+-   [docker/ubuntu.dockerfile](../docker/ubuntu.dockerfile): Builds Tuw on Ubuntu20.04  
+-   [docker/alpine.dockerfile](../docker/alpine.dockerfile): Builds Tuw on Alpine3.16  
 
 ## Github Actions
 

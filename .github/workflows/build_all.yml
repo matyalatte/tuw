@@ -150,7 +150,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static binfmt-support
-          docker buildx build --platform linux/arm64 -t tuw_ubuntu_arm -f Dockerfile_Ubuntu ./
+          docker buildx build --platform linux/arm64 -t tuw_ubuntu_arm -f docker/ubuntu.dockerfile ./
           docker run --name tuw_ubuntu_arm tuw_ubuntu_arm
           docker cp tuw_ubuntu_arm:/Tuw/build/Release/${{ env.TOOL_NAME }} ./
 

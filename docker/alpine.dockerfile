@@ -1,7 +1,7 @@
 # Building workflow for distributions using musl.
 #
 # 1. Use this docker file to build the executable.
-#    docker build -t tuw_alpine -f Dockerfile_Alpine ./
+#    docker build -t tuw_alpine -f docker/alpine.dockerfile ./
 #
 # 2. Run the built image.
 #    docker run --name tuw_alpine tuw_alpine
@@ -12,10 +12,10 @@
 # Notes:
 #   -You can use buildx for cross compiling
 #    sudo apt install -y qemu-user-static binfmt-support
-#    docker buildx build --platform linux/arm64 -t tuw_alpine_arm -f Dockerfile_Alpine ./
+#    docker buildx build --platform linux/arm64 -t tuw_alpine_arm -f docker/alpine.dockerfile ./
 #
 #   -You can run tests on the container.
-#    docker build -t tuw_alpine -f Dockerfile_Alpine ./
+#    docker build -t tuw_alpine -f docker/alpine.dockerfile ./
 #    docker run --rm --init -i tuw_alpine xvfb-run bash test.sh
 
 # Base image
@@ -26,7 +26,7 @@ FROM ${OS}
 RUN apk update && \
     apk add --no-cache \
         alpine-sdk linux-headers bash gtk+3.0-dev \
-        py3-pip python3 ttf-freefont xvfb-run at-spi2-core
+        py3-pip python3 ttf-freefont xvfb-run
 
 # Need ttf-freefont to avoid a GTK warning
 # "Native Windows wider or taller than * pixels are not supported"
@@ -35,9 +35,7 @@ RUN apk update && \
 RUN pip3 install meson ninja
 
 # Clone the repo
-COPY . /Tuw
-WORKDIR /Tuw
-RUN rm -rf build
+COPY .. /Tuw
 
 # Build
 WORKDIR /Tuw/shell_scripts
