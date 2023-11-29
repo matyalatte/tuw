@@ -8,17 +8,17 @@
                 {
                     "type": "file",
                     "label": "Some file",
-                    "empty_message": "Drop a file here!"
+                    "placeholder": "Drop a file here!"
                 },
                 {
                     "type": "folder",
                     "label": "Some folder",
-                    "empty_message": "Drop a folder here!"
+                    "placeholder": "Drop a folder here!"
                 },
                 {
                     "type": "text",
                     "label": "Some text",
-                    "empty_message": "Type here!"
+                    "placeholder": "Type here!"
                 }
             ]
         }

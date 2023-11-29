@@ -9,7 +9,7 @@ You can use them if the standard one is uncomfortable for you.
 | ---- | ---- |
 |  folder  |  dir  |
 |  text  |  text_box  |
-|  choice  |  combo  |
+|  combo  |  choice  |
 |  check_array  |  checks  |
 |  int  |  integer  |
 
@@ -21,6 +21,6 @@ You can use them if the standard one is uncomfortable for you.
 |  components  |  component_array  |
 |  items  |  item_array  |
 |  platforms  |  platform_array  |
-|  empty_message  |  placeholder  |
+|  placeholder  |  empty_message  |
 |  recommended  |  recommended_version  |
 |  minimum_required  |  minimum_required_version  |

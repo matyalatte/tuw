@@ -19,7 +19,7 @@ namespace json_utils {
         COMP_STATIC_TEXT,
         COMP_FILE,
         COMP_FOLDER,
-        COMP_CHOICE,
+        COMP_COMBO,
         COMP_CHECK,
         COMP_CHECK_ARRAY,
         COMP_TEXT,
@@ -362,9 +362,9 @@ namespace json_utils {
         else if (strcmp(comptype, "dir") == 0)
             return COMP_FOLDER;
         else if (strcmp(comptype, "choice") == 0)
-            return COMP_CHOICE;
+            return COMP_COMBO;
         else if (strcmp(comptype, "combo") == 0)
-            return COMP_CHOICE;
+            return COMP_COMBO;
         else if (strcmp(comptype, "check") == 0)
             return COMP_CHECK;
         else if (strcmp(comptype, "check_array") == 0)
@@ -430,7 +430,7 @@ namespace json_utils {
                 case COMP_TEXT:
                     CheckJsonType(result, c, "default", JsonType::STRING, label, CAN_SKIP);
                     break;
-                case COMP_CHOICE:
+                case COMP_COMBO:
                     CheckJsonType(result, c, "items", JsonType::JSON_ARRAY, label);
                     if (!result.ok) return;
                     for (rapidjson::Value& i : c["items"].GetArray()) {
@@ -482,8 +482,8 @@ namespace json_utils {
 
             CorrectKey(c, "add_quote", "add_quotes", alloc);
             CheckJsonType(result, c, "add_quotes", JsonType::BOOLEAN, label, CAN_SKIP);
-            CorrectKey(c, "placeholder", "empty_message", alloc);
-            CheckJsonType(result, c, "empty_message", JsonType::STRING, label, CAN_SKIP);
+            CorrectKey(c, "empty_message", "placeholder", alloc);
+            CheckJsonType(result, c, "placeholder", JsonType::STRING, label, CAN_SKIP);
             CheckJsonType(result, c, "id", JsonType::STRING, label, CAN_SKIP);
             CheckJsonType(result, c, "tooltip", JsonType::STRING, label, CAN_SKIP);
 

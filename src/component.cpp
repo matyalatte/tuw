@@ -10,7 +10,7 @@ enum ComponentType: int {
     COMP_STATIC_TEXT,
     COMP_FILE,
     COMP_FOLDER,
-    COMP_CHOICE,
+    COMP_COMBO,
     COMP_CHECK,
     COMP_CHECK_ARRAY,
     COMP_TEXT,
@@ -66,8 +66,8 @@ Component* Component::PutComponent(uiBox* box, const rapidjson::Value& j) {
         case COMP_FOLDER:
             comp = new DirPicker(box, j);
             break;
-        case COMP_CHOICE:
-            comp = new Choice(box, j);
+        case COMP_COMBO:
+            comp = new Combo(box, j);
             break;
         case COMP_CHECK:
             comp = new CheckBox(box, j);
@@ -137,14 +137,14 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     m_is_wide = true;
     m_ext = json_utils::GetString(j, "extension", "any files (*.*)|*.*");
     const char* value = json_utils::GetString(j, "default", "");
-    const char* empty_message = json_utils::GetString(j, "empty_message", "");
+    const char* placeholder = json_utils::GetString(j, "placeholder", "");
     const char* button_label = json_utils::GetString(j, "button", "Browse");
 
     uiEntry* entry = uiNewEntry();
     uiEntryOnFilesDropped(entry, onFilesDropped, NULL);
     uiEntrySetAcceptDrops(entry, 1);
     uiEntrySetText(entry, value);
-    uiEntrySetPlaceholder(entry, empty_message);
+    uiEntrySetPlaceholder(entry, placeholder);
 
     uiButton* button = uiNewButton(button_label);
     uiButtonOnClicked(button, onOpenFileClicked, this);
@@ -304,14 +304,14 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
     m_is_wide = true;
     const char* value = json_utils::GetString(j, "default", "");
-    const char* empty_message = json_utils::GetString(j, "empty_message", "");
+    const char* placeholder = json_utils::GetString(j, "placeholder", "");
     const char* button_label = json_utils::GetString(j, "button", "Browse");
 
     uiEntry* entry = uiNewEntry();
     uiEntryOnFilesDropped(entry, onFilesDropped, NULL);
     uiEntrySetAcceptDrops(entry, 1);
     uiEntrySetText(entry, value);
-    uiEntrySetPlaceholder(entry, empty_message);
+    uiEntrySetPlaceholder(entry, placeholder);
 
     uiButton* button = uiNewButton(button_label);
     uiButtonOnClicked(button, onOpenFolderClicked, this);
@@ -365,34 +365,34 @@ void DirPicker::OpenFolder() {
     uiFreeText(filename);
 }
 
-// Choice
-Choice::Choice(uiBox* box, const rapidjson::Value& j)
+// Combo
+Combo::Combo(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
-    uiCombobox* choice = uiNewCombobox();
+    uiCombobox* combo = uiNewCombobox();
     std::vector<std::string> values;
     for (const rapidjson::Value& i : j["items"].GetArray()) {
         const char* label = i["label"].GetString();
-        uiComboboxAppend(choice, label);
+        uiComboboxAppend(combo, label);
         const char* value = json_utils::GetString(i, "value", label);
         values.push_back(value);
     }
     uiBox* hbox = uiNewHorizontalBox();
-    uiBoxAppend(hbox, uiControl(choice), 0);
+    uiBoxAppend(hbox, uiControl(combo), 0);
     uiBoxAppend(box, uiControl(hbox), 0);
-    uiComboboxSetSelected(choice, json_utils::GetInt(j, "default", 0) % j["items"].Size());
+    uiComboboxSetSelected(combo, json_utils::GetInt(j, "default", 0) % j["items"].Size());
 
     SetValues(values);
     if (j.HasMember("tooltip"))
-        m_tooltip = uiTooltipSetControl(uiControl(choice), json_utils::GetString(j, "tooltip", ""));
-    m_widget = choice;
+        m_tooltip = uiTooltipSetControl(uiControl(combo), json_utils::GetString(j, "tooltip", ""));
+    m_widget = combo;
 }
 
-std::string Choice::GetRawString() {
+std::string Combo::GetRawString() {
     int sel = uiComboboxSelected(static_cast<uiCombobox*>(m_widget));
     return m_values[sel];
 }
 
-void Choice::SetConfig(const rapidjson::Value& config) {
+void Combo::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsInt()) {
         int  i = config[m_id].GetInt();
         if (i < m_values.size())
@@ -400,7 +400,7 @@ void Choice::SetConfig(const rapidjson::Value& config) {
     }
 }
 
-void Choice::GetConfig(rapidjson::Document& config) {
+void Combo::GetConfig(rapidjson::Document& config) {
     if (config.HasMember(m_id))
         config.RemoveMember(m_id);
     int sel = uiComboboxSelected(static_cast<uiCombobox*>(m_widget));
@@ -510,10 +510,10 @@ TextBox::TextBox(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
     m_is_wide = true;
     const char* value = json_utils::GetString(j, "default", "");
-    const char* empty_message = json_utils::GetString(j, "empty_message", "");
+    const char* placeholder = json_utils::GetString(j, "placeholder", "");
     uiEntry* entry = uiNewEntry();
     uiEntrySetText(entry, value);
-    uiEntrySetPlaceholder(entry, empty_message);
+    uiEntrySetPlaceholder(entry, placeholder);
     uiBoxAppend(box, uiControl(entry), 0);
     if (j.HasMember("tooltip"))
         m_tooltip = uiTooltipSetControl(uiControl(entry), json_utils::GetString(j, "tooltip", ""));

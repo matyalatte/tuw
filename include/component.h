@@ -33,7 +33,7 @@ class Component {
     static Component* PutComponent(uiBox* box, const rapidjson::Value& j);
 };
 
-// containers for Choice and CheckArray
+// containers for Combo and CheckArray
 class MultipleValuesContainer {
  protected:
     std::vector<std::string> m_values;
@@ -79,10 +79,10 @@ class DirPicker : public StringComponentBase {
     void OpenFolder();
 };
 
-class Choice : public StringComponentBase, MultipleValuesContainer {
+class Combo : public StringComponentBase, MultipleValuesContainer {
  public:
     std::string GetRawString() override;
-    Choice(uiBox* box, const rapidjson::Value& j);
+    Combo(uiBox* box, const rapidjson::Value& j);
     void GetConfig(rapidjson::Document& config) override;
     void SetConfig(const rapidjson::Value& config) override;
 };

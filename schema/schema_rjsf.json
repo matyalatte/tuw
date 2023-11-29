@@ -23,7 +23,7 @@
                     "static_text",
                     "file",
                     "folder",
-                    "choice",
+                    "combo",
                     "check",
                     "check_array",
                     "text",
@@ -41,7 +41,7 @@
                 { "$ref": "#/definitions/components/check" },
                 { "$ref": "#/definitions/components/int" },
                 { "$ref": "#/definitions/components/float" },
-                { "$ref": "#/definitions/components/choice" },
+                { "$ref": "#/definitions/components/combo" },
                 { "$ref": "#/definitions/components/check_array" }
               ],
               "required": [ "type", "label" ]
@@ -110,7 +110,7 @@
         "then": {
           "properties": {
             "extension": { "type": "string" },
-            "empty_message": { "type": "string" },
+            "placeholder": { "type": "string" },
             "default": { "type": "string" },
             "tooltip": { "type": "string" }
           }
@@ -124,7 +124,7 @@
         },
         "then": {
           "properties": {
-            "empty_message": { "type": "string" },
+            "placeholder": { "type": "string" },
             "default": { "type": "string" },
             "tooltip": { "type": "string" }
           }
@@ -179,10 +179,10 @@
           }
         }
       },
-      "choice": {
+      "combo": {
         "if": {
           "properties": {
-            "type": { "const": "choice"}
+            "type": { "const": "combo"}
           }
         },
         "then": {

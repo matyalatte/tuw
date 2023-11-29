@@ -2,7 +2,7 @@
     "ファイル": "テスト",
     "folder": "検証",
     "check": true,
-    "choice": 2,
+    "combo": 2,
     "options": [ false, false, true ],
     "text": "текстове поле",
     "integer": 2,

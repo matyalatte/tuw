@@ -2,7 +2,7 @@
     "gui": [
         {
             "label": "Component Sample",
-            "command": "echo choice: %a% & echo textbox: %c%",
+            "command": "echo combo: %a% & echo textbox: %c%",
             "button": "Echo!",
             "components": [
                 {
@@ -10,7 +10,7 @@
                     "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
                 },
                 {
-                    "type": "choice",
+                    "type": "combo",
                     "label": "num",
                     "items": [
                         {

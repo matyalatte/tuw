@@ -1,3 +1,9 @@
+ver 0.6.1
+- "placeholder" became the standard spelling for the placeholders option.
+  ("empty_message" became the alternative one.)
+- "combo" became the standard spelling for the combo boxes.
+  ("choice" became the alternative one.)
+
 ver 0.6.0
 - Switched GUI library from wxWidgets to libui.
 - Changed license from GPL to MIT.
