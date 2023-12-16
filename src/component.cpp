@@ -11,6 +11,7 @@ enum ComponentType: int {
     COMP_FILE,
     COMP_FOLDER,
     COMP_COMBO,
+    COMP_RADIO,
     COMP_CHECK,
     COMP_CHECK_ARRAY,
     COMP_TEXT,
@@ -67,7 +68,10 @@ Component* Component::PutComponent(uiBox* box, const rapidjson::Value& j) {
             comp = new DirPicker(box, j);
             break;
         case COMP_COMBO:
-            comp = new Combo(box, j);
+            comp = new ComboBox(box, j);
+            break;
+        case COMP_RADIO:
+            comp = new RadioButtons(box, j);
             break;
         case COMP_CHECK:
             comp = new CheckBox(box, j);
@@ -365,8 +369,8 @@ void DirPicker::OpenFolder() {
     uiFreeText(filename);
 }
 
-// Combo
-Combo::Combo(uiBox* box, const rapidjson::Value& j)
+// ComboBox
+ComboBox::ComboBox(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
     uiCombobox* combo = uiNewCombobox();
     std::vector<std::string> values;
@@ -387,12 +391,12 @@ Combo::Combo(uiBox* box, const rapidjson::Value& j)
     m_widget = combo;
 }
 
-std::string Combo::GetRawString() {
+std::string ComboBox::GetRawString() {
     int sel = uiComboboxSelected(static_cast<uiCombobox*>(m_widget));
     return m_values[sel];
 }
 
-void Combo::SetConfig(const rapidjson::Value& config) {
+void ComboBox::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsInt()) {
         int  i = config[m_id].GetInt();
         if (i < m_values.size())
@@ -400,10 +404,53 @@ void Combo::SetConfig(const rapidjson::Value& config) {
     }
 }
 
-void Combo::GetConfig(rapidjson::Document& config) {
+void ComboBox::GetConfig(rapidjson::Document& config) {
     if (config.HasMember(m_id))
         config.RemoveMember(m_id);
     int sel = uiComboboxSelected(static_cast<uiCombobox*>(m_widget));
+    rapidjson::Value n(m_id.c_str(), config.GetAllocator());
+    config.AddMember(n, sel, config.GetAllocator());
+}
+
+// RadioButtons
+RadioButtons::RadioButtons(uiBox* box, const rapidjson::Value& j)
+    : StringComponentBase(box, j) {
+    uiRadioButtons* radio = uiNewRadioButtons();
+    std::vector<std::string> values;
+    for (const rapidjson::Value& i : j["items"].GetArray()) {
+        const char* label = i["label"].GetString();
+        uiRadioButtonsAppend(radio, label);
+        const char* value = json_utils::GetString(i, "value", label);
+        values.push_back(value);
+    }
+    uiBox* hbox = uiNewHorizontalBox();
+    uiBoxAppend(hbox, uiControl(radio), 0);
+    uiBoxAppend(box, uiControl(hbox), 0);
+    uiRadioButtonsSetSelected(radio, json_utils::GetInt(j, "default", 0) % j["items"].Size());
+
+    SetValues(values);
+    if (j.HasMember("tooltip"))
+        m_tooltip = uiTooltipSetControl(uiControl(radio), json_utils::GetString(j, "tooltip", ""));
+    m_widget = radio;
+}
+
+std::string RadioButtons::GetRawString() {
+    int sel = uiRadioButtonsSelected(static_cast<uiRadioButtons*>(m_widget));
+    return m_values[sel];
+}
+
+void RadioButtons::SetConfig(const rapidjson::Value& config) {
+    if (config.HasMember(m_id) && config[m_id].IsInt()) {
+        int  i = config[m_id].GetInt();
+        if (i < m_values.size())
+            uiRadioButtonsSetSelected(static_cast<uiRadioButtons*>(m_widget), i);
+    }
+}
+
+void RadioButtons::GetConfig(rapidjson::Document& config) {
+    if (config.HasMember(m_id))
+        config.RemoveMember(m_id);
+    int sel = uiRadioButtonsSelected(static_cast<uiRadioButtons*>(m_widget));
     rapidjson::Value n(m_id.c_str(), config.GetAllocator());
     config.AddMember(n, sel, config.GetAllocator());
 }

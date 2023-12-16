@@ -10,24 +10,6 @@
                     "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
                 },
                 {
-                    "type": "combo",
-                    "label": "num",
-                    "items": [
-                        {
-                            "label": "one",
-                            "value": "1"
-                        },
-                        {
-                            "label": "two",
-                            "value": "2"
-                        },
-                        {
-                            "label": "three",
-                            "value": "3"
-                        }
-                    ]
-                },
-                {
                     "type": "text",
                     "label": "Some text"
                 }

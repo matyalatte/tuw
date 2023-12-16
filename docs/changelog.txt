@@ -1,4 +1,5 @@
 ver 0.6.1
+- Added radio buttons to GUI components
 - "placeholder" became the standard spelling for the placeholders option.
   ("empty_message" became the alternative one.)
 - "combo" became the standard spelling for the combo boxes.

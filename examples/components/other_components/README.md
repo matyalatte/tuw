@@ -11,24 +11,6 @@ There are more components you can use.
         "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
     },
     {
-        "type": "combo",
-        "label": "num",
-        "items": [
-            {
-                "label": "one",
-                "value": "1"
-            },
-            {
-                "label": "two",
-                "value": "2"
-            },
-            {
-                "label": "three",
-                "value": "3"
-            }
-        ]
-    },
-    {
         "type": "text",
         "label": "Some text"
     }
@@ -36,5 +18,4 @@ There are more components you can use.
 ```
 
 -   `static_text` is a string component. You don't need to put `%*%` in command for this component.
--   `combo` is a combo box. `value` will be inputted to command.
 -   `text` is a text box.

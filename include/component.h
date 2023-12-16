@@ -79,10 +79,18 @@ class DirPicker : public StringComponentBase {
     void OpenFolder();
 };
 
-class Combo : public StringComponentBase, MultipleValuesContainer {
+class ComboBox : public StringComponentBase, MultipleValuesContainer {
  public:
     std::string GetRawString() override;
-    Combo(uiBox* box, const rapidjson::Value& j);
+    ComboBox(uiBox* box, const rapidjson::Value& j);
+    void GetConfig(rapidjson::Document& config) override;
+    void SetConfig(const rapidjson::Value& config) override;
+};
+
+class RadioButtons : public StringComponentBase, MultipleValuesContainer {
+ public:
+    std::string GetRawString() override;
+    RadioButtons(uiBox* box, const rapidjson::Value& j);
     void GetConfig(rapidjson::Document& config) override;
     void SetConfig(const rapidjson::Value& config) override;
 };

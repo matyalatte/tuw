@@ -123,6 +123,7 @@
                 "dir",
                 "choice",
                 "combo",
+                "radio",
                 "check",
                 "check_array",
                 "checks",
@@ -274,7 +275,7 @@
       "combo": {
         "if": {
           "properties": {
-            "type": { "enum": [ "choice", "combo" ] }
+            "type": { "enum": [ "choice", "combo", "radio" ] }
           }
         },
         "then": {

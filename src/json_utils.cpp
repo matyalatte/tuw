@@ -20,6 +20,7 @@ namespace json_utils {
         COMP_FILE,
         COMP_FOLDER,
         COMP_COMBO,
+        COMP_RADIO,
         COMP_CHECK,
         COMP_CHECK_ARRAY,
         COMP_TEXT,
@@ -365,6 +366,8 @@ namespace json_utils {
             return COMP_COMBO;
         else if (strcmp(comptype, "combo") == 0)
             return COMP_COMBO;
+        else if (strcmp(comptype, "radio") == 0)
+            return COMP_RADIO;
         else if (strcmp(comptype, "check") == 0)
             return COMP_CHECK;
         else if (strcmp(comptype, "check_array") == 0)
@@ -431,6 +434,7 @@ namespace json_utils {
                     CheckJsonType(result, c, "default", JsonType::STRING, label, CAN_SKIP);
                     break;
                 case COMP_COMBO:
+                case COMP_RADIO:
                     CheckJsonType(result, c, "items", JsonType::JSON_ARRAY, label);
                     if (!result.ok) return;
                     for (rapidjson::Value& i : c["items"].GetArray()) {

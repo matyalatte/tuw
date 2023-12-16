@@ -24,6 +24,7 @@
                     "file",
                     "folder",
                     "combo",
+                    "radio",
                     "check",
                     "check_array",
                     "text",
@@ -182,7 +183,7 @@
       "combo": {
         "if": {
           "properties": {
-            "type": { "const": "combo"}
+            "type": { "enum": [ "combo", "radio" ] }
           }
         },
         "then": {
