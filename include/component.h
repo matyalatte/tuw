@@ -12,7 +12,6 @@ class Component {
     std::string m_id;
     bool m_has_string;
     bool m_is_wide;
-    uintptr_t m_tooltip;  // handler for tooltip window
 
  private:
     bool m_add_quotes;
