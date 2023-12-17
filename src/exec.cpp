@@ -104,7 +104,8 @@ ExecuteResult Execute(const std::string& cmd) {
 
 ExecuteResult LaunchDefaultApp(const std::string& url) {
 #ifdef _WIN32
-    const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", UTF8toUTF16(url.c_str()).c_str(), NULL};
+    std::wstring utf16_url = UTF8toUTF16(url.c_str());
+    const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", utf16_url.c_str(), NULL};
 #elif defined(__linux__)
     const char* argv[] = {"xdg-open", url.c_str(), NULL};
 #else

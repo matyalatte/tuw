@@ -4,6 +4,7 @@ ver 0.6.1
   ("empty_message" became the alternative one.)
 - "combo" became the standard spelling for the combo boxes.
   ("choice" became the alternative one.)
+- Fixed an error when opening URLs with debug builds.
 
 ver 0.6.0
 - Switched GUI library from wxWidgets to libui.
