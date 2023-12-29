@@ -6,6 +6,7 @@ ver 0.6.1
   ("choice" became the alternative one.)
 - Fixed an error when opening URLs with debug builds.
 - Fixed a crash when the executed process uses multiprocessing and each child process sends something to stdout.
+- Fixed a bug that drag-drop events are ignored on newer versions of GTK.
 
 ver 0.6.0
 - Switched GUI library from wxWidgets to libui.
