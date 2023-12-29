@@ -1,6 +1,6 @@
 # Tuw: a tiny GUI wrapper for command-line tools
 
-```
+```text
   _____  
  |_   _|   ___      __
    | || | | \ \ /\ / /

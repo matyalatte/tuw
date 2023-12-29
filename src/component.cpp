@@ -210,6 +210,8 @@ class FilterList {
  public:
     FilterList(): filter_buf(NULL), filters(), ui_filters(NULL) {}
     void MakeFilters(const std::string& ext) {
+        if (filter_buf != NULL)
+            delete[] filter_buf;
         filter_buf =  new char[ext.length() + 1];
         size_t i = 0;
         size_t start = 0;

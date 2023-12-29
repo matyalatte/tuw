@@ -49,4 +49,3 @@ You can use a combo box or radio buttons to let users select one of choices.
 They require `items` to specify choices.  
 `label` is the string that will be displayed in GUI.  
 `value` is the actual value that will be injected in commands.  
-

@@ -120,7 +120,7 @@ ExecuteResult Execute(const std::string& cmd) {
     }
 
     // Sometimes stderr still have unread characters
-    err_read_size = ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
+    ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
 
     int return_code;
     DestroyProcess(process, &return_code, err_msg);

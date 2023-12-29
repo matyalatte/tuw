@@ -19,8 +19,7 @@
 #    docker run --rm --init -i tuw_alpine xvfb-run bash test.sh
 
 # Base image
-ARG OS=alpine:3.16.5
-FROM ${OS}
+FROM alpine:3.16.5
 
 # Install packages
 RUN apk update && \
@@ -32,7 +31,7 @@ RUN apk update && \
 # "Native Windows wider or taller than * pixels are not supported"
 
 # Install meson
-RUN pip3 install meson ninja
+RUN pip3 install meson==1.3.1 ninja==1.11.1
 
 # Clone the repo
 COPY .. /Tuw
