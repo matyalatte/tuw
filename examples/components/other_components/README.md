@@ -1,8 +1,8 @@
 # Other Components
 
-There are more components you can use.
+There are more components you can use.  
 
-![others](https://github.com/matyalatte/tuw/assets/69258547/3e178f69-3db7-4c43-b08f-d962912f096a)
+![other_comps](https://github.com/matyalatte/tuw/assets/69258547/c156e9b0-9f93-42fe-a336-5365f9ebb81a)  
 
 ```json
 "components": [

@@ -18,6 +18,7 @@ Here is the list of test environments.
 | Ubuntu20.04 | arm64 | gcc | glibc | :heavy_check_mark: | :x: | :heavy_check_mark: |
 | Ubuntu18.04 | x64 |  | glibc | :x: | :warning: | :x: |
 | Fedora32 | x64 |  | glibc | :x: | :warning: | :x: |
+| ZorinOS17 | x64 |  | glibc | :x: | :warning: | :x: |
 | Alpine3.16 | x64 | gcc | musl | :heavy_check_mark: | :x: | :heavy_check_mark: |
 | Alpine3.16 | arm64 | gcc | musl | :heavy_check_mark: | :x: | :heavy_check_mark: |
 | Alpine3.18 | x64 |  | musl | :x: | :warning: | :x: |
