@@ -12,7 +12,6 @@ class Component {
     std::string m_id;
     bool m_has_string;
     bool m_is_wide;
-    uintptr_t m_tooltip;  // handler for tooltip window
 
  private:
     bool m_add_quotes;
@@ -33,7 +32,7 @@ class Component {
     static Component* PutComponent(uiBox* box, const rapidjson::Value& j);
 };
 
-// containers for Choice and CheckArray
+// containers for Combo and CheckArray
 class MultipleValuesContainer {
  protected:
     std::vector<std::string> m_values;
@@ -79,10 +78,18 @@ class DirPicker : public StringComponentBase {
     void OpenFolder();
 };
 
-class Choice : public StringComponentBase, MultipleValuesContainer {
+class ComboBox : public StringComponentBase, MultipleValuesContainer {
  public:
     std::string GetRawString() override;
-    Choice(uiBox* box, const rapidjson::Value& j);
+    ComboBox(uiBox* box, const rapidjson::Value& j);
+    void GetConfig(rapidjson::Document& config) override;
+    void SetConfig(const rapidjson::Value& config) override;
+};
+
+class RadioButtons : public StringComponentBase, MultipleValuesContainer {
+ public:
+    std::string GetRawString() override;
+    RadioButtons(uiBox* box, const rapidjson::Value& j);
     void GetConfig(rapidjson::Document& config) override;
     void SetConfig(const rapidjson::Value& config) override;
 };

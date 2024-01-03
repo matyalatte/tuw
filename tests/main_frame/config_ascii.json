@@ -1,6 +1,7 @@
 {
     "check": true,
-    "choice": 2,
+    "combo": 2,
+    "radio": 2,
     "file": "test.txt",
     "folder": "testdir",
     "options": [ false, false, true ],

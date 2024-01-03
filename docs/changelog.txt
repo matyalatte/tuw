@@ -1,3 +1,14 @@
+ver 0.6.1
+- Added radio buttons to GUI components
+- "placeholder" became the standard spelling for the placeholders option.
+  ("empty_message" became the alternative one.)
+- "combo" became the standard spelling for the combo boxes.
+  ("choice" became the alternative one.)
+- Fixed an error when opening URLs with debug builds.
+- Fixed a crash when the executed process uses multiprocessing and each child process sends something to stdout.
+- Fixed a bug that drag-drop events are ignored on newer versions of GTK.
+- Fixed a bug that tuw didn't check the type of the `"default"` values for combo boxies.
+
 ver 0.6.0
 - Switched GUI library from wxWidgets to libui.
 - Changed license from GPL to MIT.

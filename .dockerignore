@@ -1,0 +1,10 @@
+.git
+.github
+.gitignore
+batch_files
+build
+docs
+schema
+CPPLINT.cfg
+license.txt
+docker

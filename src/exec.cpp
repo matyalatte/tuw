@@ -27,6 +27,47 @@ static std::string GetLastLine(const std::string& input) {
     return input.substr(position, end - position + 1);
 }
 
+enum READ_IO_TYPE : int {
+    READ_STDOUT = 0,
+    READ_STDERR,
+};
+
+unsigned ReadIO(subprocess_s &process,
+                int read_io_type,
+                char *buf, const unsigned buf_size,
+                std::string& str, const unsigned str_size) {
+    unsigned read_size = 0;
+    if (read_io_type == READ_STDOUT) {
+        read_size = subprocess_read_stdout(&process, buf, buf_size);
+    } else {
+        read_size = subprocess_read_stderr(&process, buf, buf_size);
+    }
+
+    buf[read_size] = 0;
+    str += buf;
+    if (str.length() > str_size * 2) {
+        str = str.substr(str.length() - str_size, str_size);
+    }
+
+    return read_size;
+}
+
+void DestroyProcess(subprocess_s &process, int *return_code, std::string &err_msg) {
+    int result = subprocess_join(&process, return_code);
+    if (0 != result) {
+        *return_code = -1;
+        err_msg = "Failed to join a subprocess.\n";
+        return;
+    }
+
+    result = subprocess_destroy(&process);
+    if (0 != result) {
+        *return_code = -1;
+        err_msg = "Failed to destroy a subprocess.\n";
+        return;
+    }
+}
+
 ExecuteResult Execute(const std::string& cmd) {
 #ifdef _WIN32
     std::wstring wcmd = UTF8toUTF16(cmd.c_str());
@@ -69,33 +110,20 @@ ExecuteResult Execute(const std::string& cmd) {
     unsigned err_read_size = 0;
 
     while (subprocess_alive(&process) || out_read_size || err_read_size) {
-        out_read_size = subprocess_read_stdout(&process, out_buf, BUF_SIZE);
-        out_buf[out_read_size] = 0;
-        err_read_size = subprocess_read_stderr(&process, err_buf, BUF_SIZE);
-        err_buf[err_read_size] = 0;
+        out_read_size = ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, BUF_SIZE);
+        err_read_size = ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
 #ifdef _WIN32
         printf("%s", out_buf);
 #else
         PrintFmt("%s", out_buf);
 #endif
-        last_line += out_buf;
-        err_msg += err_buf;
-        if (last_line.length() > 2048) {
-            last_line = last_line.substr(last_line.length() - 1024, 1024);
-        }
-        if (err_msg.length() > 4096) {
-            err_msg = err_msg.substr(err_msg.length() - 2048, 2048);
-        }
     }
 
-    int return_code;
-    result = subprocess_join(&process, &return_code);
-    if (0 != result)
-        return { -1, "Failed to join a subprocess.\n"};
+    // Sometimes stderr still have unread characters
+    ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
 
-    result = subprocess_destroy(&process);
-    if (0 != result)
-        return { -1, "Failed to destroy a subprocess.\n"};
+    int return_code;
+    DestroyProcess(process, &return_code, err_msg);
 
     last_line = GetLastLine(last_line);
 
@@ -104,7 +132,8 @@ ExecuteResult Execute(const std::string& cmd) {
 
 ExecuteResult LaunchDefaultApp(const std::string& url) {
 #ifdef _WIN32
-    const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", UTF8toUTF16(url.c_str()).c_str(), NULL};
+    std::wstring utf16_url = UTF8toUTF16(url.c_str());
+    const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", utf16_url.c_str(), NULL};
 #elif defined(__linux__)
     const char* argv[] = {"xdg-open", url.c_str(), NULL};
 #else
@@ -118,13 +147,8 @@ ExecuteResult LaunchDefaultApp(const std::string& url) {
         return { -1, "Failed to create a subprocess.\n"};
 
     int return_code;
-    result = subprocess_join(&process, &return_code);
-    if (0 != result)
-        return { -1, "Failed to join a subprocess.\n"};
+    std::string err_msg = "";
+    DestroyProcess(process, &return_code, err_msg);
 
-    result = subprocess_destroy(&process);
-    if (0 != result)
-        return { -1, "Failed to destroy a subprocess.\n"};
-
-    return { 0 };
+    return { return_code, err_msg };
 }

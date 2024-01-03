@@ -2,7 +2,7 @@
     "gui": [
         {
             "label": "Alternate Spellings",
-            "command": "echo folder: %-% & echo choice: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-%",
+            "command": "echo folder: %-% & echo combo: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-%",
             "title": "Alternate Spellings Sample",
             "component_array": [
                 {
@@ -12,11 +12,11 @@
                 {
                     "type": "dir",
                     "label": "Some folder path",
-                    "placeholder": "empty message!",
+                    "empty_message": "placeholder!",
                     "add_quote": true
                 },
                 {
-                    "type": "combo",
+                    "type": "choice",
                     "label": "combo box",
                     "item_array": [
                         {

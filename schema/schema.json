@@ -123,6 +123,7 @@
                 "dir",
                 "choice",
                 "combo",
+                "radio",
                 "check",
                 "check_array",
                 "checks",
@@ -157,13 +158,13 @@
             { "$ref": "#/definitions/components/check" },
             { "$ref": "#/definitions/components/int" },
             { "$ref": "#/definitions/components/float" },
-            { "$ref": "#/definitions/components/choice" },
+            { "$ref": "#/definitions/components/combo" },
             { "$ref": "#/definitions/components/check_array" }
           ],
           "required": [ "type", "label" ]
         }
       },
-      "choice_items": {
+      "combo_items": {
         "type": "array",
         "items": {
           "type": "object",
@@ -271,18 +272,18 @@
           }
         }
       },
-      "choice": {
+      "combo": {
         "if": {
           "properties": {
-            "type": { "enum": [ "choice", "combo" ] }
+            "type": { "enum": [ "choice", "combo", "radio" ] }
           }
         },
         "then": {
           "properties": {
             "default": { "type": "integer" },
             "tooltip": { "type": "string" },
-            "items": { "$ref": "#/definitions/types/choice_items" },
-            "item_array": { "$ref": "#/definitions/types/choice_items" }
+            "items": { "$ref": "#/definitions/types/combo_items" },
+            "item_array": { "$ref": "#/definitions/types/combo_items" }
           },
           "if": {
             "not": {

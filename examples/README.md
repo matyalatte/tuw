@@ -18,6 +18,7 @@ Examples for GUI components (e.g. file pickers)
 -   [Path Pickers](./components/path_pickers/): File pickers and dir pickers.
 -   [Number Pickers](./components/num_pickers/): Int pickers and float pickers.
 -   [Check Boxes](./components/check_boxes/): Check box and check array.
+-   [Choices](./components/choices/): Combo box and radio buttons.
 -   [Other components](./components/other_components/): There are more components you can use.
 
 ![PathPikcers](https://github.com/matyalatte/tuw/assets/69258547/47bf541f-7ac4-465b-8bff-512c48d9d2a9)  

@@ -4,7 +4,7 @@
     "gui": [
         {
             "label": "Components Minimal",
-            "command": "echo file: %-% & echo folder: %-% & echo choice: %-% & echo check: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-% & echo float: %-%",
+            "command": "echo file: %-% & echo folder: %-% & echo combo: %-% & echo radio: %-% & echo check: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-% & echo float: %-%",
             "components": [
                 {
                     "type": "static_text",
@@ -19,8 +19,23 @@
                     "label": "Some folder path"
                 },
                 {
-                    "type": "choice",
+                    "type": "combo",
                     "label": "combo box",
+                    "items": [
+                        {
+                            "label": "value1"
+                        },
+                        {
+                            "label": "value2"
+                        },
+                        {
+                            "label": "value3"
+                        }
+                    ]
+                },
+                {
+                    "type": "radio",
+                    "label": "radio box",
                     "items": [
                         {
                             "label": "value1"
@@ -68,7 +83,7 @@
         },
         {
             "label": "Components Optional",
-            "command": "echo file: %file% & echo folder: %folder% & echo choice: %choice% & echo check: %check% & echo check_array: %options% & echo textbox: %text% & echo int: %integer% & echo float: %double%",
+            "command": "echo file: %file% & echo folder: %folder% & echo combo: %combo% & echo radio: %radio% & echo check: %check% & echo check_array: %options% & echo textbox: %text% & echo int: %integer% & echo float: %double%",
             "components": [
                 {
                     "type": "static_text",
@@ -80,7 +95,7 @@
                     "label": "PNG or JPG",
                     "id": "file",
                     "extension": "png or jpg (*.png;*.jpg)|*.png;*.jpg",
-                    "empty_message": "Drop a file here!",
+                    "placeholder": "Drop a file here!",
                     "button": "...",
                     "default": "test.txt",
                     "add_quotes": true,
@@ -91,7 +106,7 @@
                     "type": "folder",
                     "label": "Folder path",
                     "id": "folder",
-                    "empty_message": "Drop a folder here!",
+                    "placeholder": "Drop a folder here!",
                     "button": "Browse",
                     "default": "testdir",
                     "add_quotes": true,
@@ -99,9 +114,31 @@
                     "platforms": ["win", "linux", "mac"]
                 },
                 {
-                    "type": "choice",
+                    "type": "combo",
                     "label": "Combo box",
-                    "id": "choice",
+                    "id": "combo",
+                    "items": [
+                        {
+                            "label": "item1",
+                            "value": "value1"
+                        },
+                        {
+                            "label": "item2",
+                            "value": "value2"
+                        },
+                        {
+                            "label": "item3",
+                            "value": "value3"
+                        }
+                    ],
+                    "default": 2,
+                    "tooltip": "choose one of items.",
+                    "platforms": ["win", "linux", "mac"]
+                },
+                {
+                    "type": "radio",
+                    "label": "Radio box",
+                    "id": "radio",
                     "items": [
                         {
                             "label": "item1",
@@ -159,7 +196,7 @@
                     "type": "text",
                     "label": "Text box",
                     "id": "text",
-                    "empty_message": "type here!",
+                    "placeholder": "type here!",
                     "default": "remove this text!",
                     "tooltip": "text box.",
                     "platforms": ["win", "linux", "mac"]

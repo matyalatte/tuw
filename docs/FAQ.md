@@ -11,7 +11,7 @@ You can use the defined IDs as variable names in commands.
 
 ## How can I run multiple commands at the same time?
 
-Simple Command Runner will execute a single line command on the command prompt (or the terminal.)  
+Tuw will execute a single line command on the command prompt (or the terminal.)  
 So, it's the same question as "How can I run multiple commands as a single line on the command prompt (or the terminal?)"  
 It's a little complicated task, but you can find tons of websites that explain about it.  
 Also, you can see [some examples](../examples/tips/multi_lines/) about it.

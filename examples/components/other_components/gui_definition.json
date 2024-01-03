@@ -2,30 +2,12 @@
     "gui": [
         {
             "label": "Component Sample",
-            "command": "echo choice: %a% & echo textbox: %c%",
+            "command": "echo textbox: %c%",
             "button": "Echo!",
             "components": [
                 {
                     "type": "static_text",
                     "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
-                },
-                {
-                    "type": "choice",
-                    "label": "num",
-                    "items": [
-                        {
-                            "label": "one",
-                            "value": "1"
-                        },
-                        {
-                            "label": "two",
-                            "value": "2"
-                        },
-                        {
-                            "label": "three",
-                            "value": "3"
-                        }
-                    ]
                 },
                 {
                     "type": "text",
