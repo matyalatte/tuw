@@ -112,7 +112,7 @@ TEST(JsonCheckTest, checkGUIFail) {
 TEST(JsonCheckTest, checkGUIFail2) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
-    test_json["gui"][0]["components"][5].RemoveMember("items");
+    test_json["gui"][0]["components"][6].RemoveMember("items");
     CheckGUIError(test_json, "['options']['items'] not found.");
 }
 
@@ -144,8 +144,8 @@ TEST(JsonCheckTest, checkGUIFail6) {
     CheckGUIError(test_json,
         "The command requires more components for arguments;"
         " echo file: __comp1__ & echo folder: __comp2__ & echo combo: __comp3__ &"
-        " echo check: __comp4__ & echo check_array: __comp5__ & echo textbox: __comp6__ &"
-        " echo int: __comp7__ & echo float: __comp???__");
+        " echo radio: __comp4__ & echo check: __comp5__ & echo check_array: __comp6__ &"
+        " echo textbox: __comp7__ & echo int: __comp8__ & echo float: __comp???__");
 }
 
 TEST(JsonCheckTest, checkGUIFail7) {
@@ -155,8 +155,8 @@ TEST(JsonCheckTest, checkGUIFail7) {
     CheckGUIError(test_json,
         "The ID of [\"commponents\"][1] is unused in the command;"
         " echo file: __comp2__ & echo folder: __comp3__ & echo combo: __comp4__"
-        " & echo check: __comp5__ & echo check_array: __comp6__ & echo textbox: __comp7__"
-        " & echo int: __comp8__ & echo float: __comp???__");
+        " & echo radio: __comp5__ & echo check: __comp6__ & echo check_array: __comp7__"
+        " & echo textbox: __comp8__ & echo int: __comp9__ & echo float: __comp???__");
 }
 
 TEST(JsonCheckTest, checkHelpSuccess) {

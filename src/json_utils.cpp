@@ -441,6 +441,7 @@ namespace json_utils {
                         CheckJsonType(result, i, "label", JsonType::STRING, "items");
                         CheckJsonType(result, i, "value", JsonType::STRING, "items", CAN_SKIP);
                     }
+                    CheckJsonType(result, c, "default", JsonType::INTEGER, label, CAN_SKIP);
                     break;
                 case COMP_CHECK:
                     CheckJsonType(result, c, "value", JsonType::STRING, label, CAN_SKIP);

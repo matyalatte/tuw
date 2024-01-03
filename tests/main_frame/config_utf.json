@@ -3,6 +3,7 @@
     "folder": "検証",
     "check": true,
     "combo": 2,
+    "radio": 2,
     "options": [ false, false, true ],
     "text": "текстове поле",
     "integer": 2,

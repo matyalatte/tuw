@@ -139,7 +139,7 @@ TEST_F(MainFrameTest, GetCommand2) {
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
     std::string expected = "echo file: \"test.txt\" & echo folder: \"testdir\"";
-    expected += " & echo combo: value3 & echo check: flag!";
+    expected += " & echo combo: value3 & echo radio: value3 & echo check: flag!";
     expected += " & echo check_array:  --f2 & echo textbox: remove this text!";
     expected += " & echo int: 10 & echo float: 0.01";
     EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().c_str());
@@ -151,7 +151,7 @@ TEST_F(MainFrameTest, GetCommand3) {
     rapidjson::Document dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
-    std::string expected = "echo file:  & echo folder:  & echo combo: value1";
+    std::string expected = "echo file:  & echo folder:  & echo combo: value1 & echo radio: value1";
     expected += " & echo check:  & echo check_array:  & echo textbox: ";
     expected += " & echo int: 0 & echo float: 0.0";
     EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().c_str());
