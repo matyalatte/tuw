@@ -17,6 +17,7 @@ class MainFrame {
     std::vector<Component*> m_components;
     uiGrid* m_grid;
     uiButton* m_run_button;
+    uiMenuItem* m_menu_item;
 
     void CreateFrame();
     void CreateMenu();
@@ -42,6 +43,7 @@ class MainFrame {
         if (m_mainwin == NULL) return;
         uiControlDestroy(uiControl(m_mainwin));
     }
+    int IsSafeMode() { return uiMenuItemChecked(m_menu_item); }
 };
 
 void MainFrameDisableDialog();
