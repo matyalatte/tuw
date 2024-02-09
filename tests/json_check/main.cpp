@@ -153,7 +153,7 @@ TEST(JsonCheckTest, checkGUIFail7) {
     GetTestJson(test_json);
     test_json["gui"][0]["components"][1].AddMember("id", "aaa", test_json.GetAllocator());
     CheckGUIError(test_json,
-        "The ID of [\"commponents\"][1] is unused in the command;"
+        "The ID of [\"components\"][1] is unused in the command;"
         " echo file: __comp2__ & echo folder: __comp3__ & echo combo: __comp4__"
         " & echo radio: __comp5__ & echo check: __comp6__ & echo check_array: __comp7__"
         " & echo textbox: __comp8__ & echo int: __comp9__ & echo float: __comp???__");

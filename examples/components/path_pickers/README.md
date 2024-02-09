@@ -1,7 +1,7 @@
 # Path Pickers
 
 You can use file pickers and folder pickers.  
-Of course, you can drop files on the pickers to specifiy the paths.  
+Of course, you can drop files on the pickers to specify the paths.  
 
 ![PathPikcers](https://github.com/matyalatte/tuw/assets/69258547/47bf541f-7ac4-465b-8bff-512c48d9d2a9)
 
@@ -33,7 +33,7 @@ Of course, you can drop files on the pickers to specifiy the paths.
 
 ## Components
 
-`compoents` is an array of GUI components (e.g. file pickers).  
+`components` is an array of GUI components (e.g. file pickers).  
 Each component should be defined as a dictionary.  
 
 -   `type` is component type. `file` for a file picker, and `folder` for a dir picker.

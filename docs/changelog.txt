@@ -1,3 +1,6 @@
+ver 0.6.2
+- Fixed typos.
+
 ver 0.6.1
 - Added radio buttons to GUI components
 - "placeholder" became the standard spelling for the placeholders option.
@@ -16,7 +19,7 @@ ver 0.6.0
 
 ver 0.5.1
 - Added a predefined ID for the user's home directory.
-- Added an option to rename the "Browse" button for path pickers. 
+- Added an option to rename the "Browse" button for path pickers.
 - Disabled c++ exceptions.
 - Removed more codes from wxWidgets.
 - Fixed crashes when opening URLs or files via the help menu.
@@ -33,14 +36,14 @@ ver 0.5.0
 - Fixed an error when the size of ["gui"] is zero.
 - Fixed a GTK warning about component sizes.
 - Removed more codes from wxWidgets.
-- Applied optimazation for objective-c++ files.
+- Applied optimization for objective-c++ files.
 - Applied link time optimization.
 - Used cstdio instead of iostream.
 - Removed compressed version from releases.
 
 ver 0.4.1
 - Raise errors when the command requires more components or there are unused components.
-- Error messages bacame more detailed when failed to parse commands.
+- Error messages became more detailed when failed to parse commands.
 - Commands will be shown in the log when loading definitions.
 - Fixed a bug that "%%" won't escsape the "%" symbol.
 - Fixed a bug that the window is resizable on macOS and Linux.
@@ -106,7 +109,7 @@ ver0.1.3
 - Added "empty_message" option to text box and pickers. They can show messages when their text boxes are empty.
 - Added "default" option to check box and text box
 - Fixed errors when failing to read json files
-- Removed dependancies from macOS build
+- Removed dependencies from macOS build
 
 ver0.1.2
 - Fixed a bug it needs dll for runtime libs

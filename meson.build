@@ -140,7 +140,7 @@ if get_option('build_test')
         include_directories: include_directories('include'),
         build_rpath: '',
         install_rpath: '',
-        name_prefix: 'lib',		# always call it libui, even in Windows DLLs
+        name_prefix: 'lib',
         install: false,
         gnu_symbol_visibility: 'hidden',
         soversion: '',

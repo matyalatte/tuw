@@ -6,15 +6,22 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  TOOL_NAME: Tuw
+
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-      - run: pip3 install cpplint
-      - run: cpplint --recursive --quiet .
-          
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: |
+          pip3 install cpplint codespell
+          cpplint --recursive --quiet .
+          codespell -S subprojects
+
   test:
     strategy:
       fail-fast: false
@@ -23,8 +30,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: lint
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
       - name: Install Meson for Windows
         if: runner.os == 'Windows'
@@ -73,7 +82,7 @@ jobs:
       matrix:
         os: [ubuntu, alpine]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run tests on arm64 image
         run: |
           sudo apt-get update
@@ -85,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run tests on alpine
         run: |
           docker build -t tuw_alpine_test -f docker/alpine.dockerfile ./
@@ -95,8 +104,10 @@ jobs:
     runs-on: windows-2022
     needs: lint
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
       - name: Install Meson
         run: pip install meson
@@ -135,7 +146,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, build_tests_windows_arm64]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v3
         with:
           name: tests-windows-arm64

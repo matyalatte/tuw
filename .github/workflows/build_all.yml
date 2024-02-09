@@ -5,7 +5,7 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
-  
+
 env:
   TOOL_NAME: Tuw
 
@@ -16,7 +16,7 @@ jobs:
       tag: ${{ steps.check-tag.outputs.tag }}
       wx_version: ${{ steps.wx-version.outputs.version }}
     steps:
-    
+
       - name: Check tag
         id: check-tag
         run: |
@@ -27,8 +27,8 @@ jobs:
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
         shell: bash
-      
-      - uses: actions/checkout@v3
+
+      - uses: actions/checkout@v4
 
       - name: Create Release Draft
         id: create-release
@@ -79,8 +79,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: setup
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
       - name: Install Meson for Windows
         if: runner.os == 'Windows'
@@ -103,7 +105,7 @@ jobs:
       - name: Build exe for Windows
         if: runner.os == 'Windows'
         run: batch_files/build.bat Release ${{ matrix.arch }}
-          
+
       - name: Build exe for Unix
         if: runner.os != 'Windows'
         run: bash shell_scripts/build.sh Release
@@ -145,7 +147,7 @@ jobs:
     env:
       zip_ext: tar.bz2
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build ARM64 version on Ubuntu
         run: |
           sudo apt-get update
