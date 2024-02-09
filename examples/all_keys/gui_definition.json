@@ -87,7 +87,7 @@
             "components": [
                 {
                     "type": "static_text",
-                    "label": "All components with their optinal keys.",
+                    "label": "All components with their optional keys.",
                     "platforms": ["win", "linux", "mac"]
                 },
                 {

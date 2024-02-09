@@ -331,7 +331,7 @@ namespace json_utils {
                 if (id.GetInt() == j) { found = true; break; }
             if (!found) {
                 result.ok = false;
-                result.msg = "[\"commponents\"][" + std::to_string(j)
+                result.msg = "[\"components\"][" + std::to_string(j)
                              + "] is unused in the command; " + cmd_str;
                 if (comp_ids[j] != "")
                     result.msg = "The ID of " + result.msg;
@@ -427,7 +427,7 @@ namespace json_utils {
             CorrectKey(c, "item_array", "items", alloc);
             switch (type) {
                 case COMP_FILE:
-                    CheckJsonType(result, c, "extention", JsonType::STRING, label, CAN_SKIP);
+                    CheckJsonType(result, c, "extension", JsonType::STRING, label, CAN_SKIP);
                 case COMP_FOLDER:
                     CheckJsonType(result, c, "button", JsonType::STRING, label, CAN_SKIP);
                 case COMP_TEXT:

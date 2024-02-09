@@ -39,10 +39,10 @@ int main_app() {
 bool AskOverwrite(const std::string& path) {
     if (!env_utils::FileExists(path)) return true;
     PrintFmt("Overwrite %s? (y/n)\n", path.c_str());
-    char ans;
-    int ret = scanf("%c", &ans);
+    char answer;
+    int ret = scanf("%c", &answer);
     fseek(stdin, 0, SEEK_END);
-    return ret == 1 && (ans == "y"[0] || ans == "Y"[0]);
+    return ret == 1 && (answer == "y"[0] || answer == "Y"[0]);
 }
 
 json_utils::JsonResult Merge(const std::string& exe_path, const std::string& json_path,

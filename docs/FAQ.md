@@ -21,7 +21,7 @@ Also, you can see [some examples](../examples/tips/multi_lines/) about it.
 It saves the previously executed arguments.  
 The executable will use them as default values when launching.  
 
-## My Linux machine says `Could Not Display` when lauching the executable.
+## My Linux machine says `Could Not Display` when launching the executable.
 
 Check `Allow executing file as program.` (Properties->Permissions->Execute)  
 You will be able to launch the executable by double-click.  

@@ -1,6 +1,6 @@
 # Cross-platform Support
 
-There are optional keys to make platfrom specific GUIs.  
+There are optional keys to make platform specific GUIs.  
 No need to write JSON files for each platform.  
 
 ## "command_'os'"
