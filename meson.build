@@ -41,7 +41,7 @@ if tuw_OS == 'windows'
         endif
 
         if (tuw_is_release)
-            tuw_cpp_args += ['/GL']
+            tuw_cpp_args += ['/GL', '/D_HAS_EXCEPTIONS=0']
             tuw_link_args += ['/OPT:REF', '/OPT:ICF', '/LTCG']
         endif
     else
