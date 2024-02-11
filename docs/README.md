@@ -1,10 +1,10 @@
 # Tuw: a tiny GUI wrapper for command-line tools
 
 ```text
-  _____  
+  _____
  |_   _|   ___      __
    | || | | \ \ /\ / /
-   | || |_| |\ V  V / 
+   | || |_| |\ V  V /
    |_| \__,_| \_/\_/
   Tiny UI wrapper for
        CLI tools
@@ -84,6 +84,6 @@ Files in this repository are available under the [MIT license](../license.txt).
 
 | Project | Used for | License |
 | -- | -- | -- |
-| [libui-ng](https://github.com/libui-ng/libui-ng) | GUI framework | [MIT](http://opensource.org/licenses/MIT) | 
+| [libui-ng](https://github.com/libui-ng/libui-ng) | GUI framework | [MIT](http://opensource.org/licenses/MIT) |
 | [RapidJSON](https://github.com/Tencent/rapidjson) | JSON handling | [MIT](http://opensource.org/licenses/MIT) |
-| [subprocess.h](https://github.com/sheredom/subprocess.h) | Command processing | [Unlicense](https://github.com/sheredom/subprocess.h/blob/master/LICENSE) | 
+| [subprocess.h](https://github.com/sheredom/subprocess.h) | Command processing | [Unlicense](https://github.com/sheredom/subprocess.h/blob/master/LICENSE) |
