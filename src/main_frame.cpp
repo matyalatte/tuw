@@ -114,6 +114,7 @@ void MainFrame::CreateFrame() {
     uiWindowSetMargined(m_mainwin, 1);
 
 #ifdef __linux__
+    // Console window for linux
     uiWindow* log_win = uiNewWindow(env_utils::GetExecutablePath().c_str(), 600, 400, 0);
     uiWindowOnClosing(log_win, OnClosing, NULL);
     uiMultilineEntry* log_entry = uiNewMultilineEntry();
@@ -163,8 +164,16 @@ static void OnOpenURL(uiMenuItem *item, uiWindow *w, void *data) {
 
 void MainFrame::CreateMenu() {
     uiMenuItem* item;
-    uiMenu* menu = uiNewMenu("Menu");
+    uiMenu* menu = NULL;
+
+#ifdef __APPLE__
+    // No need the menu for the quit item on macOS.
     if (m_definition["gui"].Size() > 1) {
+        menu = uiNewMenu("Menu");
+#else
+    menu = uiNewMenu("Menu");
+    if (m_definition["gui"].Size() > 1) {
+#endif  // __APPLE__
         for (int i = 0; i < m_definition["gui"].Size(); i++) {
             item = uiMenuAppendItem(menu, m_definition["gui"][i]["label"].GetString());
             uiMenuItemOnClicked(item, OnUpdatePanel, new MenuData(this, i));
