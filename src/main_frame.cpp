@@ -13,6 +13,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     PrintFmt(tuw_constants::LOGO);
 
     m_grid = NULL;
+    m_menu_item = NULL;
     std::string exe_path = env_utils::GetExecutablePath();
 
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
@@ -113,6 +114,7 @@ void MainFrame::CreateFrame() {
     uiWindowSetMargined(m_mainwin, 1);
 
 #ifdef __linux__
+    // Console window for linux
     uiWindow* log_win = uiNewWindow(env_utils::GetExecutablePath().c_str(), 600, 400, 0);
     uiWindowOnClosing(log_win, OnClosing, NULL);
     uiMultilineEntry* log_entry = uiNewMultilineEntry();
@@ -162,8 +164,16 @@ static void OnOpenURL(uiMenuItem *item, uiWindow *w, void *data) {
 
 void MainFrame::CreateMenu() {
     uiMenuItem* item;
-    uiMenu* menu = uiNewMenu("Menu");
+    uiMenu* menu = NULL;
+
+#ifdef __APPLE__
+    // No need the menu for the quit item on macOS.
     if (m_definition["gui"].Size() > 1) {
+        menu = uiNewMenu("Menu");
+#else
+    menu = uiNewMenu("Menu");
+    if (m_definition["gui"].Size() > 1) {
+#endif  // __APPLE__
         for (int i = 0; i < m_definition["gui"].Size(); i++) {
             item = uiMenuAppendItem(menu, m_definition["gui"][i]["label"].GetString());
             uiMenuItemOnClicked(item, OnUpdatePanel, new MenuData(this, i));
@@ -180,6 +190,8 @@ void MainFrame::CreateMenu() {
             uiMenuItemOnClicked(item, OnOpenURL, new MenuData(this, i));
         }
     }
+    menu = uiNewMenu("Debug");
+    m_menu_item = uiMenuAppendCheckItem(menu, "Safe Mode");
 }
 
 void MainFrame::OpenURL(int id) {
@@ -229,11 +241,19 @@ void MainFrame::OpenURL(int id) {
         url = "file:" + url;
     }
 
-    ExecuteResult result = LaunchDefaultApp(url);
-    if (result.exit_code != 0) {
-        std::string msg = "Failed to open a " + type + " by an unexpected error.";
-        PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
-        ShowErrorDialog(msg.c_str());
+    if (IsSafeMode()) {
+        std::string msg = "The URL was not opened because the safe mode is enabled.\n"
+                          "You can disable it from the menu bar (Debug > Safe Mode.)\n"
+                          "\n"
+                          "URL: " + url;
+        ShowSuccessDialog(msg, "Safe Mode");
+    } else {
+        ExecuteResult result = LaunchDefaultApp(url);
+        if (result.exit_code != 0) {
+            std::string msg = "Failed to open a " + type + " by an unexpected error.";
+            PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
+            ShowErrorDialog(msg.c_str());
+        }
     }
 }
 
@@ -358,36 +378,46 @@ void MainFrame::RunCommand() {
 
     std::string cmd = GetCommand();
     PrintFmt("[RunCommand] Command: %s\n", cmd.c_str());
-    ExecuteResult result = Execute(cmd);
-    uiButtonSetText(m_run_button, text);
 
-    rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
-    bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);
-    int exit_success = json_utils::GetInt(sub_definition, "exit_success", 0);
-    bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
-
-    if (result.err_msg != "") {
-        PrintFmt("[RunCommand] Error: %s\n", result.err_msg.c_str());
-        ShowErrorDialog(result.err_msg);
-        return;
-    }
-
-    if (check_exit_code && result.exit_code != exit_success) {
-        std::string err_msg;
-        if (show_last_line)
-            err_msg = result.last_line;
-        else
-            err_msg = "Invalid exit code (" + std::to_string(result.exit_code) + ")";
-        PrintFmt("[RunCommand] Error: %s\n", err_msg.c_str());
-        ShowErrorDialog(err_msg);
-        return;
-    }
-
-    if (show_last_line && result.last_line != "") {
-        ShowSuccessDialog(result.last_line);
+    if (IsSafeMode()) {
+        std::string msg = "The command was not executed because the safe mode is enabled.\n"
+                          "You can disable it from the menu bar (Debug > Safe Mode.)\n"
+                          "\n"
+                          "Command: " + cmd;
+        ShowSuccessDialog(msg, "Safe Mode");
     } else {
-        ShowSuccessDialog("Success!");
+        ExecuteResult result = Execute(cmd);
+
+        rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
+        bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);
+        int exit_success = json_utils::GetInt(sub_definition, "exit_success", 0);
+        bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
+
+        if (result.err_msg != "") {
+            PrintFmt("[RunCommand] Error: %s\n", result.err_msg.c_str());
+            ShowErrorDialog(result.err_msg);
+            return;
+        }
+
+        if (check_exit_code && result.exit_code != exit_success) {
+            std::string err_msg;
+            if (show_last_line)
+                err_msg = result.last_line;
+            else
+                err_msg = "Invalid exit code (" + std::to_string(result.exit_code) + ")";
+            PrintFmt("[RunCommand] Error: %s\n", err_msg.c_str());
+            ShowErrorDialog(err_msg);
+            return;
+        }
+
+        if (show_last_line && result.last_line != "") {
+            ShowSuccessDialog(result.last_line);
+        } else {
+            ShowSuccessDialog("Success!");
+        }
     }
+
+    uiButtonSetText(m_run_button, text);
 }
 
 // read gui_definition.json

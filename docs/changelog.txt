@@ -1,5 +1,7 @@
 ver 0.6.2
 - Fixed typos.
+- Fixed a bug that the menu can be empty on macOS.
+- Added safe mode.
 
 ver 0.6.1
 - Added radio buttons to GUI components
