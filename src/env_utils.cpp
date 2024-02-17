@@ -12,6 +12,10 @@
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
 #endif
+#ifdef __FreeBSD__
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#endif
 #include <sys/stat.h>
 #include <unistd.h>
 #include <pwd.h>
@@ -99,17 +103,46 @@ namespace env_utils {
         }
     }
 
+#ifdef __TUW_UNIX__
+#ifdef __FreeBSD__
+    void GetExecutablePathFreeBSD(char *path) {
+        size_t path_size = PATH_MAX;
+        int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
+        int error = sysctl(mib, 4, path, &path_size, NULL, 0);
+        if (error < 0 || path_size == 0)
+            path_size = 0;
+        path[path_size] = 0;
+    }
+#else  // __FreeBSD__
+    int TryReadlink(const char *link, char *path, int path_size) {
+        int new_path_size;
+        if (path_size != 0)
+            return path_size;
+        new_path_size = readlink(link, path, PATH_MAX);
+        if (new_path_size == -1)
+            new_path_size = 0;
+        return new_path_size;
+    }
+
+    void GetExecutablePathUnix(char *path) {
+        int path_size = 0;
+        path_size = TryReadlink("/proc/self/exe", path, path_size);  // Linux
+        path_size = TryReadlink("/proc/curproc/exe", path, path_size);  // NetBSD
+        path_size = TryReadlink("/proc/curproc/file", path, path_size);  // OpenBSD
+        path[path_size] = 0;
+    }
+#endif  // __FreeBSD__
+#endif  // __TUW_UNIX__
+
     std::string GetExecutablePath() {
         char path[PATH_MAX + 1];
         path[PATH_MAX] = 0;
     #ifdef __TUW_UNIX__
-        const size_t LINKSIZE = 100;
-        char link[LINKSIZE];
-        snprintf(link, LINKSIZE, "/proc/%d/exe", getpid() );
-        int path_size = readlink(link, path, PATH_MAX);
-        if (path_size == -1)
-            path_size = 0;
-        path[path_size] = 0;
+    #ifdef __FreeBSD__
+        GetExecutablePathFreeBSD(path);
+    #else
+        GetExecutablePathUnix(path);
+    #endif
     #else
         uint32_t bufsize = PATH_MAX;
         _NSGetExecutablePath(path, &bufsize);

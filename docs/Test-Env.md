@@ -22,3 +22,4 @@ Here is the list of test environments.
 | Alpine3.16 | x64 | gcc | musl | :heavy_check_mark: | :x: | :heavy_check_mark: |
 | Alpine3.16 | arm64 | gcc | musl | :heavy_check_mark: | :x: | :heavy_check_mark: |
 | Alpine3.18 | x64 |  | musl | :x: | :warning: | :x: |
+| FreeBSD14.0 | x64 | gcc | | :warning: | :warning: | :x: |
