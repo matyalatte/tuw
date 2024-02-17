@@ -22,7 +22,7 @@ namespace tuw_constants {
     const int BOX_CHECKS_SPACE = 0;
     const int BTN_WIDTH = 90;
     const int BTN_HEIGHT = 24;
-#elif defined(__linux__)
+#elif defined(__TUW_UNIX__)
     constexpr char OS[] = "linux";
     const int GRID_COMP_XSPACE = 4;
     const int GRID_MAIN_SPACE = 12;

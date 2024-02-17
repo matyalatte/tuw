@@ -102,7 +102,7 @@ namespace env_utils {
     std::string GetExecutablePath() {
         char path[PATH_MAX + 1];
         path[PATH_MAX] = 0;
-    #ifdef __linux__
+    #ifdef __TUW_UNIX__
         const size_t LINKSIZE = 100;
         char link[LINKSIZE];
         snprintf(link, LINKSIZE, "/proc/%d/exe", getpid() );

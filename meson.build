@@ -81,6 +81,7 @@ else
         warning('This OS is unsupported. (' + tuw_OS + ')')
     endif
     tuw_link_args += ['-no-pie']
+    tuw_cpp_args += ['-D__TUW_UNIX__']
     if tuw_compiler != 'gcc'
         warning('This project has NOT been tested with your compiler. (' + tuw_compiler + ')')
     endif

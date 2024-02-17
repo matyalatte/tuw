@@ -55,7 +55,7 @@ void PrintFmt(const char* fmt, ...) {
     uiprivFree(wfmt);
 }
 
-#elif defined(__linux__)
+#elif defined(__TUW_UNIX__)
 #include <stdarg.h>
 #include "ui.h"
 

@@ -25,7 +25,7 @@ int main_app() {
         return 1;
     }
 
-#ifdef __linux__
+#ifdef __TUW_UNIX__
     // Need this for uiMainStep(1)
     uiMainSteps();
 #endif

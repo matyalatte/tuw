@@ -73,7 +73,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
     CreateMenu();
     CreateFrame();
-#ifdef __linux__
+#ifdef __TUW_UNIX__
     uiMainStep(1);  // Need uiMainStep before using uiMsgBox
 #endif
 
@@ -113,7 +113,7 @@ void MainFrame::CreateFrame() {
     uiControlShow(uiControl(m_mainwin));
     uiWindowSetMargined(m_mainwin, 1);
 
-#ifdef __linux__
+#ifdef __TUW_UNIX__
     // Console window for linux
     uiWindow* log_win = uiNewWindow(env_utils::GetExecutablePath().c_str(), 600, 400, 0);
     uiWindowOnClosing(log_win, OnClosing, NULL);
@@ -372,7 +372,7 @@ void MainFrame::RunCommand() {
     uiButtonSetText(m_run_button, "Processing...");
 #ifdef __APPLE__
     uiMainStep(1);
-#elif defined(__linux__)
+#elif defined(__TUW_UNIX__)
     uiUnixWaitEvents();
 #endif
 
