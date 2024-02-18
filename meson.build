@@ -100,7 +100,7 @@ if tuw_OS != 'windows'
         tuw_cpp_args += ['-ffunction-sections', '-fdata-sections']
         if tuw_compiler == 'gcc'
             tuw_link_args += ['-Wl,--gc-sections']
-        elif tuw_compiler.startswith('clang')
+        elif tuw_compiler.startswith('clang') and tuw_OS == 'darwin'
             tuw_link_args += ['-Wl,-dead_strip']
         endif
     endif
