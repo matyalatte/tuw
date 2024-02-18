@@ -7,7 +7,7 @@ You can build it on the following platforms.
 
 -   Windows 7 or later  
 -   macOS 10.9 or later  
--   Linux with GTK+ 3.10 or later  
+-   Unix with GTK+ 3.10 or later  
 
 You can also see the list of tested platforms [here](./Test-Env.md).
 
@@ -18,6 +18,7 @@ There are platform-specific documents for building the executable with [Meson](h
 -   [Building Workflow for Windows](./Build-on-Windows.md)  
 -   [Building Workflow for macOS](./Build-on-Mac.md)  
 -   [Building Workflow for Linux](./Build-on-Linux.md)  
+-   [Building Workflow for Other Platforms](./Build-on-Other.md)  
 
 You can also see [batch files](../batch_files/) and [shell scripts](../shell_scripts/) to understand the workflow.  
 
