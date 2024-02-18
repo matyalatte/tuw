@@ -14,7 +14,10 @@
 #endif
 #ifdef __FreeBSD__
 #include <sys/param.h>
-#include <sys/sysctl.h>
+#include <sys/sysctl.h>  // for GetExecutablePathFreeBSD()
+#endif
+#ifdef __TUW_HAIKU__
+#include <kernel/image.h>  // for GetExecutablePathHaiku()
 #endif
 #include <sys/stat.h>
 #include <unistd.h>
@@ -105,6 +108,7 @@ namespace env_utils {
 
 #ifdef __TUW_UNIX__
 #ifdef __FreeBSD__
+    // FreeBSD requires sysctl to get the executable path.
     void GetExecutablePathFreeBSD(char *path) {
         size_t path_size = PATH_MAX;
         int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
@@ -113,7 +117,28 @@ namespace env_utils {
             path_size = 0;
         path[path_size] = 0;
     }
-#else  // __FreeBSD__
+
+    std::string GetExecutablePath() {
+        char path[PATH_MAX + 1];
+        path[PATH_MAX] = 0;
+        GetExecutablePathFreeBSD(path);
+        if (path[0] == 0)
+            return "/";
+        return path;
+    }
+#elif defined(__TUW_HAIKU__)
+    // Haiku OS requires its own API to get the executable path.
+    std::string GetExecutablePath() {
+        int32_t cookie = 0;
+        image_info info;
+        while (get_next_image_info(B_CURRENT_TEAM, &cookie, &info) == B_OK) {
+            if (info.type == B_APP_IMAGE)
+                return info.name;
+        }
+        return "/";
+    }
+#else
+    // Linux distributons support readlink to get the executable path.
     int TryReadlink(const char *link, char *path, int path_size) {
         int new_path_size;
         if (path_size != 0)
@@ -131,26 +156,29 @@ namespace env_utils {
         path_size = TryReadlink("/proc/curproc/file", path, path_size);  // OpenBSD
         path[path_size] = 0;
     }
-#endif  // __FreeBSD__
-#endif  // __TUW_UNIX__
 
     std::string GetExecutablePath() {
         char path[PATH_MAX + 1];
         path[PATH_MAX] = 0;
-    #ifdef __TUW_UNIX__
-    #ifdef __FreeBSD__
-        GetExecutablePathFreeBSD(path);
-    #else
         GetExecutablePathUnix(path);
-    #endif
-    #else
-        uint32_t bufsize = PATH_MAX;
-        _NSGetExecutablePath(path, &bufsize);
-    #endif
         if (path[0] == 0)
             return "/";
         return path;
     }
+#endif
+#endif  // __TUW_UNIX__
+
+#ifdef __APPLE__
+    std::string GetExecutablePath() {
+        char path[PATH_MAX + 1];
+        path[PATH_MAX] = 0;
+        uint32_t bufsize = PATH_MAX;
+        _NSGetExecutablePath(path, &bufsize);
+        if (path[0] == 0)
+            return "/";
+        return path;
+    }
+#endif
 
     bool FileExists(const std::string& path) {
         struct stat buffer;

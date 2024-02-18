@@ -77,8 +77,9 @@ elif tuw_OS == 'darwin'
         warning('This project has NOT been tested with your compiler. (' + tuw_compiler + ')')
     endif
 else
-    if tuw_OS != 'linux'
-        warning('This OS is unsupported. (' + tuw_OS + ')')
+    if tuw_OS == 'haiku'
+        tuw_link_args += ['-lbe']
+        tuw_cpp_args += ['-D__TUW_HAIKU__']
     endif
     tuw_link_args += ['-no-pie']
     tuw_cpp_args += ['-D__TUW_UNIX__']
