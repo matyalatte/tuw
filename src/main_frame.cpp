@@ -194,6 +194,14 @@ void MainFrame::CreateMenu() {
     m_menu_item = uiMenuAppendCheckItem(menu, "Safe Mode");
 }
 
+static bool IsValidURL(const std::string &url) {
+    for (const char c : { ' ', ';', '|', '&'}) {
+        if (url.find(c) != std::string::npos)
+            return false;
+    }
+    return true;
+}
+
 void MainFrame::OpenURL(int id) {
     rapidjson::Value& help = m_definition["help"].GetArray()[id];
     std::string type = help["type"].GetString();
@@ -239,6 +247,14 @@ void MainFrame::OpenURL(int id) {
 
     if (type == "file") {
         url = "file:" + url;
+    }
+
+    if (!IsValidURL(url)) {
+        std::string msg = "URL should NOT contains ' ', ';', '|', or '&'.\n"
+                          "URL: " + url;
+        PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
+        ShowErrorDialog(msg.c_str());
+        return;
     }
 
     if (IsSafeMode()) {
