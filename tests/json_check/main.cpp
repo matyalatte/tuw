@@ -69,7 +69,7 @@ TEST(JsonCheckTest, checkGUISuccess) {
 TEST(JsonCheckTest, checkGUISuccess2) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
-    rapidjson::Value& comp = test_json["gui"][0]["components"][5];
+    rapidjson::Value& comp = test_json["gui"][0]["components"][6];
     comp.AddMember("item_array", comp["items"], test_json.GetAllocator());
     comp.RemoveMember("items");
     json_utils::JsonResult result = { true };

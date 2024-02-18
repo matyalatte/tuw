@@ -13,6 +13,9 @@ class MainFrame {
     int m_definition_id;
     rapidjson::Document m_config;
     uiWindow* m_mainwin;
+#ifdef __TUW_UNIX__
+    uiWindow* m_logwin;
+#endif
 
     std::vector<Component*> m_components;
     uiGrid* m_grid;
@@ -40,8 +43,12 @@ class MainFrame {
     void SaveConfig();
     void Fit();
     void Close() {
-        if (m_mainwin == NULL) return;
-        uiControlDestroy(uiControl(m_mainwin));
+        if (m_mainwin != NULL)
+            uiControlDestroy(uiControl(m_mainwin));
+    #ifdef __TUW_UNIX__
+        if (m_logwin != NULL)
+            uiControlDestroy(uiControl(m_logwin));
+    #endif
     }
     int IsSafeMode() { return uiMenuItemChecked(m_menu_item); }
 };

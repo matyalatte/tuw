@@ -115,8 +115,8 @@ void MainFrame::CreateFrame() {
 
 #ifdef __TUW_UNIX__
     // Console window for linux
-    uiWindow* log_win = uiNewWindow(env_utils::GetExecutablePath().c_str(), 600, 400, 0);
-    uiWindowOnClosing(log_win, OnClosing, NULL);
+    m_logwin = uiNewWindow(env_utils::GetExecutablePath().c_str(), 600, 400, 0);
+    uiWindowOnClosing(m_logwin, OnClosing, NULL);
     uiMultilineEntry* log_entry = uiNewMultilineEntry();
 
     /*
@@ -139,8 +139,8 @@ void MainFrame::CreateFrame() {
     SetLogEntry(log_entry);
     uiBox* log_box = uiNewVerticalBox();
     uiBoxAppend(log_box, uiControl(log_entry), 1);
-    uiWindowSetChild(log_win, uiControl(log_box));
-    uiControlShow(uiControl(log_win));
+    uiWindowSetChild(m_logwin, uiControl(log_box));
+    uiControlShow(uiControl(m_logwin));
 #endif
 }
 
