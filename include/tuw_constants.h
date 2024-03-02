@@ -10,8 +10,8 @@ namespace tuw_constants {
         "       CLI tools\n";
     constexpr char TOOL_NAME[] = "Tuw";
     constexpr char AUTHOR[] = "matyalatte";
-    constexpr char VERSION[] = "0.6.2";
-    constexpr int VERSION_INT = 602;
+    constexpr char VERSION[] = "0.6.3";
+    constexpr int VERSION_INT = 603;
 
 #ifdef _WIN32
     constexpr char OS[] = "win";
