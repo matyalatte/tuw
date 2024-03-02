@@ -1,5 +1,7 @@
 ver 0.6.3
 - Supported Unix-like systems (FreeBSD, Haiku, etc).
+- Added URL validation for safety.
+  (You can not open help URLs contain some special characters.)
 
 ver 0.6.2
 - Fixed typos.

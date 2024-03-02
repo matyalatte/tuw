@@ -23,6 +23,6 @@ Here is the list of test environments.
 | Alpine3.16 | arm64 | gcc | musl | :heavy_check_mark: | :x: | :heavy_check_mark: |
 | Alpine3.18 | x64 |  | musl | :x: | :warning: | :x: |
 | FreeBSD14.0 | x64 | gcc | | :warning: | :warning: | :warning: |
-| OpenBSD7.4 | x64 | gcc | | :warning: | :warning: | :warning: |
+| OpenBSD7.4 | x64 | clang | | :warning: | :warning: | :warning: |
 | NetBSD9.3 | x64 | gcc | | :warning: | :warning: | :warning: |
 | Haiku R1/beta4 | x64 | gcc | | :warning: | :warning: | :x: |

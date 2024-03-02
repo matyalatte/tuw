@@ -61,3 +61,21 @@ cd tuw
 bash shell_scripts/build.sh
 ./build/Release/Tuw
 ```
+
+> [!WARNING]  
+> Note that GTK on Haiku is still a WIP project.
+> Some features might not work properly.
+> As far as I know, drag-drop events are not supported yet.
+
+You can also use [the Haiku theme for GTK](https://github.com/B00merang-Project/Haiku) if you don't like the default theme.  
+
+```
+mkdir -p /boot/home/config/non-packaged/data/themes
+cd /boot/home/config/non-packaged/data/themes
+git clone https://github.com/B00merang-Project/Haiku.git
+
+# replace `gtk-theme='Adwaita'` with `gtk-theme='Haiku'`
+nano /boot/system/non-packaged/data/glib-2.0/schemas/00_org.gnome.desktop.interface.gschema.override
+
+glib-compile-schemas /boot/system/non-packaged/data/glib-2.0/schemas
+```
