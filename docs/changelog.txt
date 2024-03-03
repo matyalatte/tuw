@@ -1,3 +1,5 @@
+- Fixed a bug that the execution button still says "processing" after getting errors.
+
 ver 0.6.3
 - Supported Unix-like systems (FreeBSD, Haiku, etc).
 - Added URL validation for safety.

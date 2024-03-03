@@ -384,14 +384,6 @@ std::string MainFrame::GetCommand() {
 }
 
 void MainFrame::RunCommand() {
-    char* text = uiButtonText(m_run_button);
-    uiButtonSetText(m_run_button, "Processing...");
-#ifdef __APPLE__
-    uiMainStep(1);
-#elif defined(__TUW_UNIX__)
-    uiUnixWaitEvents();
-#endif
-
     std::string cmd = GetCommand();
     PrintFmt("[RunCommand] Command: %s\n", cmd.c_str());
 
@@ -402,7 +394,15 @@ void MainFrame::RunCommand() {
                           "Command: " + cmd;
         ShowSuccessDialog(msg, "Safe Mode");
     } else {
+        char* text = uiButtonText(m_run_button);
+        uiButtonSetText(m_run_button, "Processing...");
+    #ifdef __APPLE__
+        uiMainStep(1);
+    #elif defined(__TUW_UNIX__)
+        uiUnixWaitEvents();
+    #endif
         ExecuteResult result = Execute(cmd);
+        uiButtonSetText(m_run_button, text);
 
         rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
         bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);
@@ -432,8 +432,6 @@ void MainFrame::RunCommand() {
             ShowSuccessDialog("Success!");
         }
     }
-
-    uiButtonSetText(m_run_button, text);
 }
 
 // read gui_definition.json
