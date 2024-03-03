@@ -29,7 +29,7 @@ All you need is a JSON file and a tiny executable.
 -   [Embed JSON into exe](../examples/get_start/json_embed/)
 -   Save arguments
 -   Input paths by drag and drop
--   Cross-platform
+-   Cross-platform (Windows, macOS, Linux, BSD, etc.)
 -   Native look and feel
 -   Portable
 -   Small size

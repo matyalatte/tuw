@@ -8,7 +8,7 @@ uint32_t Fnv1Hash32(const std::string& str);
 std::string UTF16toUTF8(const wchar_t* str);
 std::wstring UTF8toUTF16(const char* str);
 void PrintFmt(const char* fmt, ...);
-#elif defined(__linux__)
+#elif defined(__TUW_UNIX__)
 void SetLogEntry(void* log_entry);
 void PrintFmt(const char* fmt, ...);
 #else

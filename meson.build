@@ -77,10 +77,12 @@ elif tuw_OS == 'darwin'
         warning('This project has NOT been tested with your compiler. (' + tuw_compiler + ')')
     endif
 else
-    if tuw_OS != 'linux'
-        warning('This OS is unsupported. (' + tuw_OS + ')')
+    if tuw_OS == 'haiku'
+        tuw_link_args += ['-lbe']
+        tuw_cpp_args += ['-D__TUW_HAIKU__']
     endif
     tuw_link_args += ['-no-pie']
+    tuw_cpp_args += ['-D__TUW_UNIX__']
     if tuw_compiler != 'gcc'
         warning('This project has NOT been tested with your compiler. (' + tuw_compiler + ')')
     endif
@@ -98,7 +100,7 @@ if tuw_OS != 'windows'
         tuw_cpp_args += ['-ffunction-sections', '-fdata-sections']
         if tuw_compiler == 'gcc'
             tuw_link_args += ['-Wl,--gc-sections']
-        elif tuw_compiler.startswith('clang')
+        elif tuw_compiler.startswith('clang') and tuw_OS == 'darwin'
             tuw_link_args += ['-Wl,-dead_strip']
         endif
     endif

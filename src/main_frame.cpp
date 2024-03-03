@@ -73,7 +73,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
     CreateMenu();
     CreateFrame();
-#ifdef __linux__
+#ifdef __TUW_UNIX__
     uiMainStep(1);  // Need uiMainStep before using uiMsgBox
 #endif
 
@@ -113,10 +113,10 @@ void MainFrame::CreateFrame() {
     uiControlShow(uiControl(m_mainwin));
     uiWindowSetMargined(m_mainwin, 1);
 
-#ifdef __linux__
+#ifdef __TUW_UNIX__
     // Console window for linux
-    uiWindow* log_win = uiNewWindow(env_utils::GetExecutablePath().c_str(), 600, 400, 0);
-    uiWindowOnClosing(log_win, OnClosing, NULL);
+    m_logwin = uiNewWindow(env_utils::GetExecutablePath().c_str(), 600, 400, 0);
+    uiWindowOnClosing(m_logwin, OnClosing, NULL);
     uiMultilineEntry* log_entry = uiNewMultilineEntry();
 
     /*
@@ -139,8 +139,8 @@ void MainFrame::CreateFrame() {
     SetLogEntry(log_entry);
     uiBox* log_box = uiNewVerticalBox();
     uiBoxAppend(log_box, uiControl(log_entry), 1);
-    uiWindowSetChild(log_win, uiControl(log_box));
-    uiControlShow(uiControl(log_win));
+    uiWindowSetChild(m_logwin, uiControl(log_box));
+    uiControlShow(uiControl(m_logwin));
 #endif
 }
 
@@ -194,6 +194,14 @@ void MainFrame::CreateMenu() {
     m_menu_item = uiMenuAppendCheckItem(menu, "Safe Mode");
 }
 
+static bool IsValidURL(const std::string &url) {
+    for (const char c : { ' ', ';', '|', '&'}) {
+        if (url.find(c) != std::string::npos)
+            return false;
+    }
+    return true;
+}
+
 void MainFrame::OpenURL(int id) {
     rapidjson::Value& help = m_definition["help"].GetArray()[id];
     std::string type = help["type"].GetString();
@@ -239,6 +247,14 @@ void MainFrame::OpenURL(int id) {
 
     if (type == "file") {
         url = "file:" + url;
+    }
+
+    if (!IsValidURL(url)) {
+        std::string msg = "URL should NOT contains ' ', ';', '|', or '&'.\n"
+                          "URL: " + url;
+        PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
+        ShowErrorDialog(msg.c_str());
+        return;
     }
 
     if (IsSafeMode()) {
@@ -372,7 +388,7 @@ void MainFrame::RunCommand() {
     uiButtonSetText(m_run_button, "Processing...");
 #ifdef __APPLE__
     uiMainStep(1);
-#elif defined(__linux__)
+#elif defined(__TUW_UNIX__)
     uiUnixWaitEvents();
 #endif
 

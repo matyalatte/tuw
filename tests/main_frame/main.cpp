@@ -57,7 +57,7 @@ class MainFrameTest : public ::testing::Test {
     virtual void TearDown() {
         main_frame->Close();
         uiUninit();
-    #ifdef __linux__
+    #ifdef __TUW_UNIX__
         // Need to reset the pointer to the log.
         SetLogEntry(NULL);
     #endif

@@ -10,8 +10,8 @@ namespace tuw_constants {
         "       CLI tools\n";
     constexpr char TOOL_NAME[] = "Tuw";
     constexpr char AUTHOR[] = "matyalatte";
-    constexpr char VERSION[] = "0.6.2";
-    constexpr int VERSION_INT = 602;
+    constexpr char VERSION[] = "0.6.3";
+    constexpr int VERSION_INT = 603;
 
 #ifdef _WIN32
     constexpr char OS[] = "win";
@@ -22,7 +22,7 @@ namespace tuw_constants {
     const int BOX_CHECKS_SPACE = 0;
     const int BTN_WIDTH = 90;
     const int BTN_HEIGHT = 24;
-#elif defined(__linux__)
+#elif defined(__TUW_UNIX__)
     constexpr char OS[] = "linux";
     const int GRID_COMP_XSPACE = 4;
     const int GRID_MAIN_SPACE = 12;
