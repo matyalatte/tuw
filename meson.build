@@ -32,9 +32,11 @@ if tuw_OS == 'windows'
         tuw_link_args = [
             '/LARGEADDRESSAWARE',
             '/INCREMENTAL:NO',
-            '/MANIFEST:NO',
             '/ENTRY:wmainCRTStartup'
         ]
+        if meson.version().version_compare('<1.4.0')
+            tuw_link_args += ['/MANIFEST:NO']
+        endif
 
         if (get_option('optimization') == 's')
             tuw_cpp_args += ['/Os']
