@@ -34,6 +34,11 @@ if tuw_OS == 'windows'
             '/INCREMENTAL:NO',
             '/ENTRY:wmainCRTStartup'
         ]
+        if get_option('use_ucrt')
+            # These linker options make exe much smaller with UCRT,
+            # but the built binary only supports Windows10 or later.
+            tuw_link_args += ['/NODEFAULTLIB:libucrt.lib', '/DEFAULTLIB:ucrt.lib']
+        endif
         if meson.version().version_compare('<1.4.0')
             tuw_link_args += ['/MANIFEST:NO']
         endif

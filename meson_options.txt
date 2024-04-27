@@ -2,3 +2,5 @@ option('build_exe', type : 'boolean', value : true, description : 'Build executa
 option('build_test', type : 'boolean', value : false, description : 'Build tests')
 option('macosx_version_min', type : 'string', value : '10.9',
        description : 'Deployment target for macOS. This will affect to subprojects')
+option('use_ucrt', type : 'boolean', value : false,
+       description : 'Use Universal CRT for Windows 10 or later')

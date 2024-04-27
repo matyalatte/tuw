@@ -16,10 +16,14 @@ if /I "%~2"=="ARM" (
     )
 )
 
+if /I "%~2"=="UCRT" (
+    set OPT="-Duse_ucrt=true"
+)
+
 echo Build type: %BUILD_TYPE%
 
 @pushd %~dp0\..
-    meson setup build\%BUILD_TYPE%%~2 --backend=vs %PRESET%
+    meson setup build\%BUILD_TYPE%%~2 --backend=vs %PRESET% %OPT%
     if %ERRORLEVEL% neq 0 goto :buildend
     cd build\%BUILD_TYPE%%~2
     meson compile -v
