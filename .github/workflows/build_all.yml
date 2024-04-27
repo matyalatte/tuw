@@ -32,7 +32,7 @@ jobs:
 
       - name: Create Release Draft
         id: create-release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.check-tag.outputs.tag }}
           name: ${{ steps.check-tag.outputs.tag }}
@@ -64,6 +64,11 @@ jobs:
             zip_ext: zip
             arch: ARM
             arch_suffix: -arm64
+          - os: windows-2022
+            exe_ext: .exe
+            zip_ext: zip
+            arch: UCRT
+            arch_suffix: -x64-ucrt
           - os: ubuntu-20.04
             exe_ext: ""
             zip_ext: tar.bz2
@@ -105,7 +110,6 @@ jobs:
       - name: Build exe for Windows
         if: runner.os == 'Windows'
         run: batch_files/build.bat Release ${{ matrix.arch }}
-
       - name: Build exe for Unix
         if: runner.os != 'Windows'
         run: bash shell_scripts/build.sh Release
