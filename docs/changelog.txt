@@ -1,3 +1,5 @@
+ver 0.6.4
+- Added Universal CRT version for Windows 10 or later
 - Fixed a bug that the execution button still says "processing" after getting errors.
 
 ver 0.6.3
