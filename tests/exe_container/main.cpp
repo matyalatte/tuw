@@ -23,10 +23,8 @@ int main(int argc, char* argv[]) {
     json_file = argv[1];
 #endif
 
-    char *exe_path = envuGetExecutablePath();
-    char *exe_dir = envuGetDirectory(exe_path);
+    char *exe_dir = envuGetExecutableDir();
     envuSetCwd(exe_dir);
-    envuFree(exe_path);
     envuFree(exe_dir);
 
     return RUN_ALL_TESTS();

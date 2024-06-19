@@ -215,8 +215,7 @@ int main(int argc, char* argv[]) {
     char *exe_path_cstr = envuGetExecutablePath();
     char *exe_dir = envuGetDirectory(exe_path_cstr);
     envuSetCwd(exe_dir);
-    std::string exe_path = exe_path_cstr;
-    envuFree(exe_path_cstr);
+    std::string exe_path = envuStr(exe_path_cstr);
     envuFree(exe_dir);
 
     // Launch GUI if no args.

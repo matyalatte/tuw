@@ -235,11 +235,10 @@ void MainFrame::OpenURL(int id) {
         }
 
     } else if (type == "file") {
-        char *url_cstr = envuGetFullPath(help["path"].GetString());
-        url = url_cstr;
-        tag = "[OpenFile] ";
+        char *url_cstr = envuGetRealPath(help["path"].GetString());
         int exists = envuFileExists(url_cstr);
-        envuFree(url_cstr);
+        url = envuStr(url_cstr);
+        tag = "[OpenFile] ";
 
         if (!exists) {
             std::string msg = "File does not exist. (" + url + ")";
