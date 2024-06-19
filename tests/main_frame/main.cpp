@@ -4,7 +4,6 @@
 #include <gtest/gtest.h>
 #include "main_frame.h"
 #include "string_utils.h"
-#include "env_utils.h"
 #include "exec.h"
 
 const char* json_file;
@@ -12,9 +11,9 @@ const char* config_ascii;
 const char* config_utf;
 
 #ifdef _WIN32
-int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
+int wmain(int argc, wchar_t* argv[]) {
 #else
-int main(int argc, char* argv[], char* envp[]) {
+int main(int argc, char* argv[]) {
 #endif
 
     ::testing::InitGoogleTest(&argc, argv);
@@ -33,7 +32,6 @@ int main(int argc, char* argv[], char* envp[]) {
     config_utf = argv[3];
 #endif
 
-    env_utils::InitEnv(envp);
     MainFrameDisableDialog();
 
     return RUN_ALL_TESTS();

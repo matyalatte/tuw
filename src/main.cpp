@@ -36,9 +36,9 @@ int main_app() {
 }
 
 
-bool AskOverwrite(const std::string& path) {
-    if (!env_utils::FileExists(path)) return true;
-    PrintFmt("Overwrite %s? (y/n)\n", path.c_str());
+bool AskOverwrite(const char *path) {
+    if (!envuFileExists(path)) return true;
+    PrintFmt("Overwrite %s? (y/n)\n", path);
     char answer;
     int ret = scanf("%c", &answer);
     fseek(stdin, 0, SEEK_END);
@@ -61,7 +61,7 @@ json_utils::JsonResult Merge(const std::string& exe_path, const std::string& jso
 
     PrintFmt("Importing a json file... (%s)\n", json_path.c_str());
     exe.SetJson(json);
-    if (!force && !AskOverwrite(new_path)) {
+    if (!force && !AskOverwrite(new_path.c_str())) {
         PrintFmt("The operation has been cancelled.\n");
         return { true };
     }
@@ -91,7 +91,7 @@ json_utils::JsonResult Split(const std::string& exe_path, const std::string& jso
     rapidjson::Document json;
     exe.GetJson(json);
     exe.RemoveJson();
-    if (!force && (!AskOverwrite(new_path) || !AskOverwrite(json_path))) {
+    if (!force && (!AskOverwrite(new_path.c_str()) || !AskOverwrite(json_path.c_str()))) {
         PrintFmt("The operation has been cancelled.\n");
         return { true };
     }
@@ -199,22 +199,25 @@ static std::string RemoveHyphen(const char* arg) {
 }
 
 #ifdef _WIN32
-int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
+int wmain(int argc, wchar_t* argv[]) {
     setlocale(LC_CTYPE, "");
-    std::vector<std::string> args;
-    for (size_t i = 0; i < argc; i++) {
-        args.push_back(UTF16toUTF8(argv[i]));
-    }
 #else
-int main(int argc, char* argv[], char* envp[]) {
+int main(int argc, char* argv[]) {
+#endif
     std::vector<std::string> args;
     for (size_t i = 0; i < argc; i++) {
+#ifdef _WIN32
+        args.push_back(UTF16toUTF8(argv[i]));
+#else
         args.push_back(argv[i]);
-    }
 #endif
-    env_utils::InitEnv(envp);
-    std::string exe_path = env_utils::GetExecutablePath();
-    env_utils::SetCwd(env_utils::GetDirectory(exe_path));
+    }
+    char *exe_path_cstr = envuGetExecutablePath();
+    char *exe_dir = envuGetDirectory(exe_path_cstr);
+    envuSetCwd(exe_dir);
+    std::string exe_path = exe_path_cstr;
+    envuFree(exe_path_cstr);
+    envuFree(exe_dir);
 
     // Launch GUI if no args.
     if (argc == 1) return main_app();
@@ -273,8 +276,8 @@ int main(int argc, char* argv[], char* envp[]) {
     if (new_exe_path == "")
         new_exe_path = exe_path + ".new";
 
-    json_path = env_utils::GetFullPath(json_path);
-    new_exe_path = env_utils::GetFullPath(new_exe_path);
+    json_path = envuStr(envuGetFullPath(json_path.c_str()));
+    new_exe_path = envuStr(envuGetFullPath(new_exe_path.c_str()));
 
     if (json_path == exe_path || new_exe_path == exe_path) {
         PrintUsage();

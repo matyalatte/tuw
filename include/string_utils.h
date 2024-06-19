@@ -1,5 +1,14 @@
 #pragma once
 #include <string>
+#include "env_utils.h"
+
+inline std::string envuStr(char *cstr) {
+    if (cstr == NULL)
+        return "";
+    std::string str = cstr;
+    envuFree(cstr);
+    return str;
+}
 
 int StartsWith(const char *str, const char* pattern);
 uint32_t Fnv1Hash32(const std::string& str);

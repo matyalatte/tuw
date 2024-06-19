@@ -21,6 +21,7 @@ subprojects/packagecache
 subprojects/rapidjson
 subprojects/subprocess
 subprojects/google*
+subprojects/env_utils
 
 # built files
 *.exe
