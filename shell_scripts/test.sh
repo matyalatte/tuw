@@ -13,10 +13,10 @@ echo "Build type: ${build_type}"
 
 os=$(uname -s)
 options=""
-if [[ "$os" == "SunOS"]]; then
+if [[ "$os" == "SunOS" ]]; then
     # Solaris requires gld to use these flags.
     options="-Db_lto=false -Db_coverage=false"
-elif [[ "$os" == "NetBSD"]]; then
+elif [[ "$os" == "NetBSD" ]]; then
     # NetBSD seems to have some issues about lto.
     options="-Db_lto=false"
 elif [[ "$build_type" == "Release" ]]; then
