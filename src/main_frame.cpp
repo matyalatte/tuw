@@ -14,14 +14,14 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
     m_grid = NULL;
     m_menu_item = NULL;
-    std::string exe_path = env_utils::GetExecutablePath();
+    std::string exe_path = envuStr(envuGetExecutablePath());
 
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
     bool ignore_external_json = false;
     json_utils::JsonResult result = { true };
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
-        bool exists_external_json = env_utils::FileExists("gui_definition.json");
+        bool exists_external_json = envuFileExists("gui_definition.json");
         ExeContainer exe;
 
         result = exe.Read(exe_path);
@@ -115,7 +115,9 @@ void MainFrame::CreateFrame() {
 
 #ifdef __TUW_UNIX__
     // Console window for linux
-    m_logwin = uiNewWindow(env_utils::GetExecutablePath().c_str(), 600, 400, 0);
+    char *exe_path = envuGetExecutablePath();
+    m_logwin = uiNewWindow(exe_path, 600, 400, 0);
+    envuFree(exe_path);
     uiWindowOnClosing(m_logwin, OnClosing, NULL);
     uiMultilineEntry* log_entry = uiNewMultilineEntry();
 
@@ -233,9 +235,12 @@ void MainFrame::OpenURL(int id) {
         }
 
     } else if (type == "file") {
-        url = env_utils::GetFullPath(help["path"].GetString());
+        char *url_cstr = envuGetRealPath(help["path"].GetString());
+        int exists = envuFileExists(url_cstr);
+        url = envuStr(url_cstr);
         tag = "[OpenFile] ";
-        if (!env_utils::FileExists(url)) {
+
+        if (!exists) {
             std::string msg = "File does not exist. (" + url + ")";
             PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
             ShowErrorDialog(msg);
@@ -370,9 +375,9 @@ std::string MainFrame::GetCommand() {
         if (id == CMD_ID_PERCENT) {
             cmd += "%";
         } else if (id == CMD_ID_CURRENT_DIR) {
-            cmd += env_utils::GetCwd();
+            cmd += envuStr(envuGetCwd());
         } else if (id == CMD_ID_HOME_DIR) {
-            cmd += env_utils::GetHome();
+            cmd += envuStr(envuGetHome());
         } else {
             cmd += comp_strings[id];
         }

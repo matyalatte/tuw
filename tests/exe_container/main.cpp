@@ -9,9 +9,9 @@
 const char* json_file;
 
 #ifdef _WIN32
-int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
+int wmain(int argc, wchar_t* argv[]) {
 #else
-int main(int argc, char* argv[], char* envp[]) {
+int main(int argc, char* argv[]) {
 #endif
     ::testing::InitGoogleTest(&argc, argv);
     assert(argc == 2);
@@ -23,9 +23,9 @@ int main(int argc, char* argv[], char* envp[]) {
     json_file = argv[1];
 #endif
 
-    env_utils::InitEnv(envp);
-    std::string exe_path = env_utils::GetExecutablePath();
-    env_utils::SetCwd(env_utils::GetDirectory(exe_path));
+    char *exe_dir = envuGetExecutableDir();
+    envuSetCwd(exe_dir);
+    envuFree(exe_dir);
 
     return RUN_ALL_TESTS();
 }

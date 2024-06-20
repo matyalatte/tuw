@@ -1,0 +1,7 @@
+[wrap-git]
+url = https://github.com/matyalatte/c-env-utils.git
+revision = f9c43727513a3a502667945d0edf739bb64f1e41
+depth = 1
+
+[provide]
+env_utils = env_utils_dep

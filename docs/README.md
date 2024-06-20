@@ -82,8 +82,9 @@ Files in this repository are available under the [MIT license](../license.txt).
 
 ## External Projects
 
-| Project | Used for | License |
+| Project | About | License |
 | -- | -- | -- |
 | [libui-ng](https://github.com/libui-ng/libui-ng) | GUI framework | [MIT](http://opensource.org/licenses/MIT) |
-| [RapidJSON](https://github.com/Tencent/rapidjson) | JSON handling | [MIT](http://opensource.org/licenses/MIT) |
-| [subprocess.h](https://github.com/sheredom/subprocess.h) | Command processing | [Unlicense](https://github.com/sheredom/subprocess.h/blob/master/LICENSE) |
+| [RapidJSON](https://github.com/Tencent/rapidjson) | JSON parser | [MIT](http://opensource.org/licenses/MIT) |
+| [subprocess.h](https://github.com/sheredom/subprocess.h) | Command processor | [Unlicense](https://github.com/sheredom/subprocess.h/blob/master/LICENSE) |
+| [c-env-utils](https://github.com/matyalatte/c-env-utils) | Utilities for env info | [MIT](http://opensource.org/licenses/MIT) |
