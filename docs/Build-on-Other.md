@@ -14,7 +14,7 @@ The workflow is the same as Linux.
 
 ## FreeBSD
 
-On FreeBSD, You can get all the required tools with `pkg`.
+On FreeBSD, you can get all the required tools with `pkg`.
 
 ```shell
 pkg install git bash pkgconf meson ninja
@@ -26,7 +26,7 @@ bash shell_scripts/build.sh
 
 ## OpenBSD
 
-On OpenBSD, You can get all the required tools with `pkg_add`.
+On OpenBSD, you can get all the required tools with `pkg_add`.
 
 ```shell
 pkg_add bash meson ninja
@@ -38,7 +38,7 @@ bash shell_scripts/build.sh
 
 ## NetBSD
 
-On NetBSD, You can get all the required tools with `pkgin`.
+On NetBSD, you can get all the required tools with `pkgin`.
 
 ```shell
 pkgin in git mozilla-rootcerts-openssl bash pkgconf meson ninja
@@ -50,7 +50,7 @@ bash shell_scripts/build.sh
 
 ## Haiku
 
-On Haiku, You can get all the required tools with `pkgman`.
+On Haiku, you can get all the required tools with `pkgman`.
 
 ```shell
 pkgman install meson ninja gtk3_devel
@@ -76,4 +76,16 @@ git clone https://github.com/B00merang-Project/Haiku.git
 nano /boot/system/non-packaged/data/glib-2.0/schemas/00_org.gnome.desktop.interface.gschema.override
 
 glib-compile-schemas /boot/system/non-packaged/data/glib-2.0/schemas
+```
+
+## OpenIndiana
+
+On OpenIndiana, you can get all the required tools with `pkg`.
+
+```shell
+pkg install bash git meson
+git clone https://github.com/matyalatte/tuw.git
+cd tuw
+bash shell_scripts/build.sh
+./build/Release/Tuw
 ```

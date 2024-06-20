@@ -7,8 +7,8 @@
 -   [Meson](https://github.com/mesonbuild/meson) (**0.58** or later)
 -   Shell scripts in [`./Tuw/shell_scripts`](../shell_scripts)
 
-> :warning: GCC is not supported.  
-> (It might work, but if you find issues, you need to solve them by yourself.)  
+> [!Warning]
+> GCC is not supported. (It might work, but if you find issues, you need to solve them by yourself.)  
 
 ## Install Meson and Ninja
 

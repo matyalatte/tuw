@@ -9,9 +9,6 @@
 -   bash
 -   Shell scripts in [`./Tuw/shell_scripts`](../shell_scripts)
 
-> :warning: Clang is not supported.  
-> (It might work, but if you find issues, you need to solve them by yourself.)  
-
 ## Install Meson and Ninja
 
 You can install meson and ninja via apt. (`sudo apt install meson ninja`)  

@@ -1,3 +1,8 @@
+- Added support for Solaris/illumos.
+- Added support for MinGW-w64.
+- Fixed a bug that Windows was not able to handle long paths
+  (that have more than 260 characters.)
+- Fixed a bug that OpenBSD was not able to get executable paths.
 - Fixed a bug that empty strings were removed from arguments on Windows.
 
 ver 0.6.4

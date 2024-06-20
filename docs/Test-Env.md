@@ -9,6 +9,7 @@ Here is the list of test environments.
 | OS | Arch | Compiler | libc | Build | Manual Test | CI Test |
 | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | Windows10 | x64 | msvc |  | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| Windows10 | x64 | gcc | | :warning: | :warning: | :warning: |
 | Windows10 | arm64 | msvc |  | :heavy_check_mark: | :x: | :heavy_check_mark: |
 | Windows8 | x64 |  |  | :x: | :warning: | :x: |
 | macOS11 | x64 | clang |  | :heavy_check_mark: | :x: | :heavy_check_mark: |
