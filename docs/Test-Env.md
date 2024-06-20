@@ -26,3 +26,4 @@ Here is the list of test environments.
 | OpenBSD7.4 | x64 | clang | | :warning: | :warning: | :warning: |
 | NetBSD9.3 | x64 | gcc | | :warning: | :warning: | :warning: |
 | Haiku R1/beta4 | x64 | gcc | | :warning: | :warning: | :x: |
+| OpenIndiana 2024.04 | x64 | gcc | | :warning: | :warning: | :x: |

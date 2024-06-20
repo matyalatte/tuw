@@ -48,8 +48,6 @@ bash shell_scripts/build.sh
 ./build/Release/Tuw
 ```
 
-If you get linker errors, try to disalble LTO with `b_lto = false` in `./presets/release.ini`.
-
 ## Haiku
 
 On Haiku, You can get all the required tools with `pkgman`.

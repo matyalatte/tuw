@@ -53,12 +53,15 @@ if tuw_OS == 'windows'
             tuw_link_args += ['/OPT:REF', '/OPT:ICF', '/LTCG']
         endif
     else
-        warning('This project has NOT been tested with your compiler. (' + tuw_compiler + ')')
+        warning('Your compiler (' + tuw_compiler + ') makes exe larger.'
+                + ' It is recommended to use MSVC for Windows build.')
         tuw_link_args += [
             '-static',
             '-static-libgcc',
             '-static-libstdc++',
         ]
+        # need this option for wmain()
+        tuw_link_args += ['-municode']
     endif
 elif tuw_OS == 'darwin'
     add_languages('objc', required: true)
@@ -100,7 +103,8 @@ if tuw_OS != 'windows'
     if tuw_compiler.startswith('clang')
         tuw_cpp_args += ['-stdlib=libc++']
     endif
-    if tuw_is_release
+    if tuw_is_release and tuw_OS != 'sunos'
+        # Note: solaris requires gld (not ld) to use --gc-sections
         tuw_cpp_args += ['-ffunction-sections', '-fdata-sections']
         if tuw_compiler == 'gcc'
             tuw_link_args += ['-Wl,--gc-sections']
