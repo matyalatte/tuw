@@ -134,7 +134,7 @@ ExecuteResult LaunchDefaultApp(const std::string& url) {
 #ifdef _WIN32
     std::wstring utf16_url = UTF8toUTF16(url.c_str());
     const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", utf16_url.c_str(), NULL};
-#elif defined(__TUW_UNIX__) && !defined(__TUW_HAIKU__)
+#elif defined(__TUW_UNIX__) && !defined(__HAIKU__)
     // Linux and BSD
     const char* argv[] = {"xdg-open", url.c_str(), NULL};
 #else
