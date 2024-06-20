@@ -49,7 +49,7 @@ void PrintFmt(const char* fmt, ...) {
     va_end(va);
 
     WCHAR* wfmt = toUTF16(buf);
-    wprintf(L"%s", wfmt);
+    wprintf(L"%ls", wfmt);
 
     uiprivFree(buf);
     uiprivFree(wfmt);
