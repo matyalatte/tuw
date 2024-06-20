@@ -16,14 +16,24 @@ if /I "%~2"=="ARM" (
     )
 )
 
+set OPTIONS=
 if /I "%~2"=="UCRT" (
-    set OPT="-Duse_ucrt=true"
+    set OPTIONS= -Duse_ucrt=true
 )
 
 echo Build type: %BUILD_TYPE%
 
+REM Check if MSBuild exists
+WHERE MSBuild >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo MSBuild: Not found
+) else (
+    echo MSBuild: Found
+    set OPTIONS=%OPTIONS% --backend=vs
+)
+
 @pushd %~dp0\..
-    meson setup build\%BUILD_TYPE%%~2 --backend=vs %PRESET% %OPT%
+    meson setup build\%BUILD_TYPE%%~2 %PRESET%%OPTIONS%
     if %ERRORLEVEL% neq 0 goto :buildend
     cd build\%BUILD_TYPE%%~2
     meson compile -v
