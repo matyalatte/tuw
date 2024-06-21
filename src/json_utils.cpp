@@ -284,9 +284,9 @@ namespace json_utils {
         rapidjson::Value& components = sub_definition["components"];;
         rapidjson::Value cmd_int_ids(rapidjson::kArrayType);
         std::string cmd_str = "";
-        int comp_size = (int)comp_ids.size();
+        int comp_size = static_cast<int>(comp_ids.size());
         int non_id_comp = 0;
-        for (int i = 0; i < (int)cmd_ids.size(); i++) {
+        for (int i = 0; i < static_cast<int>(cmd_ids.size()); i++) {
             cmd_str += splitted_cmd[i];
             std::string id = cmd_ids[i];
             int j;

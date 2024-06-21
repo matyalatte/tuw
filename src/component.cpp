@@ -401,7 +401,7 @@ std::string ComboBox::GetRawString() {
 void ComboBox::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsInt()) {
         int i = config[m_id].GetInt();
-        if (i >= 0 && i < (int)m_values.size())
+        if (i >= 0 && i < static_cast<int>(m_values.size()))
             uiComboboxSetSelected(static_cast<uiCombobox*>(m_widget), i);
     }
 }
@@ -444,7 +444,7 @@ std::string RadioButtons::GetRawString() {
 void RadioButtons::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsInt()) {
         int i = config[m_id].GetInt();
-        if (i >= 0 && i < (int)m_values.size())
+        if (i >= 0 && i < static_cast<int>(m_values.size()))
             uiRadioButtonsSetSelected(static_cast<uiRadioButtons*>(m_widget), i);
     }
 }
