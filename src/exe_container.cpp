@@ -19,7 +19,7 @@ static uint32_t ReadUint32(FILE* io) {
 static void WriteUint32(FILE* io, const uint32_t& num) {
     unsigned char int_as_bin[4];
     for (size_t i = 0; i < 4; i++)
-        int_as_bin[i] = num >> (i * 8);
+        int_as_bin[i] = (unsigned char)(num >> (i * 8));
     fwrite(int_as_bin, 1, 4, io);
 }
 
@@ -42,7 +42,7 @@ static void ReadStr(FILE* io, std::string& str, const uint32_t& size) {
 }
 
 static void WriteStr(FILE* io, const std::string& str) {
-    uint32_t size = str.length();
+    uint32_t size = (uint32_t)str.length();
     uint32_t pos = 0;
     while (pos < size) {
         if (size - pos <= 1024) {
@@ -107,7 +107,7 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
         // Json data not found
         m_exe_size = end_off;
         fclose(file_io);
-        return { true };
+        return JSON_RESULT_OK;
     }
 
     // Read exe size
@@ -156,7 +156,7 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
         return { false, msg };
     }
 
-    return { true };
+    return JSON_RESULT_OK;
 }
 
 json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
@@ -165,7 +165,7 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
     if (HasJson())
         json_str = json_utils::JsonToString(m_json);
 
-    uint32_t json_size = json_str.length();
+    uint32_t json_size = (uint32_t)json_str.length();
     if (JSON_SIZE_MAX <= json_size) {
         std::string msg = "Unexpected json size. (" + std::to_string(json_size) + ")";
         return { false, msg };
@@ -199,7 +199,7 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
     fclose(old_io);
     if (json_size == 0) {
         fclose(new_io);
-        return { true };
+        return JSON_RESULT_OK;
     }
 
     // Write json data
@@ -210,5 +210,5 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
     WriteUint32(new_io, m_exe_size - ftell(new_io) - 8);
     fwrite("JSON", 1, 4, new_io);
     fclose(new_io);
-    return { true };
+    return JSON_RESULT_OK;
 }

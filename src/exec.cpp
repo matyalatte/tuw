@@ -99,7 +99,7 @@ ExecuteResult Execute(const std::string& cmd) {
 #endif
 
     if (0 != result)
-        return { -1, "Failed to create a subprocess.\n"};
+        return { -1, "Failed to create a subprocess.\n", ""};
 
     const unsigned BUF_SIZE = 1024;
     char out_buf[BUF_SIZE + 1];
@@ -146,11 +146,11 @@ ExecuteResult LaunchDefaultApp(const std::string& url) {
                   | subprocess_option_search_user_path;
     int result = subprocess_create(argv, options, &process);
     if (0 != result)
-        return { -1, "Failed to create a subprocess.\n"};
+        return { -1, "Failed to create a subprocess.\n", ""};
 
     int return_code;
     std::string err_msg = "";
     DestroyProcess(process, &return_code, err_msg);
 
-    return { return_code, err_msg };
+    return { return_code, err_msg, "" };
 }

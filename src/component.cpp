@@ -125,11 +125,13 @@ static uiWindow* GetToplevel(uiControl* c) {
 static void onOpenFileClicked(uiButton *b, void *data) {
     FilePicker* picker = static_cast<FilePicker*>(data);
     picker->OpenFile();
+    UNUSED(b);
 }
 
 static void onFilesDropped(uiEntry *e, int count, char** names, void *data) {
     if (count < 1) return;
     uiEntrySetText(e, names[0]);
+    UNUSED(data);
 }
 
 // File Picker
@@ -245,8 +247,8 @@ class FilterList {
         }
 
         ui_filters = new uiFileDialogParamsFilter[filters.size()];
-        for (size_t i = 0; i < filters.size(); i++) {
-            ui_filters[i] = filters[i]->ToLibuiFilter();
+        for (size_t j = 0; j < filters.size(); j++) {
+            ui_filters[j] = filters[j]->ToLibuiFilter();
         }
     }
 
@@ -300,6 +302,7 @@ void FilePicker::OpenFile() {
 static void onOpenFolderClicked(uiButton *b, void *data) {
     DirPicker* picker = static_cast<DirPicker*>(data);
     picker->OpenFolder();
+    UNUSED(b);
 }
 
 // Dir Picker
@@ -397,8 +400,8 @@ std::string ComboBox::GetRawString() {
 
 void ComboBox::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsInt()) {
-        int  i = config[m_id].GetInt();
-        if (i < m_values.size())
+        int i = config[m_id].GetInt();
+        if (i >= 0 && i < (int)m_values.size())
             uiComboboxSetSelected(static_cast<uiCombobox*>(m_widget), i);
     }
 }
@@ -440,8 +443,8 @@ std::string RadioButtons::GetRawString() {
 
 void RadioButtons::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsInt()) {
-        int  i = config[m_id].GetInt();
-        if (i < m_values.size())
+        int i = config[m_id].GetInt();
+        if (i >= 0 && i < (int)m_values.size())
             uiRadioButtonsSetSelected(static_cast<uiRadioButtons*>(m_widget), i);
     }
 }
@@ -519,7 +522,7 @@ std::string CheckArray::GetRawString() {
     std::string str = "";
     std::vector<uiCheckbox*> checks;
     checks = *(std::vector<uiCheckbox*>*)m_widget;
-    for (int i = 0; i < checks.size(); i++) {
+    for (size_t i = 0; i < checks.size(); i++) {
         if (uiCheckboxChecked(checks[i])) {
             str += m_values[i];
         }
@@ -530,7 +533,7 @@ std::string CheckArray::GetRawString() {
 void CheckArray::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsArray()) {
         std::vector<uiCheckbox*> checks = *(std::vector<uiCheckbox*>*)m_widget;
-        for (int i = 0; i < config[m_id].Size() && i < checks.size(); i++) {
+        for (unsigned i = 0; i < config[m_id].Size() && i < checks.size(); i++) {
             if (config[m_id][i].IsBool())
                 uiCheckboxSetChecked(checks[i], config[m_id][i].GetBool());
         }

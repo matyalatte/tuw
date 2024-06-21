@@ -4,6 +4,8 @@
 #include "rapidjson/document.h"
 #include "ui.h"
 
+#define UNUSED(x) (void)(x)
+
 // Base class for GUI components (file picker, combo box, etc.)
 class Component {
  protected:
@@ -18,13 +20,13 @@ class Component {
 
  public:
     explicit Component(const rapidjson::Value& j);
-    ~Component();
+    virtual ~Component();
     virtual std::string GetRawString() { return "";}
     std::string GetString();
     std::string const GetID();
 
-    virtual void SetConfig(const rapidjson::Value& config) {}
-    virtual void GetConfig(rapidjson::Document& config) {}
+    virtual void SetConfig(const rapidjson::Value& config) { UNUSED(config); }
+    virtual void GetConfig(rapidjson::Document& config) { UNUSED(config); }
 
     bool HasString() { return m_has_string; }
     bool IsWide() { return m_is_wide; }
@@ -46,7 +48,7 @@ class MultipleValuesContainer {
 class EmptyComponent : public Component {
  public:
     EmptyComponent(uiBox* box, const rapidjson::Value& j)
-        : Component(j) {}
+        : Component(j) { UNUSED(box); }
 };
 
 class StaticText : public Component {

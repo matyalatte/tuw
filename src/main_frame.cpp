@@ -19,7 +19,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
     bool ignore_external_json = false;
-    json_utils::JsonResult result = { true };
+    json_utils::JsonResult result = JSON_RESULT_OK;
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
         bool exists_external_json = envuFileExists("gui_definition.json");
         ExeContainer exe;
@@ -32,7 +32,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
                 ignore_external_json = exists_external_json;
             } else {
                 PrintFmt("[LoadDefinition] Embedded JSON not found.\n");
-                result = { false };
+                result = { false, "" };
             }
         } else {
             PrintFmt("[LoadDefinition] ERROR: %s\n", result.msg.c_str());
@@ -64,9 +64,9 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     if (!result.ok)
         json_utils::GetDefaultDefinition(m_definition);
 
-    int definition_id = 0;
+    unsigned definition_id = 0;
     if (m_config.HasMember("_mode") && m_config["_mode"].IsInt()) {
-        int mode = m_config["_mode"].GetInt();
+        unsigned mode = m_config["_mode"].GetInt();
         if (mode < m_definition["gui"].Size())
             definition_id = mode;
     }
@@ -85,7 +85,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     }
 
     if (!result.ok)
-        JsonLoadFailed(result.msg, m_definition);
+        JsonLoadFailed(result.msg);
 
     UpdatePanel(definition_id);
     Fit();
@@ -93,6 +93,8 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
 static int OnClosing(uiWindow *w, void *data) {
     uiQuit();
+    UNUSED(w);
+    UNUSED(data);
     return 1;
 }
 
@@ -157,11 +159,15 @@ static void OnUpdatePanel(uiMenuItem *item, uiWindow *w, void *data) {
     MenuData* menu_data = static_cast<MenuData*>(data);
     menu_data->main_frame->UpdatePanel(menu_data->menu_id);
     menu_data->main_frame->Fit();
+    UNUSED(item);
+    UNUSED(w);
 }
 
 static void OnOpenURL(uiMenuItem *item, uiWindow *w, void *data) {
     MenuData* menu_data = static_cast<MenuData*>(data);
     menu_data->main_frame->OpenURL(menu_data->menu_id);
+    UNUSED(item);
+    UNUSED(w);
 }
 
 void MainFrame::CreateMenu() {
@@ -176,7 +182,7 @@ void MainFrame::CreateMenu() {
     menu = uiNewMenu("Menu");
     if (m_definition["gui"].Size() > 1) {
 #endif  // __APPLE__
-        for (int i = 0; i < m_definition["gui"].Size(); i++) {
+        for (unsigned i = 0; i < m_definition["gui"].Size(); i++) {
             item = uiMenuAppendItem(menu, m_definition["gui"][i]["label"].GetString());
             uiMenuItemOnClicked(item, OnUpdatePanel, new MenuData(this, i));
         }
@@ -187,7 +193,7 @@ void MainFrame::CreateMenu() {
     if (m_definition.HasMember("help") && m_definition["help"].Size() > 0) {
         menu = uiNewMenu("Help");
 
-        for (int i = 0; i < m_definition["help"].Size(); i++) {
+        for (unsigned i = 0; i < m_definition["help"].Size(); i++) {
             item = uiMenuAppendItem(menu, m_definition["help"][i]["label"].GetString());
             uiMenuItemOnClicked(item, OnOpenURL, new MenuData(this, i));
         }
@@ -214,7 +220,7 @@ void MainFrame::OpenURL(int id) {
         url = help["url"].GetString();
         tag = "[OpenURL] ";
 
-        int pos = url.find("://");
+        size_t pos = url.find("://");
         if (pos != std::string::npos) {
             std::string scheme = url.substr(0, pos);
             // scheme should be http or https
@@ -282,9 +288,10 @@ static void OnClicked(uiButton *sender, void *data) {
     MainFrame* main_frame = static_cast<MainFrame*>(data);
     main_frame->SaveConfig();
     main_frame->RunCommand();
+    UNUSED(sender);
 }
 
-void MainFrame::UpdatePanel(int definition_id) {
+void MainFrame::UpdatePanel(unsigned definition_id) {
     m_definition_id = definition_id;
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     const char* label = sub_definition["label"].GetString();
@@ -365,12 +372,12 @@ std::string MainFrame::GetCommand() {
         cmd_ids.push_back(c.GetInt());
 
     std::vector<std::string> comp_strings = std::vector<std::string>(m_components.size());
-    for (int i = 0; i < m_components.size(); i++) {
+    for (size_t i = 0; i < m_components.size(); i++) {
         comp_strings[i] = m_components[i]->GetString();
     }
 
     std::string cmd = cmd_ary[0];
-    for (int i = 0; i < cmd_ids.size(); i++) {
+    for (size_t i = 0; i < cmd_ids.size(); i++) {
         int id = cmd_ids[i];
         if (id == CMD_ID_PERCENT) {
             cmd += "%";
@@ -441,7 +448,7 @@ void MainFrame::RunCommand() {
 
 // read gui_definition.json
 json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definition) {
-    json_utils::JsonResult result = { true };
+    json_utils::JsonResult result = JSON_RESULT_OK;
     json_utils::CheckVersion(result, definition);
     if (!result.ok) return result;
 
@@ -459,7 +466,7 @@ json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definitio
     return result;
 }
 
-void MainFrame::JsonLoadFailed(const std::string& msg, rapidjson::Document& definition) {
+void MainFrame::JsonLoadFailed(const std::string& msg) {
     PrintFmt("[LoadDefinition] Error: %s\n", msg.c_str());
     ShowErrorDialog(msg);
 }

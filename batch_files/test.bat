@@ -40,7 +40,9 @@ if %ERRORLEVEL% NEQ 0 (
     echo MSBuild: Not found
 ) else (
     echo MSBuild: Found
-    set OPTIONS=%OPTIONS% --backend=vs
+    if not exist %~dp0\..\build\%BUILD_TYPE%%~2-Test (
+        set OPTIONS=%OPTIONS% --backend=vs
+    )
 )
 
 @pushd %~dp0\..

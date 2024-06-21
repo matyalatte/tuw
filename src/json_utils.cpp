@@ -49,7 +49,7 @@ namespace json_utils {
         if (!json.IsObject())
             json.SetObject();
 
-        return { true };
+        return JSON_RESULT_OK;
     }
 
     JsonResult SaveJson(rapidjson::Document& json, const std::string& file) {
@@ -62,7 +62,7 @@ namespace json_utils {
         rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);
         json.Accept(writer);
         fclose(fp);
-        return { true };
+        return JSON_RESULT_OK;
     }
 
     std::string JsonToString(rapidjson::Document& json) {
@@ -237,11 +237,13 @@ namespace json_utils {
 
     static void CheckIndexDuplication(JsonResult& result,
                                       const std::vector<std::string>& component_ids) {
-        int size = component_ids.size();
-        for (int i = 0; i < size - 1; i++) {
+        size_t size = component_ids.size();
+        if (size == 0)
+            return;
+        for (size_t i = 0; i < size - 1; i++) {
             std::string str = component_ids[i];
             if (str == "") { continue; }
-            for (int j = i + 1; j < size; j++) {
+            for (size_t j = i + 1; j < size; j++) {
                 if (str == component_ids[j]) {
                     result.ok = false;
                     result.msg = GetLabel("components", "id")
@@ -282,9 +284,9 @@ namespace json_utils {
         rapidjson::Value& components = sub_definition["components"];;
         rapidjson::Value cmd_int_ids(rapidjson::kArrayType);
         std::string cmd_str = "";
-        int comp_size = comp_ids.size();
+        int comp_size = (int)comp_ids.size();
         int non_id_comp = 0;
-        for (int i = 0; i < cmd_ids.size(); i++) {
+        for (int i = 0; i < (int)cmd_ids.size(); i++) {
             cmd_str += splitted_cmd[i];
             std::string id = cmd_ids[i];
             int j;
@@ -428,8 +430,10 @@ namespace json_utils {
             switch (type) {
                 case COMP_FILE:
                     CheckJsonType(result, c, "extension", JsonType::STRING, label, CAN_SKIP);
+                    /* Falls through. */
                 case COMP_FOLDER:
                     CheckJsonType(result, c, "button", JsonType::STRING, label, CAN_SKIP);
+                    /* Falls through. */
                 case COMP_TEXT:
                     CheckJsonType(result, c, "default", JsonType::STRING, label, CAN_SKIP);
                     break;
