@@ -67,7 +67,7 @@ bash shell_scripts/build.sh
 
 You can also use [the Haiku theme for GTK](https://github.com/B00merang-Project/Haiku) if you don't like the default theme.  
 
-```
+```shell
 mkdir -p /boot/home/config/non-packaged/data/themes
 cd /boot/home/config/non-packaged/data/themes
 git clone https://github.com/B00merang-Project/Haiku.git
