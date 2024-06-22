@@ -12,8 +12,9 @@ Here is the list of test environments.
 | Windows10 | x64 | gcc | | :warning: | :warning: | :warning: |
 | Windows10 | arm64 | msvc |  | :heavy_check_mark: | :x: | :heavy_check_mark: |
 | Windows8 | x64 |  |  | :x: | :warning: | :x: |
-| macOS11 | x64 | clang |  | :heavy_check_mark: | :x: | :heavy_check_mark: |
-| macOS10.15 | x64 | clang |  | :heavy_check_mark: | :heavy_check_mark: | :x: |
+| macOS14 | arm64 | clang |  | :heavy_check_mark: | :x: | :heavy_check_mark: |
+| macOS11 | x64 | clang |  | :warning: | :x: | :warning: |
+| macOS10.15 | x64 | clang |  | :warning: | :warning: | :x: |
 | macOS10.12 | x64 |  |  | :x: | :warning: | :x: |
 | Ubuntu20.04 | x64 | gcc | glibc | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | Ubuntu20.04 | arm64 | gcc | glibc | :heavy_check_mark: | :x: | :heavy_check_mark: |
@@ -27,4 +28,4 @@ Here is the list of test environments.
 | OpenBSD7.4 | x64 | clang | | :warning: | :warning: | :warning: |
 | NetBSD9.3 | x64 | gcc | | :warning: | :warning: | :warning: |
 | Haiku R1/beta4 | x64 | gcc | | :warning: | :warning: | :x: |
-| OpenIndiana 2024.04 | x64 | gcc | | :warning: | :warning: | :x: |
+| OpenIndiana 2024.04 | x64 | gcc | | :warning: | :warning: | :warning: |

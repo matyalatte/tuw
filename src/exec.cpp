@@ -109,7 +109,7 @@ ExecuteResult Execute(const std::string& cmd) {
     unsigned out_read_size = 0;
     unsigned err_read_size = 0;
 
-    while (subprocess_alive(&process) || out_read_size || err_read_size) {
+    do {
         out_read_size = ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, BUF_SIZE);
         err_read_size = ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
 #ifdef _WIN32
@@ -117,7 +117,7 @@ ExecuteResult Execute(const std::string& cmd) {
 #else
         PrintFmt("%s", out_buf);
 #endif
-    }
+    } while (subprocess_alive(&process) || out_read_size || err_read_size);
 
     // Sometimes stderr still have unread characters
     ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
