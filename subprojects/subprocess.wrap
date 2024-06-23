@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/matyalatte/subprocess.h.git
-revision = 35754225e32b739c72bd24a5a73720d8bab1fa56
+revision = f52d398b9958ca3b372bb6876618f58eef9dbacb
 depth=1
 patch_directory = subprocess
 

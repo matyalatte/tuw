@@ -13,16 +13,26 @@ fi
 
 echo "Build type: ${build_type}"
 
+os=$(uname -s)
+options=""
+if [[ "$os" == "SunOS" || "$os" == "NetBSD" ]]; then
+    # Solaris requires gld to use lto.
+    # NetBSD seems to have some issues about lto.
+    options="-Db_lto=false"
+elif [[ "$build_type" == "Release" ]]; then
+    options="-Db_lto=true"
+fi
+
 pushd $(dirname "$0")/..
-    meson setup build/${build_type} ${preset} || exit 1
+    meson setup build/${build_type} ${preset} ${options} || exit 1
     cd build/${build_type}
     meson compile -v || exit 1
 
     # Strip symbols to reduce the binary size
     if [ "${build_type}" = "Release" ]; then
-        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        if [[ "$os" == "Linux" ]]; then
             strip --strip-all ./Tuw
-        elif [[ "$OSTYPE" == "darwin"* ]]; then
+        elif [[ "$os" == "Darwin" ]]; then
             strip ./Tuw
         fi
     fi

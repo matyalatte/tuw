@@ -99,7 +99,7 @@ ExecuteResult Execute(const std::string& cmd) {
 #endif
 
     if (0 != result)
-        return { -1, "Failed to create a subprocess.\n"};
+        return { -1, "Failed to create a subprocess.\n", ""};
 
     const unsigned BUF_SIZE = 1024;
     char out_buf[BUF_SIZE + 1];
@@ -109,7 +109,7 @@ ExecuteResult Execute(const std::string& cmd) {
     unsigned out_read_size = 0;
     unsigned err_read_size = 0;
 
-    while (subprocess_alive(&process) || out_read_size || err_read_size) {
+    do {
         out_read_size = ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, BUF_SIZE);
         err_read_size = ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
 #ifdef _WIN32
@@ -117,7 +117,7 @@ ExecuteResult Execute(const std::string& cmd) {
 #else
         PrintFmt("%s", out_buf);
 #endif
-    }
+    } while (subprocess_alive(&process) || out_read_size || err_read_size);
 
     // Sometimes stderr still have unread characters
     ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
@@ -134,7 +134,7 @@ ExecuteResult LaunchDefaultApp(const std::string& url) {
 #ifdef _WIN32
     std::wstring utf16_url = UTF8toUTF16(url.c_str());
     const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", utf16_url.c_str(), NULL};
-#elif defined(__TUW_UNIX__) && !defined(__TUW_HAIKU__)
+#elif defined(__TUW_UNIX__) && !defined(__HAIKU__)
     // Linux and BSD
     const char* argv[] = {"xdg-open", url.c_str(), NULL};
 #else
@@ -146,11 +146,11 @@ ExecuteResult LaunchDefaultApp(const std::string& url) {
                   | subprocess_option_search_user_path;
     int result = subprocess_create(argv, options, &process);
     if (0 != result)
-        return { -1, "Failed to create a subprocess.\n"};
+        return { -1, "Failed to create a subprocess.\n", ""};
 
     int return_code;
     std::string err_msg = "";
     DestroyProcess(process, &return_code, err_msg);
 
-    return { return_code, err_msg };
+    return { return_code, err_msg, "" };
 }

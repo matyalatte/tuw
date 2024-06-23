@@ -6,10 +6,6 @@
 #include <cstring>
 #endif
 
-int StartsWith(const char *str, const char* pattern) {
-    return strncmp(str, pattern, strlen(pattern));
-}
-
 static const uint32_t FNV_OFFSET_BASIS_32 = 2166136261U;
 static const uint32_t FNV_PRIME_32 = 16777619U;
 
@@ -49,7 +45,7 @@ void PrintFmt(const char* fmt, ...) {
     va_end(va);
 
     WCHAR* wfmt = toUTF16(buf);
-    wprintf(L"%s", wfmt);
+    wprintf(L"%ls", wfmt);
 
     uiprivFree(buf);
     uiprivFree(wfmt);

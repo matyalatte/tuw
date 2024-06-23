@@ -125,18 +125,17 @@ static uiWindow* GetToplevel(uiControl* c) {
 static void onOpenFileClicked(uiButton *b, void *data) {
     FilePicker* picker = static_cast<FilePicker*>(data);
     picker->OpenFile();
+    UNUSED(b);
 }
 
 static void onFilesDropped(uiEntry *e, int count, char** names, void *data) {
     if (count < 1) return;
     uiEntrySetText(e, names[0]);
+    UNUSED(data);
 }
 
-// File Picker
-FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
-    : StringComponentBase(box, j) {
-    m_is_wide = true;
-    m_ext = json_utils::GetString(j, "extension", "any files (*.*)|*.*");
+static uiEntry *putPathPicker(void* component, uiBox* box, const rapidjson::Value& j,
+                              void (*click_func)(uiButton *sender, void *senderData)) {
     const char* value = json_utils::GetString(j, "default", "");
     const char* placeholder = json_utils::GetString(j, "placeholder", "");
     const char* button_label = json_utils::GetString(j, "button", "Browse");
@@ -148,7 +147,7 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     uiEntrySetPlaceholder(entry, placeholder);
 
     uiButton* button = uiNewButton(button_label);
-    uiButtonOnClicked(button, onOpenFileClicked, this);
+    uiButtonOnClicked(button, click_func, component);
 
     uiGrid* grid = uiNewGrid();
     uiGridAppend(grid, uiControl(entry),
@@ -162,7 +161,15 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     uiBoxAppend(box, uiControl(grid), 0);
     if (j.HasMember("tooltip"))
         uiControlSetTooltip(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
-    m_widget = entry;
+    return entry;
+}
+
+// File Picker
+FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
+    : StringComponentBase(box, j) {
+    m_is_wide = true;
+    m_ext = json_utils::GetString(j, "extension", "any files (*.*)|*.*");
+    m_widget = putPathPicker(this, box, j, onOpenFileClicked);
 }
 
 std::string FilePicker::GetRawString() {
@@ -172,12 +179,17 @@ std::string FilePicker::GetRawString() {
     return str;
 }
 
-void FilePicker::SetConfig(const rapidjson::Value& config) {
-    if (config.HasMember(m_id) && config[m_id].IsString()) {
-        const char* str = config[m_id].GetString();
-        uiEntry* entry = static_cast<uiEntry*>(m_widget);
+static void setConfigForTextBox(const rapidjson::Value& config,
+                                const std::string& id, void *widget) {
+    if (config.HasMember(id) && config[id].IsString()) {
+        const char* str = config[id].GetString();
+        uiEntry* entry = static_cast<uiEntry*>(widget);
         uiEntrySetText(entry, str);
     }
+}
+
+void FilePicker::SetConfig(const rapidjson::Value& config) {
+    setConfigForTextBox(config, m_id, m_widget);
 }
 
 class Filter {
@@ -245,8 +257,8 @@ class FilterList {
         }
 
         ui_filters = new uiFileDialogParamsFilter[filters.size()];
-        for (size_t i = 0; i < filters.size(); i++) {
-            ui_filters[i] = filters[i]->ToLibuiFilter();
+        for (size_t j = 0; j < filters.size(); j++) {
+            ui_filters[j] = filters[j]->ToLibuiFilter();
         }
     }
 
@@ -300,38 +312,14 @@ void FilePicker::OpenFile() {
 static void onOpenFolderClicked(uiButton *b, void *data) {
     DirPicker* picker = static_cast<DirPicker*>(data);
     picker->OpenFolder();
+    UNUSED(b);
 }
 
 // Dir Picker
 DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
     m_is_wide = true;
-    const char* value = json_utils::GetString(j, "default", "");
-    const char* placeholder = json_utils::GetString(j, "placeholder", "");
-    const char* button_label = json_utils::GetString(j, "button", "Browse");
-
-    uiEntry* entry = uiNewEntry();
-    uiEntryOnFilesDropped(entry, onFilesDropped, NULL);
-    uiEntrySetAcceptDrops(entry, 1);
-    uiEntrySetText(entry, value);
-    uiEntrySetPlaceholder(entry, placeholder);
-
-    uiButton* button = uiNewButton(button_label);
-    uiButtonOnClicked(button, onOpenFolderClicked, this);
-
-    uiGrid* grid = uiNewGrid();
-    uiGridAppend(grid, uiControl(entry),
-        0, 0, 1, 1,
-        1, uiAlignFill, 0, uiAlignFill);
-    uiGridAppend(grid, uiControl(button),
-        1, 0, 1, 1,
-        0, uiAlignFill, 0, uiAlignFill);
-    uiGridSetSpacing(grid, tuw_constants::GRID_COMP_XSPACE, 0);
-
-    uiBoxAppend(box, uiControl(grid), 0);
-    if (j.HasMember("tooltip"))
-        uiControlSetTooltip(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
-    m_widget = entry;
+    m_widget = putPathPicker(this, box, j, onOpenFolderClicked);
 }
 
 std::string DirPicker::GetRawString() {
@@ -342,11 +330,7 @@ std::string DirPicker::GetRawString() {
 }
 
 void DirPicker::SetConfig(const rapidjson::Value& config) {
-    if (config.HasMember(m_id) && config[m_id].IsString()) {
-        const char* str = config[m_id].GetString();
-        uiEntry* entry = static_cast<uiEntry*>(m_widget);
-        uiEntrySetText(entry, str);
-    }
+    setConfigForTextBox(config, m_id, m_widget);
 }
 
 void DirPicker::OpenFolder() {
@@ -397,8 +381,8 @@ std::string ComboBox::GetRawString() {
 
 void ComboBox::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsInt()) {
-        int  i = config[m_id].GetInt();
-        if (i < m_values.size())
+        int i = config[m_id].GetInt();
+        if (i >= 0 && i < static_cast<int>(m_values.size()))
             uiComboboxSetSelected(static_cast<uiCombobox*>(m_widget), i);
     }
 }
@@ -440,8 +424,8 @@ std::string RadioButtons::GetRawString() {
 
 void RadioButtons::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsInt()) {
-        int  i = config[m_id].GetInt();
-        if (i < m_values.size())
+        int i = config[m_id].GetInt();
+        if (i >= 0 && i < static_cast<int>(m_values.size()))
             uiRadioButtonsSetSelected(static_cast<uiRadioButtons*>(m_widget), i);
     }
 }
@@ -519,7 +503,7 @@ std::string CheckArray::GetRawString() {
     std::string str = "";
     std::vector<uiCheckbox*> checks;
     checks = *(std::vector<uiCheckbox*>*)m_widget;
-    for (int i = 0; i < checks.size(); i++) {
+    for (size_t i = 0; i < checks.size(); i++) {
         if (uiCheckboxChecked(checks[i])) {
             str += m_values[i];
         }
@@ -530,7 +514,7 @@ std::string CheckArray::GetRawString() {
 void CheckArray::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id) && config[m_id].IsArray()) {
         std::vector<uiCheckbox*> checks = *(std::vector<uiCheckbox*>*)m_widget;
-        for (int i = 0; i < config[m_id].Size() && i < checks.size(); i++) {
+        for (unsigned i = 0; i < config[m_id].Size() && i < checks.size(); i++) {
             if (config[m_id][i].IsBool())
                 uiCheckboxSetChecked(checks[i], config[m_id][i].GetBool());
         }
@@ -574,11 +558,15 @@ std::string TextBox::GetRawString() {
 }
 
 void TextBox::SetConfig(const rapidjson::Value& config) {
-    if (config.HasMember(m_id) && config[m_id].IsString()) {
-        const char* str = config[m_id].GetString();
-        uiEntry* entry = static_cast<uiEntry*>(m_widget);
-        uiEntrySetText(entry, str);
-    }
+    setConfigForTextBox(config, m_id, m_widget);
+}
+
+static void initSpinbox(uiSpinbox* picker, uiBox* box, const rapidjson::Value& j) {
+    uiBox* hbox = uiNewHorizontalBox();
+    uiBoxAppend(hbox, uiControl(picker), 0);
+    uiBoxAppend(box, uiControl(hbox), 0);
+    if (j.HasMember("tooltip"))
+        uiControlSetTooltip(uiControl(picker), json_utils::GetString(j, "tooltip", ""));
 }
 
 IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
@@ -605,11 +593,7 @@ IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
         static_cast<double>(inc),
         static_cast<int>(wrap));
     uiSpinboxSetValue(picker, val);
-    uiBox* hbox = uiNewHorizontalBox();
-    uiBoxAppend(hbox, uiControl(picker), 0);
-    uiBoxAppend(box, uiControl(hbox), 0);
-    if (j.HasMember("tooltip"))
-        uiControlSetTooltip(uiControl(picker), json_utils::GetString(j, "tooltip", ""));
+    initSpinbox(picker, box, j);
     m_widget = picker;
 }
 
@@ -655,11 +639,7 @@ FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
     bool wrap = json_utils::GetBool(j, "wrap", false);
     uiSpinbox* picker = uiNewSpinboxDoubleEx(min, max, digits, inc, static_cast<int>(wrap));
     uiSpinboxSetValueDouble(picker, val);
-    uiBox* hbox = uiNewHorizontalBox();
-    uiBoxAppend(hbox, uiControl(picker), 0);
-    uiBoxAppend(box, uiControl(hbox), 0);
-    if (j.HasMember("tooltip"))
-        uiControlSetTooltip(uiControl(picker), json_utils::GetString(j, "tooltip", ""));
+    initSpinbox(picker, box, j);
     m_widget = picker;
 }
 

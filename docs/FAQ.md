@@ -21,13 +21,13 @@ Also, you can see [some examples](../examples/tips/multi_lines/) about it.
 It saves the previously executed arguments.  
 The executable will use them as default values when launching.  
 
-## My Linux machine says `Could Not Display` when launching the executable.
+## My Linux machine says `Could Not Display` when launching the executable
 
 Check `Allow executing file as program.` (Properties->Permissions->Execute)  
 You will be able to launch the executable by double-click.  
 ![CloudNotDisplay](https://github.com/matyalatte/tuw/assets/69258547/ecf995a6-cc75-4ba6-a253-ad2104f2e2c9)  
 
-## My Linux machine says `File not found` (or nothing) when clicking the executable.
+## My Linux machine says `File not found` (or nothing) when clicking the executable
 
 It could be due to glibc dependences.  
 The released binary requires GTK+ 3.10, GLIBC 2.15, and GLIBCXX 3.4.21 (or newer versions of the libraries).  

@@ -10,7 +10,7 @@
 class MainFrame {
  private:
     rapidjson::Document m_definition;
-    int m_definition_id;
+    unsigned m_definition_id;
     rapidjson::Document m_config;
     uiWindow* m_mainwin;
 #ifdef __TUW_UNIX__
@@ -28,14 +28,14 @@ class MainFrame {
     void UpdateConfig();
     void ShowSuccessDialog(const std::string& msg, const std::string& title = "Success");
     void ShowErrorDialog(const std::string& msg, const std::string& title = "Error");
-    void JsonLoadFailed(const std::string& msg, rapidjson::Document& definition);
+    void JsonLoadFailed(const std::string& msg);
 
  public:
     explicit MainFrame(const rapidjson::Document& definition =
                            rapidjson::Document(rapidjson::kObjectType),
                        const rapidjson::Document& config =
                            rapidjson::Document(rapidjson::kObjectType));
-    void UpdatePanel(int definition_id);
+    void UpdatePanel(unsigned definition_id);
     void OpenURL(int id);
     std::string GetCommand();
     void RunCommand();

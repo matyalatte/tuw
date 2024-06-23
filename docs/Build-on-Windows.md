@@ -2,12 +2,12 @@
 
 ## Requirements
 
--   Visual Studio
+-   Visual Studio or MinGW-w64
 -   [Meson](https://github.com/mesonbuild/meson/releases) (**0.58** or later)
 -   Batch files in [`./Tuw/batch_files`](../batch_files)
 
-> :warning: MinGW-w64 is not supported.  
-> (It might work, but if you find issues, you need to solve them by yourself.)  
+> [!Note]
+> It is recommended to use Visual Studio because MinGW-w64 makes exe larger.
 
 ## Install Meson
 

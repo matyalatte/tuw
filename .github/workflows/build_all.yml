@@ -74,7 +74,7 @@ jobs:
             zip_ext: tar.bz2
             arch: ""
             arch_suffix: -x64
-          - os: macos-11
+          - os: macos-14
             exe_ext: ""
             zip_ext: tar.bz2
             arch: ""

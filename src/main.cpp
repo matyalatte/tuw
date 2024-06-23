@@ -53,7 +53,7 @@ json_utils::JsonResult Merge(const std::string& exe_path, const std::string& jso
 
     if (json.Size() == 0) {
         PrintFmt("JSON file loaded but it has no data.\n");
-        return { true };
+        return JSON_RESULT_OK;
     }
     ExeContainer exe;
     result = exe.Read(exe_path);
@@ -63,7 +63,7 @@ json_utils::JsonResult Merge(const std::string& exe_path, const std::string& jso
     exe.SetJson(json);
     if (!force && !AskOverwrite(new_path.c_str())) {
         PrintFmt("The operation has been cancelled.\n");
-        return { true };
+        return JSON_RESULT_OK;
     }
     result = exe.Write(new_path);
     if (!result.ok) return result;
@@ -75,7 +75,7 @@ json_utils::JsonResult Merge(const std::string& exe_path, const std::string& jso
           S_IRGRP | S_IXGRP |  // r-x
           S_IROTH | S_IXOTH);  // r-x
 #endif
-    return { true };
+    return JSON_RESULT_OK;
 }
 
 json_utils::JsonResult Split(const std::string& exe_path, const std::string& json_path,
@@ -85,7 +85,7 @@ json_utils::JsonResult Split(const std::string& exe_path, const std::string& jso
     if (!result.ok) return result;
     if (!exe.HasJson()) {
         PrintFmt("The executable has no json data.\n");
-        return { true };
+        return JSON_RESULT_OK;
     }
     PrintFmt("Extracting JSON data from the executable...\n");
     rapidjson::Document json;
@@ -93,7 +93,7 @@ json_utils::JsonResult Split(const std::string& exe_path, const std::string& jso
     exe.RemoveJson();
     if (!force && (!AskOverwrite(new_path.c_str()) || !AskOverwrite(json_path.c_str()))) {
         PrintFmt("The operation has been cancelled.\n");
-        return { true };
+        return JSON_RESULT_OK;
     }
     result = exe.Write(new_path);
     if (!result.ok) return result;
@@ -108,7 +108,7 @@ json_utils::JsonResult Split(const std::string& exe_path, const std::string& jso
           S_IRGRP | S_IXGRP |  // r-x
           S_IROTH | S_IXOTH);  // r-x
 #endif
-    return { true };
+    return JSON_RESULT_OK;
 }
 
 void PrintUsage() {
@@ -205,7 +205,7 @@ int wmain(int argc, wchar_t* argv[]) {
 int main(int argc, char* argv[]) {
 #endif
     std::vector<std::string> args;
-    for (size_t i = 0; i < argc; i++) {
+    for (int i = 0; i < argc; i++) {
 #ifdef _WIN32
         args.push_back(UTF16toUTF8(argv[i]));
 #else
@@ -233,7 +233,7 @@ int main(int argc, char* argv[]) {
     std::string new_exe_path = "";
     bool force = false;
 
-    for (size_t i = 2; i < argc; i++) {
+    for (int i = 2; i < argc; i++) {
         std::string opt_str = RemoveHyphen(args[i].c_str());
         int opt_int = OptToInt(opt_str.c_str());
         if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && argc <= i + 1) {
@@ -285,7 +285,7 @@ int main(int argc, char* argv[]) {
     }
 
     rapidjson::Document json(rapidjson::kObjectType);
-    json_utils::JsonResult result = { true };
+    json_utils::JsonResult result = JSON_RESULT_OK;
 
     switch (cmd_int) {
         case CMD_MERGE:

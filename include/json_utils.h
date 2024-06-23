@@ -21,6 +21,8 @@ struct JsonResult {
     std::string msg;
 };
 
+#define JSON_RESULT_OK { true, "" }
+
 JsonResult LoadJson(const std::string& file, rapidjson::Document& json);
 JsonResult SaveJson(rapidjson::Document& json, const std::string& file);
 std::string JsonToString(rapidjson::Document& json);

@@ -9,7 +9,9 @@
 
 static uint32_t ReadUint32(FILE* io) {
     unsigned char int_as_bin[4];
-    fread(int_as_bin, 1, 4, io);
+    size_t ret = fread(int_as_bin, 1, 4, io);
+    if (ret != 4)
+        return 0;
     uint32_t num = 0;
     for (size_t i = 0; i < 4; i++)
         num += int_as_bin[i] << (i * 8);
@@ -19,64 +21,75 @@ static uint32_t ReadUint32(FILE* io) {
 static void WriteUint32(FILE* io, const uint32_t& num) {
     unsigned char int_as_bin[4];
     for (size_t i = 0; i < 4; i++)
-        int_as_bin[i] = num >> (i * 8);
+        int_as_bin[i] = (unsigned char)(num >> (i * 8));
     fwrite(int_as_bin, 1, 4, io);
 }
 
-static void ReadStr(FILE* io, std::string& str, const uint32_t& size) {
-    // assert str == "";
-    char buff[1025];
-    buff[1024] = 0;
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#define BUF_SIZE 1024
+
+static std::string ReadStr(FILE* io, const uint32_t& size) {
+    std::string str = "";
+    char buff[BUF_SIZE + 1];
+    buff[BUF_SIZE] = 0;
     uint32_t pos = 0;
     while (pos < size) {
-        if (size - pos < 1024) {
-            fread(buff, 1, size - pos, io);
-            buff[size - pos] = 0;
-            str += buff;
-            break;
-        }
-        fread(buff, 1, 1024, io);
+        size_t ret;
+        uint32_t rest = size - pos;
+        size_t copy_size = MIN(BUF_SIZE, rest);
+        ret = fread(buff, 1, copy_size, io);
+        if (ret != copy_size)
+            return "";
+        buff[copy_size] = 0;
         str += buff;
-        pos += 1024;
+
+        if (rest < BUF_SIZE)
+            break;
+        pos += BUF_SIZE;
     }
+    return str;
 }
 
 static void WriteStr(FILE* io, const std::string& str) {
-    uint32_t size = str.length();
+    uint32_t size = (uint32_t)str.length();
     uint32_t pos = 0;
     while (pos < size) {
-        if (size - pos <= 1024) {
+        if (size - pos <= BUF_SIZE) {
             fwrite(str.substr(pos, size).c_str(), 1, size - pos, io);
             break;
         }
-        fwrite(str.substr(pos, pos + 1024).c_str(), 1, 1024, io);
-        pos += 1024;
+        fwrite(str.substr(pos, pos + BUF_SIZE).c_str(), 1, BUF_SIZE, io);
+        pos += BUF_SIZE;
     }
     size_t padding = (8 - ftell(io) % 8) % 8;
     char buff[8];
     fwrite(buff, 1, padding, io);
 }
 
-static void CopyBinary(FILE* reader, FILE* writer, const uint32_t& size) {
+static bool CopyBinary(FILE* reader, FILE* writer, const uint32_t& size) {
     uint32_t pos = 0;
-    char buff[1024];
+    char buff[BUF_SIZE];
     while (pos < size) {
         uint32_t rest = size - pos;
-        if (rest < 1024) {
-            fread(buff, 1, rest, reader);
-            fwrite(buff, 1, rest, writer);
+        size_t copy_size = MIN(BUF_SIZE, rest);
+        size_t ret = fread(buff, 1, copy_size, reader);
+        if (ret != copy_size)
+            return false;
+        fwrite(buff, 1, copy_size, writer);
+
+        if (rest < BUF_SIZE)
             break;
-        }
-        fread(buff, 1, 1024, reader);
-        fwrite(buff, 1, 1024, writer);
-        pos += 1024;
+        pos += BUF_SIZE;
     }
+    return true;
 }
 
 static std::string ReadMagic(FILE* io) {
     char magic[5];
     magic[4] = 0;
-    fread(magic, 1, 4, io);
+    size_t ret = fread(magic, 1, 4, io);
+    if (ret != 4)
+        return "";
     return std::string(magic);
 }
 
@@ -107,7 +120,7 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
         // Json data not found
         m_exe_size = end_off;
         fclose(file_io);
-        return { true };
+        return JSON_RESULT_OK;
     }
 
     // Read exe size
@@ -136,8 +149,7 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
     }
 
     // Read json data
-    std::string json_str = "";
-    ReadStr(file_io, json_str, json_size);
+    std::string json_str = ReadStr(file_io, json_size);
     fclose(file_io);
 
     if (json_str.length() != json_size)
@@ -156,7 +168,7 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
         return { false, msg };
     }
 
-    return { true };
+    return JSON_RESULT_OK;
 }
 
 json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
@@ -165,7 +177,7 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
     if (HasJson())
         json_str = json_utils::JsonToString(m_json);
 
-    uint32_t json_size = json_str.length();
+    uint32_t json_size = (uint32_t)json_str.length();
     if (JSON_SIZE_MAX <= json_size) {
         std::string msg = "Unexpected json size. (" + std::to_string(json_size) + ")";
         return { false, msg };
@@ -184,7 +196,12 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
     }
     m_exe_path = exe_path;
 
-    CopyBinary(old_io, new_io, m_exe_size);
+    bool ok = CopyBinary(old_io, new_io, m_exe_size);
+    if (!ok) {
+        fclose(old_io);
+        fclose(new_io);
+        return { false, "Failed to copy the original executable (" + m_exe_path + ")" };
+    }
 
     uint32_t pos = ftell(old_io);
     if (pos != Length(old_io)) {
@@ -199,7 +216,7 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
     fclose(old_io);
     if (json_size == 0) {
         fclose(new_io);
-        return { true };
+        return JSON_RESULT_OK;
     }
 
     // Write json data
@@ -210,5 +227,5 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
     WriteUint32(new_io, m_exe_size - ftell(new_io) - 8);
     fwrite("JSON", 1, 4, new_io);
     fclose(new_io);
-    return { true };
+    return JSON_RESULT_OK;
 }
