@@ -51,6 +51,20 @@ void PrintFmt(const char* fmt, ...) {
     uiprivFree(wfmt);
 }
 
+// Enable ANSI escape sequences on the console window.
+void EnableCSI() {
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE)
+        return;
+
+    DWORD dwMode = 0;
+    if (!GetConsoleMode(hOut, &dwMode))
+        return;
+
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hOut, dwMode);
+}
+
 #elif defined(__TUW_UNIX__)
 #include <stdarg.h>
 #include "ui.h"

@@ -14,6 +14,11 @@
 #include "tuw_constants.h"
 
 int main_app() {
+#ifdef _WIN32
+    // Enable ANSI escape sequences on the console window.
+    EnableCSI();
+#endif
+
     uiInitOptions options;
     const char *err;
 

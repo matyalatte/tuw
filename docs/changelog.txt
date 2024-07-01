@@ -1,3 +1,5 @@
+- Added support for colorized output on Windows.
+
 ver 0.6.5
 - Added support for Solaris/illumos.
 - Added support for MinGW-w64.
