@@ -402,6 +402,8 @@ namespace json_utils {
         CheckJsonType(result, sub_definition, "check_exit_code", JsonType::BOOLEAN, "", CAN_SKIP);
         CheckJsonType(result, sub_definition, "exit_success", JsonType::INTEGER, "", CAN_SKIP);
         CheckJsonType(result, sub_definition, "show_last_line", JsonType::BOOLEAN, "", CAN_SKIP);
+        CheckJsonType(result, sub_definition,
+                      "show_success_dialog", JsonType::BOOLEAN, "", CAN_SKIP);
 
         CorrectKey(sub_definition, "component", "components", alloc);
         CorrectKey(sub_definition, "component_array", "components", alloc);

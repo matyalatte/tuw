@@ -420,6 +420,7 @@ void MainFrame::RunCommand() {
         bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);
         int exit_success = json_utils::GetInt(sub_definition, "exit_success", 0);
         bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
+        bool show_success_dialog = json_utils::GetBool(sub_definition, "show_success_dialog", true);
 
         if (result.err_msg != "") {
             PrintFmt("[RunCommand] Error: %s\n", result.err_msg.c_str());
@@ -437,6 +438,9 @@ void MainFrame::RunCommand() {
             ShowErrorDialog(err_msg);
             return;
         }
+
+        if (!show_success_dialog)
+            return;
 
         if (show_last_line && result.last_line != "") {
             ShowSuccessDialog(result.last_line);
