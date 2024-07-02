@@ -286,6 +286,9 @@ void MainFrame::OpenURL(int id) {
 
 static void OnClicked(uiButton *sender, void *data) {
     MainFrame* main_frame = static_cast<MainFrame*>(data);
+
+    if (!main_frame->Validate())
+        return;
     main_frame->SaveConfig();
     main_frame->RunCommand();
     UNUSED(sender);
@@ -322,13 +325,9 @@ void MainFrame::UpdatePanel(unsigned definition_id) {
             uiBox* priv_box = uiNewVerticalBox();
             uiBoxSetSpacing(priv_box, tuw_constants::BOX_SUB_SPACE);
             new_comp = Component::PutComponent(priv_box, c);
-            if (new_comp == nullptr) {
-                ShowErrorDialog("Unknown component type detected. This is unexpected.");
-            } else {
-                new_comp->SetConfig(m_config);
-                m_components.push_back(new_comp);
-            }
-        uiBoxAppend(main_box, uiControl(priv_box), 0);
+            new_comp->SetConfig(m_config);
+            m_components.push_back(new_comp);
+            uiBoxAppend(main_box, uiControl(priv_box), 0);
         }
     }
 
@@ -359,6 +358,38 @@ void MainFrame::Fit() {
     }
     // Fit the window size to the new components.
     uiWindowSetContentSize(m_mainwin, width, 1);
+}
+
+// Do validation for each component
+bool MainFrame::Validate() {
+    bool validate = true;
+    bool redraw_flag = false;
+    std::string val_first_err;
+    for (Component* comp : m_components) {
+        if (!comp->Validate(&redraw_flag)) {
+            std::string val_err = comp->GetValidationError();
+            std::string val = comp->GetRawString();
+            if (val != "")
+                val_err += " (" + comp->GetRawString() +")";
+            if (validate)
+                val_first_err = val_err;
+            validate = false;
+            PrintFmt("[RunCommand] Error: %s\n", val_err.c_str());
+        }
+    }
+
+    if (redraw_flag) {
+        // TODO: Keep window size
+        Fit();
+    #ifdef _WIN32
+        uiWindowsWindowRedraw(m_mainwin);
+    #endif
+    }
+
+    if (!validate)
+        ShowErrorDialog(val_first_err);
+
+    return validate;
 }
 
 // Make command string

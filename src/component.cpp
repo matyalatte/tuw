@@ -32,6 +32,8 @@ Component::Component(const rapidjson::Value& j) {
         m_id = "_" + std::to_string(hash);
     }
     m_add_quotes = json_utils::GetBool(j, "add_quotes", false);
+    if (j.HasMember("validator"))
+        m_validator.Initialize(j["validator"]);
 }
 
 Component::~Component() {
@@ -48,13 +50,41 @@ std::string const Component::GetID() {
     return m_id;
 }
 
+bool Component::Validate(bool* redraw_flag) {
+    // Main frame should run Fit() after this function.
+    bool validate = m_validator.Validate(GetRawString());
+    uiControl *c = uiControl(m_error_widget);
+    bool old_validate = !static_cast<bool>(uiControlVisible(c));
+    bool updated = old_validate != validate;
+    *redraw_flag |= updated;
+
+    if (updated) {
+       if (validate) {
+            uiControlHide(c);
+        } else {
+            uiControlShow(c);
+            uiLabelSetText(m_error_widget,
+                           GetValidationError().c_str());
+        }
+    }
+    return validate;
+}
+
+std::string Component::GetValidationError() {
+    return m_validator.GetError();
+}
+
+void Component::PutErrorWidget(uiBox* box) {
+    m_error_widget = uiNewLabel("");
+    uiLabelSetTextColor(m_error_widget, 1.0, 0.0, 0.0);
+    uiControlHide(uiControl(m_error_widget));
+    uiBoxAppend(box, uiControl(m_error_widget), 0);
+}
+
 Component* Component::PutComponent(uiBox* box, const rapidjson::Value& j) {
     Component* comp = nullptr;
     int type = j["type_int"].GetInt();
     switch (type) {
-        case COMP_EMPTY:
-            comp = new EmptyComponent(box, j);
-            break;
         case COMP_STATIC_TEXT:
             comp = new StaticText(box, j);
             break;
@@ -86,8 +116,10 @@ Component* Component::PutComponent(uiBox* box, const rapidjson::Value& j) {
             comp = new FloatPicker(box, j);
             break;
         default:
+            comp = new EmptyComponent(box, j);
             break;
     }
+    comp->PutErrorWidget(box);
     return comp;
 }
 

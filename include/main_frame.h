@@ -37,6 +37,7 @@ class MainFrame {
                            rapidjson::Document(rapidjson::kObjectType));
     void UpdatePanel(unsigned definition_id);
     void OpenURL(int id);
+    bool Validate();
     std::string GetCommand();
     void RunCommand();
     void GetDefinition(rapidjson::Document& json);
