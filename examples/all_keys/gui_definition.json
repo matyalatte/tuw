@@ -250,7 +250,7 @@
         {
             "type": "url",
             "label": "test",
-            "url":"http://test.com"
+            "url":"example.com"
         }
     ]
 }
