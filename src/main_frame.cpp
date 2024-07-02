@@ -203,7 +203,7 @@ void MainFrame::CreateMenu() {
 }
 
 static bool IsValidURL(const std::string &url) {
-    for (const char c : { ' ', ';', '|', '&'}) {
+    for (const char c : { ' ', ';', '|', '&', '\r', '\n' }) {
         if (url.find(c) != std::string::npos)
             return false;
     }
@@ -261,7 +261,7 @@ void MainFrame::OpenURL(int id) {
     }
 
     if (!IsValidURL(url)) {
-        std::string msg = "URL should NOT contains ' ', ';', '|', or '&'.\n"
+        std::string msg = "URL should NOT contains ' ', ';', '|', '&', '\\r', nor '\\n'.\n"
                           "URL: " + url;
         PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
         ShowErrorDialog(msg.c_str());

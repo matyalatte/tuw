@@ -1,5 +1,6 @@
 - Added support for colorized output on Windows.
 - Added an option to skip success dialog.
+- Prohibited URLs that have linefeeds.
 
 ver 0.6.5
 - Added support for Solaris/illumos.
