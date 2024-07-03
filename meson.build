@@ -118,8 +118,9 @@ libui_dep = dependency('libui', fallback : ['libui', 'libui_dep'])
 rapidjson_dep = dependency('rapidjson', fallback : ['rapidjson', 'rapidjson_dep'])
 subprocess_dep = dependency('subprocess', fallback : ['subprocess', 'subprocess_dep'])
 env_utils_dep = dependency('env_utils', fallback : ['env_utils', 'env_utils_dep'])
+tiny_str_match_dep = dependency('tiny_str_match', fallback : ['tiny_str_match', 'tiny_str_match_dep'])
 
-tuw_dependencies = [libui_dep, rapidjson_dep, subprocess_dep, env_utils_dep]
+tuw_dependencies = [libui_dep, rapidjson_dep, subprocess_dep, env_utils_dep, tiny_str_match_dep]
 
 tuw_sources += [
     'src/main_frame.cpp',

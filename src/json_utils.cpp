@@ -111,6 +111,7 @@ namespace json_utils {
         FLOAT,
         STRING,
         STRING_ARRAY,
+        JSON,
         JSON_ARRAY,
         MAX
     };
@@ -165,6 +166,10 @@ namespace json_utils {
         case JsonType::STRING_ARRAY:
             valid = IsStringArray(j, key);
             type_name = "an array of strings";
+            break;
+        case JsonType::JSON:
+            valid = j[key].IsObject();
+            type_name = "a json object";
             break;
         case JsonType::JSON_ARRAY:
             valid = IsJsonArray(j, key);
@@ -389,6 +394,14 @@ namespace json_utils {
         return COMP_UNKNOWN;
     }
 
+    void CheckValidator(JsonResult& result, rapidjson::Value& validator,
+                        const std::string& label) {
+        CheckJsonType(result, validator, "regex", JsonType::STRING, label, CAN_SKIP);
+        CheckJsonType(result, validator, "wildcard", JsonType::STRING, label, CAN_SKIP);
+        CheckJsonType(result, validator, "exist", JsonType::BOOLEAN, label, CAN_SKIP);
+        CheckJsonType(result, validator, "not_empty", JsonType::BOOLEAN, label, CAN_SKIP);
+    }
+
     // validate one of definitions (["gui"][i]) and store parsed info
     void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
                             rapidjson::Document::AllocatorType& alloc) {
@@ -490,6 +503,12 @@ namespace json_utils {
                     break;
             }
             if (!result.ok) return;
+
+            if (c.HasMember("validator")) {
+                CheckJsonType(result, c, "validator", JsonType::JSON, label);
+                CheckValidator(result, c["validator"], label);
+                if (!result.ok) return;
+            }
 
             CorrectKey(c, "add_quote", "add_quotes", alloc);
             CheckJsonType(result, c, "add_quotes", JsonType::BOOLEAN, label, CAN_SKIP);

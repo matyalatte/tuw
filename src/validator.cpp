@@ -1,4 +1,4 @@
-#include <regex>
+#include "str_match.h"
 #include "validator.h"
 #include "json_utils.h"
 #include "env_utils.h"
@@ -11,27 +11,44 @@ void Validator::Initialize(const rapidjson::Value& j) {
     m_error_msg = "";
 }
 
-static std::string WildcardToRegex(const std::string& pattern) {
-    std::regex star_replace("\\*");
-    std::regex questionmark_replace("\\?");
-    std::string wildcard_pattern = std::regex_replace(
-        std::regex_replace(pattern, star_replace, ".*"),
-        questionmark_replace, ".");
-    return "^" + wildcard_pattern + "$";
+static int IsUnsupportedPattern(const char *pattern) {
+    // () operators are unsupported in tiny-regex-c
+    // https://github.com/matyalatte/tiny-str-match?tab=readme-ov-file#supported-regex-operators
+    const char* p = pattern;
+    int escaped = 0;
+    while (*p != '\0') {
+        if (*p == '\\') {
+            escaped = 1;
+            p++;
+            continue;
+        }
+        if (!escaped && (*p == '(' || *p == ')')) {
+            return 1;
+        }
+        escaped = 0;
+        p++;
+    }
+    return 0;
 }
 
 bool Validator::Validate(const std::string& str) {
     if (m_wildcard != "") {
-        std::regex rgx(WildcardToRegex(m_wildcard));
-        if (!std::regex_match(str, rgx)) {
+        if (tsm_wildcard_match(m_wildcard.c_str(), str.c_str()) != TSM_OK) {
             m_error_msg = "Wildcard match failed for pattern: " + m_wildcard;
             return false;
         }
     }
     if (m_regex != "") {
-        std::regex rgx(m_regex);
-        if (!std::regex_match(str, rgx)) {
-            m_error_msg = "Regular expression match failed for pattern: " + m_regex;
+        if (IsUnsupportedPattern(m_regex.c_str())) {
+            m_error_msg = "Sorry, () operators are not supported.";
+            return false;
+        }
+        int res = tsm_regex_match(m_regex.c_str(), str.c_str());
+        if (res == TSM_FAIL) {
+            m_error_msg = "Regex match failed for pattern: " + m_regex;
+            return false;
+        } else if (res == TSM_SYNTAX_ERROR) {
+            m_error_msg = "Failed to parse regex pattern: " + m_regex;
             return false;
         }
     }
