@@ -66,6 +66,11 @@ bool Component::Validate(bool* redraw_flag) {
             uiLabelSetText(m_error_widget,
                            GetValidationError().c_str());
         }
+    } else if (!validate) {
+        uiControlHide(c);
+        uiControlShow(c);
+        uiLabelSetText(m_error_widget,
+                       GetValidationError().c_str());
     }
     return validate;
 }

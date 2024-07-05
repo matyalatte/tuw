@@ -5,9 +5,13 @@
 
 void Validator::Initialize(const rapidjson::Value& j) {
     m_regex = json_utils::GetString(j, "regex", "");
+    m_regex_error = json_utils::GetString(j, "regex_error", "");
     m_wildcard = json_utils::GetString(j, "wildcard", "");
+    m_wildcard_error = json_utils::GetString(j, "wildcard_error", "");
     m_not_empty = json_utils::GetBool(j, "not_empty", false);
+    m_not_empty_error = json_utils::GetString(j, "not_empty_error", "");
     m_exist = json_utils::GetBool(j, "exist", false);
+    m_exist_error = json_utils::GetString(j, "exist_error", "");
     m_error_msg = "";
 }
 
@@ -34,7 +38,10 @@ static int IsUnsupportedPattern(const char *pattern) {
 bool Validator::Validate(const std::string& str) {
     if (m_wildcard != "") {
         if (tsm_wildcard_match(m_wildcard.c_str(), str.c_str()) != TSM_OK) {
-            m_error_msg = "Wildcard match failed for pattern: " + m_wildcard;
+            if (m_wildcard_error == "")
+                m_error_msg = "Wildcard match failed for pattern: " + m_wildcard;
+            else
+                m_error_msg = m_wildcard_error;
             return false;
         }
     }
@@ -44,6 +51,10 @@ bool Validator::Validate(const std::string& str) {
             return false;
         }
         int res = tsm_regex_match(m_regex.c_str(), str.c_str());
+        if (res != TSM_OK && m_regex_error != "") {
+            m_error_msg = m_regex_error;
+            return false;
+        }
         if (res == TSM_FAIL) {
             m_error_msg = "Regex match failed for pattern: " + m_regex;
             return false;
@@ -53,11 +64,17 @@ bool Validator::Validate(const std::string& str) {
         }
     }
     if (m_not_empty && str == "") {
-        m_error_msg = "Empty string is NOT allowed.";
+        if (m_not_empty_error == "")
+            m_error_msg = "Empty string is NOT allowed.";
+        else
+            m_error_msg = m_not_empty_error;
         return false;
     }
     if (m_exist && !envuPathExists(str.c_str())) {
-        m_error_msg = "Path does NOT exist.";
+        if (m_exist_error == "")
+            m_error_msg = "Path does NOT exist.";
+        else
+            m_error_msg = m_exist_error;
         return false;
     }
     m_error_msg = "";
