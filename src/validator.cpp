@@ -36,6 +36,13 @@ static int IsUnsupportedPattern(const char *pattern) {
 }
 
 bool Validator::Validate(const std::string& str) {
+    if (m_not_empty && str == "") {
+        if (m_not_empty_error == "")
+            m_error_msg = "Empty string is NOT allowed.";
+        else
+            m_error_msg = m_not_empty_error;
+        return false;
+    }
     if (m_wildcard != "") {
         if (tsm_wildcard_match(m_wildcard.c_str(), str.c_str()) != TSM_OK) {
             if (m_wildcard_error == "")
@@ -62,13 +69,6 @@ bool Validator::Validate(const std::string& str) {
             m_error_msg = "Failed to parse regex pattern: " + m_regex;
             return false;
         }
-    }
-    if (m_not_empty && str == "") {
-        if (m_not_empty_error == "")
-            m_error_msg = "Empty string is NOT allowed.";
-        else
-            m_error_msg = m_not_empty_error;
-        return false;
     }
     if (m_exist && !envuPathExists(str.c_str())) {
         if (m_exist_error == "")
