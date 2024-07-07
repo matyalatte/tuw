@@ -1,0 +1,15 @@
+# Skip Success Dialog
+
+You can disable the success dialog with `"show_success_dialog": false`.
+Tuw does not show the dialog no matter how many times you push the execution button.
+
+```json
+"gui": [
+    {
+        "label": "Skip dialog",
+        "command": "echo No dialogues...",
+        "show_success_dialog": false,
+        "components": []
+    }
+]
+```

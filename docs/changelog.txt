@@ -1,3 +1,4 @@
+- Added options for string validation.
 - Added support for colorized output on Windows.
 - Added an option to skip success dialog.
 - Prohibited URLs that have linefeeds.

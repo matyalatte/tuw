@@ -1,0 +1,10 @@
+{
+    "gui": [
+        {
+            "label": "Skip dialog",
+            "command": "echo No dialogues...",
+            "show_success_dialog": false,
+            "components": []
+        }
+    ]
+}

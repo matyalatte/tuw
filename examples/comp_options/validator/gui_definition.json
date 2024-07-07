@@ -1,0 +1,48 @@
+{
+    "gui": [
+        {
+            "label": "Validator",
+            "command": "echo file: %-%",
+            "components": [
+                {
+                    "type": "static_text",
+                    "label": "You can validate input strings before execution!"
+                },
+                {
+                    "type": "file",
+                    "label": "Some file path",
+                    "validator": {
+                        "exist": true,
+                        "not_empty": true,
+                        "regex": "^[\\w]+\\.png$",
+                        "wildcard": "*.png"
+                    }
+                }
+            ]
+        },
+        {
+            "label": "Custom error messages",
+            "command": "echo file: %-%",
+            "components": [
+                {
+                    "type": "static_text",
+                    "label": "You can overwrite the validation errors!"
+                },
+                {
+                    "type": "file",
+                    "label": "Some file path",
+                    "validator": {
+                        "exist": true,
+                        "exist_error": "File does not exist!!!",
+                        "not_empty": true,
+                        "not_empty_error": "Type something...",
+                        "regex": "^[\\w]+\\.png$",
+                        "regex_error": "Only alphanumeric characters are supported.",
+                        "wildcard": "*.png",
+                        "wildcard_error": "Not PNG!"
+                    }
+                }
+            ]
+        }
+    ]
+}
