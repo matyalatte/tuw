@@ -46,7 +46,7 @@ There are more features you can use.
 -   [Cross-platform Support](./other_features/cross_platform): You can make platform specific GUIs.
 -   [Version Checking](./other_features/version_check/): Constraints on the tool version.
 -   [Alternate Spellings](./other_features/alternate_spellings/): Tuw supports multiple spellings for some JSON keys and values.
--   [Skip Success Message](./other_features/skip_dialog/): You can skip the success dialog.
+-   [Skip Success Dialog](./other_features/skip_dialog/): You can skip the success dialog.
 
 ![help](https://github.com/matyalatte/tuw/assets/69258547/e408a179-6f9f-4769-ab3d-57f87d392a4f)  
 

@@ -100,7 +100,17 @@
                     "default": "test.txt",
                     "add_quotes": true,
                     "tooltip": "Tooltip!",
-                    "platforms": ["win", "linux", "mac"]
+                    "platforms": ["win", "linux", "mac"],
+                    "validator": {
+                        "exist": true,
+                        "exist_error": "File not found.",
+                        "not_empty": true,
+                        "not_empty_error": "Empty string...",
+                        "regex": "\\.png$|\\.jpg$",
+                        "regex_error": "PNG or JPG.",
+                        "wildcard": "*.*",
+                        "wildcard_error": "File does not have extension."
+                    }
                 },
                 {
                     "type": "folder",
@@ -235,6 +245,7 @@
             "command_linux": "echo home: %__HOME__%; echo cwd: %__CWD__%; echo percent: %%; echo sample message!",
             "command_mac": "echo home: %__HOME__%; echo cwd: %__CWD__%; echo percent: %%; echo sample message!",
             "button": "Run!",
+            "show_success_dialog": true,
             "show_last_line": true,
             "check_exit_code": true,
             "exit_success": 0,

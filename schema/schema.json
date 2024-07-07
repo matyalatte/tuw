@@ -21,6 +21,7 @@
           "title": { "type": "string" },
           "button": { "type": "string" },
           "show_last_line": { "type": "boolean" },
+          "show_success_dialog": { "type": "boolean" },
           "check_exit_code": { "type": "boolean" },
           "exit_success": { "type": "integer" },
           "components": { "$ref": "#/definitions/types/components" },
@@ -159,7 +160,8 @@
             { "$ref": "#/definitions/components/int" },
             { "$ref": "#/definitions/components/float" },
             { "$ref": "#/definitions/components/combo" },
-            { "$ref": "#/definitions/components/check_array" }
+            { "$ref": "#/definitions/components/check_array" },
+            { "$ref": "#/definitions/components/validator" }
           ],
           "required": [ "type", "label" ]
         }
@@ -313,6 +315,32 @@
           },
           "then": {
             "required": [ "items" ]
+          }
+        }
+      },
+      "validator": {
+        "if": {
+          "not": {
+            "properties": {
+              "type": { "const": "static_text" }
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "validator": {
+              "type": "object",
+              "properties": {
+                "exist": { "type": "boolean" },
+                "exist_error": { "type": "string" },
+                "not_empty": { "type": "boolean" },
+                "not_empty_error": { "type": "string" },
+                "regex": { "type": "string" },
+                "regex_error": { "type": "string" },
+                "wildcard": { "type": "string" },
+                "wildcard_error": { "type": "string" }
+              }
+            }
           }
         }
       }
