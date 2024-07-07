@@ -43,9 +43,6 @@ You can download executables from [the release page](https://github.com/matyalat
 -   `Tuw*-macOS*.tar.bz2` is for macOS (10.9 or later.)  
 -   `Tuw*-Linux*.tar.bz2` is for Linux (with GTK3.14, GLIBC2.15, and GLIBCXX3.4.21, or later versions of the libraries.)  
 
-> Linux builds only support distributions using glibc.  
-> [Build the executable](./Building.md) by yourself if you want to use it on unsupported distros.  
-
 ## Examples
 
 There are some [JSON files](../examples/README.md) to learn how to define GUIs.  
