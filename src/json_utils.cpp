@@ -397,9 +397,13 @@ namespace json_utils {
     void CheckValidator(JsonResult& result, rapidjson::Value& validator,
                         const std::string& label) {
         CheckJsonType(result, validator, "regex", JsonType::STRING, label, CAN_SKIP);
+        CheckJsonType(result, validator, "regex_error", JsonType::STRING, label, CAN_SKIP);
         CheckJsonType(result, validator, "wildcard", JsonType::STRING, label, CAN_SKIP);
+        CheckJsonType(result, validator, "wildcard_error", JsonType::STRING, label, CAN_SKIP);
         CheckJsonType(result, validator, "exist", JsonType::BOOLEAN, label, CAN_SKIP);
+        CheckJsonType(result, validator, "exist_error", JsonType::STRING, label, CAN_SKIP);
         CheckJsonType(result, validator, "not_empty", JsonType::BOOLEAN, label, CAN_SKIP);
+        CheckJsonType(result, validator, "not_empty_error", JsonType::STRING, label, CAN_SKIP);
     }
 
     // validate one of definitions (["gui"][i]) and store parsed info
@@ -505,6 +509,11 @@ namespace json_utils {
             if (!result.ok) return;
 
             if (c.HasMember("validator")) {
+                if (type == COMP_STATIC_TEXT) {
+                    result.ok = false;
+                    result.msg = "Static text does not support validator.";
+                    return;
+                }
                 CheckJsonType(result, c, "validator", JsonType::JSON, label);
                 CheckValidator(result, c["validator"], label);
                 if (!result.ok) return;
