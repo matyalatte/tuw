@@ -16,7 +16,7 @@ project('Tuw', ['c', 'cpp'],
 tuw_sources = []
 tuw_manifest = []
 tuw_link_args = []
-tuw_cpp_args = ['-DRAPIDJSON_HAS_STDSTRING']
+tuw_cpp_args = []
 tuw_OS = host_machine.system()
 tuw_compiler = meson.get_compiler('c').get_id()
 tuw_is_release = get_option('buildtype').startswith('release') or (get_option('buildtype').startswith('custom') and not get_option('debug'))
@@ -28,7 +28,6 @@ if tuw_OS == 'windows'
         depend_files: ['src/app.manifest']),
     ]
     if tuw_compiler == 'msvc'
-        tuw_cpp_args = ['/DRAPIDJSON_HAS_STDSTRING']
         tuw_link_args = [
             '/LARGEADDRESSAWARE',
             '/INCREMENTAL:NO',

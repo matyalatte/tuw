@@ -96,12 +96,13 @@ namespace json_utils {
         return def;
     }
 
-    static std::string GetLabel(const std::string& label, const std::string& key) {
-        // Todo: std::string to wchar for windows
-        std::string msg = "['" + key + "']";
+    static std::string GetLabel(const std::string& label, const char* key) {
+        std::string msg = "['";
         if (label != "") {
-            msg = "['" + label + "']" + msg;
+            msg += label + "']['";
         }
+        msg += key;
+        msg += "']";
         return msg;
     }
 
@@ -116,7 +117,7 @@ namespace json_utils {
         MAX
     };
 
-    static bool IsJsonArray(const rapidjson::Value& j, const std::string& key) {
+    static bool IsJsonArray(const rapidjson::Value& j, const char* key) {
         if (!j[key].IsArray()) { return false; }
         for (const rapidjson::Value& el : j[key].GetArray()) {
             if (!el.IsObject())
@@ -125,7 +126,7 @@ namespace json_utils {
         return true;
     }
 
-    static bool IsStringArray(const rapidjson::Value& j, const std::string& key) {
+    static bool IsStringArray(const rapidjson::Value& j, const char* key) {
         if (!j[key].IsArray()) { return false; }
         for (const rapidjson::Value& el : j[key].GetArray()) {
             if (!el.IsString())
@@ -136,7 +137,7 @@ namespace json_utils {
 
     static const bool CAN_SKIP = true;
 
-    static void CheckJsonType(JsonResult& result, const rapidjson::Value& j, const std::string& key,
+    static void CheckJsonType(JsonResult& result, const rapidjson::Value& j, const char* key,
         const JsonType& type, const std::string& label = "", const bool& canSkip = false) {
         if (!j.HasMember(key)) {
             if (canSkip) return;
@@ -207,11 +208,11 @@ namespace json_utils {
     }
 
     static void CorrectKey(rapidjson::Value& j,
-                           const std::string& false_key,
-                           const std::string& true_key,
+                           const char* false_key,
+                           const char* true_key,
                            rapidjson::Document::AllocatorType& alloc) {
         if (!j.HasMember(true_key) && j.HasMember(false_key)) {
-            rapidjson::Value n(true_key.c_str(), alloc);
+            rapidjson::Value n(true_key, alloc);
             j.AddMember(n, j[false_key], alloc);
             j.RemoveMember(false_key);
         }
@@ -353,7 +354,8 @@ namespace json_utils {
         }
         if (sub_definition.HasMember("command_str"))
             sub_definition.RemoveMember("command_str");
-        sub_definition.AddMember("command_str", cmd_str, alloc);
+        rapidjson::Value v(cmd_str.c_str(), alloc);
+        sub_definition.AddMember("command_str", v, alloc);
         if (sub_definition.HasMember("command_ids"))
             sub_definition.RemoveMember("command_ids");
         sub_definition.AddMember("command_ids", cmd_int_ids, alloc);
@@ -568,13 +570,14 @@ namespace json_utils {
 
         // Overwrite ["command"] with ["command_'os'"] if exists.
         std::string command_os_key = std::string("command_") + tuw_constants::OS;
-        if (sub_definition.HasMember(command_os_key)) {
-            CheckJsonType(result, sub_definition, command_os_key, JsonType::STRING);
+        if (sub_definition.HasMember(command_os_key.c_str())) {
+            CheckJsonType(result, sub_definition, command_os_key.c_str(), JsonType::STRING);
             if (!result.ok) return;
-            std::string command_os = sub_definition[command_os_key].GetString();
+            std::string command_os = sub_definition[command_os_key.c_str()].GetString();
             if (sub_definition.HasMember("command"))
                 sub_definition.RemoveMember("command");
-            sub_definition.AddMember("command", command_os, alloc);
+            rapidjson::Value v(command_os.c_str(), alloc);
+            sub_definition.AddMember("command", v, alloc);
         }
 
         // check sub_definition["command"] and convert it to more useful format.
