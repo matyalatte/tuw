@@ -13,6 +13,7 @@
 
 You can install meson and ninja via apt. (`sudo apt install meson ninja`)  
 
+> [!Note]
 > If you are a Python user, you can also get them via pip. (`sudo pip3 install meson ninja`)
 
 ## Build
@@ -26,18 +27,17 @@ If you want a debug build, run `bash shell_scripts/build.sh Debug` on the termin
 
 ## Test
 
-If you want to build tests, type `bash shell_scripts/test.sh` or `bash shell_scripts/test.sh Debug` on the terminal.
+To build tests, type `bash shell_scripts/test.sh` or `bash shell_scripts/test.sh Debug` on the terminal.
 
 ## Coverage
 
-If you will use GCC, you can get coverage reports.  
-Install lcov with `sudo apt install lcov`.  
-Then, type `bash shell_scripts/coverage.sh` or `bash shell_scripts/coverage.sh Debug` on the Terminal.  
+If you use GCC, you can get coverage reports.  
+Install lcov with `sudo apt install lcov` and run `bash shell_scripts/coverage.sh` or `bash shell_scripts/coverage.sh Debug` on the terminal.  
 It'll generate html files in `./Tuw/coverage-report/`.
 
 ## GLIBC Dependencies
 
-If you built the binary with GLIBC, you can use `check_glibc_compatibility.sh` to see the required versions of GLIBC and GLIBCXX.  
+If you have built the binary with GLIBC, you can use `check_glibc_compatibility.sh` to see the required versions of GLIBC and GLIBCXX.  
 
 ```console
 $ bash shell_scripts/check_libc_compatibility.sh build/Release/Tuw

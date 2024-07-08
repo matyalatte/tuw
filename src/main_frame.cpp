@@ -368,7 +368,6 @@ bool MainFrame::Validate() {
     for (Component* comp : m_components) {
         if (!comp->Validate(&redraw_flag)) {
             std::string val_err = comp->GetValidationError();
-            std::string val = comp->GetRawString();
             if (validate)
                 val_first_err = val_err;
             validate = false;

@@ -29,6 +29,6 @@ You will be able to launch the executable by double-click.
 
 ## My Linux machine says `File not found` (or nothing) when clicking the executable
 
-It could be due to glibc dependences.  
+It could be due to glibc dependencies.  
 The released binary requires GTK+ 3.10, GLIBC 2.15, and GLIBCXX 3.4.21 (or newer versions of the libraries).  
 You should get the libs, or [build the executable](./Building.md) by yourself.  

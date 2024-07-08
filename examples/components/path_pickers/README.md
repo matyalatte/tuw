@@ -33,17 +33,17 @@ Of course, you can drop files on the pickers to specify the paths.
 
 ## Components
 
-`components` is an array of GUI components (e.g. file pickers).  
+`components` is an array of GUI components (e.g., file pickers).  
 Each component should be defined as a dictionary.  
 
--   `type` is component type. `file` for a file picker, and `folder` for a dir picker.
--   `label` is a string written above the text box of the picker.
--   `extension` is an optional key for file pickers. It's wildcard for file extensions. Use the same syntax as for [wxWidget's wildcards](https://docs.wxwidgets.org/3.0/classwx_file_dialog.html).
+-   `type` is the component type. `file` for a file picker, and `folder` for a directory picker.
+-   `label` is the string written above the text box of the picker.
+-   `extension` is an optional key for file pickers. It specifies the wildcard for file extensions. Use the same syntax as for [wxWidget's wildcards](https://docs.wxwidgets.org/3.0/classwx_file_dialog.html).
 -   `add_quotes` is an optional key for components. It will add quotes (`""`) to the input strings.
 
 ## Command
 
 Inputs of components will be injected into `command` when executing the command.  
 You can specify where they should be injected with `%*%`.  
-In the example, the file path will be injected in `%foo%`, and the folder path will be in `%bar%`.  
-You can also use [`id`](../../comp_options/id) option to name the components like variables.
+In the example, the file path will be injected at `%foo%`, and the folder path will be at `%bar%`.  
+You can also use the [`id`](../../comp_options/id) option to name the components like variables.

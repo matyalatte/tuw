@@ -29,9 +29,9 @@ Examples for component options.
 
 -   [IDs](./comp_options/id/): An option to set ids. You can use them as variable names in commands.
 -   [Default Values](./comp_options/default/):  An option to set default values of components.
--   [Tooltip](./comp_options/tooltip/): An option to show a message when the mouse cursor is on a component.
--   [Placeholder](./comp_options/placeholder/): An option to show a message when the text box is empty.
--   [Validator](./comp_options/validator/): Options to validate input strings before execution.
+-   [Tooltips](./comp_options/tooltip/): An option to show a message when the mouse cursor is on a component.
+-   [Placeholders](./comp_options/placeholder/): An option to show a message when the text box is empty.
+-   [Validators](./comp_options/validator/): Options to validate input strings before execution.
 -   [Renaming Buttons](./comp_options/button/): An option to rename buttons of path pickers.
 
 ![tooltip](https://github.com/matyalatte/tuw/assets/69258547/8c7244ee-48ce-4492-973c-a3e6c628b8ed)  
@@ -42,7 +42,7 @@ There are more features you can use.
 
 -   [Error Handling](./other_features/error/): How to notify users of errors.
 -   [Help Documents](./other_features/help/): You can put help documents for users.
--   [Multiple Definition](./other_features/multiple/): You can put multiple definitions in a JSON file.
+-   [Multiple Definitions](./other_features/multiple/): You can put multiple definitions in a JSON file.
 -   [Cross-platform Support](./other_features/cross_platform): You can make platform specific GUIs.
 -   [Version Checking](./other_features/version_check/): Constraints on the tool version.
 -   [Alternate Spellings](./other_features/alternate_spellings/): Tuw supports multiple spellings for some JSON keys and values.

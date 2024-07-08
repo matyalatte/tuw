@@ -14,6 +14,7 @@
 
 You can install meson and ninja via Homebrew. (`brew install meson ninja`)
 
+> [!Note]
 > If you are a Python user, you can also get them via pip. (`pip3 install meson ninja`)
 
 ## Build
@@ -27,4 +28,4 @@ If you want a debug build, run `bash shell_scripts/build.sh Debug` on the termin
 
 ## Test
 
-If you want to build tests, type `bash shell_scripts/test.sh` or `bash shell_scripts/test.sh Debug` on the terminal.  
+To build tests, type `bash shell_scripts/test.sh` or `bash shell_scripts/test.sh Debug` on the terminal.  

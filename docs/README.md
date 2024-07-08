@@ -16,9 +16,9 @@
 
 ## Only 500KB for a portable GUI
 
-Tuw will give a very simple GUI to your scripts.  
+Tuw provides a very simple GUI for your scripts.  
 All you need is a JSON file and a tiny executable.  
-**No need compilers, no need browsers, and no need huge executables**!  
+**No need for compilers, browsers, or huge executables!**  
 
 ![sample](https://github.com/matyalatte/tuw/assets/69258547/9b3c8487-010e-497b-b66c-95af84906dd0)
 <img src=https://user-images.githubusercontent.com/69258547/192090797-f5e5b52d-59aa-4942-a361-2c8b5c7bd746.png width=387></img>  
@@ -84,5 +84,5 @@ Files in this repository are available under the [MIT license](../license.txt).
 | [libui-ng](https://github.com/libui-ng/libui-ng) | GUI framework | [MIT](http://opensource.org/licenses/MIT) |
 | [RapidJSON](https://github.com/Tencent/rapidjson) | JSON parser | [MIT](http://opensource.org/licenses/MIT) |
 | [subprocess.h](https://github.com/sheredom/subprocess.h) | Command processor | [Unlicense](https://github.com/sheredom/subprocess.h/blob/master/LICENSE) |
-| [c-env-utils](https://github.com/matyalatte/c-env-utils) | Utilities for env info | [MIT](http://opensource.org/licenses/MIT) |
+| [c-env-utils](https://github.com/matyalatte/c-env-utils) | Utilities for environment info | [MIT](http://opensource.org/licenses/MIT) |
 | [tiny-str-match](https://github.com/matyalatte/tiny-str-match) | String validator | [MIT](http://opensource.org/licenses/MIT) |

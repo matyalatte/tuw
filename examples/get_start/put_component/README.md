@@ -25,19 +25,19 @@ You can put a text box in the GUI.
 
 ## Components
 
-`components` is an array of GUI components (e.g. file pickers).  
+`components` is an array of GUI components (e.g., file pickers).  
 Each component should be defined as a dictionary.  
 
--   `type` is component type. `text` is for a text box.
--   `label` is a string written above the text box.
+-   `type` is the component type. `text` is for a text box.
+-   `label` is the string written above the text box.
 
-You can see [more examples](../../#2-components) for the other component types.
+You can see [more examples](../../#2-components) for other component types.
 
 ## Command
 
 Inputs of components will be injected into the value of `command` when executing the command.  
 You can specify where they should be injected with `%*%`.  
-In the example, the value of the text box will be injected in `%-%`.  
+In the example, the value of the text box will be injected at `%-%`.  
 
 ## IDs
 
