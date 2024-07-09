@@ -105,7 +105,7 @@ static int OnShouldQuit(void *data) {
 }
 
 void MainFrame::CreateFrame() {
-    m_mainwin = uiNewWindow(tuw_constants::TOOL_NAME, 400, 1, 1);
+    m_mainwin = uiNewWindow(tuw_constants::TOOL_NAME, 200, 1, 1);
 #ifdef __APPLE__
     // Move the default position from bottom left to top left.
     uiWindowSetPosition(m_mainwin, 0, 0);
@@ -347,12 +347,19 @@ void MainFrame::UpdatePanel(unsigned definition_id) {
     }
 }
 
-void MainFrame::Fit() {
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+void MainFrame::Fit(bool keep_width) {
     int width = 200;
+    if (keep_width) {
+        int height;
+        uiWindowContentSize(m_mainwin, &width, &height);
+        width = MAX(width, 200);
+    }
     for (Component* c : m_components) {
         // Widen the window if a component has text box.
         if (c->IsWide()) {
-            width = 400;
+            width = MAX(width, 400);
             break;
         }
     }
@@ -376,8 +383,7 @@ bool MainFrame::Validate() {
     }
 
     if (redraw_flag) {
-        // TODO: Keep window size
-        Fit();
+        Fit(true);
     #ifdef _WIN32
         uiWindowsWindowRedraw(m_mainwin);
     #endif

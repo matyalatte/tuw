@@ -42,7 +42,7 @@ class MainFrame {
     void RunCommand();
     void GetDefinition(rapidjson::Document& json);
     void SaveConfig();
-    void Fit();
+    void Fit(bool keep_width = false);
     void Close() {
         if (m_mainwin != NULL)
             uiControlDestroy(uiControl(m_mainwin));
