@@ -151,6 +151,9 @@ enum Commands: int {
 
 // don't use map. it will make exe larger.
 int CmdToInt(const char* cmd) {
+    while (*cmd == '-') {
+        cmd++;
+    }
     if (strcmp(cmd, "merge") == 0)
         return CMD_MERGE;
     else if (strcmp(cmd, "m") == 0)
@@ -179,6 +182,9 @@ enum Options: int {
 };
 
 int OptToInt(const char* opt) {
+    while (*opt == '-') {
+        opt++;
+    }
     if (strcmp(opt, "json") == 0)
         return OPT_JSON;
     else if (strcmp(opt, "j") == 0)
@@ -194,13 +200,6 @@ int OptToInt(const char* opt) {
     else if (strcmp(opt, "y") == 0)
         return OPT_FORCE;
     return OPT_UNKNOWN;
-}
-
-static std::string RemoveHyphen(const char* arg) {
-    const char* pos = arg;
-    while (pos[0] == "-"[0])
-        pos++;
-    return pos;
 }
 
 #ifdef _WIN32
@@ -226,11 +225,11 @@ int main(int argc, char* argv[]) {
     // Launch GUI if no args.
     if (argc == 1) return main_app();
 
-    std::string cmd_str = RemoveHyphen(args[1].c_str());
-    int cmd_int = CmdToInt(cmd_str.c_str());
+    const char* cmd_str = args[1].c_str();
+    int cmd_int = CmdToInt(cmd_str);
     if (cmd_int == CMD_UNKNOWN) {
         PrintUsage();
-        fprintf(stderr, "Error: Unknown command detected. (%s)", cmd_str.c_str());
+        fprintf(stderr, "Error: Unknown command detected. (%s)", cmd_str);
         return 1;
     }
 
@@ -239,18 +238,18 @@ int main(int argc, char* argv[]) {
     bool force = false;
 
     for (int i = 2; i < argc; i++) {
-        std::string opt_str = RemoveHyphen(args[i].c_str());
-        int opt_int = OptToInt(opt_str.c_str());
+        const char* opt_str = args[i].c_str();
+        int opt_int = OptToInt(opt_str);
         if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && argc <= i + 1) {
             PrintUsage();
-            fprintf(stderr, "Error: This option requires a file path. (%s)\n", opt_str.c_str());
+            fprintf(stderr, "Error: This option requires a file path. (%s)\n", opt_str);
             return 1;
         }
         switch (opt_int) {
             case OPT_UNKNOWN:
                 {
                     PrintUsage();
-                    fprintf(stderr, "Error: Unknown option detected. (%s)\n", opt_str.c_str());
+                    fprintf(stderr, "Error: Unknown option detected. (%s)\n", opt_str);
                     return 1;
                 }
                 break;
