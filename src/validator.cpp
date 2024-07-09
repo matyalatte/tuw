@@ -19,17 +19,14 @@ static int IsUnsupportedPattern(const char *pattern) {
     // () operators are unsupported in tiny-regex-c
     // https://github.com/matyalatte/tiny-str-match?tab=readme-ov-file#supported-regex-operators
     const char* p = pattern;
-    int escaped = 0;
     while (*p != '\0') {
         if (*p == '\\') {
-            escaped = 1;
             p++;
-            continue;
-        }
-        if (!escaped && (*p == '(' || *p == ')')) {
+            if (*p == '\0')
+                break;
+        } else if (*p == '(' || *p == ')') {
             return 1;
         }
-        escaped = 0;
         p++;
     }
     return 0;
@@ -54,7 +51,7 @@ bool Validator::Validate(const std::string& str) {
     }
     if (m_regex != "") {
         if (IsUnsupportedPattern(m_regex.c_str())) {
-            m_error_msg = "Sorry, () operators are not supported.";
+            m_error_msg = "Regex compile error: () operators are not supported.";
             return false;
         }
         int res = tsm_regex_match(m_regex.c_str(), str.c_str());
