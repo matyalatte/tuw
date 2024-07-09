@@ -469,8 +469,10 @@ void MainFrame::RunCommand() {
         return;
     }
 
-    if (!show_success_dialog)
+    if (!show_success_dialog) {
+        PrintFmt("[RunCommand] Done\n");
         return;
+    }
 
     if (show_last_line && result.last_line != "") {
         ShowSuccessDialog(result.last_line);
