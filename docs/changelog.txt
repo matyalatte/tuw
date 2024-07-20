@@ -1,3 +1,4 @@
+ver 0.7.0
 - Added options for string validation.
 - Added support for colorized output on Windows.
 - Added an option to skip success dialog.
