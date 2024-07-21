@@ -1,5 +1,0 @@
-#pragma once
-const char *JSON_ALL_KEYS = "@ALL_KEYS_JSON_PATH@";
-const char *JSON_BROKEN = "@TEST_JSON_DIR@" "broken.json";
-const char *JSON_CONFIG_ASCII = "@TEST_JSON_DIR@" "config_ascii.json";
-const char *JSON_CONFIG_UTF = "@TEST_JSON_DIR@" "config_utf.json";
