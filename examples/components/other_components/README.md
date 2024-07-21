@@ -17,5 +17,5 @@ There are more components you can use.
 ]
 ```
 
--   `static_text` is a string component. You don't need to put `%*%` in command for this component.
+-   `static_text` is a string component. You don't need to use `%*%` in a command for this component.
 -   `text` is a text box.

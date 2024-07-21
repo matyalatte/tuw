@@ -1,6 +1,6 @@
 # Number Pickers
 
-You can use int pickers and float pickers.
+You can use integer pickers and float pickers.
 
 ![Num pikcers](https://github.com/matyalatte/tuw/assets/69258547/2b0d8299-b400-43da-8cf4-c21ca1e11f09)
 
@@ -28,27 +28,27 @@ There are some optional keys for them.
 
 ## `min` and `max`
 
-`min` and `max` are optional keys to set range of allowable values.  
+`min` and `max` are optional keys to set the range of allowable values.  
 The default range is `[0, 100]`.  
 
 ## `inc`
 
-`inc` is an optional key to set increment value (that will be added when clicking arrow keys.)  
+`inc` is an optional key to set increment value (that will be added when clicking the arrow keys.)  
 The default value is 1 for `int` pickers, and 0.1 for `float` pickers.
 
 ## `digits`
 
 `digits` is an optional key for `float` pickers.  
-It can set the number of digits after the decimal point.  
-0 means it will be `int` picker.  
+It sets the number of digits after the decimal point.  
+0 means it will be an `int` picker.  
 
 ## `wrap`
 
 `wrap` is an optional key to wrap at the `min` and `max`.  
-The minimum value will be the maximum value when clicking the down arrow.  
-The maximum value will be the minimum value when clicking the up arrow.  
+The minimum value will become the maximum value when clicking the down arrow.  
+The maximum value will become the minimum value when clicking the up arrow.  
 
 ## Notes
 
-Note that both of pickers will use double-precision floating-point numbers for their attributes.  
-It won't work properly with the numbers have many digits (like extremely large numbers.)
+Note that both pickers will use double-precision floating-point numbers for their attributes.  
+They won't work properly with numbers that have many digits (like extremely large numbers.)

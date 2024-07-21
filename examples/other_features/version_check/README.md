@@ -1,9 +1,9 @@
 # Version Checking
 
-There are 2 options to check the tool version.
+There are two options for checking the tool version.
 
--   `recommended`: Show a warning when the running version is not this value.  
--   `minimum_required`: Stop reading json file when the running version is lower than this value.  
+-   `recommended`: Displays a warning when the running version is not this value.  
+-   `minimum_required`: Stop reading the json file if the running version is lower than this value.  
 
 > The version string should be of the form `x.x.x`.
 

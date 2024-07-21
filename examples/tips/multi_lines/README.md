@@ -1,14 +1,14 @@
 # Multiple Lines
 
-Tuw will execute a single line command on the command prompt (or the terminal.)  
-If you want to executle multiple commands, you should merge them into a single line command.  
-I won't explain the details because it's the thing about the command-line, not about Tuw.  
-But you can see some examples about it.  
+Tuw executes single-line commands on the command prompt (or terminal.)  
+If you need to run multiple commands, you should merge them into a single line command.  
+I won't delve into command-line details because it's specific to the command prompt or terminal environment, not Tuw itself.  
+But you can see some examples for it.  
 
 ## Windows
 
-For windows, you can join the commands with ` && `.  
-And some commands (e.g. for loop) require `()`.
+On windows, you can join the commands with ` && `.  
+And some commands like `for` loop require parentheses `()`.
 
 ```json
 {
@@ -26,7 +26,7 @@ And some commands (e.g. for loop) require `()`.
 
 ## Unix/Linux
 
-For non-Windows platforms, you can join the commands with `;`.
+On non-Windows platforms, you can join the commands with `;`.
 
 ```json
 {

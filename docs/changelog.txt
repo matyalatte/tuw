@@ -1,3 +1,9 @@
+ver 0.7.0
+- Added options for string validation.
+- Added support for colorized output on Windows.
+- Added an option to skip success dialog.
+- Prohibited URLs that have linefeeds.
+
 ver 0.6.5
 - Added support for Solaris/illumos.
 - Added support for MinGW-w64.

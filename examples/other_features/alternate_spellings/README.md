@@ -1,7 +1,7 @@
 # Alternate Spellings
 
-Tuw supports multiple spellings for some json keys and values.  
-You can use them if the standard one is uncomfortable for you.  
+Tuw supports multiple spellings for some JSON keys and values.  
+This allows you to use more comfortable or familiar terms while configuring Tuw.  
 
 ## Component Types
 

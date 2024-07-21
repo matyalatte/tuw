@@ -32,5 +32,5 @@ You can use check boxes.
 ]
 ```
 
--   `check` is a check box. `value` will be inputted into commands if you check the check box.
--   `check_array` is an array of the `check` components.
+-   `check` is a check box. The `value` will be inputted into commands if you check the check box.
+-   `check_array` is an array of `check` components.

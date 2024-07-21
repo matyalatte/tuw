@@ -1,41 +1,14 @@
+#pragma once
+
 // Tests for main_frame.cpp
 // Todo: Write more tests
 
 #include <gtest/gtest.h>
+#include <string>
 #include "main_frame.h"
 #include "string_utils.h"
 #include "exec.h"
-
-const char* json_file;
-const char* config_ascii;
-const char* config_utf;
-
-#ifdef _WIN32
-int wmain(int argc, wchar_t* argv[]) {
-#else
-int main(int argc, char* argv[]) {
-#endif
-
-    ::testing::InitGoogleTest(&argc, argv);
-    assert(argc == 4);
-
-#ifdef _WIN32
-    std::string argv1 = UTF16toUTF8(argv[1]);
-    std::string argv2 = UTF16toUTF8(argv[2]);
-    std::string argv3 = UTF16toUTF8(argv[3]);
-    json_file = &argv1[0];
-    config_ascii = &argv2[0];
-    config_utf = &argv3[0];
-#else
-    json_file = argv[1];
-    config_ascii = argv[2];
-    config_utf = argv[3];
-#endif
-
-    MainFrameDisableDialog();
-
-    return RUN_ALL_TESTS();
-}
+#include "json_paths.h"
 
 class MainFrameTest : public ::testing::Test {
  protected:
@@ -83,11 +56,7 @@ TEST_F(MainFrameTest, MakeDefaultMainFrame) {
     EXPECT_EQ(json1, json2);
 }
 
-void GetTestJson(rapidjson::Document& test_json) {
-    json_utils::JsonResult result = json_utils::LoadJson(json_file, test_json);
-    EXPECT_TRUE(result.ok);
-    EXPECT_FALSE(test_json.ObjectEmpty());
-}
+void GetTestJson(rapidjson::Document& json);
 
 void GetDummyConfig(rapidjson::Document& dummy_config) {
     dummy_config.SetObject();
@@ -218,7 +187,7 @@ TEST_F(MainFrameTest, LoadSaveConfigAscii) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["gui"][0].Swap(test_json["gui"][1]);
-    TestConfig(test_json, config_ascii);
+    TestConfig(test_json, JSON_CONFIG_ASCII);
 }
 
 TEST_F(MainFrameTest, LoadSaveConfigUTF) {
@@ -229,5 +198,5 @@ TEST_F(MainFrameTest, LoadSaveConfigUTF) {
     cmd.replace(12, 4, "ファイル");
     test_json["gui"][0]["command"].SetString(rapidjson::StringRef(cmd.c_str()));
     test_json["gui"][0]["components"][1]["id"].SetString("ファイル");
-    TestConfig(test_json, config_utf);
+    TestConfig(test_json, JSON_CONFIG_UTF);
 }

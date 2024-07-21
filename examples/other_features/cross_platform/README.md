@@ -1,13 +1,16 @@
 # Cross-platform Support
 
-There are optional keys to make platform specific GUIs.  
-No need to write JSON files for each platform.  
+There are optional keys to create platform-specific GUIs without needing separate JSON files for each platform.  
 
 ## "command_'os'"
 
-There are optional keys to overwrite commands.  
-`command_win` is for Windows, `command_mac` is for macOS, and `command_linux` is for Linux.  
-Tuw will use the platform specific commands instead of the value of `command`.  
+You can use optional keys to override commands based on the operating system:
+
+-   `command_win` for Windows
+-   `command_mac` for macOS
+-   `command_linux` for Linux (and other unix variants)
+
+Tuw will use the platform-specific command instead of the default `command` value.  
 
 ```json
 {
@@ -22,9 +25,13 @@ Tuw will use the platform specific commands instead of the value of `command`.
 
 ## "platforms"
 
-`platforms` is an optional key for components.  
-Tuw  will ignore the component if the running OS is not in the values of `platforms`.  
-`win` for Windows components, `mac` for macOS, and `linux` for Linux.  
+You can specify the operating systems on which each component should be active using the `platforms` key:
+
+-   `win` for Windows
+-   `mac` for macOS
+-   `linux` for Linux (and other unix variants)
+
+Tuw will ignore the component if the current OS does not match the specified platform(s).  
 
 ```json
 {

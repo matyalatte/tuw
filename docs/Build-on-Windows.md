@@ -11,9 +11,9 @@
 
 ## Install Meson
 
-Get the installer (*.msi) from [the release page](https://github.com/mesonbuild/meson/releases).  
-And launch it on your machine.  
+Get the installer (*.msi) from [the release page](https://github.com/mesonbuild/meson/releases) and launch it on your machine.  
 
+> [!Note]
 > If you are a Python user, you can also get meson via pip. (`pip3 install meson`)
 
 ## Build
@@ -24,19 +24,18 @@ The executable will be generated in `build/Release/`.
 ## Debug
 
 If you want a debug build, run `batch_files/build_debug.bat`.  
-If you want to debug the exe on Visual Studio, you can open `build/Debug/Tuw.sln` with it.  
-Then, set `Tuw` as the startup project.  
+To debug the executable in Visual Studio, you can open `build/Debug/Tuw.sln` with VS and set `Tuw` as the startup project.  
 
 ## Cross Compile for ARM64
 
-If you installed ARM64 components in Visual Studio, you can build ARM64 binary on x64 machine.  
+If you have installed ARM64 components in Visual Studio, you can build ARM64 binary on your x64 machine.  
 Run `batch_files/build_arm.bat` on the command prompt.  
-The ARM64 version will be generated in `build/ReleaseARM/`.  
+The ARM64 build will be generated in `build/ReleaseARM/`.  
 
 ## Test
 
-If you want to run tests, run [`batch_files/test.bat`](../batch_files/test.bat) or `batch_files/test_debug.bat`.  
+To run tests, run [`batch_files/test.bat`](../batch_files/test.bat) or `batch_files/test_debug.bat`.  
 
 ## Coverage
 
-`batch_files/test_debug.bat` will make coverage report if [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage/releases) is installed.  
+`batch_files/test_debug.bat` will generate a coverage report if [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage/releases) is installed.  

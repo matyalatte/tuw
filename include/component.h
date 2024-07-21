@@ -3,6 +3,7 @@
 #include <vector>
 #include "rapidjson/document.h"
 #include "ui.h"
+#include "validator.h"
 
 #define UNUSED(x) (void)(x)
 
@@ -14,6 +15,8 @@ class Component {
     std::string m_id;
     bool m_has_string;
     bool m_is_wide;
+    Validator m_validator;
+    uiLabel* m_error_widget;
 
  private:
     bool m_add_quotes;
@@ -30,6 +33,10 @@ class Component {
 
     bool HasString() { return m_has_string; }
     bool IsWide() { return m_is_wide; }
+
+    bool Validate(bool* redraw_flag);
+    std::string GetValidationError();
+    void PutErrorWidget(uiBox* box);
 
     static Component* PutComponent(uiBox* box, const rapidjson::Value& j);
 };

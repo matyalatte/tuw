@@ -125,15 +125,9 @@ jobs:
       - name: copy test files to ./workspace
         run: |
           mkdir workspace
-          mkdir workspace/exe_container
-          cp build/ReleaseARM-Test/tests/exe_container/exe_container.exe workspace/exe_container
-          mkdir workspace/json_check
-          cp build/ReleaseARM-Test/tests/json_check/json_check.exe workspace/json_check
-          cp tests/json_check/*.json workspace/json_check
-          mkdir workspace/main_frame
-          cp build/ReleaseARM-Test/tests/main_frame/main_frame.exe workspace/main_frame
-          cp tests/main_frame/*.json workspace/main_frame
-          cp examples/all_keys/gui_definition.json workspace
+          cp build/ReleaseARM-Test/tests/unit_test.exe workspace
+          mkdir workspace/json
+          cp build/ReleaseARM-Test/tests/json/*.json workspace/json
         shell: bash
 
       - name: Upload artifacts
@@ -156,6 +150,4 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static xvfb
-          docker run --rm --init -i -v $(pwd)/workspace/:/workspace docker.io/linaro/wine-arm64 xvfb-run wine-arm64 cmd.exe /c '/workspace/exe_container/exe_container.exe /workspace/gui_definition.json'
-          docker run --rm --init -i -v $(pwd)/workspace/:/workspace docker.io/linaro/wine-arm64 xvfb-run wine-arm64 cmd.exe /c '/workspace/json_check/json_check.exe /workspace/json_check/broken.json /workspace/gui_definition.json'
-          docker run --rm --init -i -v $(pwd)/workspace/:/workspace docker.io/linaro/wine-arm64 xvfb-run wine-arm64 cmd.exe /c '/workspace/main_frame/main_frame.exe /workspace/gui_definition.json /workspace/main_frame/config_ascii.json /workspace/main_frame/config_utf.json'
+          docker run --rm --init -i -v $(pwd)/workspace/:/workspace docker.io/linaro/wine-arm64 xvfb-run wine-arm64 cmd.exe /c '/workspace/unit_test.exe'

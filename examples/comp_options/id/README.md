@@ -53,10 +53,11 @@ When you put an undefined id in `%*%`, it'll use one of the components that have
 ## Predefined IDs
 
 There are some predefined ids.  
-`%%` will be replaced with `%` at runtime.  
-`%__CWD__%` will be replaced with the executable directory.  
-`%__HOME__%` will be replaced with the user's home directory.  
-Also, all ids that start with `_` are reserved.  
+
+-   `%%` will be replaced with `%` at runtime.  
+-   `%__CWD__%` will be replaced with the executable directory.  
+-   `%__HOME__%` will be replaced with the user's home directory.  
+-   All ids that start with `_` are reserved.  
 
 ```json
 {

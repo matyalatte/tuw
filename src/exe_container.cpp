@@ -160,7 +160,7 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
         return { false, msg };
     }
 
-    rapidjson::ParseResult ok = m_json.Parse(json_str);
+    rapidjson::ParseResult ok = m_json.Parse(json_str.c_str());
     if (!ok) {
         std::string msg = std::string("Failed to parse JSON: ")
                           + rapidjson::GetParseError_En(ok.Code())

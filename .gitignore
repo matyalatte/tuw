@@ -22,6 +22,7 @@ subprojects/rapidjson
 subprojects/subprocess
 subprojects/google*
 subprojects/env_utils
+subprojects/tiny_str_match
 
 # built files
 *.exe

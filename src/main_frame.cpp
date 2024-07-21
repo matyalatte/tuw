@@ -105,7 +105,7 @@ static int OnShouldQuit(void *data) {
 }
 
 void MainFrame::CreateFrame() {
-    m_mainwin = uiNewWindow(tuw_constants::TOOL_NAME, 400, 1, 1);
+    m_mainwin = uiNewWindow(tuw_constants::TOOL_NAME, 200, 1, 1);
 #ifdef __APPLE__
     // Move the default position from bottom left to top left.
     uiWindowSetPosition(m_mainwin, 0, 0);
@@ -203,7 +203,7 @@ void MainFrame::CreateMenu() {
 }
 
 static bool IsValidURL(const std::string &url) {
-    for (const char c : { ' ', ';', '|', '&'}) {
+    for (const char c : { ' ', ';', '|', '&', '\r', '\n' }) {
         if (url.find(c) != std::string::npos)
             return false;
     }
@@ -261,7 +261,7 @@ void MainFrame::OpenURL(int id) {
     }
 
     if (!IsValidURL(url)) {
-        std::string msg = "URL should NOT contains ' ', ';', '|', or '&'.\n"
+        std::string msg = "URL should NOT contains ' ', ';', '|', '&', '\\r', nor '\\n'.\n"
                           "URL: " + url;
         PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
         ShowErrorDialog(msg.c_str());
@@ -286,6 +286,9 @@ void MainFrame::OpenURL(int id) {
 
 static void OnClicked(uiButton *sender, void *data) {
     MainFrame* main_frame = static_cast<MainFrame*>(data);
+
+    if (!main_frame->Validate())
+        return;
     main_frame->SaveConfig();
     main_frame->RunCommand();
     UNUSED(sender);
@@ -322,13 +325,9 @@ void MainFrame::UpdatePanel(unsigned definition_id) {
             uiBox* priv_box = uiNewVerticalBox();
             uiBoxSetSpacing(priv_box, tuw_constants::BOX_SUB_SPACE);
             new_comp = Component::PutComponent(priv_box, c);
-            if (new_comp == nullptr) {
-                ShowErrorDialog("Unknown component type detected. This is unexpected.");
-            } else {
-                new_comp->SetConfig(m_config);
-                m_components.push_back(new_comp);
-            }
-        uiBoxAppend(main_box, uiControl(priv_box), 0);
+            new_comp->SetConfig(m_config);
+            m_components.push_back(new_comp);
+            uiBoxAppend(main_box, uiControl(priv_box), 0);
         }
     }
 
@@ -348,17 +347,52 @@ void MainFrame::UpdatePanel(unsigned definition_id) {
     }
 }
 
-void MainFrame::Fit() {
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+void MainFrame::Fit(bool keep_width) {
     int width = 200;
+    if (keep_width) {
+        int height;
+        uiWindowContentSize(m_mainwin, &width, &height);
+        width = MAX(width, 200);
+    }
     for (Component* c : m_components) {
         // Widen the window if a component has text box.
         if (c->IsWide()) {
-            width = 400;
+            width = MAX(width, 400);
             break;
         }
     }
     // Fit the window size to the new components.
     uiWindowSetContentSize(m_mainwin, width, 1);
+}
+
+// Do validation for each component
+bool MainFrame::Validate() {
+    bool validate = true;
+    bool redraw_flag = false;
+    std::string val_first_err;
+    for (Component* comp : m_components) {
+        if (!comp->Validate(&redraw_flag)) {
+            std::string val_err = comp->GetValidationError();
+            if (validate)
+                val_first_err = val_err;
+            validate = false;
+            PrintFmt("[RunCommand] Error: %s\n", val_err.c_str());
+        }
+    }
+
+    if (redraw_flag) {
+        Fit(true);
+    #ifdef _WIN32
+        uiWindowsWindowRedraw(m_mainwin);
+    #endif
+    }
+
+    if (!validate)
+        ShowErrorDialog(val_first_err);
+
+    return validate;
 }
 
 // Make command string
@@ -405,45 +439,53 @@ void MainFrame::RunCommand() {
                           "\n"
                           "Command: " + cmd;
         ShowSuccessDialog(msg, "Safe Mode");
-    } else {
-        char* text = uiButtonText(m_run_button);
-        uiButtonSetText(m_run_button, "Processing...");
-    #ifdef __APPLE__
-        uiMainStep(1);
-    #elif defined(__TUW_UNIX__)
-        uiUnixWaitEvents();
-    #endif
-        ExecuteResult result = Execute(cmd);
-        uiButtonSetText(m_run_button, text);
-
-        rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
-        bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);
-        int exit_success = json_utils::GetInt(sub_definition, "exit_success", 0);
-        bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
-
-        if (result.err_msg != "") {
-            PrintFmt("[RunCommand] Error: %s\n", result.err_msg.c_str());
-            ShowErrorDialog(result.err_msg);
-            return;
-        }
-
-        if (check_exit_code && result.exit_code != exit_success) {
-            std::string err_msg;
-            if (show_last_line)
-                err_msg = result.last_line;
-            else
-                err_msg = "Invalid exit code (" + std::to_string(result.exit_code) + ")";
-            PrintFmt("[RunCommand] Error: %s\n", err_msg.c_str());
-            ShowErrorDialog(err_msg);
-            return;
-        }
-
-        if (show_last_line && result.last_line != "") {
-            ShowSuccessDialog(result.last_line);
-        } else {
-            ShowSuccessDialog("Success!");
-        }
+        return;
     }
+
+    char* text = uiButtonText(m_run_button);
+    uiButtonSetText(m_run_button, "Processing...");
+#ifdef __APPLE__
+    uiMainStep(1);
+#elif defined(__TUW_UNIX__)
+    uiUnixWaitEvents();
+#endif
+    ExecuteResult result = Execute(cmd);
+    uiButtonSetText(m_run_button, text);
+
+    rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
+    bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);
+    int exit_success = json_utils::GetInt(sub_definition, "exit_success", 0);
+    bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
+    bool show_success_dialog = json_utils::GetBool(sub_definition, "show_success_dialog", true);
+
+    if (result.err_msg != "") {
+        PrintFmt("[RunCommand] Error: %s\n", result.err_msg.c_str());
+        ShowErrorDialog(result.err_msg);
+        return;
+    }
+
+    if (check_exit_code && result.exit_code != exit_success) {
+        std::string err_msg;
+        if (show_last_line)
+            err_msg = result.last_line;
+        else
+            err_msg = "Invalid exit code (" + std::to_string(result.exit_code) + ")";
+        PrintFmt("[RunCommand] Error: %s\n", err_msg.c_str());
+        ShowErrorDialog(err_msg);
+        return;
+    }
+
+    if (!show_success_dialog) {
+        PrintFmt("[RunCommand] Done\n");
+        return;
+    }
+
+    if (show_last_line && result.last_line != "") {
+        ShowSuccessDialog(result.last_line);
+        return;
+    }
+
+    ShowSuccessDialog("Success!");
 }
 
 // read gui_definition.json

@@ -2,16 +2,16 @@
 
 ## Embed JSON into Executables
 
-Tuw has a command-line util to embed JSON into exe.  
-Type `Tuw merge` on the command prompt (or the terminal).  
+Tuw has a command-line utility to embed JSON into an executable.  
+Type `Tuw merge` in the command prompt (or terminal).  
 It'll merge `Tuw` and `gui_definition.json` into `Tuw.new`.  
-The merged executable can make a GUI without `gui_definition.json`!  
+The merged executable can create a GUI without needing `gui_definition.json`!  
 
 ```bash
 Tuw merge
 ```
 
-You can also specify the file paths with `-j` and `-e` options.  
+You can also specify the file paths with the `-j` and `-e` options.  
 
 ```bash
 Tuw merge -j gui_definition.json -e Tuw.new
@@ -33,7 +33,7 @@ Tuw.new split -j extracted.json -e Tuw -f
 
 ## GUI wrapper for JSON Embedding
 
-[The JSON file](./gui_definition.json) in this folder is for the JSON embedding.  
-It means, Tuw will be the GUI wrapper for itself.  
+[The JSON file](./gui_definition.json) in this folder is for JSON embedding.  
+This means Tuw will act as the GUI wrapper for itself.  
 
 ![embed json](https://github.com/matyalatte/tuw/assets/69258547/d28e9bfd-4905-4697-9523-49af8c294e6b)  

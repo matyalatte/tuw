@@ -2,7 +2,7 @@
 
 ## Error Dialogue
 
-When the executed command output something to `stderr`, Tuw will show an error dialogue.  
+When the executed command outputs something to `stderr`, Tuw will display an error dialogue.  
 
 ![Error](https://github.com/matyalatte/tuw/assets/69258547/a023c839-aafc-4beb-a702-596e2ea3a454)  
 
@@ -20,10 +20,9 @@ When the executed command output something to `stderr`, Tuw will show an error d
 
 ## Exit Code Checking
 
-Your command might not use `stderr` for error handling.  
-If so, you can use `check_exit_code` option.  
-It's an option to show an error dialogue when the exit code is not 0.  
-Also, you can change the success code with `exit_success` option.  
+If your command does not use `stderr` for error handling, you can use the `check_exit_code` option.  
+This option displays an error dialogue when the exit code is not 0.  
+You can also customize the success code using the `exit_success` option.  
 
 ```json
 {
@@ -37,10 +36,9 @@ Also, you can change the success code with `exit_success` option.
 
 ## `show_last_line` Option
 
-Your command might not use `stderr` nor exit codes.  
-If so, you can use `show_last_line` option.  
-It's an option to show the last line from `stdout`.  
-When `check_exit_code` is on, it can also show the last line on the error dialogue.  
+If your command neither uses `stderr` nor exit codes for error handling, you can use the `show_last_line` option.  
+It displays the last line from `stdout`.  
+When `check_exit_code` is enabled, it can also show the last line in the error dialogue.  
 
 ![ShowLastLine](https://github.com/matyalatte/tuw/assets/69258547/3915740e-37b3-496c-9e51-9f80334725ae)  
 

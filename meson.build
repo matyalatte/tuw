@@ -16,7 +16,7 @@ project('Tuw', ['c', 'cpp'],
 tuw_sources = []
 tuw_manifest = []
 tuw_link_args = []
-tuw_cpp_args = ['-DRAPIDJSON_HAS_STDSTRING']
+tuw_cpp_args = []
 tuw_OS = host_machine.system()
 tuw_compiler = meson.get_compiler('c').get_id()
 tuw_is_release = get_option('buildtype').startswith('release') or (get_option('buildtype').startswith('custom') and not get_option('debug'))
@@ -28,7 +28,6 @@ if tuw_OS == 'windows'
         depend_files: ['src/app.manifest']),
     ]
     if tuw_compiler == 'msvc'
-        tuw_cpp_args = ['/DRAPIDJSON_HAS_STDSTRING']
         tuw_link_args = [
             '/LARGEADDRESSAWARE',
             '/INCREMENTAL:NO',
@@ -118,8 +117,9 @@ libui_dep = dependency('libui', fallback : ['libui', 'libui_dep'])
 rapidjson_dep = dependency('rapidjson', fallback : ['rapidjson', 'rapidjson_dep'])
 subprocess_dep = dependency('subprocess', fallback : ['subprocess', 'subprocess_dep'])
 env_utils_dep = dependency('env_utils', fallback : ['env_utils', 'env_utils_dep'])
+tiny_str_match_dep = dependency('tiny_str_match', fallback : ['tiny_str_match', 'tiny_str_match_dep'])
 
-tuw_dependencies = [libui_dep, rapidjson_dep, subprocess_dep, env_utils_dep]
+tuw_dependencies = [libui_dep, rapidjson_dep, subprocess_dep, env_utils_dep, tiny_str_match_dep]
 
 tuw_sources += [
     'src/main_frame.cpp',
@@ -127,7 +127,8 @@ tuw_sources += [
     'src/exe_container.cpp',
     'src/json_utils.cpp',
     'src/exec.cpp',
-    'src/string_utils.cpp'
+    'src/string_utils.cpp',
+    'src/validator.cpp'
 ]
 
 if get_option('build_exe')

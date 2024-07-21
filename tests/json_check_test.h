@@ -1,3 +1,5 @@
+#pragma once
+
 // Tests for json checking
 // Todo: Write more tests
 
@@ -5,30 +7,7 @@
 #include "json_utils.h"
 #include "string_utils.h"
 #include "tuw_constants.h"
-
-const char* broken;
-const char* json_file;
-
-#ifdef _WIN32
-int wmain(int argc, wchar_t* argv[]) {
-#else
-int main(int argc, char* argv[]) {
-#endif
-    ::testing::InitGoogleTest(&argc, argv);
-    assert(argc == 3);
-
-#ifdef _WIN32
-    std::string argv1 = UTF16toUTF8(argv[1]);
-    std::string argv2 = UTF16toUTF8(argv[2]);
-    broken = &argv1[0];
-    json_file = &argv2[0];
-#else
-    broken = argv[1];
-    json_file = argv[2];
-#endif
-
-    return RUN_ALL_TESTS();
-}
+#include "json_paths.h"
 
 TEST(JsonCheckTest, LoadJsonFail) {
     rapidjson::Document test_json;
@@ -40,18 +19,14 @@ TEST(JsonCheckTest, LoadJsonFail) {
 
 TEST(JsonCheckTest, LoadJsonFail2) {
     rapidjson::Document test_json;
-    json_utils::JsonResult result = json_utils::LoadJson(broken, test_json);
+    json_utils::JsonResult result = json_utils::LoadJson(JSON_BROKEN, test_json);
     const char* expected = "Failed to parse JSON: Missing a comma or '}'"
                            " after an object member.";
     EXPECT_FALSE(result.ok);
     EXPECT_STREQ(expected, result.msg.substr(0, 68).c_str());
 }
 
-void GetTestJson(rapidjson::Document& json) {
-    json_utils::JsonResult result = json_utils::LoadJson(json_file, json);
-    EXPECT_TRUE(result.ok);
-    EXPECT_FALSE(json.ObjectEmpty());
-}
+void GetTestJson(rapidjson::Document& json);
 
 TEST(JsonCheckTest, LoadJsonSuccess) {
     rapidjson::Document test_json;

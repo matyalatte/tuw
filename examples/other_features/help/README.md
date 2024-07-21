@@ -1,6 +1,6 @@
 # Help Documents
 
-You can put some documents in menu bar.  
+You can put some documents in the menu bar.  
 
 ![sample](https://github.com/matyalatte/tuw/assets/69258547/e408a179-6f9f-4769-ab3d-57f87d392a4f)
 
