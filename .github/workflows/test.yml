@@ -127,7 +127,7 @@ jobs:
           mkdir workspace
           cp build/ReleaseARM-Test/tests/unit_test.exe workspace
           mkdir workspace/json
-          cp build/ReleaseARM-Test/tests/json/*.json workspace/json
+          cp build/ReleaseARM-Test/tests/json/*.json* workspace/json
         shell: bash
 
       - name: Upload artifacts

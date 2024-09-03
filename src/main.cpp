@@ -40,7 +40,6 @@ int main_app() {
     return 0;
 }
 
-
 bool AskOverwrite(const char *path) {
     if (!envuFileExists(path)) return true;
     PrintFmt("Overwrite %s? (y/n)\n", path);
@@ -293,6 +292,11 @@ int main(int argc, char* argv[]) {
 
     switch (cmd_int) {
         case CMD_MERGE:
+            if (!envuFileExists(json_path.c_str()) &&
+                envuFileExists((json_path + "c").c_str())) {
+                // Not found .json but found .jsonc
+                json_path.push_back('c');
+            }
             result = Merge(exe_path, json_path, new_exe_path, force);
             break;
         case CMD_SPLIT:

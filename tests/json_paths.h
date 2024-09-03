@@ -6,3 +6,4 @@ const char *JSON_ALL_KEYS = "./json/gui_definition.json";
 const char *JSON_BROKEN = "./json/broken.json";
 const char *JSON_CONFIG_ASCII = "./json/config_ascii.json";
 const char *JSON_CONFIG_UTF = "./json/config_utf.json";
+const char *JSON_RELAXED = "./json/relaxed.jsonc";
