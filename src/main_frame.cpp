@@ -449,10 +449,14 @@ void MainFrame::RunCommand() {
 #elif defined(__TUW_UNIX__)
     uiUnixWaitEvents();
 #endif
-    ExecuteResult result = Execute(cmd);
+    rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
+
+    std::string codepage = json_utils::GetString(sub_definition, "codepage", "");
+    bool use_utf8_on_windows = codepage == "utf8" || codepage == "utf-8";
+
+    ExecuteResult result = Execute(cmd, use_utf8_on_windows);
     uiButtonSetText(m_run_button, text);
 
-    rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);
     int exit_success = json_utils::GetInt(sub_definition, "exit_success", 0);
     bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);

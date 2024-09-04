@@ -24,6 +24,10 @@
           "show_success_dialog": { "type": "boolean" },
           "check_exit_code": { "type": "boolean" },
           "exit_success": { "type": "integer" },
+          "codepage": {
+            "type": "string",
+            "enum": [ "default", "utf8", "utf-8" ]
+          },
           "components": { "$ref": "#/definitions/types/components" },
           "component_array": { "$ref": "#/definitions/types/components" }
         },

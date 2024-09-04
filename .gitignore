@@ -15,6 +15,9 @@
 *.sh
 !shell_scripts/*.sh
 
+*.ps1
+!examples/**/*.ps1
+
 # subprojects
 subprojects/libui
 subprojects/packagecache

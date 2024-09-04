@@ -423,6 +423,15 @@ namespace json_utils {
         CheckJsonType(result, sub_definition, "show_last_line", JsonType::BOOLEAN, "", CAN_SKIP);
         CheckJsonType(result, sub_definition,
                       "show_success_dialog", JsonType::BOOLEAN, "", CAN_SKIP);
+        CheckJsonType(result, sub_definition, "codepage", JsonType::STRING, "", CAN_SKIP);
+        if (sub_definition.HasMember("codepage")) {
+            std::string codepage = sub_definition["codepage"].GetString();
+            if (codepage != "utf8" && codepage != "utf-8" && codepage != "default") {
+                result.ok = false;
+                result.msg = "Unknown codepage: " + codepage;
+                return;
+            }
+        }
 
         CorrectKey(sub_definition, "component", "components", alloc);
         CorrectKey(sub_definition, "component_array", "components", alloc);
