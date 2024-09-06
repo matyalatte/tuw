@@ -6,6 +6,9 @@
 #include "string_utils.h"
 #include "tuw_constants.h"
 
+constexpr char DEF_JSON[] = "gui_definition.json";
+constexpr char DEF_JSONC[] = "gui_definition.jsonc";
+
 // Main window
 MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Document& config) {
     PrintFmt("%s v%s by %s\n", tuw_constants::TOOL_NAME,
@@ -19,9 +22,19 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
     bool ignore_external_json = false;
+    const char* json_path = DEF_JSON;
     json_utils::JsonResult result = JSON_RESULT_OK;
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
-        bool exists_external_json = envuFileExists("gui_definition.json");
+        bool exists_external_json = true;
+        // Find gui_definition.json
+        if (!envuFileExists(DEF_JSON)) {
+            // Find gui_definition.jsonc
+            if (envuFileExists(DEF_JSONC))
+                json_path = DEF_JSONC;
+            else
+                exists_external_json = false;
+        }
+
         ExeContainer exe;
 
         result = exe.Read(exe_path);
@@ -40,8 +53,8 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
         if (!result.ok) {
             if (exists_external_json) {
-                PrintFmt("[LoadDefinition] Loaded gui_definition.json\n");
-                result = json_utils::LoadJson("gui_definition.json", m_definition);
+                PrintFmt("[LoadDefinition] Loaded %s\n", json_path);
+                result = json_utils::LoadJson(json_path, m_definition);
                 if (!result.ok)
                     m_definition.SetObject();
             } else {
@@ -78,9 +91,9 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 #endif
 
     if (ignore_external_json) {
-        const char* msg =
-            "WARNING: Using embedded JSON. gui_definition.json was ignored.\n";
-        PrintFmt("[LoadDefinition] %s", msg);
+        std::string msg = std::string("WARNING: Using embedded JSON. ") +
+                          json_path + " was ignored.\n";
+        PrintFmt("[LoadDefinition] %s", msg.c_str());
         ShowSuccessDialog(msg, "Warning");
     }
 

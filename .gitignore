@@ -3,6 +3,9 @@
 !examples/**/gui_definition.json
 !tests/**/*.json
 !schema/*.json
+*.jsonc
+!examples/**/gui_definition.jsonc
+!tests/**/*.jsonc
 
 *.txt
 !changelog.txt

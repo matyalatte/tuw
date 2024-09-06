@@ -29,6 +29,10 @@ namespace json_utils {
         COMP_MAX
     };
 
+    // JSON parser allows c style comments and trailing commas.
+    constexpr auto JSONC_FLAGS =
+        rapidjson::kParseCommentsFlag | rapidjson::kParseTrailingCommasFlag;
+
     JsonResult LoadJson(const std::string& file, rapidjson::Document& json) {
         FILE* fp = fopen(file.c_str(), "rb");
         if (!fp)
@@ -37,7 +41,7 @@ namespace json_utils {
         char readBuffer[65536];
         rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
 
-        rapidjson::ParseResult ok = json.ParseStream(is);
+        rapidjson::ParseResult ok = json.ParseStream<JSONC_FLAGS>(is);
         fclose(fp);
 
         if (!ok) {
