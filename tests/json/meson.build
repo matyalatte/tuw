@@ -2,7 +2,8 @@
 files = [
     'broken.json',
     'config_ascii.json',
-    'config_utf.json'
+    'config_utf.json',
+    'relaxed.jsonc',
 ]
 
 foreach f : files

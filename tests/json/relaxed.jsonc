@@ -1,0 +1,10 @@
+{
+    // Single-line comment
+    /*
+     * Multi-line comments
+     */
+    "ary": [
+        "",
+        "trailing_comma",
+    ]
+}
