@@ -7,5 +7,7 @@ struct ExecuteResult {
     std::string last_line;
 };
 
-ExecuteResult Execute(const std::string& cmd);
+// When use_utf8_on_windows is true,
+// Tuw converts output strings from UTF-8 to UTF-16 on Windows.
+ExecuteResult Execute(const std::string& cmd, bool use_utf8_on_windows = false);
 ExecuteResult LaunchDefaultApp(const std::string& url);

@@ -1,5 +1,6 @@
 - Added support for C-style comments and trailing commas in JSON files.
 - Added support for .jsonc files.
+- Added "codepage" option to support UTF-8 outputs on Windows.
 
 ver 0.7.0
 - Added options for string validation.
