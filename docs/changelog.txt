@@ -1,6 +1,8 @@
 - Added support for C-style comments and trailing commas in JSON files.
 - Added support for .jsonc files.
 - Added "codepage" option to support UTF-8 outputs on Windows.
+- Added support for colorized outputs on Linux.
+- Fixed a bug that there is no limit on the buffer size of the console window on Linux.
 
 ver 0.7.0
 - Added options for string validation.

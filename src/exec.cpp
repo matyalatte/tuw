@@ -112,16 +112,18 @@ ExecuteResult Execute(const std::string& cmd, bool use_utf8_on_windows) {
     do {
         out_read_size = ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, BUF_SIZE);
         err_read_size = ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
+        if (out_read_size) {
 #ifdef _WIN32
-        if (use_utf8_on_windows) {
-            std::wstring wout = UTF8toUTF16(out_buf);
-            printf("%ls", wout.c_str());
-        } else {
-            printf("%s", out_buf);
-        }
+            if (use_utf8_on_windows) {
+                std::wstring wout = UTF8toUTF16(out_buf);
+                printf("%ls", wout.c_str());
+            } else {
+                printf("%s", out_buf);
+            }
 #else
-        PrintFmt("%s", out_buf);
+            PrintFmt("%s", out_buf);
 #endif
+        }
     } while (subprocess_alive(&process) || out_read_size || err_read_size);
 
     // Sometimes stderr still have unread characters
