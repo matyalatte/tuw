@@ -95,67 +95,72 @@ enum ANSI_ESCAPE: ansi_escape_code {
     ANSI_BG_WHITE      = 47,
 };
 
+struct pango_tag {
+    const char* str;
+    int len;
+};
+
+constexpr int strlen_constexpr(const char* str, int count = 0) {
+    return (*str == '\0') ? count : strlen_constexpr(str + 1, count + 1);
+}
+
+constexpr pango_tag PangoTag(const char* str) {
+    return { str, strlen_constexpr(str) };
+}
+
+constexpr pango_tag FONT_TAGS[] = {
+    PangoTag("<span foreground='black'>"),
+    PangoTag("<span foreground='red'>"),
+    PangoTag("<span foreground='green'>"),
+    PangoTag("<span foreground='yellow'>"),
+    PangoTag("<span foreground='blue'>"),
+    PangoTag("<span foreground='magenta'>"),
+    PangoTag("<span foreground='cyan'>"),
+    PangoTag("<span foreground='white'>")
+};
+
+constexpr pango_tag BG_TAGS[] = {
+    PangoTag("<span background='black'>"),
+    PangoTag("<span background='red'>"),
+    PangoTag("<span background='green'>"),
+    PangoTag("<span background='yellow'>"),
+    PangoTag("<span background='blue'>"),
+    PangoTag("<span background='magenta'>"),
+    PangoTag("<span background='cyan'>"),
+    PangoTag("<span background='white'>")
+};
+
 // Get opening markup tag from ANSI escape sequence
-static const char* GetOpeningTag(ansi_escape_code code) {
-    switch (code) {
-        case ANSI_BOLD:
-            return "<b>";
-        case ANSI_ITALIC:
-            return "<i>";
-        case ANSI_UNDERLINE:
-            return "<u>";
-        case ANSI_STRIKETHROUGH:
-            return "<s>";
-        case ANSI_FONT_BLACK:
-            return "<span foreground='black'>";
-        case ANSI_FONT_RED:
-            return "<span foreground='red'>";
-        case ANSI_FONT_GREEN:
-            return "<span foreground='green'>";
-        case ANSI_FONT_YELLOW:
-            return "<span foreground='yellow'>";
-        case ANSI_FONT_BLUE:
-            return "<span foreground='blue'>";
-        case ANSI_FONT_MAGENTA:
-            return "<span foreground='magenta'>";
-        case ANSI_FONT_CYAN:
-            return "<span foreground='cyan'>";
-        case ANSI_FONT_WHITE:
-            return "<span foreground='white'>";
-        case ANSI_BG_BLACK:
-            return "<span background='black'>";
-        case ANSI_BG_RED:
-            return "<span background='red'>";
-        case ANSI_BG_GREEN:
-            return "<span background='green'>";
-        case ANSI_BG_YELLOW:
-            return "<span background='yellow'>";
-        case ANSI_BG_BLUE:
-            return "<span background='blue'>";
-        case ANSI_BG_MAGENTA:
-            return "<span background='magenta'>";
-        case ANSI_BG_CYAN:
-            return "<span background='cyan'>";
-        case ANSI_BG_WHITE:
-            return "<span background='white'>";
-    }
-    return "";
+static const pango_tag GetOpeningTag(ansi_escape_code code) {
+    if (code == ANSI_BOLD)
+        return PangoTag("<b>");
+    else if (code == ANSI_ITALIC)
+        return PangoTag("<i>");
+    else if (code == ANSI_UNDERLINE)
+        return PangoTag("<u>");
+    else if (code == ANSI_STRIKETHROUGH)
+        return PangoTag("<s>");
+    else if (ANSI_FONT_BLACK <= code && code <= ANSI_FONT_WHITE)
+        return FONT_TAGS[code - ANSI_FONT_BLACK];
+    else if (ANSI_BG_BLACK <= code && code <= ANSI_BG_WHITE)
+        return BG_TAGS[code - ANSI_BG_BLACK];
+    return PangoTag("");
 }
 
 // Get closing markup tag from ANSI escape sequence
-static const char* GetClosingTag(ansi_escape_code code) {
+static const pango_tag GetClosingTag(ansi_escape_code code) {
     if (code == ANSI_BOLD)
-        return "</b>";
+        return PangoTag("</b>");
     else if (code == ANSI_ITALIC)
-        return "</i>";
+        return PangoTag("</i>");
     else if (code == ANSI_UNDERLINE)
-        return "</u>";
+        return PangoTag("</u>");
     else if (code == ANSI_STRIKETHROUGH)
-        return "</s>";
+        return PangoTag("</s>");
     else if ((ANSI_FONT_BLACK <= code && code <= ANSI_FONT_WHITE) ||
             (ANSI_BG_BLACK <= code && code <= ANSI_BG_WHITE))
-        return "</span>";
-    return "";
+        return PangoTag("</span>");
+    return PangoTag("");
 }
 
 #define MAX_STACK_SIZE 64
@@ -167,7 +172,7 @@ class TagStack {
     int m_top;
 
  public:
-    TagStack() : m_top(-1) {}
+    TagStack() : m_tags(), m_top(-1) {}
 
     void Push(ansi_escape_code code) {
         if (m_top < MAX_STACK_SIZE - 1)
@@ -178,58 +183,44 @@ class TagStack {
 
     void Clear() { m_top = -1; }
 
-    // Get length of stacked opening tags
-    int OpeningTagLength() {
-        if (m_top < 0)
-            return 0;
+    using GetTagFunc = const pango_tag (*)(ansi_escape_code);
+
+    // Get length of stacked tags
+    int GetTagLength(GetTagFunc GetTag) const {
         int len = 0;
-        for (ansi_escape_code* code = m_tags; code < m_tags + Size(); code++) {
-            const char* closing_tag = GetOpeningTag(*code);
-            len += strlen(closing_tag);
+        const ansi_escape_code* max_tag = m_tags + m_top;
+        for (const ansi_escape_code* code = m_tags; code <= max_tag; code++) {
+            len += GetTag(*code).len;
         }
         return len;
     }
 
-    // Get length of stacked closing tags
-    int ClosingTagLength() {
-        if (m_top < 0)
-            return 0;
-        int len = 0;
-        for (ansi_escape_code* code = m_tags; code < m_tags + Size(); code++) {
-            const char* closing_tag = GetClosingTag(*code);
-            len += strlen(closing_tag);
-        }
-        return len;
+    inline int OpeningTagLength() const {
+        return GetTagLength(GetOpeningTag);
     }
 
-    // Copy stacked opening tags to char*
-    int CopyOpeningTag(char* output) {
-        if (m_top < 0)
-            return 0;
-        int len = 0;
-        for (ansi_escape_code* code = m_tags; code < m_tags + Size(); code++) {
-            const char *opening_tag = GetOpeningTag(*code);
-            int opening_tag_len = strlen(opening_tag);
-            memcpy(output, opening_tag, opening_tag_len);
-            output += opening_tag_len;
-            len += opening_tag_len;
-        }
-        return len;
+    inline int ClosingTagLength() const {
+        return GetTagLength(GetClosingTag);
     }
 
-    // Copy stacked closing tags to char*
-    int CopyClosingTag(char* output) {
-        if (m_top < 0)
-            return 0;
-        int len = 0;
-        for (ansi_escape_code* code = m_tags + m_top; code >= m_tags; code--) {
-            const char *closing_tag = GetClosingTag(*code);
-            int closing_tag_len = strlen(closing_tag);
-            memcpy(output, closing_tag, closing_tag_len);
-            output += closing_tag_len;
-            len += closing_tag_len;
+    // Copy stacked tags to char*
+    int CopyTag(char* output, GetTagFunc GetTag, bool reverse) const {
+        char* start = output;
+        for (int i = 0; i <= m_top; i++) {
+            int idx = reverse ? m_top - i : i;
+            const pango_tag opening_tag = GetTag(m_tags[idx]);
+            memcpy(output, opening_tag.str, opening_tag.len);
+            output += opening_tag.len;
         }
-        return len;
+        return static_cast<int>(output - start);
+    }
+
+    inline int CopyOpeningTag(char* output) const {
+        return CopyTag(output, GetOpeningTag, false);
+    }
+
+    inline int CopyClosingTag(char* output) const {
+        return CopyTag(output, GetClosingTag, true);
     }
 };
 
@@ -256,35 +247,29 @@ int ConvertAnsiToPangoLength(TagStack* stack, const char *input) {
                         len += closing_tag_len;
                         closing_tag_len = 0;
                     } else {
-                        const char *opening_tag = GetOpeningTag(code);
-                        len += strlen(opening_tag);
-                        const char *closing_tag = GetClosingTag(code);
-                        closing_tag_len += strlen(closing_tag);
+                        len += GetOpeningTag(code).len;
+                        closing_tag_len += GetClosingTag(code).len;
                     }
                     if (c == 'm')
                         break;
                 }
             }
+            continue;
         } else if (*p == '&') {
-            p++;
             len += 5;  // &amp;
         } else if (*p == '<') {
-            p++;
             len += 4;  // &lt;
         } else if (*p == '>') {
-            p++;
             len += 4;  // &gt;
         } else if (*p == '\'') {
-            p++;
             len += 6;  // &apos;
         } else if (*p == '"') {
-            p++;
             len += 6;  // &quot;
         } else {
             // Copy regular characters
-            p++;
             len++;
         }
+        p++;
     }
 
     len += closing_tag_len;
@@ -318,40 +303,36 @@ void ConvertAnsiToPango(TagStack* stack, const char *input, char *output) {
                         q += stack->CopyClosingTag(q);
                         stack->Clear();
                     } else {
-                        const char *opening_tag = GetOpeningTag(code);
-                        int opening_tag_len = strlen(opening_tag);
-                        memcpy(q, opening_tag, opening_tag_len);
-                        q += opening_tag_len;
+                        const pango_tag opening_tag = GetOpeningTag(code);
+                        memcpy(q, opening_tag.str, opening_tag.len);
+                        q += opening_tag.len;
                         stack->Push(code);
                     }
                     if (c == 'm')
                         break;
                 }
             }
+            continue;
         } else if (*p == '&') {
-            p++;
             memcpy(q, "&amp;", 5);
             q += 5;
         } else if (*p == '<') {
-            p++;
             memcpy(q, "&lt;", 4);
             q += 4;
         } else if (*p == '>') {
-            p++;
             memcpy(q, "&gt;", 4);
             q += 4;
         } else if (*p == '\'') {
-            p++;
             memcpy(q, "&apos;", 6);
             q += 6;
         } else if (*p == '"') {
-            p++;
             memcpy(q, "&quot;", 6);
             q += 6;
         } else {
             // Copy regular characters
-            *q++ = *p++;
+            *q++ = *p;
         }
+        p++;
     }
 
     // Add closing tags
