@@ -226,7 +226,7 @@ static bool IsValidURL(const std::string &url) {
 void MainFrame::OpenURL(int id) {
     rapidjson::Value& help = m_definition["help"].GetArray()[id];
     std::string type = help["type"].GetString();
-    std::string url = "";
+    std::string url;
     std::string tag;
 
     if (type == "url") {
@@ -464,8 +464,8 @@ void MainFrame::RunCommand() {
 #endif
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
 
-    std::string codepage = json_utils::GetString(sub_definition, "codepage", "");
-    bool use_utf8_on_windows = codepage == "utf8" || codepage == "utf-8";
+    const char* codepage = json_utils::GetString(sub_definition, "codepage", "");
+    bool use_utf8_on_windows = strcmp(codepage, "utf8") == 0 || strcmp(codepage, "utf-8") == 0;
 
     ExecuteResult result = Execute(cmd, use_utf8_on_windows);
     uiButtonSetText(m_run_button, text);
@@ -475,7 +475,7 @@ void MainFrame::RunCommand() {
     bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
     bool show_success_dialog = json_utils::GetBool(sub_definition, "show_success_dialog", true);
 
-    if (result.err_msg != "") {
+    if (!result.err_msg.empty()) {
         PrintFmt("[RunCommand] Error: %s\n", result.err_msg.c_str());
         ShowErrorDialog(result.err_msg);
         return;
@@ -497,7 +497,7 @@ void MainFrame::RunCommand() {
         return;
     }
 
-    if (show_last_line && result.last_line != "") {
+    if (show_last_line && !result.last_line.empty()) {
         ShowSuccessDialog(result.last_line);
         return;
     }

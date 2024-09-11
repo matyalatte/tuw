@@ -27,7 +27,7 @@ Component::Component(const rapidjson::Value& j) {
     m_is_wide = false;
     m_label = j["label"].GetString();
     m_id = json_utils::GetString(j, "id", "");
-    if (m_id == "") {
+    if (m_id.empty()) {
         uint32_t hash = Fnv1Hash32(j["label"].GetString());
         m_id = "_" + std::to_string(hash);
     }
@@ -267,7 +267,7 @@ class FilterList {
         bool is_reading_pattern = false;
         Filter* filter = new Filter();
         for (const char c : ext) {
-            if (c == "|"[0]) {
+            if (c == '|') {
                 filter_buf[i] = 0;
                 if (is_reading_pattern) {
                     filter->AddPattern(&filter_buf[start]);
@@ -278,7 +278,7 @@ class FilterList {
                 }
                 is_reading_pattern = !is_reading_pattern;
                 start = i + 1;
-            } else if (is_reading_pattern && (c == ";"[0])) {
+            } else if (is_reading_pattern && (c == ';')) {
                 filter_buf[i] = 0;
                 filter->AddPattern(&filter_buf[start]);
                 start = i + 1;
@@ -537,7 +537,7 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
 }
 
 std::string CheckArray::GetRawString() {
-    std::string str = "";
+    std::string str;
     std::vector<uiCheckbox*> checks;
     checks = *(std::vector<uiCheckbox*>*)m_widget;
     for (size_t i = 0; i < checks.size(); i++) {

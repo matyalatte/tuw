@@ -14,7 +14,7 @@ namespace tuw_constants {
     constexpr int VERSION_INT = 700;
 
 #ifdef _WIN32
-    constexpr char OS[] = "win";
+    #define TUW_CONSTANTS_OS "win"
     const int GRID_COMP_XSPACE = 2;
     const int GRID_MAIN_SPACE = 7;
     const int BOX_MAIN_SPACE = 6;
@@ -23,7 +23,7 @@ namespace tuw_constants {
     const int BTN_WIDTH = 90;
     const int BTN_HEIGHT = 24;
 #elif defined(__TUW_UNIX__)
-    constexpr char OS[] = "linux";
+    #define TUW_CONSTANTS_OS "linux"
     const int GRID_COMP_XSPACE = 4;
     const int GRID_MAIN_SPACE = 12;
     const int BOX_MAIN_SPACE = 12;
@@ -32,7 +32,7 @@ namespace tuw_constants {
     const int BTN_WIDTH = 84;
     const int BTN_HEIGHT = -1;
 #else
-    constexpr char OS[] = "mac";
+    #define TUW_CONSTANTS_OS "mac"
     const int GRID_COMP_XSPACE = 4;
     const int GRID_MAIN_SPACE = 12;
     const int BOX_MAIN_SPACE = 12;

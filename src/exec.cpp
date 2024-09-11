@@ -156,7 +156,7 @@ ExecuteResult LaunchDefaultApp(const std::string& url) {
         return { -1, "Failed to create a subprocess.\n", ""};
 
     int return_code;
-    std::string err_msg = "";
+    std::string err_msg;
     DestroyProcess(process, &return_code, err_msg);
 
     return { return_code, err_msg, "" };

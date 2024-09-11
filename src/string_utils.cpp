@@ -358,7 +358,7 @@ class Logger {
 
     void SetLogEntry(void* log_entry) {
         m_log_entry = static_cast<uiMultilineEntry*>(log_entry);
-        if (m_log_buffer != "") {
+        if (!m_log_buffer.empty()) {
             Log(m_log_buffer.c_str());
             m_log_buffer = "";
         }
