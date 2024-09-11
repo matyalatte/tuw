@@ -210,9 +210,9 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> args;
     for (int i = 0; i < argc; i++) {
 #ifdef _WIN32
-        args.push_back(UTF16toUTF8(argv[i]));
+        args.emplace_back(UTF16toUTF8(argv[i]));
 #else
-        args.push_back(argv[i]);
+        args.emplace_back(argv[i]);
 #endif
     }
     char *exe_path_cstr = envuGetExecutablePath();

@@ -239,7 +239,7 @@ class Filter {
         name = n;
     }
     void AddPattern(const char* pattern) {
-        patterns.push_back(pattern);
+        patterns.emplace_back(pattern);
     }
     uiFileDialogParamsFilter ToLibuiFilter() {
         return {
@@ -311,7 +311,7 @@ class FilterList {
     }
 
     void AddFilter(Filter* f) {
-        filters.push_back(f);
+        filters.emplace_back(f);
     }
 
     size_t GetSize() {
@@ -398,7 +398,7 @@ ComboBox::ComboBox(uiBox* box, const rapidjson::Value& j)
         const char* label = i["label"].GetString();
         uiComboboxAppend(combo, label);
         const char* value = json_utils::GetString(i, "value", label);
-        values.push_back(value);
+        values.emplace_back(value);
     }
     uiBox* hbox = uiNewHorizontalBox();
     uiBoxAppend(hbox, uiControl(combo), 0);
@@ -441,7 +441,7 @@ RadioButtons::RadioButtons(uiBox* box, const rapidjson::Value& j)
         const char* label = i["label"].GetString();
         uiRadioButtonsAppend(radio, label);
         const char* value = json_utils::GetString(i, "value", label);
-        values.push_back(value);
+        values.emplace_back(value);
     }
     uiBox* hbox = uiNewHorizontalBox();
     uiBoxAppend(hbox, uiControl(radio), 0);
@@ -526,9 +526,9 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
             uiControlSetTooltip(uiControl(check),
                                             json_utils::GetString(i, "tooltip", ""));
         }
-        checks->push_back(check);
+        checks->emplace_back(check);
         const char* value = json_utils::GetString(i, "value", label);
-        values.push_back(value);
+        values.emplace_back(value);
         id++;
     }
     uiBoxAppend(box, uiControl(check_array_box), 0);

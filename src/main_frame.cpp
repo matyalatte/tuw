@@ -339,7 +339,7 @@ void MainFrame::UpdatePanel(unsigned definition_id) {
             uiBoxSetSpacing(priv_box, tuw_constants::BOX_SUB_SPACE);
             new_comp = Component::PutComponent(priv_box, c);
             new_comp->SetConfig(m_config);
-            m_components.push_back(new_comp);
+            m_components.emplace_back(new_comp);
             uiBoxAppend(main_box, uiControl(priv_box), 0);
         }
     }
@@ -413,10 +413,10 @@ std::string MainFrame::GetCommand() {
     std::vector<std::string> cmd_ary;
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     for (rapidjson::Value& c : sub_definition["command_splitted"].GetArray())
-        cmd_ary.push_back(c.GetString());
+        cmd_ary.emplace_back(c.GetString());
     std::vector<int> cmd_ids;
     for (rapidjson::Value& c : sub_definition["command_ids"].GetArray())
-        cmd_ids.push_back(c.GetInt());
+        cmd_ids.emplace_back(c.GetInt());
 
     std::vector<std::string> comp_strings = std::vector<std::string>(m_components.size());
     for (size_t i = 0; i < m_components.size(); i++) {

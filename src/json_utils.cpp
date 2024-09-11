@@ -277,9 +277,9 @@ namespace json_utils {
         bool store_ids = false;
         for (const std::string& token : cmd) {
             if (store_ids) {
-                cmd_ids.push_back(token);
+                cmd_ids.emplace_back(token);
             } else {
-                splitted_cmd.push_back(token);
+                splitted_cmd.emplace_back(token);
                 rapidjson::Value n(token.c_str(), alloc);
                 splitted_cmd_json.PushBack(n, alloc);
             }
