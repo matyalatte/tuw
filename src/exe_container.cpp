@@ -9,19 +9,19 @@
 
 static uint32_t ReadUint32(FILE* io) {
     unsigned char int_as_bin[4];
-    size_t ret = fread(int_as_bin, 1, 4, io);
-    if (ret != 4)
+    if (fread(int_as_bin, 1, 4, io) != 4)
         return 0;
-    uint32_t num = 0;
-    for (size_t i = 0; i < 4; i++)
-        num += int_as_bin[i] << (i * 8);
-    return num;
+    return static_cast<uint32_t>(int_as_bin[0]) | static_cast<uint32_t>(int_as_bin[1] << 8) |
+           static_cast<uint32_t>(int_as_bin[2] << 16) | static_cast<uint32_t>(int_as_bin[3] << 24);
 }
 
 static void WriteUint32(FILE* io, const uint32_t& num) {
-    unsigned char int_as_bin[4];
-    for (size_t i = 0; i < 4; i++)
-        int_as_bin[i] = (unsigned char)(num >> (i * 8));
+    unsigned char int_as_bin[4] = {
+        static_cast<unsigned char>(num & 0xFF),
+        static_cast<unsigned char>((num >> 8) & 0xFF),
+        static_cast<unsigned char>((num >> 16) & 0xFF),
+        static_cast<unsigned char>((num >> 24) & 0xFF)
+    };
     fwrite(int_as_bin, 1, 4, io);
 }
 
@@ -29,68 +29,39 @@ static void WriteUint32(FILE* io, const uint32_t& num) {
 #define BUF_SIZE 1024
 
 static std::string ReadStr(FILE* io, const uint32_t& size) {
-    std::string str = "";
-    char buff[BUF_SIZE + 1];
-    buff[BUF_SIZE] = 0;
-    uint32_t pos = 0;
-    while (pos < size) {
-        size_t ret;
-        uint32_t rest = size - pos;
-        size_t copy_size = MIN(BUF_SIZE, rest);
-        ret = fread(buff, 1, copy_size, io);
-        if (ret != copy_size)
-            return "";
-        buff[copy_size] = 0;
-        str += buff;
-
-        if (rest < BUF_SIZE)
-            break;
-        pos += BUF_SIZE;
-    }
+    std::string str(size, '\0');
+    if (fread(&str[0], 1, size, io) != size)
+        return "";
     return str;
 }
 
 static void WriteStr(FILE* io, const std::string& str) {
-    uint32_t size = (uint32_t)str.length();
-    uint32_t pos = 0;
-    while (pos < size) {
-        if (size - pos <= BUF_SIZE) {
-            fwrite(str.substr(pos, size).c_str(), 1, size - pos, io);
-            break;
-        }
-        fwrite(str.substr(pos, pos + BUF_SIZE).c_str(), 1, BUF_SIZE, io);
-        pos += BUF_SIZE;
-    }
+    fwrite(str.data(), 1, str.size(), io);
+
+    // Zero padding
     size_t padding = (8 - ftell(io) % 8) % 8;
-    char buff[8];
-    fwrite(buff, 1, padding, io);
+    char padding_bytes[8] = { 0 };
+    fwrite(padding_bytes, 1, padding, io);
 }
 
-static bool CopyBinary(FILE* reader, FILE* writer, const uint32_t& size) {
-    uint32_t pos = 0;
+static bool CopyBinary(FILE* reader, FILE* writer, uint32_t size) {
     char buff[BUF_SIZE];
-    while (pos < size) {
-        uint32_t rest = size - pos;
-        size_t copy_size = MIN(BUF_SIZE, rest);
-        size_t ret = fread(buff, 1, copy_size, reader);
-        if (ret != copy_size)
+    while (size > 0) {
+        size_t copy_size = MIN(BUF_SIZE, size);
+        size_t read_size = fread(buff, 1, copy_size, reader);
+        if (read_size != copy_size)
             return false;
-        fwrite(buff, 1, copy_size, writer);
-
-        if (rest < BUF_SIZE)
-            break;
-        pos += BUF_SIZE;
+        fwrite(buff, 1, read_size, writer);
+        size -= static_cast<uint32_t>(read_size);
     }
     return true;
 }
 
 static std::string ReadMagic(FILE* io) {
-    char magic[5];
-    magic[4] = 0;
-    size_t ret = fread(magic, 1, 4, io);
-    if (ret != 4)
+    char magic[4];
+    if (fread(magic, 1, 4, io) != 4)
         return "";
-    return std::string(magic);
+    return std::string(magic, 4);
 }
 
 static uint32_t Length(FILE* io) {
@@ -127,9 +98,8 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
     fseek(file_io, -8, SEEK_CUR);
     m_exe_size = end_off + ReadUint32(file_io);
     if (EXE_SIZE_MAX <= m_exe_size || end_off < m_exe_size) {
-        std::string msg = "Unexpected exe size. (" + std::to_string(m_exe_size) + ")";
         fclose(file_io);
-        return { false, msg };
+        return { false, "Unexpected exe size. (" + std::to_string(m_exe_size) + ")" };
     }
     fseek(file_io, m_exe_size, SEEK_SET);
 
@@ -143,9 +113,8 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
     uint32_t json_size = ReadUint32(file_io);
     uint32_t stored_hash = ReadUint32(file_io);
     if (JSON_SIZE_MAX <= json_size || end_off < m_exe_size + json_size + 20) {
-        std::string msg = "Unexpected json size. (" + std::to_string(json_size) + ")";
         fclose(file_io);
-        return { false, msg };
+        return { false, "Unexpected json size. (" + std::to_string(json_size) + ")" };
     }
 
     // Read json data
@@ -155,44 +124,40 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
     if (json_str.length() != json_size)
         return { false, "Unexpected char detected." };
 
-    if (stored_hash != Fnv1Hash32(json_str)) {
-        std::string msg = "Invalid JSON hash. (" + std::to_string(stored_hash) + ")";
-        return { false, msg };
-    }
+    if (stored_hash != Fnv1Hash32(json_str))
+        return { false, "Invalid JSON hash. (" + std::to_string(stored_hash) + ")" };
 
     rapidjson::ParseResult ok = m_json.Parse(json_str.c_str());
     if (!ok) {
-        std::string msg = std::string("Failed to parse JSON: ")
-                          + rapidjson::GetParseError_En(ok.Code())
-                          + " (offset: " + std::to_string(ok.Offset()) + ")";
-        return { false, msg };
+        return {
+            false,
+            std::string("Failed to parse JSON: ") +
+                rapidjson::GetParseError_En(ok.Code()) +
+                " (offset: " + std::to_string(ok.Offset()) + ")"
+        };
     }
 
     return JSON_RESULT_OK;
 }
 
 json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
-    assert(m_exe_path != "");
-    std::string json_str = "";
+    assert(!m_exe_path.empty());
+    std::string json_str;
     if (HasJson())
         json_str = json_utils::JsonToString(m_json);
 
-    uint32_t json_size = (uint32_t)json_str.length();
-    if (JSON_SIZE_MAX <= json_size) {
-        std::string msg = "Unexpected json size. (" + std::to_string(json_size) + ")";
-        return { false, msg };
-    }
+    uint32_t json_size = static_cast<uint32_t>(json_str.length());
+    if (JSON_SIZE_MAX <= json_size)
+        return { false, "Unexpected json size. (" + std::to_string(json_size) + ")" };
 
     FILE* old_io = fopen(m_exe_path.c_str(), "rb");
-    if (!old_io) {
-        std::string msg = "Failed to open a file. (" + m_exe_path + ")";
-        return { false, msg };
-    }
+    if (!old_io)
+        return { false, "Failed to open a file. (" + m_exe_path + ")" };
+
     FILE* new_io = fopen(exe_path.c_str(), "wb");
     if (!new_io) {
-        std::string msg = "Failed to open a file. (" + exe_path + ")";
         fclose(old_io);
-        return { false, msg };
+        return { false, "Failed to open a file. (" + exe_path + ")" };
     }
     m_exe_path = exe_path;
 
