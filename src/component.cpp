@@ -46,10 +46,6 @@ std::string Component::GetString() {
     return str;
 }
 
-std::string const Component::GetID() {
-    return m_id;
-}
-
 bool Component::Validate(bool* redraw_flag) {
     // Main frame should run Fit() after this function.
     bool validate = m_validator.Validate(GetRawString());
@@ -75,7 +71,7 @@ bool Component::Validate(bool* redraw_flag) {
     return validate;
 }
 
-std::string Component::GetValidationError() {
+const std::string& Component::GetValidationError() const {
     return m_validator.GetError();
 }
 

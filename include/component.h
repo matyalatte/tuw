@@ -26,16 +26,16 @@ class Component {
     virtual ~Component();
     virtual std::string GetRawString() { return "";}
     std::string GetString();
-    std::string const GetID();
+    const std::string& GetID() const { return m_id; }
 
     virtual void SetConfig(const rapidjson::Value& config) { UNUSED(config); }
     virtual void GetConfig(rapidjson::Document& config) { UNUSED(config); }
 
-    bool HasString() { return m_has_string; }
-    bool IsWide() { return m_is_wide; }
+    bool HasString() const { return m_has_string; }
+    bool IsWide() const { return m_is_wide; }
 
     bool Validate(bool* redraw_flag);
-    std::string GetValidationError();
+    const std::string& GetValidationError() const;
     void PutErrorWidget(uiBox* box);
 
     static Component* PutComponent(uiBox* box, const rapidjson::Value& j);
