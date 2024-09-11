@@ -139,12 +139,12 @@ namespace json_utils {
         return true;
     }
 
-    static const bool CAN_SKIP = true;
+    static const bool OPTIONAL = true;
 
     static void CheckJsonType(JsonResult& result, const rapidjson::Value& j, const char* key,
-        const JsonType& type, const std::string& label = "", const bool& canSkip = false) {
+        const JsonType& type, const std::string& label = "", const bool& optional = false) {
         if (!j.HasMember(key)) {
-            if (canSkip) return;
+            if (optional) return;
             result.ok = false;
             result.msg = GetLabel(label, key) + " not found.";
             return;
@@ -402,14 +402,14 @@ namespace json_utils {
 
     void CheckValidator(JsonResult& result, rapidjson::Value& validator,
                         const std::string& label) {
-        CheckJsonType(result, validator, "regex", JsonType::STRING, label, CAN_SKIP);
-        CheckJsonType(result, validator, "regex_error", JsonType::STRING, label, CAN_SKIP);
-        CheckJsonType(result, validator, "wildcard", JsonType::STRING, label, CAN_SKIP);
-        CheckJsonType(result, validator, "wildcard_error", JsonType::STRING, label, CAN_SKIP);
-        CheckJsonType(result, validator, "exist", JsonType::BOOLEAN, label, CAN_SKIP);
-        CheckJsonType(result, validator, "exist_error", JsonType::STRING, label, CAN_SKIP);
-        CheckJsonType(result, validator, "not_empty", JsonType::BOOLEAN, label, CAN_SKIP);
-        CheckJsonType(result, validator, "not_empty_error", JsonType::STRING, label, CAN_SKIP);
+        CheckJsonType(result, validator, "regex", JsonType::STRING, label, OPTIONAL);
+        CheckJsonType(result, validator, "regex_error", JsonType::STRING, label, OPTIONAL);
+        CheckJsonType(result, validator, "wildcard", JsonType::STRING, label, OPTIONAL);
+        CheckJsonType(result, validator, "wildcard_error", JsonType::STRING, label, OPTIONAL);
+        CheckJsonType(result, validator, "exist", JsonType::BOOLEAN, label, OPTIONAL);
+        CheckJsonType(result, validator, "exist_error", JsonType::STRING, label, OPTIONAL);
+        CheckJsonType(result, validator, "not_empty", JsonType::BOOLEAN, label, OPTIONAL);
+        CheckJsonType(result, validator, "not_empty_error", JsonType::STRING, label, OPTIONAL);
     }
 
     // validate one of definitions (["gui"][i]) and store parsed info
@@ -417,17 +417,17 @@ namespace json_utils {
                             rapidjson::Document::AllocatorType& alloc) {
         // check is_string
         CheckJsonType(result, sub_definition, "label", JsonType::STRING);
-        CheckJsonType(result, sub_definition, "button", JsonType::STRING, "", CAN_SKIP);
+        CheckJsonType(result, sub_definition, "button", JsonType::STRING, "", OPTIONAL);
         CorrectKey(sub_definition, "window_title", "window_name", alloc);
         CorrectKey(sub_definition, "title", "window_name", alloc);
-        CheckJsonType(result, sub_definition, "window_name", JsonType::STRING, "", CAN_SKIP);
+        CheckJsonType(result, sub_definition, "window_name", JsonType::STRING, "", OPTIONAL);
 
-        CheckJsonType(result, sub_definition, "check_exit_code", JsonType::BOOLEAN, "", CAN_SKIP);
-        CheckJsonType(result, sub_definition, "exit_success", JsonType::INTEGER, "", CAN_SKIP);
-        CheckJsonType(result, sub_definition, "show_last_line", JsonType::BOOLEAN, "", CAN_SKIP);
+        CheckJsonType(result, sub_definition, "check_exit_code", JsonType::BOOLEAN, "", OPTIONAL);
+        CheckJsonType(result, sub_definition, "exit_success", JsonType::INTEGER, "", OPTIONAL);
+        CheckJsonType(result, sub_definition, "show_last_line", JsonType::BOOLEAN, "", OPTIONAL);
         CheckJsonType(result, sub_definition,
-                      "show_success_dialog", JsonType::BOOLEAN, "", CAN_SKIP);
-        CheckJsonType(result, sub_definition, "codepage", JsonType::STRING, "", CAN_SKIP);
+                      "show_success_dialog", JsonType::BOOLEAN, "", OPTIONAL);
+        CheckJsonType(result, sub_definition, "codepage", JsonType::STRING, "", OPTIONAL);
         if (sub_definition.HasMember("codepage")) {
             std::string codepage = sub_definition["codepage"].GetString();
             if (codepage != "utf8" && codepage != "utf-8" && codepage != "default") {
@@ -463,13 +463,13 @@ namespace json_utils {
             CorrectKey(c, "item_array", "items", alloc);
             switch (type) {
                 case COMP_FILE:
-                    CheckJsonType(result, c, "extension", JsonType::STRING, label, CAN_SKIP);
+                    CheckJsonType(result, c, "extension", JsonType::STRING, label, OPTIONAL);
                     /* Falls through. */
                 case COMP_FOLDER:
-                    CheckJsonType(result, c, "button", JsonType::STRING, label, CAN_SKIP);
+                    CheckJsonType(result, c, "button", JsonType::STRING, label, OPTIONAL);
                     /* Falls through. */
                 case COMP_TEXT:
-                    CheckJsonType(result, c, "default", JsonType::STRING, label, CAN_SKIP);
+                    CheckJsonType(result, c, "default", JsonType::STRING, label, OPTIONAL);
                     break;
                 case COMP_COMBO:
                 case COMP_RADIO:
@@ -477,22 +477,22 @@ namespace json_utils {
                     if (!result.ok) return;
                     for (rapidjson::Value& i : c["items"].GetArray()) {
                         CheckJsonType(result, i, "label", JsonType::STRING, "items");
-                        CheckJsonType(result, i, "value", JsonType::STRING, "items", CAN_SKIP);
+                        CheckJsonType(result, i, "value", JsonType::STRING, "items", OPTIONAL);
                     }
-                    CheckJsonType(result, c, "default", JsonType::INTEGER, label, CAN_SKIP);
+                    CheckJsonType(result, c, "default", JsonType::INTEGER, label, OPTIONAL);
                     break;
                 case COMP_CHECK:
-                    CheckJsonType(result, c, "value", JsonType::STRING, label, CAN_SKIP);
-                    CheckJsonType(result, c, "default", JsonType::BOOLEAN, label, CAN_SKIP);
+                    CheckJsonType(result, c, "value", JsonType::STRING, label, OPTIONAL);
+                    CheckJsonType(result, c, "default", JsonType::BOOLEAN, label, OPTIONAL);
                     break;
                 case COMP_CHECK_ARRAY:
                     CheckJsonType(result, c, "items", JsonType::JSON_ARRAY, label);
                     if (!result.ok) return;
                     for (rapidjson::Value& i : c["items"].GetArray()) {
                         CheckJsonType(result, i, "label", JsonType::STRING, "items");
-                        CheckJsonType(result, i, "value", JsonType::STRING, "items", CAN_SKIP);
-                        CheckJsonType(result, i, "default", JsonType::BOOLEAN, "items", CAN_SKIP);
-                        CheckJsonType(result, i, "tooltip", JsonType::STRING, "items", CAN_SKIP);
+                        CheckJsonType(result, i, "value", JsonType::STRING, "items", OPTIONAL);
+                        CheckJsonType(result, i, "default", JsonType::BOOLEAN, "items", OPTIONAL);
+                        CheckJsonType(result, i, "tooltip", JsonType::STRING, "items", OPTIONAL);
                     }
                     break;
                 case COMP_INT:
@@ -502,7 +502,7 @@ namespace json_utils {
                         jtype = JsonType::INTEGER;
                     } else {
                         jtype = JsonType::FLOAT;
-                        CheckJsonType(result, c, "digits", JsonType::INTEGER, label, CAN_SKIP);
+                        CheckJsonType(result, c, "digits", JsonType::INTEGER, label, OPTIONAL);
                         if (!result.ok) return;
                         if (c.HasMember("digits") && c["digits"].GetInt() < 0) {
                             result.ok = false;
@@ -510,11 +510,11 @@ namespace json_utils {
                                          + " should be a non-negative integer.";
                         }
                     }
-                    CheckJsonType(result, c, "default", jtype, label, CAN_SKIP);
-                    CheckJsonType(result, c, "min", jtype, label, CAN_SKIP);
-                    CheckJsonType(result, c, "max", jtype, label, CAN_SKIP);
-                    CheckJsonType(result, c, "inc", jtype, label, CAN_SKIP);
-                    CheckJsonType(result, c, "wrap", JsonType::BOOLEAN, label, CAN_SKIP);
+                    CheckJsonType(result, c, "default", jtype, label, OPTIONAL);
+                    CheckJsonType(result, c, "min", jtype, label, OPTIONAL);
+                    CheckJsonType(result, c, "max", jtype, label, OPTIONAL);
+                    CheckJsonType(result, c, "inc", jtype, label, OPTIONAL);
+                    CheckJsonType(result, c, "wrap", JsonType::BOOLEAN, label, OPTIONAL);
                     break;
                 case COMP_UNKNOWN:
                     result.ok = false;
@@ -535,16 +535,16 @@ namespace json_utils {
             }
 
             CorrectKey(c, "add_quote", "add_quotes", alloc);
-            CheckJsonType(result, c, "add_quotes", JsonType::BOOLEAN, label, CAN_SKIP);
+            CheckJsonType(result, c, "add_quotes", JsonType::BOOLEAN, label, OPTIONAL);
             CorrectKey(c, "empty_message", "placeholder", alloc);
-            CheckJsonType(result, c, "placeholder", JsonType::STRING, label, CAN_SKIP);
-            CheckJsonType(result, c, "id", JsonType::STRING, label, CAN_SKIP);
-            CheckJsonType(result, c, "tooltip", JsonType::STRING, label, CAN_SKIP);
+            CheckJsonType(result, c, "placeholder", JsonType::STRING, label, OPTIONAL);
+            CheckJsonType(result, c, "id", JsonType::STRING, label, OPTIONAL);
+            CheckJsonType(result, c, "tooltip", JsonType::STRING, label, OPTIONAL);
 
             bool ignore = false;
             CorrectKey(c, "platform", "platforms", alloc);
             CorrectKey(c, "platform_array", "platforms", alloc);
-            CheckJsonType(result, c, "platforms", JsonType::STRING_ARRAY, label, CAN_SKIP);
+            CheckJsonType(result, c, "platforms", JsonType::STRING_ARRAY, label, OPTIONAL);
             if (!result.ok) return;
             if (c.HasMember("platforms")) {
                 ignore = true;
