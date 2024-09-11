@@ -6,25 +6,21 @@
 #include "windows.h"
 #endif
 
+inline bool IsNewline(char ch) {
+    return ch == '\n' || ch == '\r';
+}
+
 static std::string GetLastLine(const std::string& input) {
-    if (input.length() == 0) return "";
-    size_t end = input.length() - 1;
-    if (input[end] == '\n') {
-        if (end == 0) return "";
-        end--;
-    }
-#ifdef _WIN32
-    if (input[end] == '\r') {
-        if (end == 0) return "";
-        end--;
-    }
-#endif
+    if (input.empty()) return "";
+    size_t end = input.length();
+
+    // Trim trailing newlines
+    while (end > 0 && IsNewline(input[end - 1])) end--;
     if (end == 0) return "";
-    size_t position = end;
-    while ((input[position] != '\n') && position > 0) position--;
-    if (input[position] == '\n') position++;
-    if (end <= position) return "";
-    return input.substr(position, end - position + 1);
+
+    size_t start = end - 1;
+    while (start > 0 && input[start - 1] != '\n') start--;
+    return input.substr(start, end - start);
 }
 
 enum READ_IO_TYPE : int {
@@ -53,18 +49,9 @@ unsigned ReadIO(subprocess_s &process,
 }
 
 void DestroyProcess(subprocess_s &process, int *return_code, std::string &err_msg) {
-    int result = subprocess_join(&process, return_code);
-    if (0 != result) {
+    if (subprocess_join(&process, return_code) || subprocess_destroy(&process)) {
         *return_code = -1;
-        err_msg = "Failed to join a subprocess.\n";
-        return;
-    }
-
-    result = subprocess_destroy(&process);
-    if (0 != result) {
-        *return_code = -1;
-        err_msg = "Failed to destroy a subprocess.\n";
-        return;
+        err_msg = "Failed to manage subprocess.\n";
     }
 }
 

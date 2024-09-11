@@ -225,11 +225,11 @@ static bool IsValidURL(const std::string &url) {
 
 void MainFrame::OpenURL(int id) {
     rapidjson::Value& help = m_definition["help"].GetArray()[id];
-    std::string type = help["type"].GetString();
+    const char* type = help["type"].GetString();
     std::string url;
-    std::string tag;
+    const char* tag = "";
 
-    if (type == "url") {
+    if (strcmp(type, "url") == 0) {
         url = help["url"].GetString();
         tag = "[OpenURL] ";
 
@@ -239,13 +239,13 @@ void MainFrame::OpenURL(int id) {
             // scheme should be http or https
             if (scheme == "file") {
                 std::string msg = "Use 'file' type for a path, not 'url' type. (" + url + ")";
-                PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
+                PrintFmt("%sError: %s\n", tag, msg.c_str());
                 ShowErrorDialog(msg);
                 return;
             } else if (scheme != "https" && scheme != "http") {
                 std::string msg = "Unsupported scheme detected. "
                                   "It should be http or https. (" + scheme + ")";
-                PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
+                PrintFmt("%sError: %s\n", tag, msg.c_str());
                 ShowErrorDialog(msg);
                 return;
             }
@@ -253,7 +253,7 @@ void MainFrame::OpenURL(int id) {
             url = "https://" + url;
         }
 
-    } else if (type == "file") {
+    } else if (strcmp(type, "file") == 0) {
         char *url_cstr = envuGetRealPath(help["path"].GetString());
         int exists = envuFileExists(url_cstr);
         url = envuStr(url_cstr);
@@ -261,22 +261,22 @@ void MainFrame::OpenURL(int id) {
 
         if (!exists) {
             std::string msg = "File does not exist. (" + url + ")";
-            PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
+            PrintFmt("%sError: %s\n", tag, msg.c_str());
             ShowErrorDialog(msg);
             return;
         }
     }
 
-    PrintFmt("%s%s\n", tag.c_str(), url.c_str());
+    PrintFmt("%s%s\n", tag, url.c_str());
 
-    if (type == "file") {
+    if (strcmp(type, "file") == 0) {
         url = "file:" + url;
     }
 
     if (!IsValidURL(url)) {
         std::string msg = "URL should NOT contains ' ', ';', '|', '&', '\\r', nor '\\n'.\n"
                           "URL: " + url;
-        PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
+        PrintFmt("%sError: %s\n", tag, msg.c_str());
         ShowErrorDialog(msg.c_str());
         return;
     }
@@ -290,8 +290,8 @@ void MainFrame::OpenURL(int id) {
     } else {
         ExecuteResult result = LaunchDefaultApp(url);
         if (result.exit_code != 0) {
-            std::string msg = "Failed to open a " + type + " by an unexpected error.";
-            PrintFmt("%sError: %s\n", tag.c_str(), msg.c_str());
+            std::string msg = std::string("Failed to open a ") + type + " by an unexpected error.";
+            PrintFmt("%sError: %s\n", tag, msg.c_str());
             ShowErrorDialog(msg.c_str());
         }
     }
@@ -387,7 +387,7 @@ bool MainFrame::Validate() {
     std::string val_first_err;
     for (Component* comp : m_components) {
         if (!comp->Validate(&redraw_flag)) {
-            std::string val_err = comp->GetValidationError();
+            const std::string& val_err = comp->GetValidationError();
             if (validate)
                 val_first_err = val_err;
             validate = false;
