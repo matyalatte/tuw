@@ -73,7 +73,6 @@ static uint32_t Length(FILE* io) {
 }
 
 static const uint32_t EXE_SIZE_MAX = 20000000;  // Allowed size of exe
-static const uint32_t JSON_SIZE_MAX = 1000000;  // Allowed size of json
 
 json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
     m_exe_path = exe_path;

@@ -38,7 +38,7 @@ namespace json_utils {
         if (!fp)
             return { false, "Failed to open " + file };
 
-        char readBuffer[65536];
+        char readBuffer[JSON_SIZE_MAX];
         rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
 
         rapidjson::ParseResult ok = json.ParseStream<JSONC_FLAGS>(is);
@@ -61,7 +61,7 @@ namespace json_utils {
         if (!fp)
             return { false, "Failed to open " + file + "." };
 
-        char writeBuffer[65536];
+        char writeBuffer[JSON_SIZE_MAX];
         rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
         rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);
         json.Accept(writer);
