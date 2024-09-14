@@ -22,5 +22,5 @@ class Validator {
     ~Validator() {}
     void Initialize(const rapidjson::Value& j);
     bool Validate(const std::string& str);
-    std::string GetError() { return m_error_msg; }
+    const std::string& GetError() const { return m_error_msg; }
 };

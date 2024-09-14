@@ -1,6 +1,6 @@
 {
-    "recommended": "0.7.0",
-    "minimum_required": "0.7.0",
+    "recommended": "0.7.1",
+    "minimum_required": "0.7.1",
     "gui": [
         {
             "label": "Components Minimal",
@@ -249,6 +249,7 @@
             "show_last_line": true,
             "check_exit_code": true,
             "exit_success": 0,
+            "codepage": "default",
             "components": [
                 {
                     "type": "static_text",
@@ -260,8 +261,17 @@
     "help": [
         {
             "type": "url",
-            "label": "test",
-            "url":"example.com"
+            "label": "open example.com",
+            "url": "example.com"
+        },
+        {
+            "type": "file",
+            "label": "open gui_definition.json",
+            "path": "gui_definition.json"
         }
-    ]
+    ],  // Trailing comma
 }
+// Single-line comment
+/*
+ * Multi-line comments
+ */

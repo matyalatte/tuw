@@ -33,29 +33,29 @@ static int IsUnsupportedPattern(const char *pattern) {
 }
 
 bool Validator::Validate(const std::string& str) {
-    if (m_not_empty && str == "") {
-        if (m_not_empty_error == "")
+    if (m_not_empty && str.empty()) {
+        if (m_not_empty_error.empty())
             m_error_msg = "Empty string is NOT allowed.";
         else
             m_error_msg = m_not_empty_error;
         return false;
     }
-    if (m_wildcard != "") {
+    if (!m_wildcard.empty()) {
         if (tsm_wildcard_match(m_wildcard.c_str(), str.c_str()) != TSM_OK) {
-            if (m_wildcard_error == "")
+            if (m_wildcard_error.empty())
                 m_error_msg = "Wildcard match failed for pattern: " + m_wildcard;
             else
                 m_error_msg = m_wildcard_error;
             return false;
         }
     }
-    if (m_regex != "") {
+    if (!m_regex.empty()) {
         if (IsUnsupportedPattern(m_regex.c_str())) {
             m_error_msg = "Regex compile error: () operators are not supported.";
             return false;
         }
         int res = tsm_regex_match(m_regex.c_str(), str.c_str());
-        if (res != TSM_OK && m_regex_error != "") {
+        if (res != TSM_OK && !m_regex_error.empty()) {
             m_error_msg = m_regex_error;
             return false;
         }
@@ -68,7 +68,7 @@ bool Validator::Validate(const std::string& str) {
         }
     }
     if (m_exist && !envuPathExists(str.c_str())) {
-        if (m_exist_error == "")
+        if (m_exist_error.empty())
             m_error_msg = "Path does NOT exist.";
         else
             m_error_msg = m_exist_error;

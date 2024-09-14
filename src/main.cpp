@@ -210,9 +210,9 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> args;
     for (int i = 0; i < argc; i++) {
 #ifdef _WIN32
-        args.push_back(UTF16toUTF8(argv[i]));
+        args.emplace_back(UTF16toUTF8(argv[i]));
 #else
-        args.push_back(argv[i]);
+        args.emplace_back(argv[i]);
 #endif
     }
     char *exe_path_cstr = envuGetExecutablePath();
@@ -232,8 +232,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string json_path = "";
-    std::string new_exe_path = "";
+    std::string json_path;
+    std::string new_exe_path;
     bool force = false;
 
     for (int i = 2; i < argc; i++) {
@@ -268,14 +268,14 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if (json_path == "") {
+    if (json_path.empty()) {
         if (cmd_int == CMD_MERGE)
             json_path = "gui_definition.json";
         else
             json_path = "new.json";
     }
 
-    if (new_exe_path == "")
+    if (new_exe_path.empty())
         new_exe_path = exe_path + ".new";
 
     json_path = envuStr(envuGetFullPath(json_path.c_str()));

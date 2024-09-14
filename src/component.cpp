@@ -27,7 +27,7 @@ Component::Component(const rapidjson::Value& j) {
     m_is_wide = false;
     m_label = j["label"].GetString();
     m_id = json_utils::GetString(j, "id", "");
-    if (m_id == "") {
+    if (m_id.empty()) {
         uint32_t hash = Fnv1Hash32(j["label"].GetString());
         m_id = "_" + std::to_string(hash);
     }
@@ -44,10 +44,6 @@ std::string Component::GetString() {
     if (m_add_quotes)
         return "\"" + str + "\"";
     return str;
-}
-
-std::string const Component::GetID() {
-    return m_id;
 }
 
 bool Component::Validate(bool* redraw_flag) {
@@ -75,7 +71,7 @@ bool Component::Validate(bool* redraw_flag) {
     return validate;
 }
 
-std::string Component::GetValidationError() {
+const std::string& Component::GetValidationError() const {
     return m_validator.GetError();
 }
 
@@ -239,7 +235,7 @@ class Filter {
         name = n;
     }
     void AddPattern(const char* pattern) {
-        patterns.push_back(pattern);
+        patterns.emplace_back(pattern);
     }
     uiFileDialogParamsFilter ToLibuiFilter() {
         return {
@@ -267,7 +263,7 @@ class FilterList {
         bool is_reading_pattern = false;
         Filter* filter = new Filter();
         for (const char c : ext) {
-            if (c == "|"[0]) {
+            if (c == '|') {
                 filter_buf[i] = 0;
                 if (is_reading_pattern) {
                     filter->AddPattern(&filter_buf[start]);
@@ -278,7 +274,7 @@ class FilterList {
                 }
                 is_reading_pattern = !is_reading_pattern;
                 start = i + 1;
-            } else if (is_reading_pattern && (c == ";"[0])) {
+            } else if (is_reading_pattern && (c == ';')) {
                 filter_buf[i] = 0;
                 filter->AddPattern(&filter_buf[start]);
                 start = i + 1;
@@ -311,7 +307,7 @@ class FilterList {
     }
 
     void AddFilter(Filter* f) {
-        filters.push_back(f);
+        filters.emplace_back(f);
     }
 
     size_t GetSize() {
@@ -398,7 +394,7 @@ ComboBox::ComboBox(uiBox* box, const rapidjson::Value& j)
         const char* label = i["label"].GetString();
         uiComboboxAppend(combo, label);
         const char* value = json_utils::GetString(i, "value", label);
-        values.push_back(value);
+        values.emplace_back(value);
     }
     uiBox* hbox = uiNewHorizontalBox();
     uiBoxAppend(hbox, uiControl(combo), 0);
@@ -441,7 +437,7 @@ RadioButtons::RadioButtons(uiBox* box, const rapidjson::Value& j)
         const char* label = i["label"].GetString();
         uiRadioButtonsAppend(radio, label);
         const char* value = json_utils::GetString(i, "value", label);
-        values.push_back(value);
+        values.emplace_back(value);
     }
     uiBox* hbox = uiNewHorizontalBox();
     uiBoxAppend(hbox, uiControl(radio), 0);
@@ -526,9 +522,9 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
             uiControlSetTooltip(uiControl(check),
                                             json_utils::GetString(i, "tooltip", ""));
         }
-        checks->push_back(check);
+        checks->emplace_back(check);
         const char* value = json_utils::GetString(i, "value", label);
-        values.push_back(value);
+        values.emplace_back(value);
         id++;
     }
     uiBoxAppend(box, uiControl(check_array_box), 0);
@@ -537,7 +533,7 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
 }
 
 std::string CheckArray::GetRawString() {
-    std::string str = "";
+    std::string str;
     std::vector<uiCheckbox*> checks;
     checks = *(std::vector<uiCheckbox*>*)m_widget;
     for (size_t i = 0; i < checks.size(); i++) {

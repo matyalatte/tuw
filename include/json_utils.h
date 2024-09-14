@@ -23,6 +23,9 @@ struct JsonResult {
 
 #define JSON_RESULT_OK { true, "" }
 
+// Max binary size for JSON files.
+#define JSON_SIZE_MAX 128 * 1024
+
 JsonResult LoadJson(const std::string& file, rapidjson::Document& json);
 JsonResult SaveJson(rapidjson::Document& json, const std::string& file);
 std::string JsonToString(rapidjson::Document& json);
