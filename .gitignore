@@ -35,7 +35,8 @@ subprojects/tiny_str_match
 *.new
 *.zip
 
-Tuw*
+Tuw
+Tuw.exe
 SimpleCommandRunner
 *.tar.*
 
