@@ -48,7 +48,7 @@ if tuw_OS == 'windows'
 
         if tuw_is_release
             # Note: b_lto doesn't seem to work with MSVC.
-            tuw_cpp_args += ['/GL', '/D_HAS_EXCEPTIONS=0']
+            tuw_cpp_args += ['/GL']
             tuw_link_args += ['/OPT:REF', '/OPT:ICF', '/LTCG']
         endif
     else
