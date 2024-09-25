@@ -100,7 +100,6 @@
                     "default": "test.txt",
                     "add_quotes": true,
                     "tooltip": "Tooltip!",
-                    "platforms": ["win", "linux", "mac"],
                     "validator": {
                         "exist": true,
                         "exist_error": "File not found.",
@@ -110,7 +109,11 @@
                         "regex_error": "PNG or JPG.",
                         "wildcard": "*.*",
                         "wildcard_error": "File does not have extension."
-                    }
+                    },
+                    "optional": false,
+                    "prefix": "",
+                    "suffix": "",
+                    "platforms": ["win", "linux", "mac"]
                 },
                 {
                     "type": "folder",
@@ -121,6 +124,9 @@
                     "default": "testdir",
                     "add_quotes": true,
                     "tooltip": "Tooltip?",
+                    "optional": false,
+                    "prefix": "",
+                    "suffix": "",
                     "platforms": ["win", "linux", "mac"]
                 },
                 {
@@ -209,6 +215,9 @@
                     "placeholder": "type here!",
                     "default": "remove this text!",
                     "tooltip": "text box.",
+                    "optional": false,
+                    "prefix": "",
+                    "suffix": "",
                     "platforms": ["win", "linux", "mac"]
                 },
                 {

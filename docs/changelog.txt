@@ -1,3 +1,5 @@
+- Added "optional" to ignore some options when a text box is empty.
+- Added "prefix" and "suffix" options to append strings to user inputs.
 - Removed unused functions from release builds.
 - Re-enabled exception handlings for the std library.
 

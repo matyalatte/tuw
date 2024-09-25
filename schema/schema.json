@@ -142,6 +142,9 @@
             "label": { "type": "string" },
             "id": { "type": "string" },
             "add_quotes": { "type": "boolean" },
+            "optional": { "type": "boolean" },
+            "prefix": { "type": "string" },
+            "suffix": { "type": "string" },
             "platforms": {
               "type": "array",
               "items": {

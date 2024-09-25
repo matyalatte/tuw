@@ -538,6 +538,10 @@ namespace json_utils {
             CheckJsonType(result, c, "id", JsonType::STRING, label, OPTIONAL);
             CheckJsonType(result, c, "tooltip", JsonType::STRING, label, OPTIONAL);
 
+            CheckJsonType(result, c, "optional", JsonType::BOOLEAN, label, OPTIONAL);
+            CheckJsonType(result, c, "prefix", JsonType::STRING, label, OPTIONAL);
+            CheckJsonType(result, c, "suffix", JsonType::STRING, label, OPTIONAL);
+
             bool ignore = false;
             CorrectKey(c, "platform", "platforms", alloc);
             CorrectKey(c, "platform_array", "platforms", alloc);

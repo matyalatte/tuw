@@ -34,6 +34,9 @@ Component::Component(const rapidjson::Value& j) {
     m_add_quotes = json_utils::GetBool(j, "add_quotes", false);
     if (j.HasMember("validator"))
         m_validator.Initialize(j["validator"]);
+    m_optional = json_utils::GetBool(j, "optional", false);
+    m_prefix = json_utils::GetString(j, "prefix", "");
+    m_suffix = json_utils::GetString(j, "suffix", "");
 }
 
 Component::~Component() {
@@ -41,14 +44,20 @@ Component::~Component() {
 
 std::string Component::GetString() {
     std::string str = GetRawString();
+    if (m_optional && str.empty())
+        return "";
     if (m_add_quotes)
-        return "\"" + str + "\"";
-    return str;
+        str = "\"" + str + "\"";
+    return m_prefix + str + m_suffix;
 }
 
 bool Component::Validate(bool* redraw_flag) {
     // Main frame should run Fit() after this function.
-    bool validate = m_validator.Validate(GetRawString());
+    std::string str = GetRawString();
+    if (m_optional && str.empty())
+        return true;
+
+    bool validate = m_validator.Validate(str);
     uiControl *c = uiControl(m_error_widget);
     bool old_validate = !static_cast<bool>(uiControlVisible(c));
     bool updated = old_validate != validate;
