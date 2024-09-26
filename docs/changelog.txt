@@ -2,6 +2,7 @@
 - Added "prefix" and "suffix" options to append strings to user inputs.
 - Removed unused functions from release builds.
 - Re-enabled exception handlings for the std library.
+- Optimized some functions for binary size.
 
 ver 0.7.1
 - Added support for C-style comments and trailing commas in JSON files.

@@ -195,20 +195,18 @@ namespace json_utils {
             "\"label\":\"Default GUI\","
     #ifdef _WIN32
             "\"command\":\"dir\","
-            "\"command_str\":\"dir\","
-            "\"command_splitted\":[\"dir\"],"
             "\"button\":\"run 'dir'\","
     #else
             "\"command\":\"ls\","
-            "\"command_str\":\"ls\","
-            "\"command_splitted\":[\"ls\"],"
             "\"button\":\"run 'ls'\","
     #endif
-            "\"components\":[],"
-            "\"command_ids\":[]"
+            "\"components\":[]"
             "}]}";
         rapidjson::ParseResult ok = definition.Parse(def_str);
         assert(ok);
+        JsonResult result = JSON_RESULT_OK;
+        CheckDefinition(result, definition);
+        assert(result.ok);
     }
 
     static void CorrectKey(rapidjson::Value& j,

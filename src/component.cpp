@@ -223,8 +223,8 @@ std::string FilePicker::GetRawString() {
 
 static void setConfigForTextBox(const rapidjson::Value& config,
                                 const std::string& id, void *widget) {
-    if (config.HasMember(id.c_str()) && config[id.c_str()].IsString()) {
-        const char* str = config[id.c_str()].GetString();
+    const char* str = json_utils::GetString(config, id.c_str(), nullptr);
+    if (str) {
         uiEntry* entry = static_cast<uiEntry*>(widget);
         uiEntrySetText(entry, str);
     }

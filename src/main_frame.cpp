@@ -77,12 +77,9 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     if (!result.ok)
         json_utils::GetDefaultDefinition(m_definition);
 
-    unsigned definition_id = 0;
-    if (m_config.HasMember("_mode") && m_config["_mode"].IsInt()) {
-        unsigned mode = m_config["_mode"].GetInt();
-        if (mode < m_definition["gui"].Size())
-            definition_id = mode;
-    }
+    unsigned definition_id = json_utils::GetInt(m_config, "_mode", 0);
+    if (definition_id >= m_definition["gui"].Size())
+        definition_id = 0;
 
     CreateMenu();
     CreateFrame();
@@ -195,9 +192,11 @@ void MainFrame::CreateMenu() {
     menu = uiNewMenu("Menu");
     if (m_definition["gui"].Size() > 1) {
 #endif  // __APPLE__
-        for (unsigned i = 0; i < m_definition["gui"].Size(); i++) {
-            item = uiMenuAppendItem(menu, m_definition["gui"][i]["label"].GetString());
+        int i = 0;
+        for (const rapidjson::Value& j : m_definition["gui"].GetArray()) {
+            item = uiMenuAppendItem(menu, j["label"].GetString());
             uiMenuItemOnClicked(item, OnUpdatePanel, new MenuData(this, i));
+            i++;
         }
     }
     item = uiMenuAppendQuitItem(menu);
@@ -206,9 +205,11 @@ void MainFrame::CreateMenu() {
     if (m_definition.HasMember("help") && m_definition["help"].Size() > 0) {
         menu = uiNewMenu("Help");
 
-        for (unsigned i = 0; i < m_definition["help"].Size(); i++) {
-            item = uiMenuAppendItem(menu, m_definition["help"][i]["label"].GetString());
+        int i = 0;
+        for (const rapidjson::Value& j : m_definition["help"].GetArray()) {
+            item = uiMenuAppendItem(menu, j["label"].GetString());
             uiMenuItemOnClicked(item, OnOpenURL, new MenuData(this, i));
+            i++;
         }
     }
     menu = uiNewMenu("Debug");

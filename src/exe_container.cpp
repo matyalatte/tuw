@@ -57,11 +57,11 @@ static bool CopyBinary(FILE* reader, FILE* writer, uint32_t size) {
     return true;
 }
 
-static std::string ReadMagic(FILE* io) {
-    char magic[4];
+static void ReadMagic(FILE* io, char* magic) {
+    magic[4] = '\0';
     if (fread(magic, 1, 4, io) != 4)
-        return "";
-    return std::string(magic, 4);
+        memset(magic, 0, sizeof(char) * 4);
+    return;
 }
 
 static uint32_t Length(FILE* io) {
@@ -84,9 +84,10 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
     fseek(file_io, 0, SEEK_END);
     uint32_t end_off = ftell(file_io);
     fseek(file_io, -4, SEEK_CUR);
-    std::string magic = ReadMagic(file_io);
+    char magic[5];
+    ReadMagic(file_io, magic);
 
-    if ( magic != "JSON" ) {
+    if (strcmp(magic, "JSON") != 0) {
         // Json data not found
         m_exe_size = end_off;
         fclose(file_io);
@@ -103,10 +104,10 @@ json_utils::JsonResult ExeContainer::Read(const std::string& exe_path) {
     fseek(file_io, m_exe_size, SEEK_SET);
 
     // Read a header for json data
-    magic = ReadMagic(file_io);
-    if (magic != "JSON") {
+    ReadMagic(file_io, magic);
+    if (strcmp(magic, "JSON") != 0) {
         fclose(file_io);
-        return { false, "Invalid magic. (" + magic + ")" };
+        return { false, std::string("Invalid magic. (") + magic + ")" };
     }
 
     uint32_t json_size = ReadUint32(file_io);
@@ -169,11 +170,12 @@ json_utils::JsonResult ExeContainer::Write(const std::string& exe_path) {
 
     uint32_t pos = ftell(old_io);
     if (pos != Length(old_io)) {
-        std::string magic = ReadMagic(old_io);
-        if (magic != "JSON") {
+        char magic[5];
+        ReadMagic(old_io, magic);
+        if (strcmp(magic, "JSON") != 0) {
             fclose(old_io);
             fclose(new_io);
-            return { false, "Invalid magic. (" + magic + ")" };
+            return { false, std::string("Invalid magic. (") + magic + ")" };
         }
     }
 
