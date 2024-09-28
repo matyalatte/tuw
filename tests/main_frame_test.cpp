@@ -3,12 +3,7 @@
 // Tests for main_frame.cpp
 // Todo: Write more tests
 
-#include <gtest/gtest.h>
-#include <string>
-#include "main_frame.h"
-#include "string_utils.h"
-#include "exec.h"
-#include "json_paths.h"
+#include "test_utils.h"
 
 class MainFrameTest : public ::testing::Test {
  protected:
@@ -55,8 +50,6 @@ TEST_F(MainFrameTest, MakeDefaultMainFrame) {
     main_frame->GetDefinition(json2);
     EXPECT_EQ(json1, json2);
 }
-
-void GetTestJson(rapidjson::Document& json);
 
 void GetDummyConfig(rapidjson::Document& dummy_config) {
     dummy_config.SetObject();

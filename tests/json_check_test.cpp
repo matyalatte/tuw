@@ -3,11 +3,7 @@
 // Tests for json checking
 // Todo: Write more tests
 
-#include <gtest/gtest.h>
-#include "json_utils.h"
-#include "string_utils.h"
-#include "tuw_constants.h"
-#include "json_paths.h"
+#include "test_utils.h"
 
 TEST(JsonCheckTest, LoadJsonFail) {
     rapidjson::Document test_json;
@@ -32,8 +28,6 @@ TEST(JsonCheckTest, LoadJsonWithComments) {
     json_utils::JsonResult result = json_utils::LoadJson(JSON_RELAXED, test_json);
     EXPECT_TRUE(result.ok);
 }
-
-void GetTestJson(rapidjson::Document& json);
 
 TEST(JsonCheckTest, LoadJsonSuccess) {
     rapidjson::Document test_json;
