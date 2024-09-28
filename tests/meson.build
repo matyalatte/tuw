@@ -6,6 +6,7 @@ test_sources = [
     'exe_container_test.cpp',
     'json_check_test.cpp',
     'main_frame_test.cpp',
+    'string_utils_test.cpp',
 ]
 
 # build tests
