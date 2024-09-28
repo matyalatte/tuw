@@ -33,6 +33,8 @@ Examples for component options.
 -   [Placeholders](./comp_options/placeholder/): An option to show a message when the text box is empty.
 -   [Validators](./comp_options/validator/): Options to validate input strings before execution.
 -   [Renaming Buttons](./comp_options/button/): An option to rename buttons of path pickers.
+-   [Affixes](./comp_options/affix/): Options to append strings to user intpus.
+-   [Optional Components](./comp_options/optional/): An option to ignore affixes and validators when a text box is empty.
 
 ![tooltip](https://github.com/matyalatte/tuw/assets/69258547/8c7244ee-48ce-4492-973c-a3e6c628b8ed)  
 

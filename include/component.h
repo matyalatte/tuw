@@ -17,6 +17,9 @@ class Component {
     bool m_is_wide;
     Validator m_validator;
     uiLabel* m_error_widget;
+    bool m_optional;
+    std::string m_prefix;
+    std::string m_suffix;
 
  private:
     bool m_add_quotes;
