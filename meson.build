@@ -137,6 +137,7 @@ if get_option('build_exe')
         dependencies : tuw_dependencies,
         cpp_args: tuw_cpp_args,
         link_args: tuw_link_args,
+        gnu_symbol_visibility: 'hidden',
         include_directories: include_directories('include'),
         install : false)
 endif
