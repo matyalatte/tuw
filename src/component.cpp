@@ -29,7 +29,7 @@ Component::Component(const rapidjson::Value& j) {
     m_id = json_utils::GetString(j, "id", "");
     if (m_id.empty()) {
         uint32_t hash = Fnv1Hash32(j["label"].GetString());
-        m_id = "_" + std::to_string(hash);
+        m_id = ConcatCStrings("_", hash);
     }
     m_add_quotes = json_utils::GetBool(j, "add_quotes", false);
     if (j.HasMember("validator"))
@@ -47,8 +47,8 @@ std::string Component::GetString() {
     if (m_optional && str.empty())
         return "";
     if (m_add_quotes)
-        str = "\"" + str + "\"";
-    return m_prefix + str + m_suffix;
+        str = ConcatCStrings("\"", str.c_str(), "\"");
+    return ConcatCStrings(m_prefix.c_str(), str.c_str(), m_suffix.c_str());
 }
 
 bool Component::Validate(bool* redraw_flag) {

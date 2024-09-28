@@ -10,6 +10,7 @@
 #include "rapidjson/error/en.h"
 
 #include "tuw_constants.h"
+#include "string_utils.h"
 
 namespace json_utils {
 
@@ -46,8 +47,8 @@ namespace json_utils {
 
         if (!ok) {
             std::string msg("Failed to parse JSON: ");
-            msg += std::string(rapidjson::GetParseError_En(ok.Code()))
-                   + " (offset: " + std::to_string(ok.Offset()) + ")";
+            msg += rapidjson::GetParseError_En(ok.Code()) +
+                   ConcatCStrings(" (offset: ", ok.Offset(), ")");
             return { false, msg };
         }
         if (!json.IsObject())
@@ -59,7 +60,7 @@ namespace json_utils {
     JsonResult SaveJson(rapidjson::Document& json, const std::string& file) {
         FILE* fp = fopen(file.c_str(), "wb");
         if (!fp)
-            return { false, "Failed to open " + file + "." };
+            return { false, ConcatCStrings("Failed to open ", file.c_str(), ".") };
 
         char writeBuffer[JSON_SIZE_MAX];
         rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
@@ -73,7 +74,7 @@ namespace json_utils {
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         json.Accept(writer);
-        return std::string(buffer.GetString());
+        return buffer.GetString();
     }
 
     const char* GetString(const rapidjson::Value& json, const char* key, const char* def) {
@@ -101,12 +102,11 @@ namespace json_utils {
     }
 
     static std::string GetLabel(const char* label, const char* key) {
-        std::string msg = "['";
+        std::string msg;
         if (*label != '\0') {
-            msg += std::string(label) + "']['";
+            msg = ConcatCStrings("['", label, "']");
         }
-        msg += key;
-        msg += "']";
+        msg += ConcatCStrings("['", key, "']");
         return msg;
     }
 
@@ -185,7 +185,7 @@ namespace json_utils {
         }
         if (!valid) {
             result.ok = false;
-            result.msg = GetLabel(label, key) + " should be " + type_name + ".";
+            result.msg = GetLabel(label, key) + ConcatCStrings(" should be ", type_name, ".");
         }
     }
 
@@ -251,9 +251,9 @@ namespace json_utils {
             for (size_t j = i + 1; j < size; j++) {
                 if (str == component_ids[j]) {
                     result.ok = false;
-                    result.msg = "[components][id]"
-                                 " should not be duplicated in a gui definition. ("
-                                 + str + ")";
+                    result.msg = ConcatCStrings("[components][id]"
+                                    " should not be duplicated in a gui definition. (",
+                                    str.c_str(), ")");
                     return;
                 }
             }
@@ -322,7 +322,7 @@ namespace json_utils {
             if (j >= comp_size)
                 cmd_str += "__comp???__";
             else if (j >= 0)
-                cmd_str += "__comp" + std::to_string(j) + "__";
+                cmd_str += ConcatCStrings("__comp", j, "__");
         }
         if (cmd_ids.size() < splitted_cmd.size())
             cmd_str += splitted_cmd.back();
@@ -337,8 +337,8 @@ namespace json_utils {
                 if (id.GetInt() == j) { found = true; break; }
             if (!found) {
                 result.ok = false;
-                result.msg = "[\"components\"][" + std::to_string(j)
-                             + "] is unused in the command; " + cmd_str;
+                result.msg = ConcatCStrings("[\"components\"][", j,
+                                "] is unused in the command; ") + cmd_str;
                 if (!comp_ids[j].empty())
                     result.msg = "The ID of " + result.msg;
                 return;
@@ -427,7 +427,7 @@ namespace json_utils {
             if (strcmp(codepage, "utf8") != 0 && strcmp(codepage, "utf-8") != 0 &&
                     strcmp(codepage, "default") != 0) {
                 result.ok = false;
-                result.msg = std::string("Unknown codepage: ") + codepage;
+                result.msg = ConcatCStrings("Unknown codepage: ", codepage);
                 return;
             }
         }
@@ -513,7 +513,7 @@ namespace json_utils {
                     break;
                 case COMP_UNKNOWN:
                     result.ok = false;
-                    result.msg = std::string("Unknown component type: ") + type_str;
+                    result.msg = ConcatCStrings("Unknown component type: ", type_str);
                     break;
             }
             if (!result.ok) return;
@@ -606,7 +606,7 @@ namespace json_utils {
         for (const std::string& str : version_strings) {
             if (str.length() == 0 || str.length() > 2) {
                 result.ok = false;
-                result.msg = std::string("Can NOT convert '") + string + "' to int.";
+                result.msg = ConcatCStrings("Can NOT convert '", string, "' to int.");
                 return 0;
             }
             if (str.length() == 1) {
@@ -641,7 +641,7 @@ namespace json_utils {
             int required_int = VersionStringToInt(result, required);
             if (tuw_constants::VERSION_INT < required_int) {
                 result.ok = false;
-                result.msg = std::string("Version ") + required + " is required.";
+                result.msg = ConcatCStrings("Version ", required, " is required.");
             }
         }
     }
@@ -675,7 +675,7 @@ namespace json_utils {
                 CheckJsonType(result, h, "path", JsonType::STRING);
             } else {
                 result.ok = false;
-                result.msg = std::string("Unsupported help type: ") + type;
+                result.msg = ConcatCStrings("Unsupported help type: ", type);
                 return;
             }
         }

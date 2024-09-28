@@ -1,5 +1,7 @@
 #include "string_utils.h"
 
+#include "inttypes.h"
+
 #ifdef _WIN32
 #include "windows/uipriv_windows.hpp"
 #else
@@ -14,6 +16,39 @@ uint32_t Fnv1Hash32(const std::string& str) {
     for (const char& c : str) hash = (FNV_PRIME_32 * hash) ^ c;
     return hash;
 }
+
+template<>
+std::string ConcatCStrings<const char*>(const char* str1, const char* str2, const char* str3) {
+    size_t len1 = strlen(str1), len2 = strlen(str2), len3 = str3 ? strlen(str3) : 0;
+    char* buffer = new char[len1 + len2 + len3 + 1];
+    memcpy(buffer, str1, len1);
+    memcpy(buffer + len1, str2, len2);
+    if (str3) memcpy(buffer + len1 + len2, str3, len3);
+    buffer[len1 + len2 + len3] = '\0';
+    std::string result(buffer);
+    delete[] buffer;
+    return result;
+}
+
+template<>
+std::string ConcatCStrings<char*>(const char* str1, char* str2, const char* str3) {
+    return ConcatCStrings<const char*>(str1, str2, str3);
+}
+
+#define DEFINE_CONCAT_CSTR_NUM(num_type, fmt) \
+template<> \
+std::string ConcatCStrings<num_type>(const char* str1, num_type num, const char* str2) { \
+    int num_len = snprintf(nullptr, 0, "%" fmt, num); \
+    char* num_str = new char[num_len + 1]; \
+    snprintf(num_str, num_len + 1, "%" fmt, num); \
+    std::string ret = ConcatCStrings(str1, num_str, str2); \
+    delete[] num_str; \
+    return ret; \
+}
+
+DEFINE_CONCAT_CSTR_NUM(int, "d")
+DEFINE_CONCAT_CSTR_NUM(size_t, "zu")
+DEFINE_CONCAT_CSTR_NUM(uint32_t, PRIu32)
 
 #ifdef _WIN32
 std::string UTF16toUTF8(const wchar_t* str) {
