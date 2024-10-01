@@ -49,28 +49,28 @@ bool AskOverwrite(const char *path) {
     return ret == 1 && (answer == "y"[0] || answer == "Y"[0]);
 }
 
-json_utils::JsonResult Merge(const std::string& exe_path, const std::string& json_path,
-                             const std::string& new_path, const bool force) {
+void Merge(const std::string& exe_path, const std::string& json_path,
+           const std::string& new_path, const bool force, ErrorState* result) {
     rapidjson::Document json;
-    json_utils::JsonResult result = json_utils::LoadJson(json_path, json);
-    if (!result.ok) return result;
+    json_utils::LoadJson(json_path, json, result);
+    if (!result->Ok());
 
     if (json.Size() == 0) {
         PrintFmt("JSON file loaded but it has no data.\n");
-        return JSON_RESULT_OK;
+        return;
     }
     ExeContainer exe;
-    result = exe.Read(exe_path);
-    if (!result.ok) return result;
+    exe.Read(exe_path, result);
+    if (!result->Ok()) return;
 
     PrintFmt("Importing a json file... (%s)\n", json_path.c_str());
     exe.SetJson(json);
     if (!force && !AskOverwrite(new_path.c_str())) {
         PrintFmt("The operation has been cancelled.\n");
-        return JSON_RESULT_OK;
+        return;
     }
-    result = exe.Write(new_path);
-    if (!result.ok) return result;
+    exe.Write(new_path, result);
+    if (!result->Ok()) return;
     PrintFmt("Generated an executable. (%s)\n", new_path.c_str());
 #ifndef _WIN32
     // Allow executing file as program.
@@ -79,17 +79,17 @@ json_utils::JsonResult Merge(const std::string& exe_path, const std::string& jso
           S_IRGRP | S_IXGRP |  // r-x
           S_IROTH | S_IXOTH);  // r-x
 #endif
-    return JSON_RESULT_OK;
+    return;
 }
 
-json_utils::JsonResult Split(const std::string& exe_path, const std::string& json_path,
-                             const std::string& new_path, const bool force) {
+void Split(const std::string& exe_path, const std::string& json_path,
+           const std::string& new_path, const bool force, ErrorState* result) {
     ExeContainer exe;
-    json_utils::JsonResult result = exe.Read(exe_path);
-    if (!result.ok) return result;
+    exe.Read(exe_path, result);
+    if (!result->Ok()) return;
     if (!exe.HasJson()) {
         PrintFmt("The executable has no json data.\n");
-        return JSON_RESULT_OK;
+        return;
     }
     PrintFmt("Extracting JSON data from the executable...\n");
     rapidjson::Document json;
@@ -97,12 +97,12 @@ json_utils::JsonResult Split(const std::string& exe_path, const std::string& jso
     exe.RemoveJson();
     if (!force && (!AskOverwrite(new_path.c_str()) || !AskOverwrite(json_path.c_str()))) {
         PrintFmt("The operation has been cancelled.\n");
-        return JSON_RESULT_OK;
+        return;
     }
-    result = exe.Write(new_path);
-    if (!result.ok) return result;
-    result = json_utils::SaveJson(json, json_path);
-    if (!result.ok) return result;
+    exe.Write(new_path, result);
+    if (!result->Ok()) return;
+    json_utils::SaveJson(json, json_path, result);
+    if (!result->Ok()) return;
     PrintFmt("Generated an executable. (%s)\n", new_path.c_str());
     PrintFmt("Exported a json file. (%s)\n", json_path.c_str());
 #ifndef _WIN32
@@ -112,7 +112,7 @@ json_utils::JsonResult Split(const std::string& exe_path, const std::string& jso
           S_IRGRP | S_IXGRP |  // r-x
           S_IROTH | S_IXOTH);  // r-x
 #endif
-    return JSON_RESULT_OK;
+    return;
 }
 
 void PrintUsage() {
@@ -288,7 +288,7 @@ int main(int argc, char* argv[]) {
     }
 
     rapidjson::Document json(rapidjson::kObjectType);
-    json_utils::JsonResult result = JSON_RESULT_OK;
+    ErrorState result;
 
     switch (cmd_int) {
         case CMD_MERGE:
@@ -297,10 +297,10 @@ int main(int argc, char* argv[]) {
                 // Not found .json but found .jsonc
                 json_path.push_back('c');
             }
-            result = Merge(exe_path, json_path, new_exe_path, force);
+            Merge(exe_path, json_path, new_exe_path, force, &result);
             break;
         case CMD_SPLIT:
-            result = Split(exe_path, json_path, new_exe_path, force);
+            Split(exe_path, json_path, new_exe_path, force, &result);
             break;
         case CMD_VERSION:
             PrintFmt("%s\n", tuw_constants::VERSION);
@@ -312,8 +312,8 @@ int main(int argc, char* argv[]) {
             break;
     }
 
-    if (!result.ok) {
-        fprintf(stderr, "Error: %s\n", result.msg.c_str());
+    if (!result.Ok()) {
+        fprintf(stderr, "Error: %s\n", result.GetErrorMsg());
         return 1;
     }
     return 0;

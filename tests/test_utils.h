@@ -9,6 +9,7 @@
 #include "tuw_constants.h"
 #include "exe_container.h"
 #include "env_utils.h"
+#include "error_state.h"
 
 // you need to copy it from examples/all_keys to the json folder
 constexpr char JSON_ALL_KEYS[] = "./json/gui_definition.json";
@@ -20,7 +21,8 @@ constexpr char JSON_CONFIG_UTF[] = "./json/config_utf.json";
 constexpr char JSON_RELAXED[] = "./json/relaxed.jsonc";
 
 inline void GetTestJson(rapidjson::Document& json) {
-    json_utils::JsonResult result = json_utils::LoadJson(JSON_ALL_KEYS, json);
-    EXPECT_TRUE(result.ok);
+    ErrorState result;
+    json_utils::LoadJson(JSON_ALL_KEYS, json, &result);
+    EXPECT_TRUE(result.Ok());
     EXPECT_FALSE(json.ObjectEmpty());
 }

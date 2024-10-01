@@ -4,6 +4,7 @@
 #include "rapidjson/document.h"
 #include "component.h"
 #include "json_utils.h"
+#include "error_state.h"
 #include "ui.h"
 
 // Main window
@@ -24,7 +25,7 @@ class MainFrame {
 
     void CreateFrame();
     void CreateMenu();
-    json_utils::JsonResult CheckDefinition(rapidjson::Document& definition);
+    void CheckDefinition(rapidjson::Document& definition, ErrorState* result);
     void UpdateConfig();
     void ShowSuccessDialog(const std::string& msg, const std::string& title = "Success");
     void ShowErrorDialog(const std::string& msg, const std::string& title = "Error");

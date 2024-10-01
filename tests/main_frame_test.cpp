@@ -31,13 +31,14 @@ class MainFrameTest : public ::testing::Test {
 
     void TestConfig(rapidjson::Document& test_json, std::string config) {
         rapidjson::Document test_config;
-        json_utils::JsonResult result = json_utils::LoadJson(config, test_config);
-        EXPECT_TRUE(result.ok);
+        ErrorState result;
+        json_utils::LoadJson(config, test_config, &result);
+        EXPECT_TRUE(result.Ok());
         main_frame = new MainFrame(test_json, test_config);
         main_frame->SaveConfig();
         rapidjson::Document saved_config;
-        result = json_utils::LoadJson("gui_config.json", saved_config);
-        EXPECT_TRUE(result.ok);
+        json_utils::LoadJson("gui_config.json", saved_config, &result);
+        EXPECT_TRUE(result.Ok());
         EXPECT_EQ(test_config, saved_config);
     }
 };

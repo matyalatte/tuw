@@ -10,11 +10,12 @@ TEST(JsonEmbeddingTest, Embed) {
         test_json.SetObject();
         GetTestJson(test_json);
         ExeContainer exe;
-        json_utils::JsonResult result = exe.Read(JSON_ALL_KEYS);
-        EXPECT_TRUE(result.ok);
+        ErrorState result;
+        exe.Read(JSON_ALL_KEYS, &result);
+        EXPECT_TRUE(result.Ok());
         exe.SetJson(test_json);
-        result = exe.Write("embedded.json");
-        EXPECT_TRUE(result.ok);
+        exe.Write("embedded.json", &result);
+        EXPECT_TRUE(result.Ok());
     }
     {
         rapidjson::Document test_json;
@@ -23,8 +24,9 @@ TEST(JsonEmbeddingTest, Embed) {
         rapidjson::Document embedded_json;
         embedded_json.SetObject();
         ExeContainer exe;
-        json_utils::JsonResult result = exe.Read("embedded.json");
-        EXPECT_TRUE(result.ok);
+        ErrorState result;
+        exe.Read("embedded.json", &result);
+        EXPECT_TRUE(result.Ok());
         exe.GetJson(embedded_json);
         EXPECT_EQ(embedded_json, test_json);
     }

@@ -5,6 +5,7 @@
 #include "exec.h"
 #include "string_utils.h"
 #include "tuw_constants.h"
+#include "error_state.h"
 
 constexpr char DEF_JSON[] = "gui_definition.json";
 constexpr char DEF_JSONC[] = "gui_definition.jsonc";
@@ -23,7 +24,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     m_config.CopyFrom(config, m_config.GetAllocator());
     bool ignore_external_json = false;
     const char* json_path = DEF_JSON;
-    json_utils::JsonResult result = JSON_RESULT_OK;
+    ErrorState result;
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
         bool exists_external_json = true;
         // Find gui_definition.json
@@ -37,44 +38,45 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
         ExeContainer exe;
 
-        result = exe.Read(exe_path);
-        if (result.ok) {
+        exe.Read(exe_path, &result);
+        if (result.Ok()) {
             if (exe.HasJson()) {
                 PrintFmt("[LoadDefinition] Found JSON in the executable.\n");
                 exe.GetJson(m_definition);
                 ignore_external_json = exists_external_json;
             } else {
                 PrintFmt("[LoadDefinition] Embedded JSON not found.\n");
-                result = { false, "" };
+                result.Throw("");
             }
         } else {
-            PrintFmt("[LoadDefinition] ERROR: %s\n", result.msg.c_str());
+            PrintFmt("[LoadDefinition] ERROR: %s\n", result.GetErrorMsg());
         }
 
-        if (!result.ok) {
+        if (!result.Ok()) {
             if (exists_external_json) {
                 PrintFmt("[LoadDefinition] Loaded %s\n", json_path);
-                result = json_utils::LoadJson(json_path, m_definition);
-                if (!result.ok)
+                result.Reset();
+                json_utils::LoadJson(json_path, m_definition, &result);
+                if (!result.Ok())
                     m_definition.SetObject();
             } else {
-                result = { false, "gui_definition.json not found." };
+                result.Throw("gui_definition.json not found.");
             }
         }
     }
 
     if (!config.IsObject() || config.ObjectEmpty()) {
-        json_utils::JsonResult cfg_result =
-            json_utils::LoadJson("gui_config.json", m_config);
-        if (!cfg_result.ok) {
+        ErrorState cfg_result;
+        json_utils::LoadJson("gui_config.json", m_config, &cfg_result);
+        if (!cfg_result.Ok()) {
             m_config.SetObject();
         }
     }
 
-    if (result.ok)
-        result = CheckDefinition(m_definition);
+    if (result.Ok())
+        CheckDefinition(m_definition, &result);
 
-    if (!result.ok)
+    if (!result.Ok())
         json_utils::GetDefaultDefinition(m_definition);
 
     unsigned definition_id = json_utils::GetInt(m_config, "_mode", 0);
@@ -88,14 +90,14 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 #endif
 
     if (ignore_external_json) {
-        std::string msg = ConcatCStrings("WARNING: Using embedded JSON. ",
-                                         json_path, " was ignored.\n");
-        PrintFmt("[LoadDefinition] %s", msg.c_str());
+        result.Warn("WARNING: Using embedded JSON. %s was ignored.", json_path);
+        const char* msg = result.GetWarningMsg();
+        PrintFmt("[LoadDefinition] %s", msg);
         ShowSuccessDialog(msg, "Warning");
     }
 
-    if (!result.ok)
-        JsonLoadFailed(result.msg);
+    if (!result.Ok())
+        JsonLoadFailed(result.GetErrorMsg());
 
     UpdatePanel(definition_id);
     Fit();
@@ -509,10 +511,9 @@ void MainFrame::RunCommand() {
 }
 
 // read gui_definition.json
-json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definition) {
-    json_utils::JsonResult result = JSON_RESULT_OK;
+void MainFrame::CheckDefinition(rapidjson::Document& definition, ErrorState* result) {
     json_utils::CheckVersion(result, definition);
-    if (!result.ok) return result;
+    if (!result->Ok()) return;
 
     if (definition.HasMember("recommended")) {
         if (definition["not_recommended"].GetBool()) {
@@ -522,10 +523,10 @@ json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definitio
     }
 
     json_utils::CheckDefinition(result, definition);
-    if (!result.ok) return result;
+    if (!result->Ok()) return;
 
     json_utils::CheckHelpURLs(result, definition);
-    return result;
+    return;
 }
 
 void MainFrame::JsonLoadFailed(const std::string& msg) {
@@ -543,11 +544,12 @@ void MainFrame::UpdateConfig() {
 
 void MainFrame::SaveConfig() {
     UpdateConfig();
-    json_utils::JsonResult result = json_utils::SaveJson(m_config, "gui_config.json");
-    if (result.ok) {
+    ErrorState result;
+    json_utils::SaveJson(m_config, "gui_config.json", &result);
+    if (result.Ok()) {
         PrintFmt("[SaveConfig] Saved gui_config.json\n");
     } else {
-        PrintFmt("[SaveConfig] Error: %s\n", result.msg.c_str());
+        PrintFmt("[SaveConfig] Error: %s\n", result.GetErrorMsg());
     }
 }
 
