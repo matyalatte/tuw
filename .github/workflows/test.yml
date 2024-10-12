@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.x'
       - run: |
-          pip3 install cpplint codespell
+          pip3 install cpplint==1.6.1 codespell
           cpplint --recursive --quiet .
           codespell -S subprojects
 
