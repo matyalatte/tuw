@@ -7,24 +7,22 @@ It allows you to rename the button associated with the picker component.
 
 ```json
 {
-    "gui": [
-        {
-            "label": "Button",
-            "window_name": "Button sample",
-            "command": "echo %-% %-%",
-            "components": [
-                {
-                    "type": "file",
-                    "label": "Some file",
-                    "button": "..."
-                },
-                {
-                    "type": "folder",
-                    "label": "Some folder",
-                    "button": "Open"
-                }
-            ]
-        }
-    ]
+    "gui": {
+        "label": "Button",
+        "window_name": "Button sample",
+        "command": "echo %-% %-%",
+        "components": [
+            {
+                "type": "file",
+                "label": "Some file",
+                "button": "..."
+            },
+            {
+                "type": "folder",
+                "label": "Some folder",
+                "button": "Open"
+            }
+        ]
+    }
 }
 ```

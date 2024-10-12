@@ -6,23 +6,21 @@
 
 ```json
 {
-    "gui": [
-        {
-            "label": "Optional component",
-            "command": "echo %-%",
-            "components": [
-                {
-                    "type": "text",
-                    "label": "Text box",
-                    "optional": true,
-                    "prefix": "-pre=",
-                    "suffix": " -suf",
-                    "validator": {
-                        "regex": ".+"
-                    }
+    "gui": {
+        "label": "Optional component",
+        "command": "echo %-%",
+        "components": [
+            {
+                "type": "text",
+                "label": "Text box",
+                "optional": true,
+                "prefix": "-pre=",
+                "suffix": " -suf",
+                "validator": {
+                    "regex": ".+"
                 }
-            ]
-        }
-    ]
+            }
+        ]
+    }
 }
 ```
