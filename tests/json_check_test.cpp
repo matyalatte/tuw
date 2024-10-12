@@ -3,11 +3,7 @@
 // Tests for json checking
 // Todo: Write more tests
 
-#include <gtest/gtest.h>
-#include "json_utils.h"
-#include "string_utils.h"
-#include "tuw_constants.h"
-#include "json_paths.h"
+#include "test_utils.h"
 
 TEST(JsonCheckTest, LoadJsonFail) {
     rapidjson::Document test_json;
@@ -32,8 +28,6 @@ TEST(JsonCheckTest, LoadJsonWithComments) {
     json_utils::JsonResult result = json_utils::LoadJson(JSON_RELAXED, test_json);
     EXPECT_TRUE(result.ok);
 }
-
-void GetTestJson(rapidjson::Document& json);
 
 TEST(JsonCheckTest, LoadJsonSuccess) {
     rapidjson::Document test_json;
@@ -190,6 +184,16 @@ TEST(JsonCheckTest, checkVersionFail) {
     EXPECT_TRUE(test_json["not_recommended"].GetBool());
 }
 
+TEST(JsonCheckTest, checkVersionFail2) {
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    test_json["recommended"].SetString("foo");
+    json_utils::JsonResult result = JSON_RESULT_OK;
+    json_utils::CheckVersion(result, test_json);
+    EXPECT_FALSE(result.ok);
+    EXPECT_STREQ("Can NOT convert 'foo' to int.", result.msg.c_str());
+}
+
 TEST(JsonCheckTest, checkVersionSuccess2) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
@@ -199,7 +203,7 @@ TEST(JsonCheckTest, checkVersionSuccess2) {
     EXPECT_TRUE(result.ok);
 }
 
-TEST(JsonCheckTest, checkVersionFail2) {
+TEST(JsonCheckTest, checkVersionFail3) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["minimum_required"].SetString("1.0.0");
@@ -207,4 +211,14 @@ TEST(JsonCheckTest, checkVersionFail2) {
     json_utils::CheckVersion(result, test_json);
     EXPECT_FALSE(result.ok);
     EXPECT_STREQ("Version 1.0.0 is required.", result.msg.c_str());
+}
+
+TEST(JsonCheckTest, checkVersionFail4) {
+    rapidjson::Document test_json;
+    GetTestJson(test_json);
+    test_json["minimum_required"].SetString("foo");
+    json_utils::JsonResult result = JSON_RESULT_OK;
+    json_utils::CheckVersion(result, test_json);
+    EXPECT_FALSE(result.ok);
+    EXPECT_STREQ("Can NOT convert 'foo' to int.", result.msg.c_str());
 }

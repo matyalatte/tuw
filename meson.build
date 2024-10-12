@@ -38,7 +38,7 @@ if tuw_OS == 'windows'
             # but the built binary only supports Windows10 or later.
             tuw_link_args += ['/NODEFAULTLIB:libucrt.lib', '/DEFAULTLIB:ucrt.lib']
         endif
-        if meson.version().version_compare('<1.4.0')
+        if meson.version().version_compare('!=1.4.0')
             tuw_link_args += ['/MANIFEST:NO']
         endif
 
@@ -137,6 +137,7 @@ if get_option('build_exe')
         dependencies : tuw_dependencies,
         cpp_args: tuw_cpp_args,
         link_args: tuw_link_args,
+        gnu_symbol_visibility: 'hidden',
         include_directories: include_directories('include'),
         install : false)
 endif

@@ -2,12 +2,7 @@
 // Tests for json embedding
 // Todo: Write more tests
 
-#include <gtest/gtest.h>
-#include "exe_container.h"
-#include "string_utils.h"
-#include "env_utils.h"
-
-void GetTestJson(rapidjson::Document& json);
+#include "test_utils.h"
 
 TEST(JsonEmbeddingTest, Embed) {
     {

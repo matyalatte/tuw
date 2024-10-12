@@ -88,8 +88,8 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 #endif
 
     if (ignore_external_json) {
-        std::string msg = std::string("WARNING: Using embedded JSON. ") +
-                          json_path + " was ignored.\n";
+        std::string msg = ConcatCStrings("WARNING: Using embedded JSON. ",
+                                         json_path, " was ignored.\n");
         PrintFmt("[LoadDefinition] %s", msg.c_str());
         ShowSuccessDialog(msg, "Warning");
     }
@@ -239,13 +239,15 @@ void MainFrame::OpenURL(int id) {
             std::string scheme = url.substr(0, pos);
             // scheme should be http or https
             if (scheme == "file") {
-                std::string msg = "Use 'file' type for a path, not 'url' type. (" + url + ")";
+                std::string msg = ConcatCStrings("Use 'file' type for a path, not 'url' type. (",
+                                                 url.c_str(), ")");
                 PrintFmt("%sError: %s\n", tag, msg.c_str());
                 ShowErrorDialog(msg);
                 return;
             } else if (scheme != "https" && scheme != "http") {
-                std::string msg = "Unsupported scheme detected. "
-                                  "It should be http or https. (" + scheme + ")";
+                std::string msg = ConcatCStrings(
+                                    "Unsupported scheme detected. "
+                                    "It should be http or https. (", scheme.c_str(), ")");
                 PrintFmt("%sError: %s\n", tag, msg.c_str());
                 ShowErrorDialog(msg);
                 return;
@@ -261,7 +263,7 @@ void MainFrame::OpenURL(int id) {
         tag = "[OpenFile] ";
 
         if (!exists) {
-            std::string msg = "File does not exist. (" + url + ")";
+            std::string msg = ConcatCStrings("File does not exist. (", url.c_str(), ")");
             PrintFmt("%sError: %s\n", tag, msg.c_str());
             ShowErrorDialog(msg);
             return;
@@ -291,7 +293,7 @@ void MainFrame::OpenURL(int id) {
     } else {
         ExecuteResult result = LaunchDefaultApp(url);
         if (result.exit_code != 0) {
-            std::string msg = std::string("Failed to open a ") + type + " by an unexpected error.";
+            std::string msg = ConcatCStrings("Failed to open a ", type, " by an unexpected error.");
             PrintFmt("%sError: %s\n", tag, msg.c_str());
             ShowErrorDialog(msg.c_str());
         }
@@ -487,7 +489,7 @@ void MainFrame::RunCommand() {
         if (show_last_line)
             err_msg = result.last_line;
         else
-            err_msg = "Invalid exit code (" + std::to_string(result.exit_code) + ")";
+            err_msg = ConcatCStrings("Invalid exit code (", result.exit_code, ")");
         PrintFmt("[RunCommand] Error: %s\n", err_msg.c_str());
         ShowErrorDialog(err_msg);
         return;
