@@ -39,9 +39,10 @@ All you need is a JSON file and a tiny executable.
 
 You can download executables from [the release page](https://github.com/matyalatte/tuw/releases)
 
--   `Tuw*-Windows*.zip` is for Windows (7 or later.)  
--   `Tuw*-macOS*.tar.bz2` is for macOS (10.9 or later.)  
--   `Tuw*-Linux*.tar.bz2` is for Linux (with GTK3.14, GLIBC2.15, and GLIBCXX3.4.21, or later versions of the libraries.)  
+-   `Tuw-*-Windows-*.zip` is for Windows (7 or later.)  
+-   `Tuw-*-Windows10-*.zip` requires Windows 10 or later, but it's much smaller than the standard version.  
+-   `Tuw-*-macOS.tar.bz2` is for macOS (10.9 or later.)  
+-   `Tuw-*-Linux-*.tar.bz2` is for Linux (with GTK3.14, GLIBC2.15, and GLIBCXX3.4.21, or later versions of the libraries.)  
 
 ## Examples
 
