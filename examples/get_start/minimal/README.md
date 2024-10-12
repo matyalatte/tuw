@@ -9,17 +9,15 @@ It has only a button to echo `Hello!`.
 
 ```json
 {
-    "gui": [
-        {
-            "label": "Minimal Sample",
-            "command": "echo Hello!",
-            "components": []
-        }
-    ]
+    "gui": {
+        "label": "Minimal Sample",
+        "command": "echo Hello!",
+        "components": []
+    }
 }
 ```
 
-You can write a definition of your GUI in `"gui": [{}]`.  
+You can write a definition of your GUI in `"gui": {}`.  
 
 -   `label` is the label for your definition. You can type anything you like here.
 -   `command` is the command you want to execute when clicking the execution button.
