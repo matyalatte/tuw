@@ -7,27 +7,25 @@ Of course, you can drop files on the pickers to specify the paths.
 
 ```json
 {
-    "gui": [
-        {
-            "label": "Copy file",
-            "window_name": "Picker sample",
-            "command": "copy %foo% %bar%",
-            "button": "copy",
-            "components": [
-                {
-                    "type": "file",
-                    "label": "PNG file you want to copy",
-                    "extension": "PNG files (*.png)|*.png",
-                    "add_quotes": true
-                },
-                {
-                    "type": "folder",
-                    "label": "Output path",
-                    "add_quotes": true
-                }
-            ]
-        }
-    ]
+    "gui": {
+        "label": "Copy file",
+        "window_name": "Picker sample",
+        "command": "copy %foo% %bar%",
+        "button": "copy",
+        "components": [
+            {
+                "type": "file",
+                "label": "PNG file you want to copy",
+                "extension": "PNG files (*.png)|*.png",
+                "add_quotes": true
+            },
+            {
+                "type": "folder",
+                "label": "Output path",
+                "add_quotes": true
+            }
+        ]
+    }
 }
 ```
 

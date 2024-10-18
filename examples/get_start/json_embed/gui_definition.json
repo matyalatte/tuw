@@ -20,7 +20,7 @@
                     "id": "merged_exe",
                     "default": "Tuw.new.exe",
                     "add_quotes": true,
-                    "platforms": ["win"]
+                    "platforms": "win"
                 },
                 {
                     "type": "file",
@@ -45,7 +45,7 @@
                     "id": "merged_exe",
                     "default": "Tuw.new.exe",
                     "add_quotes": true,
-                    "platforms": ["win"]
+                    "platforms": "win"
                 },
                 {
                     "type": "file",
@@ -68,7 +68,7 @@
                     "id": "orig_exe",
                     "default": "Tuw.orig.exe",
                     "add_quotes": true,
-                    "platforms": ["win"]
+                    "platforms": "win"
                 },
                 {
                     "type": "file",

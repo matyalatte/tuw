@@ -20,8 +20,8 @@ Tuw provides a very simple GUI for your scripts.
 All you need is a JSON file and a tiny executable.  
 **No need for compilers, browsers, or huge executables!**  
 
-![sample](https://github.com/matyalatte/tuw/assets/69258547/9b3c8487-010e-497b-b66c-95af84906dd0)
-<img src=https://user-images.githubusercontent.com/69258547/192090797-f5e5b52d-59aa-4942-a361-2c8b5c7bd746.png width=387></img>  
+![sample](https://github.com/user-attachments/assets/17894d27-64fc-45c7-89bf-7f55d505508f)
+<img src=https://github.com/user-attachments/assets/249b954f-e66e-46a8-8451-ad39e700d564 width=397></img>  
 
 ## Features
 

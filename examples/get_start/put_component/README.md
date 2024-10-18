@@ -6,20 +6,18 @@ You can put a text box in the GUI.
 
 ```json
 {
-    "gui": [
-        {
-            "label": "Text Box Sample",
-            "window_name": "Title here!",
-            "command": "echo %-%",
-            "button": "Hello!",
-            "components": [
-                {
-                    "type": "text",
-                    "label": "Type 'Hello!'"
-                }
-            ]
-        }
-    ]
+    "gui": {
+        "label": "Text Box Sample",
+        "window_name": "Title here!",
+        "command": "echo %-%",
+        "button": "Hello!",
+        "components": [
+            {
+                "type": "text",
+                "label": "Type 'Hello!'"
+            }
+        ]
+    }
 }
 ```
 
@@ -44,19 +42,17 @@ In the example, the value of the text box will be injected at `%-%`.
 You can also use the [`id`](../../comp_options/id) option to name the components like variables.  
 
 ```json
-"gui": [
-    {
-        "label": "Text Box Sample",
-        "window_name": "Title here!",
-        "command": "echo %foo%, %foo%",
-        "button": "Hello!",
-        "components": [
-            {
-                "type": "text",
-                "label": "Type 'Hello!'",
-                "id": "foo"
-            }
-        ]
-    }
-]
+"gui": {
+    "label": "Text Box Sample",
+    "window_name": "Title here!",
+    "command": "echo %foo%, %foo%",
+    "button": "Hello!",
+    "components": [
+        {
+            "type": "text",
+            "label": "Type 'Hello!'",
+            "id": "foo"
+        }
+    ]
+}
 ```

@@ -4,14 +4,12 @@ Tuw expects user's default locale for stdout on Windows. If you want to use UTF-
 
 ```json
 {
-    "gui": [
-        {
-            "label": "Use UTF-8 outputs on Windows",
-            "command": "powershell -ExecutionPolicy Bypass -File \"utf.ps1\"",
-            "codepage": "utf8",
-            "components": []
-        }
-    ]
+    "gui": {
+        "label": "Use UTF-8 outputs on Windows",
+        "command": "powershell -ExecutionPolicy Bypass -File \"utf.ps1\"",
+        "codepage": "utf8",
+        "components": []
+    }
 }
 ```
 

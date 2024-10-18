@@ -1,19 +1,17 @@
 {
-    "gui": [
-        {
-            "label": "Component Sample",
-            "command": "echo textbox: %c%",
-            "button": "Echo!",
-            "components": [
-                {
-                    "type": "static_text",
-                    "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
-                },
-                {
-                    "type": "text",
-                    "label": "Some text"
-                }
-            ]
-        }
-    ]
+    "gui": {
+        "label": "Component Sample",
+        "command": "echo textbox: %c%",
+        "button": "Echo!",
+        "components": [
+            {
+                "type": "static_text",
+                "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
+            },
+            {
+                "type": "text",
+                "label": "Some text"
+            }
+        ]
+    }
 }

@@ -1,34 +1,32 @@
 {
-    "gui": [
-        {
-            "label": "Sample GUI",
-            "command": "echo file: %-% & echo options: %-%",
-            "components": [
-                {
-                    "type": "file",
-                    "label": "Some file path",
-                    "extension": "any files (*)|*",
-                    "default": "./foo/bar"
-                },
-                {
-                    "type": "check_array",
-                    "label": "options",
-                    "items": [
-                        {
-                            "label": "falg1",
-                            "default": true
-                        },
-                        {
-                            "label": "falg2",
-                            "default": false
-                        },
-                        {
-                            "label": "falg3",
-                            "default": true
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+    "gui": {
+        "label": "Sample GUI",
+        "command": "echo file: %-% & echo options: %-%",
+        "components": [
+            {
+                "type": "file",
+                "label": "Some file path",
+                "extension": "any files (*)|*",
+                "default": "./foo/bar"
+            },
+            {
+                "type": "check_array",
+                "label": "options",
+                "items": [
+                    {
+                        "label": "falg1",
+                        "default": true
+                    },
+                    {
+                        "label": "falg2",
+                        "default": false
+                    },
+                    {
+                        "label": "falg3",
+                        "default": true
+                    }
+                ]
+            }
+        ]
+    }
 }

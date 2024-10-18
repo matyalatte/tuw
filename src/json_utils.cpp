@@ -115,34 +115,14 @@ namespace json_utils {
         INTEGER,
         FLOAT,
         STRING,
-        STRING_ARRAY,
         JSON,
-        JSON_ARRAY,
         MAX
     };
-
-    static bool IsJsonArray(const rapidjson::Value& j, const char* key) {
-        if (!j[key].IsArray()) { return false; }
-        for (const rapidjson::Value& el : j[key].GetArray()) {
-            if (!el.IsObject())
-                return false;
-        }
-        return true;
-    }
-
-    static bool IsStringArray(const rapidjson::Value& j, const char* key) {
-        if (!j[key].IsArray()) { return false; }
-        for (const rapidjson::Value& el : j[key].GetArray()) {
-            if (!el.IsString())
-                return false;
-        }
-        return true;
-    }
 
     static const bool OPTIONAL = true;
 
     static void CheckJsonType(JsonResult& result, const rapidjson::Value& j, const char* key,
-        const JsonType& type, const char* label = "", const bool& optional = false) {
+            const JsonType& type, const char* label = "", const bool& optional = false) {
         if (!j.HasMember(key)) {
             if (optional) return;
             result.ok = false;
@@ -168,19 +148,77 @@ namespace json_utils {
             valid = j[key].IsString();
             type_name = "a string";
             break;
-        case JsonType::STRING_ARRAY:
-            valid = IsStringArray(j, key);
-            type_name = "an array of strings";
-            break;
         case JsonType::JSON:
             valid = j[key].IsObject();
             type_name = "a json object";
             break;
-        case JsonType::JSON_ARRAY:
-            valid = IsJsonArray(j, key);
+        default:
+            assert(false);
+            type_name = "";
+            break;
+        }
+        if (!valid) {
+            result.ok = false;
+            result.msg = GetLabel(label, key) + ConcatCStrings(" should be ", type_name, ".");
+        }
+    }
+
+
+    static bool IsJsonArray(rapidjson::Value& j, const char* key,
+                            rapidjson::Document::AllocatorType& alloc) {
+        if (!j[key].IsArray()) {
+            if (!j[key].IsObject())
+                return false;
+            rapidjson::Value array(rapidjson::kArrayType);
+            array.PushBack(j[key].Move(), alloc);
+            j[key] = array;
+        }
+        for (const rapidjson::Value& el : j[key].GetArray()) {
+            if (!el.IsObject())
+                return false;
+        }
+        return true;
+    }
+
+    static bool IsStringArray(rapidjson::Value& j, const char* key,
+                              rapidjson::Document::AllocatorType& alloc) {
+        if (!j[key].IsArray()) {
+            if (!j[key].IsString())
+                return false;
+            rapidjson::Value array(rapidjson::kArrayType);
+            array.PushBack(j[key].Move(), alloc);
+            j[key] = array;
+        }
+        for (const rapidjson::Value& el : j[key].GetArray()) {
+            if (!el.IsString())
+                return false;
+        }
+        return true;
+    }
+
+    static void CheckJsonArrayType(JsonResult& result, rapidjson::Value& j, const char* key,
+            const JsonType& type, rapidjson::Document::AllocatorType& alloc,
+            const char* label = "", const bool& optional = false) {
+        if (!j.HasMember(key)) {
+            if (optional) return;
+            result.ok = false;
+            result.msg = GetLabel(label, key) + " not found.";
+            return;
+        }
+        bool valid = false;
+        const char* type_name = nullptr;
+        switch (type) {
+        case JsonType::STRING:
+            valid = IsStringArray(j, key, alloc);
+            type_name = "an array of strings";
+            break;
+        case JsonType::JSON:
+            valid = IsJsonArray(j, key, alloc);
             type_name = "an array of json objects";
             break;
         default:
+            assert(false);
+            type_name = "";
             break;
         }
         if (!valid) {
@@ -191,7 +229,7 @@ namespace json_utils {
 
     // get default definition of gui
     void GetDefaultDefinition(rapidjson::Document& definition) {
-        static const char* def_str = "{\"gui\":[{"
+        static const char* def_str = "{\"gui\":{"
             "\"label\":\"Default GUI\","
     #ifdef _WIN32
             "\"command\":\"dir\","
@@ -201,7 +239,7 @@ namespace json_utils {
             "\"button\":\"run 'ls'\","
     #endif
             "\"components\":[]"
-            "}]}";
+            "}}";
         rapidjson::ParseResult ok = definition.Parse(def_str);
         assert(ok);
         JsonResult result = JSON_RESULT_OK;
@@ -434,7 +472,7 @@ namespace json_utils {
 
         CorrectKey(sub_definition, "component", "components", alloc);
         CorrectKey(sub_definition, "component_array", "components", alloc);
-        CheckJsonType(result, sub_definition, "components", JsonType::JSON_ARRAY);
+        CheckJsonArrayType(result, sub_definition, "components", JsonType::JSON, alloc);
 
         if (!result.ok) return;
 
@@ -468,7 +506,7 @@ namespace json_utils {
                     break;
                 case COMP_COMBO:
                 case COMP_RADIO:
-                    CheckJsonType(result, c, "items", JsonType::JSON_ARRAY, label);
+                    CheckJsonArrayType(result, c, "items", JsonType::JSON, alloc, label);
                     if (!result.ok) return;
                     for (rapidjson::Value& i : c["items"].GetArray()) {
                         CheckJsonType(result, i, "label", JsonType::STRING, "items");
@@ -481,7 +519,7 @@ namespace json_utils {
                     CheckJsonType(result, c, "default", JsonType::BOOLEAN, label, OPTIONAL);
                     break;
                 case COMP_CHECK_ARRAY:
-                    CheckJsonType(result, c, "items", JsonType::JSON_ARRAY, label);
+                    CheckJsonArrayType(result, c, "items", JsonType::JSON, alloc, label);
                     if (!result.ok) return;
                     for (rapidjson::Value& i : c["items"].GetArray()) {
                         CheckJsonType(result, i, "label", JsonType::STRING, "items");
@@ -543,7 +581,7 @@ namespace json_utils {
             bool ignore = false;
             CorrectKey(c, "platform", "platforms", alloc);
             CorrectKey(c, "platform_array", "platforms", alloc);
-            CheckJsonType(result, c, "platforms", JsonType::STRING_ARRAY, label, OPTIONAL);
+            CheckJsonArrayType(result, c, "platforms", JsonType::STRING, alloc, label, OPTIONAL);
             if (!result.ok) return;
             if (c.HasMember("platforms")) {
                 ignore = true;
@@ -647,7 +685,7 @@ namespace json_utils {
     }
 
     void CheckDefinition(JsonResult& result, rapidjson::Document& definition) {
-        CheckJsonType(result, definition, "gui", JsonType::JSON_ARRAY);
+        CheckJsonArrayType(result, definition, "gui", JsonType::JSON, definition.GetAllocator());
         if (!result.ok) return;
         if (definition["gui"].Size() == 0) {
             result.ok = false;
@@ -660,9 +698,9 @@ namespace json_utils {
         }
     }
 
-    void CheckHelpURLs(JsonResult& result, const rapidjson::Document& definition) {
+    void CheckHelpURLs(JsonResult& result, rapidjson::Document& definition) {
         if (!definition.HasMember("help")) return;
-        CheckJsonType(result, definition, "help", JsonType::JSON_ARRAY);
+        CheckJsonArrayType(result, definition, "help", JsonType::JSON, definition.GetAllocator());
         if (!result.ok) return;
         for (const rapidjson::Value& h : definition["help"].GetArray()) {
             CheckJsonType(result, h, "type", JsonType::STRING);
