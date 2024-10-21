@@ -44,7 +44,7 @@ Tuw will ignore the component if the current OS does not match the specified pla
             "label": "Windows!",
             "id": "os",
             "default": true,
-            "platforms": [ "win" ]
+            "platforms": "win"
         },
         {
             "type": "check",

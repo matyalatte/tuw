@@ -40,6 +40,6 @@ void CheckVersion(JsonResult& result, rapidjson::Document& definition);
 void CheckDefinition(JsonResult& result, rapidjson::Document& definition);
 void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
                         rapidjson::Document::AllocatorType& alloc);
-void CheckHelpURLs(JsonResult& result, const rapidjson::Document& definition);
+void CheckHelpURLs(JsonResult& result, rapidjson::Document& definition);
 
 }  // namespace json_utils

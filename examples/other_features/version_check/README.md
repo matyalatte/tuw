@@ -11,14 +11,12 @@ There are two options for checking the tool version.
 
 ```json
 {
-    "recommended": "1.1.0",
-    "minimum_required": "1.0.0",
-    "gui": [
-        {
-            "label": "You can't see this GUI.",
-            "command": "echo Hello!",
-            "components": []
-        }
-    ]
+    "recommended": "2.1.0",
+    "minimum_required": "2.0.0",
+    "gui": {
+        "label": "You can't see this GUI.",
+        "command": "echo Hello!",
+        "components": []
+    }
 }
 ```

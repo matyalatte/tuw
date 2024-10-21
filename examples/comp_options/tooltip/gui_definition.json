@@ -1,43 +1,41 @@
 {
-    "gui": [
-        {
-            "label": "Sample GUI",
-            "command": "echo file: %-% & echo folder: %-% & echo options: %-%",
-            "components": [
-                {
-                    "type": "static_text",
-                    "label": "Move the mouse cursor to components to see tooltip messages!"
-                },
-                {
-                    "type": "file",
-                    "label": "Some file path",
-                    "extension": "any files (*)|*",
-                    "tooltip": "tooltip for file path!"
-                },
-                {
-                    "type": "folder",
-                    "label": "Some folder path",
-                    "tooltip": "tooltip for folder path!"
-                },
-                {
-                    "type": "check_array",
-                    "label": "options",
-                    "items": [
-                        {
-                            "label": "falg1",
-                            "tooltip": "tooltip for flag1!"
-                        },
-                        {
-                            "label": "falg2",
-                            "tooltip": "flag2!"
-                        },
-                        {
-                            "label": "falg3",
-                            "tooltip": "flag3..."
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+    "gui": {
+        "label": "Sample GUI",
+        "command": "echo file: %-% & echo folder: %-% & echo options: %-%",
+        "components": [
+            {
+                "type": "static_text",
+                "label": "Move the mouse cursor to components to see tooltip messages!"
+            },
+            {
+                "type": "file",
+                "label": "Some file path",
+                "extension": "any files (*)|*",
+                "tooltip": "tooltip for file path!"
+            },
+            {
+                "type": "folder",
+                "label": "Some folder path",
+                "tooltip": "tooltip for folder path!"
+            },
+            {
+                "type": "check_array",
+                "label": "options",
+                "items": [
+                    {
+                        "label": "falg1",
+                        "tooltip": "tooltip for flag1!"
+                    },
+                    {
+                        "label": "falg2",
+                        "tooltip": "flag2!"
+                    },
+                    {
+                        "label": "falg3",
+                        "tooltip": "flag3..."
+                    }
+                ]
+            }
+        ]
+    }
 }

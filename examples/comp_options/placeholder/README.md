@@ -7,29 +7,27 @@ It displays a message when the text box is empty.
 
 ```json
 {
-    "gui": [
-        {
-            "label": "Placeholder",
-            "window_name": "Placeholder sample",
-            "command": "echo %-% %-% %-%",
-            "components": [
-                {
-                    "type": "file",
-                    "label": "Some file",
-                    "placeholder": "Drop a file here!"
-                },
-                {
-                    "type": "folder",
-                    "label": "Some folder",
-                    "placeholder": "Drop a folder here!"
-                },
-                {
-                    "type": "text",
-                    "label": "Some text",
-                    "placeholder": "Type here!"
-                }
-            ]
-        }
-    ]
+    "gui": {
+        "label": "Placeholder",
+        "window_name": "Placeholder sample",
+        "command": "echo %-% %-% %-%",
+        "components": [
+            {
+                "type": "file",
+                "label": "Some file",
+                "placeholder": "Drop a file here!"
+            },
+            {
+                "type": "folder",
+                "label": "Some folder",
+                "placeholder": "Drop a folder here!"
+            },
+            {
+                "type": "text",
+                "label": "Some text",
+                "placeholder": "Type here!"
+            }
+        ]
+    }
 }
 ```

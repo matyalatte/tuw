@@ -1,45 +1,43 @@
 {
-    "gui": [
-        {
-            "label": "Component Sample",
-            "command": "echo combo: %a% & echo radio: %b%",
-            "button": "Echo!",
-            "components": [
-                {
-                    "type": "combo",
-                    "label": "Combo box",
-                    "items": [
-                        {
-                            "label": "one",
-                            "value": "1"
-                        },
-                        {
-                            "label": "two",
-                            "value": "2"
-                        },
-                        {
-                            "label": "3"
-                        }
-                    ]
-                },
-                {
-                    "type": "radio",
-                    "label": "Radio buttons",
-                    "items": [
-                        {
-                            "label": "one",
-                            "value": "1"
-                        },
-                        {
-                            "label": "two",
-                            "value": "2"
-                        },
-                        {
-                            "label": "3"
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+    "gui": {
+        "label": "Component Sample",
+        "command": "echo combo: %a% & echo radio: %b%",
+        "button": "Echo!",
+        "components": [
+            {
+                "type": "combo",
+                "label": "Combo box",
+                "items": [
+                    {
+                        "label": "one",
+                        "value": "1"
+                    },
+                    {
+                        "label": "two",
+                        "value": "2"
+                    },
+                    {
+                        "label": "3"
+                    }
+                ]
+            },
+            {
+                "type": "radio",
+                "label": "Radio buttons",
+                "items": [
+                    {
+                        "label": "one",
+                        "value": "1"
+                    },
+                    {
+                        "label": "two",
+                        "value": "2"
+                    },
+                    {
+                        "label": "3"
+                    }
+                ]
+            }
+        ]
+    }
 }
