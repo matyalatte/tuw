@@ -3,8 +3,12 @@
     /*
      * Multi-line comments
      */
-    "ary": [
-        "",
-        "trailing_comma",
-    ]
+    "label": "test",
+    "command": "echo hello",
+    "components": [],
+    "help": {
+        "label": "test",
+        "type": "url",
+        "url": "example.com",
+    },
 }

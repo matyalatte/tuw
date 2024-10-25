@@ -1,29 +1,33 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "properties": {
-    "recommended": { "$ref": "#/definitions/types/version" },
-    "recommended_version": { "$ref": "#/definitions/types/version" },
-    "minimum_required": { "$ref": "#/definitions/types/version" },
-    "minimum_required_version": { "$ref": "#/definitions/types/version" },
-    "gui": {
-      "if": { "type": "object" },
-      "then": { "$ref": "#/definitions/types/gui_item" },
-      "else": {
-        "type": "array",
-        "items": { "$ref": "#/definitions/types/gui_item" }
-      }
-    },
-    "help":  {
-      "if": { "type": "object" },
-      "then": { "$ref": "#/definitions/types/help_item" },
-      "else": {
-        "type": "array",
-        "items": { "$ref": "#/definitions/types/help_item" }
-      }
+  "if": {
+    "required": [ "gui" ]
+  },
+  "then": {
+    "properties": {
+      "recommended": { "$ref": "#/definitions/types/version" },
+      "recommended_version": { "$ref": "#/definitions/types/version" },
+      "minimum_required": { "$ref": "#/definitions/types/version" },
+      "minimum_required_version": { "$ref": "#/definitions/types/version" },
+      "gui": { "$ref": "#/definitions/types/gui_array" },
+      "help": { "$ref": "#/definitions/types/help_array" }
     }
   },
-  "required": [ "gui" ],
+  "else": {
+    "allOf": [
+      { "$ref": "#/definitions/types/gui_item" },
+      {
+        "properties": {
+          "recommended": { "$ref": "#/definitions/types/version" },
+          "recommended_version": { "$ref": "#/definitions/types/version" },
+          "minimum_required": { "$ref": "#/definitions/types/version" },
+          "minimum_required_version": { "$ref": "#/definitions/types/version" },
+          "help": { "$ref": "#/definitions/types/help_array" }
+        }
+      }
+    ]
+  },
   "definitions": {
     "types": {
       "version": {
@@ -183,6 +187,14 @@
           }
         ]
       },
+      "gui_array": {
+        "if": { "type": "object" },
+        "then": { "$ref": "#/definitions/types/gui_item" },
+        "else": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/types/gui_item" }
+        }
+      },
       "help_item": {
         "type": "object",
         "properties": {
@@ -221,6 +233,14 @@
             }
           }
         ]
+      },
+      "help_array":  {
+        "if": { "type": "object" },
+        "then": { "$ref": "#/definitions/types/help_item" },
+        "else": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/types/help_item" }
+        }
       }
     },
     "components": {
