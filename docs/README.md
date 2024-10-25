@@ -60,7 +60,7 @@ For VSCode, you can add the schema path to `settings.json` (`File > Preferences 
 ```json
 "json.schemas": [
     {
-        "fileMatch": [ "gui_definition.json" ],
+        "fileMatch": [ "gui_definition.json", "gui_definition.jsonc" ],
         "url": "https://raw.githubusercontent.com/matyalatte/tuw/main/schema/schema.json"
     }
 ]
