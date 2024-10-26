@@ -1,6 +1,5 @@
 {
     "gui": {
-        "label": "Component Sample",
         "command": "echo textbox: %c%",
         "button": "Echo!",
         "components": [

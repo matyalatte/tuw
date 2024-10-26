@@ -2,64 +2,23 @@
     "gui": [
         {
             "label": "Sample GUI",
-            "command": "echo file: %-% & echo folder: %-% & echo checkbox: %-%",
+            "command": "echo file: %-%",
             "button": "Echo!",
             "components": [
                 {
-                    "type": "static_text",
-                    "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
-                },
-                {
                     "type": "file",
-                    "label": "Some file path",
-                    "extension": "any files (*)|*",
-                    "placeholder": "Drop a file here!"
-                },
-                {
-                    "type": "folder",
-                    "label": "Some folder path"
-                },
-                {
-                    "type": "check",
-                    "label": "checkbox",
-                    "value": "true",
-                    "default": true
+                    "label": "Some file path"
                 }
             ]
         },
         {
             "label": "Sample GUI2",
-            "command": "echo text_box: %-% & echo options:%-%",
+            "command": "echo text_box: %-%",
             "button": "Echo!",
             "components": [
                 {
-                    "type": "static_text",
-                    "label": "This is a sample GUI. Edit 'gui_definition.json' for your scripts."
-                },
-                {
                     "type": "text",
                     "label": "Some text"
-                },
-                {
-                    "type": "check_array",
-                    "label": "options",
-                    "items": [
-                        {
-                            "label": "option1",
-                            "value": "--opt1",
-                            "default": true
-                        },
-                        {
-                            "label": "option2",
-                            "value": "--opt2",
-                            "default": false
-                        },
-                        {
-                            "label": "option3",
-                            "value": "--opt3",
-                            "default": false
-                        }
-                    ]
                 }
             ]
         }

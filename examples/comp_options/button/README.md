@@ -8,7 +8,6 @@ It allows you to rename the button associated with the picker component.
 ```json
 {
     "gui": {
-        "label": "Button",
         "window_name": "Button sample",
         "command": "echo %-% %-%",
         "components": [

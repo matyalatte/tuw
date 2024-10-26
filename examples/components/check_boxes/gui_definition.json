@@ -1,6 +1,5 @@
 {
     "gui": {
-        "label": "Check Boxes",
         "command": "echo checkbox: %-% & echo options:%-%",
         "button": "Echo!",
         "components": [

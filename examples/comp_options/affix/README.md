@@ -7,7 +7,6 @@
 ```json
 {
     "gui": {
-        "label": "Affix example",
         "command": "echo %-%",
         "components": [
             {

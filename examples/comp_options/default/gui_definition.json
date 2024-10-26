@@ -1,6 +1,5 @@
 {
     "gui": {
-        "label": "Sample GUI",
         "command": "echo file: %-% & echo options: %-%",
         "components": [
             {

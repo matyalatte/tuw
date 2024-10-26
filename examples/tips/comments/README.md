@@ -9,7 +9,7 @@ Tuw supports the [JSON with Comments](https://code.visualstudio.com/docs/languag
      * Multi-line comment
      */
     "gui": {
-        "label": "JSON with Comments",
+        "window_name": "JSON with Comments",
         "command": "echo Hello!",
         "components": [],
         // You can put a trailing comma after the last element.

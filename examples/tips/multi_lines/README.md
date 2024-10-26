@@ -10,9 +10,9 @@ But you can see some examples for it.
 On windows, you can join the commands with ` && `.  
 And some commands like `for` loop require parentheses `()`.
 
-```json
+```jsonc
 {
-    "label": "Search json in a folder (Windows)",
+    // Search json in a folder (Windows)
     "command": "@echo off && (for %%f in (\"%dir%\\*.json\") do (echo %%f)) && echo Done!",
     "button": "Echo!",
     "components": [
@@ -28,9 +28,9 @@ And some commands like `for` loop require parentheses `()`.
 
 On non-Windows platforms, you can join the commands with `;`.
 
-```json
+```jsonc
 {
-    "label": "Search json in a folder (Unix/Linux)",
+    // Search json in a folder (Unix/Linux)
     "command": "for f in %dir%/*.json; do echo \"${f}\"; done; echo Done!",
     "button": "Echo!",
     "components": [

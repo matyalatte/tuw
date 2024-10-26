@@ -1,6 +1,6 @@
 {
     "gui": {
-        "label": "Sample GUI",
+        "window_name": "Sample GUI",
         "command": "echo file: %-% & echo folder: %-% & echo checkbox: %-%",
         "components": [
             {

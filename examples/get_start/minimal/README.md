@@ -10,7 +10,6 @@ It has only a button to echo `Hello!`.
 ```json
 {
     "gui": {
-        "label": "Minimal Sample",
         "command": "echo Hello!",
         "components": []
     }
@@ -19,6 +18,5 @@ It has only a button to echo `Hello!`.
 
 You can write a definition of your GUI in `"gui": {}`.  
 
--   `label` is the label for your definition. You can type anything you like here.
 -   `command` is the command you want to execute when clicking the execution button.
 -   `components` is an array of GUI components (e.g., file pickers). `[]` means no components.

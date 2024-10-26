@@ -7,7 +7,6 @@
 ```json
 {
     "gui": {
-        "label": "Optional component",
         "command": "echo %-%",
         "components": [
             {

@@ -8,7 +8,6 @@ It displays a message when the text box is empty.
 ```json
 {
     "gui": {
-        "label": "Placeholder",
         "window_name": "Placeholder sample",
         "command": "echo %-% %-% %-%",
         "components": [
