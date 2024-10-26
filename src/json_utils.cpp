@@ -229,7 +229,7 @@ namespace json_utils {
 
     // get default definition of gui
     void GetDefaultDefinition(rapidjson::Document& definition) {
-        static const char* def_str = "{\"gui\":{"
+        static const char* def_str = "{"
             "\"label\":\"Default GUI\","
     #ifdef _WIN32
             "\"command\":\"dir\","
@@ -239,7 +239,7 @@ namespace json_utils {
             "\"button\":\"run 'ls'\","
     #endif
             "\"components\":[]"
-            "}}";
+            "}";
         rapidjson::ParseResult ok = definition.Parse(def_str);
         assert(ok);
         JsonResult result = JSON_RESULT_OK;
@@ -685,7 +685,14 @@ namespace json_utils {
     }
 
     void CheckDefinition(JsonResult& result, rapidjson::Document& definition) {
-        CheckJsonArrayType(result, definition, "gui", JsonType::JSON, definition.GetAllocator());
+        rapidjson::Document::AllocatorType& alloc = definition.GetAllocator();
+        if (!definition.HasMember("gui")) {
+            // definition["gui"] = definition
+            rapidjson::Value n(rapidjson::kObjectType);
+            n.CopyFrom(definition, alloc);
+            definition.AddMember("gui", n, alloc);
+        }
+        CheckJsonArrayType(result, definition, "gui", JsonType::JSON, alloc);
         if (!result.ok) return;
         if (definition["gui"].Size() == 0) {
             result.ok = false;
@@ -694,7 +701,7 @@ namespace json_utils {
 
         for (rapidjson::Value& sub_d : definition["gui"].GetArray()) {
             if (!result.ok) return;
-            CheckSubDefinition(result, sub_d, definition.GetAllocator());
+            CheckSubDefinition(result, sub_d, alloc);
         }
     }
 
