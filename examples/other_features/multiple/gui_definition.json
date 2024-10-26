@@ -12,7 +12,7 @@
             ]
         },
         {
-            "label": "Sample GUI2",
+            "window_name": "Sample GUI2",
             "command": "echo text_box: %-%",
             "button": "Echo!",
             "components": [

@@ -2,7 +2,8 @@
 
 `"gui"` can be an array of gui definitions.
 Users can select one of these definitions from the `Menu` in the executable.
-You can also use `"label"` to modify strings that are displayed in the menu bar.  
+You can also use `"label"` to modify strings that are displayed in the menu bar.
+When `"label"` is not defined, `"window_name"` will be used as the GUI label.  
 
 ![advanced](https://github.com/matyalatte/tuw/assets/69258547/956be42e-6931-4b71-ae3c-180103a93714)  
 
@@ -21,7 +22,7 @@ You can also use `"label"` to modify strings that are displayed in the menu bar.
             ]
         },
         {
-            "label": "Sample GUI2",
+            "window_name": "Sample GUI2",
             "command": "echo text_box: %-%",
             "button": "Echo!",
             "components": [

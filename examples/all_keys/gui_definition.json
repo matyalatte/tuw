@@ -3,7 +3,7 @@
     "minimum_required": "0.7.1",
     "gui": [
         {
-            "label": "Components Minimal",
+            "window_name": "Components Minimal",
             "command": "echo file: %-% & echo folder: %-% & echo combo: %-% & echo radio: %-% & echo check: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-% & echo float: %-%",
             "components": [
                 {
@@ -82,7 +82,7 @@
             ]
         },
         {
-            "label": "Components Optional",
+            "window_name": "Components Optional",
             "command": "echo file: %file% & echo folder: %folder% & echo combo: %combo% & echo radio: %radio% & echo check: %check% & echo check_array: %options% & echo textbox: %text% & echo int: %integer% & echo float: %double%",
             "components": [
                 {
@@ -248,8 +248,8 @@
             ]
         },
         {
-            "label": "GUI Optional",
-            "window_name": "Window Title Here",
+            "window_name": "GUI Optional",
+            "label": "GUI Optional (this string is for a menu item)",
             "command_win": "echo home: %__HOME__% & echo cwd: %__CWD__% & echo percent: %% & echo sample message!",
             "command_linux": "echo home: %__HOME__%; echo cwd: %__CWD__%; echo percent: %%; echo sample message!",
             "command_mac": "echo home: %__HOME__%; echo cwd: %__CWD__%; echo percent: %%; echo sample message!",
