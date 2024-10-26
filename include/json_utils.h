@@ -39,6 +39,7 @@ void GetDefaultDefinition(rapidjson::Document& definition);
 void CheckVersion(JsonResult& result, rapidjson::Document& definition);
 void CheckDefinition(JsonResult& result, rapidjson::Document& definition);
 void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
+                        int index,
                         rapidjson::Document::AllocatorType& alloc);
 void CheckHelpURLs(JsonResult& result, rapidjson::Document& definition);
 

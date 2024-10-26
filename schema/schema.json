@@ -157,9 +157,6 @@
           "components": { "$ref": "#/definitions/types/component_array" },
           "component_array": { "$ref": "#/definitions/types/component_array" }
         },
-        "required": [
-          "label"
-        ],
         "allOf": [
           {
             "if": {
