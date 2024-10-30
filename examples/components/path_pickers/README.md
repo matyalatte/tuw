@@ -8,7 +8,6 @@ Of course, you can drop files on the pickers to specify the paths.
 ```json
 {
     "gui": {
-        "label": "Copy file",
         "window_name": "Picker sample",
         "command": "copy %foo% %bar%",
         "button": "copy",

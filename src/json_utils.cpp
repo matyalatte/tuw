@@ -230,7 +230,6 @@ namespace json_utils {
     // get default definition of gui
     void GetDefaultDefinition(rapidjson::Document& definition) {
         static const char* def_str = "{"
-            "\"label\":\"Default GUI\","
     #ifdef _WIN32
             "\"command\":\"dir\","
             "\"button\":\"run 'dir'\","
@@ -446,13 +445,21 @@ namespace json_utils {
 
     // validate one of definitions (["gui"][i]) and store parsed info
     void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
+                            int index,
                             rapidjson::Document::AllocatorType& alloc) {
-        // check is_string
-        CheckJsonType(result, sub_definition, "label", JsonType::STRING);
-        CheckJsonType(result, sub_definition, "button", JsonType::STRING, "", OPTIONAL);
         CorrectKey(sub_definition, "window_title", "window_name", alloc);
         CorrectKey(sub_definition, "title", "window_name", alloc);
         CheckJsonType(result, sub_definition, "window_name", JsonType::STRING, "", OPTIONAL);
+
+        if (!sub_definition.HasMember("label")) {
+            std::string default_label = ConcatCStrings("GUI ", index);
+            const char* label = GetString(sub_definition, "window_name", default_label.c_str());
+            rapidjson::Value n(label, alloc);
+            sub_definition.AddMember("label", n, alloc);
+        }
+        CheckJsonType(result, sub_definition, "label", JsonType::STRING);
+
+        CheckJsonType(result, sub_definition, "button", JsonType::STRING, "", OPTIONAL);
 
         CheckJsonType(result, sub_definition, "check_exit_code", JsonType::BOOLEAN, "", OPTIONAL);
         CheckJsonType(result, sub_definition, "exit_success", JsonType::INTEGER, "", OPTIONAL);
@@ -699,9 +706,11 @@ namespace json_utils {
             result.msg = "The size of [\"gui\"] should NOT be zero.";
         }
 
+        int i = 0;
         for (rapidjson::Value& sub_d : definition["gui"].GetArray()) {
             if (!result.ok) return;
-            CheckSubDefinition(result, sub_d, alloc);
+            CheckSubDefinition(result, sub_d, i, alloc);
+            i++;
         }
     }
 

@@ -1,6 +1,5 @@
 {
     "gui": {
-        "label": "Component Sample",
         "command": "echo combo: %a% & echo radio: %b%",
         "button": "Echo!",
         "components": [

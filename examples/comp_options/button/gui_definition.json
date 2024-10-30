@@ -1,6 +1,5 @@
 {
     "gui": {
-        "label": "Button",
         "window_name": "Button sample",
         "command": "echo %-% %-%",
         "components": [

@@ -313,8 +313,10 @@ static void OnClicked(uiButton *sender, void *data) {
 void MainFrame::UpdatePanel(unsigned definition_id) {
     m_definition_id = definition_id;
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
-    const char* label = sub_definition["label"].GetString();
-    PrintFmt("[UpdatePanel] Label: %s\n", label);
+    if (m_definition["gui"].Size() > 1) {
+        const char* label = sub_definition["label"].GetString();
+        PrintFmt("[UpdatePanel] Label: %s\n", label);
+    }
     const char* cmd_str = sub_definition["command_str"].GetString();
     PrintFmt("[UpdatePanel] Command: %s\n", cmd_str);
     const char* window_name = json_utils::GetString(sub_definition,

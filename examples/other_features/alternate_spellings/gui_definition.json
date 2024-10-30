@@ -1,6 +1,5 @@
 {
     "gui": {
-        "label": "Alternate Spellings",
         "command": "echo folder: %-% & echo combo: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-%",
         "title": "Alternate Spellings Sample",
         "component_array": [

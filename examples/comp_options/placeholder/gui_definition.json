@@ -1,6 +1,5 @@
 {
     "gui": {
-        "label": "Placeholder",
         "window_name": "Placeholder sample",
         "command": "echo %-% %-% %-%",
         "components": [

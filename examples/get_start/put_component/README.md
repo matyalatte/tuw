@@ -7,7 +7,6 @@ You can put a text box in the GUI.
 ```json
 {
     "gui": {
-        "label": "Text Box Sample",
         "window_name": "Title here!",
         "command": "echo %-%",
         "button": "Hello!",

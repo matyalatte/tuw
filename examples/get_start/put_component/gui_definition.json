@@ -1,6 +1,5 @@
 {
     "gui": {
-        "label": "Minimal Sample",
         "window_name": "Title here!",
         "command": "echo %-%",
         "button": "Hello!",

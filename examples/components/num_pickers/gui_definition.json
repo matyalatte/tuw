@@ -1,6 +1,5 @@
 {
     "gui": {
-        "label": "Select numbers",
         "window_name": "Picker sample",
         "command": "echo int: %-% & echo float: %-%",
         "components": [
