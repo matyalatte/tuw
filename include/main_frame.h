@@ -1,9 +1,9 @@
 #pragma once
 #include <vector>
-#include <string>
 #include "rapidjson/document.h"
 #include "component.h"
 #include "json_utils.h"
+#include "string_utils.h"
 #include "ui.h"
 
 // Main window
@@ -26,9 +26,9 @@ class MainFrame {
     void CreateMenu();
     json_utils::JsonResult CheckDefinition(rapidjson::Document& definition);
     void UpdateConfig();
-    void ShowSuccessDialog(const std::string& msg, const std::string& title = "Success");
-    void ShowErrorDialog(const std::string& msg, const std::string& title = "Error");
-    void JsonLoadFailed(const std::string& msg);
+    void ShowSuccessDialog(const tuwString& msg, const tuwString& title = "Success");
+    void ShowErrorDialog(const tuwString& msg, const tuwString& title = "Error");
+    void JsonLoadFailed(const tuwString& msg);
 
  public:
     explicit MainFrame(const rapidjson::Document& definition =
@@ -38,7 +38,7 @@ class MainFrame {
     void UpdatePanel(unsigned definition_id);
     void OpenURL(int id);
     bool Validate();
-    std::string GetCommand();
+    tuwString GetCommand();
     void RunCommand();
     void GetDefinition(rapidjson::Document& json);
     void SaveConfig();

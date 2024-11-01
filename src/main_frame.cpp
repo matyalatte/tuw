@@ -17,7 +17,7 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 
     m_grid = NULL;
     m_menu_item = NULL;
-    std::string exe_path = envuStr(envuGetExecutablePath());
+    tuwString exe_path = envuStr(envuGetExecutablePath());
 
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
@@ -88,8 +88,8 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
 #endif
 
     if (ignore_external_json) {
-        std::string msg = ConcatCStrings("WARNING: Using embedded JSON. ",
-                                         json_path, " was ignored.\n");
+        tuwString msg = tuwString("WARNING: Using embedded JSON. ") +
+                        json_path + " was ignored.\n";
         PrintFmt("[LoadDefinition] %s", msg.c_str());
         ShowSuccessDialog(msg, "Warning");
     }
@@ -216,9 +216,9 @@ void MainFrame::CreateMenu() {
     m_menu_item = uiMenuAppendCheckItem(menu, "Safe Mode");
 }
 
-static bool IsValidURL(const std::string &url) {
+static bool IsValidURL(const tuwString &url) {
     for (const char c : { ' ', ';', '|', '&', '\r', '\n' }) {
-        if (url.find(c) != std::string::npos)
+        if (url.find(c) != tuwString::npos)
             return false;
     }
     return true;
@@ -227,7 +227,7 @@ static bool IsValidURL(const std::string &url) {
 void MainFrame::OpenURL(int id) {
     rapidjson::Value& help = m_definition["help"].GetArray()[id];
     const char* type = help["type"].GetString();
-    std::string url;
+    tuwString url;
     const char* tag = "";
 
     if (strcmp(type, "url") == 0) {
@@ -235,19 +235,18 @@ void MainFrame::OpenURL(int id) {
         tag = "[OpenURL] ";
 
         size_t pos = url.find("://");
-        if (pos != std::string::npos) {
-            std::string scheme = url.substr(0, pos);
+        if (pos != tuwString::npos) {
+            tuwString scheme = url.substr(0, pos);
             // scheme should be http or https
             if (scheme == "file") {
-                std::string msg = ConcatCStrings("Use 'file' type for a path, not 'url' type. (",
-                                                 url.c_str(), ")");
+                tuwString msg = "Use 'file' type for a path, not 'url' type. (" +
+                                url + ")";
                 PrintFmt("%sError: %s\n", tag, msg.c_str());
                 ShowErrorDialog(msg);
                 return;
             } else if (scheme != "https" && scheme != "http") {
-                std::string msg = ConcatCStrings(
-                                    "Unsupported scheme detected. "
-                                    "It should be http or https. (", scheme.c_str(), ")");
+                tuwString msg = "Unsupported scheme detected. "
+                                "It should be http or https. (" + scheme + ")";
                 PrintFmt("%sError: %s\n", tag, msg.c_str());
                 ShowErrorDialog(msg);
                 return;
@@ -263,7 +262,7 @@ void MainFrame::OpenURL(int id) {
         tag = "[OpenFile] ";
 
         if (!exists) {
-            std::string msg = ConcatCStrings("File does not exist. (", url.c_str(), ")");
+            tuwString msg = "File does not exist. (" + url + ")";
             PrintFmt("%sError: %s\n", tag, msg.c_str());
             ShowErrorDialog(msg);
             return;
@@ -277,7 +276,7 @@ void MainFrame::OpenURL(int id) {
     }
 
     if (!IsValidURL(url)) {
-        std::string msg = "URL should NOT contains ' ', ';', '|', '&', '\\r', nor '\\n'.\n"
+        tuwString msg = "URL should NOT contains ' ', ';', '|', '&', '\\r', nor '\\n'.\n"
                           "URL: " + url;
         PrintFmt("%sError: %s\n", tag, msg.c_str());
         ShowErrorDialog(msg.c_str());
@@ -285,7 +284,7 @@ void MainFrame::OpenURL(int id) {
     }
 
     if (IsSafeMode()) {
-        std::string msg = "The URL was not opened because the safe mode is enabled.\n"
+        tuwString msg = "The URL was not opened because the safe mode is enabled.\n"
                           "You can disable it from the menu bar (Debug > Safe Mode.)\n"
                           "\n"
                           "URL: " + url;
@@ -293,7 +292,7 @@ void MainFrame::OpenURL(int id) {
     } else {
         ExecuteResult result = LaunchDefaultApp(url);
         if (result.exit_code != 0) {
-            std::string msg = ConcatCStrings("Failed to open a ", type, " by an unexpected error.");
+            tuwString msg = tuwString("Failed to open a ") + type + " by an unexpected error.";
             PrintFmt("%sError: %s\n", tag, msg.c_str());
             ShowErrorDialog(msg.c_str());
         }
@@ -389,10 +388,10 @@ void MainFrame::Fit(bool keep_width) {
 bool MainFrame::Validate() {
     bool validate = true;
     bool redraw_flag = false;
-    std::string val_first_err;
+    tuwString val_first_err;
     for (Component* comp : m_components) {
         if (!comp->Validate(&redraw_flag)) {
-            const std::string& val_err = comp->GetValidationError();
+            const tuwString& val_err = comp->GetValidationError();
             if (validate)
                 val_first_err = val_err;
             validate = false;
@@ -414,8 +413,8 @@ bool MainFrame::Validate() {
 }
 
 // Make command string
-std::string MainFrame::GetCommand() {
-    std::vector<std::string> cmd_ary;
+tuwString MainFrame::GetCommand() {
+    std::vector<tuwString> cmd_ary;
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     for (rapidjson::Value& c : sub_definition["command_splitted"].GetArray())
         cmd_ary.emplace_back(c.GetString());
@@ -423,12 +422,12 @@ std::string MainFrame::GetCommand() {
     for (rapidjson::Value& c : sub_definition["command_ids"].GetArray())
         cmd_ids.emplace_back(c.GetInt());
 
-    std::vector<std::string> comp_strings = std::vector<std::string>(m_components.size());
+    std::vector<tuwString> comp_strings = std::vector<tuwString>(m_components.size());
     for (size_t i = 0; i < m_components.size(); i++) {
         comp_strings[i] = m_components[i]->GetString();
     }
 
-    std::string cmd = cmd_ary[0];
+    tuwString cmd = cmd_ary[0];
     for (size_t i = 0; i < cmd_ids.size(); i++) {
         int id = cmd_ids[i];
         if (id == CMD_ID_PERCENT) {
@@ -448,11 +447,11 @@ std::string MainFrame::GetCommand() {
 }
 
 void MainFrame::RunCommand() {
-    std::string cmd = GetCommand();
+    tuwString cmd = GetCommand();
     PrintFmt("[RunCommand] Command: %s\n", cmd.c_str());
 
     if (IsSafeMode()) {
-        std::string msg = "The command was not executed because the safe mode is enabled.\n"
+        tuwString msg = "The command was not executed because the safe mode is enabled.\n"
                           "You can disable it from the menu bar (Debug > Safe Mode.)\n"
                           "\n"
                           "Command: " + cmd;
@@ -487,11 +486,11 @@ void MainFrame::RunCommand() {
     }
 
     if (check_exit_code && result.exit_code != exit_success) {
-        std::string err_msg;
+        tuwString err_msg;
         if (show_last_line)
             err_msg = result.last_line;
         else
-            err_msg = ConcatCStrings("Invalid exit code (", result.exit_code, ")");
+            err_msg = tuwString("Invalid exit code (") + result.exit_code + ")";
         PrintFmt("[RunCommand] Error: %s\n", err_msg.c_str());
         ShowErrorDialog(err_msg);
         return;
@@ -530,7 +529,7 @@ json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definitio
     return result;
 }
 
-void MainFrame::JsonLoadFailed(const std::string& msg) {
+void MainFrame::JsonLoadFailed(const tuwString& msg) {
     PrintFmt("[LoadDefinition] Error: %s\n", msg.c_str());
     ShowErrorDialog(msg);
 }
@@ -555,12 +554,12 @@ void MainFrame::SaveConfig() {
 
 bool g_no_dialog = false;
 
-void MainFrame::ShowSuccessDialog(const std::string& msg, const std::string& title) {
+void MainFrame::ShowSuccessDialog(const tuwString& msg, const tuwString& title) {
     if (g_no_dialog) return;
     uiMsgBox(m_mainwin, title.c_str(), msg.c_str());
 }
 
-void MainFrame::ShowErrorDialog(const std::string& msg, const std::string& title) {
+void MainFrame::ShowErrorDialog(const tuwString& msg, const tuwString& title) {
     if (g_no_dialog) return;
     uiMsgBoxError(m_mainwin, title.c_str(), msg.c_str());
 }

@@ -10,7 +10,7 @@ inline bool IsNewline(char ch) {
     return ch == '\n' || ch == '\r';
 }
 
-static std::string GetLastLine(const std::string& input) {
+static tuwString GetLastLine(const tuwString& input) {
     if (input.empty()) return "";
     size_t end = input.length();
 
@@ -31,7 +31,7 @@ enum READ_IO_TYPE : int {
 unsigned ReadIO(subprocess_s &process,
                 int read_io_type,
                 char *buf, const unsigned buf_size,
-                std::string& str, const unsigned str_size) {
+                tuwString& str, const unsigned str_size) {
     unsigned read_size = 0;
     if (read_io_type == READ_STDOUT) {
         read_size = subprocess_read_stdout(&process, buf, buf_size);
@@ -48,16 +48,16 @@ unsigned ReadIO(subprocess_s &process,
     return read_size;
 }
 
-void DestroyProcess(subprocess_s &process, int *return_code, std::string &err_msg) {
+void DestroyProcess(subprocess_s &process, int *return_code, tuwString &err_msg) {
     if (subprocess_join(&process, return_code) || subprocess_destroy(&process)) {
         *return_code = -1;
         err_msg = "Failed to manage subprocess.\n";
     }
 }
 
-ExecuteResult Execute(const std::string& cmd, bool use_utf8_on_windows) {
+ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
 #ifdef _WIN32
-    std::wstring wcmd = UTF8toUTF16(cmd.c_str());
+    tuwWstring wcmd = UTF8toUTF16(cmd.c_str());
 
     int argc;
     wchar_t** parsed = CommandLineToArgvW(wcmd.c_str(), &argc);
@@ -91,8 +91,8 @@ ExecuteResult Execute(const std::string& cmd, bool use_utf8_on_windows) {
     const unsigned BUF_SIZE = 1024;
     char out_buf[BUF_SIZE + 1];
     char err_buf[BUF_SIZE + 1];
-    std::string last_line;
-    std::string err_msg;
+    tuwString last_line;
+    tuwString err_msg;
     unsigned out_read_size = 0;
     unsigned err_read_size = 0;
 
@@ -102,7 +102,7 @@ ExecuteResult Execute(const std::string& cmd, bool use_utf8_on_windows) {
         if (out_read_size) {
 #ifdef _WIN32
             if (use_utf8_on_windows) {
-                std::wstring wout = UTF8toUTF16(out_buf);
+                tuwWstring wout = UTF8toUTF16(out_buf);
                 printf("%ls", wout.c_str());
             } else {
                 printf("%s", out_buf);
@@ -124,9 +124,9 @@ ExecuteResult Execute(const std::string& cmd, bool use_utf8_on_windows) {
     return { return_code, err_msg, last_line };
 }
 
-ExecuteResult LaunchDefaultApp(const std::string& url) {
+ExecuteResult LaunchDefaultApp(const tuwString& url) {
 #ifdef _WIN32
-    std::wstring utf16_url = UTF8toUTF16(url.c_str());
+    tuwWstring utf16_url = UTF8toUTF16(url.c_str());
     const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", utf16_url.c_str(), NULL};
 #elif defined(__TUW_UNIX__) && !defined(__HAIKU__)
     // Linux and BSD
@@ -143,7 +143,7 @@ ExecuteResult LaunchDefaultApp(const std::string& url) {
         return { -1, "Failed to create a subprocess.\n", ""};
 
     int return_code;
-    std::string err_msg;
+    tuwString err_msg;
     DestroyProcess(process, &return_code, err_msg);
 
     return { return_code, err_msg, "" };
