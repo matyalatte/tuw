@@ -1,4 +1,3 @@
-#pragma once
 // Tests for json embedding
 // Todo: Write more tests
 

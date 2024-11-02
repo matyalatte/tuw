@@ -1,5 +1,3 @@
-#pragma once
-
 // Tests for json checking
 // Todo: Write more tests
 

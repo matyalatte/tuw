@@ -1,6 +1,4 @@
-#pragma once
-
-// Tests for json checking
+// Tests for string utils
 // Todo: Write more tests
 
 #include "test_utils.h"

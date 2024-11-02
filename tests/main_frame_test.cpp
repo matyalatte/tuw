@@ -1,5 +1,3 @@
-#pragma once
-
 // Tests for main_frame.cpp
 // Todo: Write more tests
 
