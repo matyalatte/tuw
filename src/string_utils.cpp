@@ -1,11 +1,12 @@
 #include "string_utils.h"
 
-#include "inttypes.h"
+#include <inttypes.h>
+#include <wchar.h>
+#include <cstdio>
+#include <cstring>
 
 #ifdef _WIN32
 #include "windows/uipriv_windows.hpp"
-#else
-#include <cstring>
 #endif
 
 void tuwString::alloc_cstr(const char *str, size_t size) {
