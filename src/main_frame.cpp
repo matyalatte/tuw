@@ -293,7 +293,7 @@ void MainFrame::OpenURL(int id) {
         if (GetStringError() != STR_OK) {
             // Reject the URL as it might have an unexpected value.
             const char* msg = "The URL was not opened "
-                              "because a fatal error has occured while editing strings. "
+                              "because a fatal error has occurred while editing strings. "
                               "Please reboot the application.";
             PrintFmt("%sError: %s\n", tag, msg);
             ShowErrorDialog(msg);
@@ -489,7 +489,7 @@ void MainFrame::RunCommand() {
     bool show_success_dialog = json_utils::GetBool(sub_definition, "show_success_dialog", true);
 
     if (GetStringError() != STR_OK) {
-        const char* msg = "Fatal error has occured while editing strings. "
+        const char* msg = "Fatal error has occurred while editing strings. "
                           "Please reboot the application.";
         PrintFmt("[RunCommand] Error: %s\n", msg);
         ShowErrorDialog(msg);

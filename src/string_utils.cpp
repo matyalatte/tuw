@@ -143,10 +143,11 @@ tuwString tuwString::operator+(num_type num) const { \
     } \
     \
     int ret = snprintf(num_str, num_size + 1, "%" fmt, num); \
-    if (ret == num_size) \
+    if (ret == num_size) { \
         new_str.append(num_str, num_size); \
-    else \
+    } else { \
         SetStringError(STR_FORMAT_ERROR); \
+    } \
     free(num_str); \
     return new_str; \
 }

@@ -75,6 +75,11 @@ static uint32_t Length(FILE* io) {
 static const uint32_t EXE_SIZE_MAX = 20000000;  // Allowed size of exe
 
 json_utils::JsonResult ExeContainer::Read(const tuwString& exe_path) {
+    if (GetStringError() != STR_OK) {
+        // Reject the operation as the exe_path might have an unexpected value.
+        return { false, "Fatal error has occurred while editing strings." };
+    }
+
     m_exe_path = exe_path;
     FILE* file_io = fopen(exe_path.c_str(), "rb");
     if (!file_io)
@@ -143,7 +148,7 @@ json_utils::JsonResult ExeContainer::Read(const tuwString& exe_path) {
 json_utils::JsonResult ExeContainer::Write(const tuwString& exe_path) {
     if (GetStringError() != STR_OK) {
         // Reject the operation as the exe_path might have an unexpected value.
-        return { false, "Fatal error has occured while editing strings." };
+        return { false, "Fatal error has occurred while editing strings." };
     }
 
     assert(!m_exe_path.empty());
