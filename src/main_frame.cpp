@@ -290,11 +290,20 @@ void MainFrame::OpenURL(int id) {
                           "URL: " + url;
         ShowSuccessDialog(msg, "Safe Mode");
     } else {
-        ExecuteResult result = LaunchDefaultApp(url);
-        if (result.exit_code != 0) {
-            tuwString msg = tuwString("Failed to open a ") + type + " by an unexpected error.";
-            PrintFmt("%sError: %s\n", tag, msg.c_str());
-            ShowErrorDialog(msg.c_str());
+        if (GetStringError() != STR_OK) {
+            // Reject the URL as it might have an unexpected value.
+            const char* msg = "The URL was not opened "
+                              "because a fatal error has occured while editing strings. "
+                              "Please reboot the application.";
+            PrintFmt("%sError: %s\n", tag, msg);
+            ShowErrorDialog(msg);
+        } else {
+            ExecuteResult result = LaunchDefaultApp(url);
+            if (result.exit_code != 0) {
+                tuwString msg = tuwString("Failed to open a ") + type + " by an unexpected error.";
+                PrintFmt("%sError: %s\n", tag, msg.c_str());
+                ShowErrorDialog(msg.c_str());
+            }
         }
     }
 }
@@ -479,6 +488,14 @@ void MainFrame::RunCommand() {
     bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
     bool show_success_dialog = json_utils::GetBool(sub_definition, "show_success_dialog", true);
 
+    if (GetStringError() != STR_OK) {
+        const char* msg = "Fatal error has occured while editing strings. "
+                          "Please reboot the application.";
+        PrintFmt("[RunCommand] Error: %s\n", msg);
+        ShowErrorDialog(msg);
+        return;
+    }
+
     if (!result.err_msg.empty()) {
         PrintFmt("[RunCommand] Error: %s\n", result.err_msg.c_str());
         ShowErrorDialog(result.err_msg);
@@ -554,14 +571,14 @@ void MainFrame::SaveConfig() {
 
 bool g_no_dialog = false;
 
-void MainFrame::ShowSuccessDialog(const tuwString& msg, const tuwString& title) {
+void MainFrame::ShowSuccessDialog(const char* msg, const char* title) {
     if (g_no_dialog) return;
-    uiMsgBox(m_mainwin, title.c_str(), msg.c_str());
+    uiMsgBox(m_mainwin, title, msg);
 }
 
-void MainFrame::ShowErrorDialog(const tuwString& msg, const tuwString& title) {
+void MainFrame::ShowErrorDialog(const char* msg, const char* title) {
     if (g_no_dialog) return;
-    uiMsgBoxError(m_mainwin, title.c_str(), msg.c_str());
+    uiMsgBoxError(m_mainwin, title, msg);
 }
 
 void MainFrameDisableDialog() {

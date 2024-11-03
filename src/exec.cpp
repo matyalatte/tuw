@@ -59,6 +59,13 @@ ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
 #ifdef _WIN32
     tuwWstring wcmd = UTF8toUTF16(cmd.c_str());
 
+    if (GetStringError() != STR_OK) {
+        // Reject the command as it might have unexpected value.
+        return { -1,
+                 "Fatal error has occored while editing strings.\n",
+                 "" };
+    }
+
     int argc;
     wchar_t** parsed = CommandLineToArgvW(wcmd.c_str(), &argc);
     wchar_t** argv = new wchar_t*[argc + 3];

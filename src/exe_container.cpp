@@ -141,6 +141,11 @@ json_utils::JsonResult ExeContainer::Read(const tuwString& exe_path) {
 }
 
 json_utils::JsonResult ExeContainer::Write(const tuwString& exe_path) {
+    if (GetStringError() != STR_OK) {
+        // Reject the operation as the exe_path might have an unexpected value.
+        return { false, "Fatal error has occured while editing strings." };
+    }
+
     assert(!m_exe_path.empty());
     tuwString json_str;
     if (HasJson())

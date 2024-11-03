@@ -9,6 +9,11 @@
 #include "windows/uipriv_windows.hpp"
 #endif
 
+StringError g_error_status = STR_OK;
+StringError GetStringError() { return g_error_status; }
+void ClearStringError() { g_error_status = STR_OK; }
+inline static void SetStringError(StringError err) { g_error_status = err; }
+
 void tuwString::alloc_cstr(const char *str, size_t size) {
     clear();
     if (str == nullptr || size == 0)
@@ -18,6 +23,7 @@ void tuwString::alloc_cstr(const char *str, size_t size) {
     m_str = reinterpret_cast<char*>(malloc(size + 1));
     if (!m_str) {
         m_size = 0;
+        SetStringError(STR_ALLOCATION_ERROR);
         return;
     }
     memcpy(m_str, str, size);
@@ -49,8 +55,10 @@ tuwString::tuwString(tuwString&& str) :
 
 tuwString::tuwString(size_t size) : m_size(size) {
     m_str = reinterpret_cast<char*>(calloc(size + 1, sizeof(char)));
-    if (!m_str)
+    if (!m_str) {
         m_size = 0;
+        SetStringError(STR_ALLOCATION_ERROR);
+    }
 }
 
 tuwString& tuwString::operator=(const char* str) {
@@ -80,8 +88,10 @@ void tuwString::append(const char* str, size_t size) {
 
     size_t new_size = m_size + size;
     char* new_cstr = reinterpret_cast<char*>(malloc(new_size + 1));
-    if (!new_cstr)
+    if (!new_cstr) {
+        SetStringError(STR_ALLOCATION_ERROR);
         return;
+    }
 
     if (!empty())
         memcpy(new_cstr, m_str, m_size);
@@ -121,14 +131,22 @@ tuwString tuwString::operator+(num_type num) const { \
     tuwString new_str(*this); \
     \
     int num_size = snprintf(nullptr, 0, "%" fmt, num); \
-    if (num_size <= 0) return new_str; \
+    if (num_size <= 0) { \
+        SetStringError(STR_FORMAT_ERROR); \
+        return new_str; \
+    } \
     \
     char* num_str = reinterpret_cast<char*>(malloc(num_size + 1)); \
-    if (!num_str) return new_str; \
+    if (!num_str) { \
+        SetStringError(STR_ALLOCATION_ERROR); \
+        return new_str; \
+    } \
     \
     int ret = snprintf(num_str, num_size + 1, "%" fmt, num); \
-    if (ret == num_size)\
+    if (ret == num_size) \
         new_str.append(num_str, num_size); \
+    else \
+        SetStringError(STR_FORMAT_ERROR); \
     free(num_str); \
     return new_str; \
 }
@@ -178,9 +196,20 @@ size_t tuwString::find(const char* str) const {
 }
 
 tuwString tuwString::substr(size_t start, size_t size) const {
-    if (start + size > m_size) return tuwString();
+    if (start + size > m_size) {
+        SetStringError(STR_BOUNDARY_ERROR);
+        return tuwString();
+    }
     tuwString new_str(m_str + start, size);
     return new_str;
+}
+
+const char& tuwString::operator[](size_t id) const {
+    if (id >= m_size) {
+        SetStringError(STR_BOUNDARY_ERROR);
+        return '\0';
+    }
+    return c_str()[id];
 }
 
 tuwString operator+(const char* str1, const tuwString& str2) {
@@ -198,8 +227,10 @@ tuwWstring::tuwWstring(const wchar_t* str) :
         return;
 
     m_str = reinterpret_cast<wchar_t*>(malloc((size + 1) * sizeof(wchar_t)));
-    if (!m_str)
+    if (!m_str) {
+        SetStringError(STR_ALLOCATION_ERROR);
         return;
+    }
 
     m_size = size;
     memcpy(m_str, str, size * sizeof(wchar_t));

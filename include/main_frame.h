@@ -26,8 +26,14 @@ class MainFrame {
     void CreateMenu();
     json_utils::JsonResult CheckDefinition(rapidjson::Document& definition);
     void UpdateConfig();
-    void ShowSuccessDialog(const tuwString& msg, const tuwString& title = "Success");
-    void ShowErrorDialog(const tuwString& msg, const tuwString& title = "Error");
+    void ShowSuccessDialog(const char* msg, const char* title = "Success");
+    void ShowErrorDialog(const char* msg, const char* title = "Error");
+    inline void ShowSuccessDialog(const tuwString& msg, const tuwString& title = "Success") {
+        ShowSuccessDialog(msg.c_str(), title.c_str());
+    }
+    inline void ShowErrorDialog(const tuwString& msg, const tuwString& title = "Error") {
+        ShowErrorDialog(msg.c_str(), title.c_str());
+    }
     void JsonLoadFailed(const tuwString& msg);
 
  public:

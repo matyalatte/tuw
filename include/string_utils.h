@@ -1,7 +1,24 @@
 #pragma once
 #include "env_utils.h"
 
+enum StringError : int {
+    STR_OK = 0,
+    STR_ALLOCATION_ERROR,  // Failed to allocate memory for string.
+    STR_BOUNDARY_ERROR,  // Accessed out-of-bounds with substr or [].
+    STR_FORMAT_ERROR,  // Failed to convert number to string.
+    STR_ERROR_MAX,
+};
+
+// Returns the error status for tuwString.
+StringError GetStringError();
+
+// Set STR_OK to the error status.
+void ClearStringError();
+
 // String class that doesn't raise std errors.
+// It works without any crashes even when it got a memory allocation error.
+// But you have to check GetStringError() after string allocations
+// or it might have an unexpected value (an empty string).
 class tuwString {
  private:
     char* m_str;
@@ -42,6 +59,8 @@ class tuwString {
         m_size = 0;
     }
 
+    const char& operator[](size_t id) const;
+
     tuwString& operator=(const char* str);
     tuwString& operator=(const tuwString& str);
     tuwString& operator=(tuwString&& str);
@@ -56,10 +75,6 @@ class tuwString {
     tuwString operator+(int num) const;
     tuwString operator+(size_t num) const;
     tuwString operator+(uint32_t num) const;
-
-    const char& operator[](size_t id) const {
-        return c_str()[id];
-    }
 
     bool operator==(const char* str) const;
     bool operator==(const tuwString& str) const;
