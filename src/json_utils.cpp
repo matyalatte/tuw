@@ -46,9 +46,9 @@ namespace json_utils {
         fclose(fp);
 
         if (!ok) {
-            tuwString msg("Failed to parse JSON: ");
-            msg += tuwString(rapidjson::GetParseError_En(ok.Code())) +
-                   " (offset: " + ok.Offset() + ")";
+            tuwString msg = tuwString("Failed to parse JSON: ") +
+                            rapidjson::GetParseError_En(ok.Code()) +
+                            " (offset: " + ok.Offset() + ")";
             return { false, msg };
         }
         if (!json.IsObject())

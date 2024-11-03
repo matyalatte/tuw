@@ -94,6 +94,18 @@ TEST(tuwStringTest, AssingMovedTuwstr) {
     expect_nullstr(str2);
 }
 
+TEST(tuwStringTest, AssingSelf) {
+    tuwString str = "test";
+    str = str;
+    expect_tuwstr("test", str);
+}
+
+TEST(tuwStringTest, AssingMovedSelf) {
+    tuwString str = "test";
+    str = std::move(str);
+    expect_tuwstr("test", str);
+}
+
 // Test +=
 TEST(tuwStringTest, AppendCstr) {
     tuwString str = "test";
@@ -146,19 +158,19 @@ TEST(tuwStringTest, PlusTuwstr) {
     expect_tuwstr("testfoo", str3);
 }
 
-TEST(StringUtilsTest, PlusInt) {
+TEST(tuwStringTest, PlusInt) {
     int a = -1;
     tuwString result = tuwString("test") + a + "bar";
     EXPECT_STREQ("test-1bar", result.c_str());
 }
 
-TEST(StringUtilsTest, PlusSizet) {
+TEST(tuwStringTest, PlusSizet) {
     size_t a = 100;
     tuwString result = tuwString("test") + a + "bar";
     EXPECT_STREQ("test100bar", result.c_str());
 }
 
-TEST(StringUtilsTest, PlusUint32) {
+TEST(tuwStringTest, PlusUint32) {
     uint32_t a = 100;
     tuwString result = tuwString("test") + a + "bar";
     EXPECT_STREQ("test100bar", result.c_str());

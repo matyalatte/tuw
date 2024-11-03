@@ -49,10 +49,8 @@ tuwString::tuwString(tuwString&& str) :
 
 tuwString::tuwString(size_t size) : m_size(size) {
     m_str = reinterpret_cast<char*>(calloc(size + 1, sizeof(char)));
-    if (!m_str) {
+    if (!m_str)
         m_size = 0;
-        return;
-    }
 }
 
 tuwString& tuwString::operator=(const char* str) {
@@ -128,9 +126,9 @@ tuwString tuwString::operator+(num_type num) const { \
     char* num_str = reinterpret_cast<char*>(malloc(num_size + 1)); \
     if (!num_str) return new_str; \
     \
-    snprintf(num_str, num_size + 1, "%" fmt, num); \
-    \
-    new_str.append(num_str, num_size); \
+    int ret = snprintf(num_str, num_size + 1, "%" fmt, num); \
+    if (ret == num_size)\
+        new_str.append(num_str, num_size); \
     free(num_str); \
     return new_str; \
 }
@@ -181,9 +179,7 @@ size_t tuwString::find(const char* str) const {
 
 tuwString tuwString::substr(size_t start, size_t size) const {
     if (start + size > m_size) return tuwString();
-    tuwString new_str(size);
-    if (new_str.size() == size)
-        memcpy(new_str.data(), m_str + start, size);
+    tuwString new_str(m_str + start, size);
     return new_str;
 }
 
