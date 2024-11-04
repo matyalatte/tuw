@@ -127,7 +127,7 @@ class tuwWstring {
     ~tuwWstring() { clear(); }
     size_t length() const { return m_size; }
     size_t size() const { return m_size; }
-    bool empty() const { return m_str == nullptr || m_str[0] == L'\0'; }
+    bool empty() const { return !m_str || m_str[0] == L'\0' || m_size == 0; }
 
     const wchar_t* c_str() const {
         if (m_str)
@@ -138,6 +138,7 @@ class tuwWstring {
     void clear() {
         if (m_str)
             free(m_str);
+        m_str = nullptr;
         m_size = 0;
     }
 };
