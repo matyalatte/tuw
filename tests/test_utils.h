@@ -1,7 +1,6 @@
 #pragma once
 
 #include <gtest/gtest.h>
-#include <string>
 #include "main_frame.h"
 #include "string_utils.h"
 #include "exec.h"

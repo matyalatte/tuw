@@ -1,66 +1,263 @@
 #include "string_utils.h"
 
-#include "inttypes.h"
+#include <inttypes.h>
+#include <wchar.h>
+#include <cstdio>
+#include <cstring>
 
 #ifdef _WIN32
 #include "windows/uipriv_windows.hpp"
-#else
-#include <cstring>
 #endif
+
+StringError g_error_status = STR_OK;
+StringError GetStringError() { return g_error_status; }
+void ClearStringError() { g_error_status = STR_OK; }
+inline static void SetStringError(StringError err) { g_error_status = err; }
+
+void tuwString::alloc_cstr(const char *str, size_t size) {
+    clear();
+    if (!str || size == 0)
+        return;
+
+    m_size = size;
+    m_str = reinterpret_cast<char*>(malloc(size + 1));
+    if (!m_str) {
+        m_size = 0;
+        SetStringError(STR_ALLOCATION_ERROR);
+        return;
+    }
+    memcpy(m_str, str, size);
+    m_str[size] = '\0';
+}
+
+#define get_strlen(str) (str) ? strlen(str) : 0
+
+tuwString::tuwString(const char* str) :
+        m_str(nullptr), m_size(0) {
+    alloc_cstr(str, get_strlen(str));
+}
+
+tuwString::tuwString(const char* str, size_t size) :
+        m_str(nullptr), m_size(0) {
+    alloc_cstr(str, size);
+}
+
+tuwString::tuwString(const tuwString& str) :
+        m_str(nullptr), m_size(0) {
+    alloc_cstr(str.c_str(), str.size());
+}
+
+tuwString::tuwString(tuwString&& str) :
+        m_str(str.m_str), m_size(str.m_size) {
+    str.m_str = nullptr;
+    str.m_size = 0;
+}
+
+tuwString::tuwString(size_t size) : m_size(size) {
+    m_str = reinterpret_cast<char*>(calloc(size + 1, sizeof(char)));
+    if (!m_str) {
+        m_size = 0;
+        SetStringError(STR_ALLOCATION_ERROR);
+    }
+}
+
+tuwString& tuwString::operator=(const char* str) {
+    alloc_cstr(str, get_strlen(str));
+    return *this;
+}
+
+tuwString& tuwString::operator=(const tuwString& str) {
+    if (this == &str) return *this;
+    alloc_cstr(str.c_str(), str.size());
+    return *this;
+}
+
+tuwString& tuwString::operator=(tuwString&& str) {
+    if (this == &str) return *this;
+    clear();
+    m_str = str.m_str;
+    m_size = str.m_size;
+    str.m_str = nullptr;
+    str.m_size = 0;
+    return *this;
+}
+
+void tuwString::append(const char* str, size_t size) {
+    if (!str || size == 0)
+        return;
+
+    size_t new_size = m_size + size;
+    char* new_cstr = reinterpret_cast<char*>(malloc(new_size + 1));
+    if (!new_cstr) {
+        SetStringError(STR_ALLOCATION_ERROR);
+        return;
+    }
+
+    if (!empty())
+        memcpy(new_cstr, m_str, m_size);
+    memcpy(new_cstr + m_size, str, size);
+    new_cstr[new_size] = '\0';
+
+    clear();
+    m_str = new_cstr;
+    m_size = new_size;
+}
+
+tuwString& tuwString::operator+=(const char* str) {
+    append(str, get_strlen(str));
+    return *this;
+}
+
+tuwString& tuwString::operator+=(const tuwString& str) {
+    append(str.c_str(), str.size());
+    return *this;
+}
+
+tuwString tuwString::operator+(const char* str) const {
+    tuwString new_str(*this);
+    new_str += str;
+    return new_str;
+}
+
+tuwString tuwString::operator+(const tuwString& str) const {
+    tuwString new_str(*this);
+    new_str += str;
+    return new_str;
+}
+
+// Convert number to c string, and append it to string.
+# define DEFINE_PLUS_FOR_NUM(num_type, fmt) \
+tuwString tuwString::operator+(num_type num) const { \
+    tuwString new_str(*this); \
+    \
+    int num_size = snprintf(nullptr, 0, "%" fmt, num); \
+    if (num_size <= 0) { \
+        SetStringError(STR_FORMAT_ERROR); \
+        return new_str; \
+    } \
+    \
+    char* num_str = reinterpret_cast<char*>(malloc(num_size + 1)); \
+    if (!num_str) { \
+        SetStringError(STR_ALLOCATION_ERROR); \
+        return new_str; \
+    } \
+    \
+    int ret = snprintf(num_str, num_size + 1, "%" fmt, num); \
+    if (ret == num_size) { \
+        new_str.append(num_str, num_size); \
+    } else { \
+        SetStringError(STR_FORMAT_ERROR); \
+    } \
+    free(num_str); \
+    return new_str; \
+}
+
+DEFINE_PLUS_FOR_NUM(int, "d")
+DEFINE_PLUS_FOR_NUM(size_t, "zu")
+DEFINE_PLUS_FOR_NUM(uint32_t, PRIu32)
+
+#define null_to_empty(str) (str) ? str : ""
+
+bool tuwString::operator==(const char* str) const {
+    return strcmp(c_str(), null_to_empty(str)) == 0;
+}
+
+bool tuwString::operator==(const tuwString& str) const {
+    return strcmp(c_str(), str.c_str()) == 0;
+}
+
+const size_t tuwString::npos = static_cast<size_t>(-1);
+
+size_t tuwString::find(const char c) const {
+    if (empty()) return npos;
+    const char* p = begin();
+    for (; p < end(); p++) {
+        if (*p == c)
+            return static_cast<size_t>(p - m_str);
+    }
+    return npos;
+}
+
+size_t tuwString::find(const char* str) const {
+    if (empty() || !str) return npos;
+
+    // Note: This function uses a slow algorithm.
+    const char* p = begin();
+    for (; p < end(); p++) {
+        const char* tmp_p = p;
+        const char* str_p = str;
+        while (tmp_p < end() && *str_p != '\0' && *tmp_p == *str_p) {
+            tmp_p++;
+            str_p++;
+        }
+        if (*str_p == '\0')
+            return static_cast<size_t>(p - m_str);
+    }
+    return npos;
+}
+
+tuwString tuwString::substr(size_t start, size_t size) const {
+    if (start + size > m_size) {
+        SetStringError(STR_BOUNDARY_ERROR);
+        return tuwString();
+    }
+    tuwString new_str(m_str + start, size);
+    return new_str;
+}
+
+const char& tuwString::operator[](size_t id) const {
+    if (id > m_size) {
+        SetStringError(STR_BOUNDARY_ERROR);
+        return ""[0];
+    }
+    return c_str()[id];
+}
+
+tuwString operator+(const char* str1, const tuwString& str2) {
+    tuwString new_str(str1);
+    new_str += str2;
+    return new_str;
+}
+
+tuwWstring::tuwWstring(const wchar_t* str) :
+        m_str(nullptr), m_size(0) {
+    if (!str) return;
+
+    size_t size = wcslen(str);
+    if (size == 0)
+        return;
+
+    m_str = reinterpret_cast<wchar_t*>(malloc((size + 1) * sizeof(wchar_t)));
+    if (!m_str) {
+        SetStringError(STR_ALLOCATION_ERROR);
+        return;
+    }
+
+    m_size = size;
+    memcpy(m_str, str, size * sizeof(wchar_t));
+    m_str[size] = L'\0';
+}
 
 static const uint32_t FNV_OFFSET_BASIS_32 = 2166136261U;
 static const uint32_t FNV_PRIME_32 = 16777619U;
 
-uint32_t Fnv1Hash32(const std::string& str) {
+uint32_t Fnv1Hash32(const tuwString& str) {
     uint32_t hash = FNV_OFFSET_BASIS_32;
-    for (const char& c : str) hash = (FNV_PRIME_32 * hash) ^ c;
+    for (const char c : str) hash = (FNV_PRIME_32 * hash) ^ c;
     return hash;
 }
 
-template<>
-std::string ConcatCStrings<const char*>(const char* str1, const char* str2, const char* str3) {
-    size_t len1 = strlen(str1), len2 = strlen(str2), len3 = str3 ? strlen(str3) : 0;
-    char* buffer = new char[len1 + len2 + len3 + 1];
-    memcpy(buffer, str1, len1);
-    memcpy(buffer + len1, str2, len2);
-    if (str3) memcpy(buffer + len1 + len2, str3, len3);
-    buffer[len1 + len2 + len3] = '\0';
-    std::string result(buffer);
-    delete[] buffer;
-    return result;
-}
-
-template<>
-std::string ConcatCStrings<char*>(const char* str1, char* str2, const char* str3) {
-    return ConcatCStrings<const char*>(str1, str2, str3);
-}
-
-#define DEFINE_CONCAT_CSTR_NUM(num_type, fmt) \
-template<> \
-std::string ConcatCStrings<num_type>(const char* str1, num_type num, const char* str2) { \
-    int num_len = snprintf(nullptr, 0, "%" fmt, num); \
-    char* num_str = new char[num_len + 1]; \
-    snprintf(num_str, num_len + 1, "%" fmt, num); \
-    std::string ret = ConcatCStrings(str1, num_str, str2); \
-    delete[] num_str; \
-    return ret; \
-}
-
-DEFINE_CONCAT_CSTR_NUM(int, "d")
-DEFINE_CONCAT_CSTR_NUM(size_t, "zu")
-DEFINE_CONCAT_CSTR_NUM(uint32_t, PRIu32)
-
 #ifdef _WIN32
-std::string UTF16toUTF8(const wchar_t* str) {
+tuwString UTF16toUTF8(const wchar_t* str) {
     char* uchar = toUTF8(str);
-    std::string ustr = uchar;
+    tuwString ustr = uchar;
     uiprivFree(uchar);
     return ustr;
 }
 
-std::wstring UTF8toUTF16(const char* str) {
+tuwWstring UTF8toUTF16(const char* str) {
     wchar_t* widechar = toUTF16(str);
-    std::wstring wstr = widechar;
+    tuwWstring wstr = widechar;
     uiprivFree(widechar);
     return wstr;
 }
@@ -382,7 +579,7 @@ void ConvertAnsiToPango(TagStack* stack, const char *input, char *output) {
 class Logger {
  private:
     uiMultilineEntry* m_log_entry;
-    std::string m_log_buffer;
+    tuwString m_log_buffer;
     TagStack m_tag_stack;  // stack for markup tags
     int m_buffer_length;
 

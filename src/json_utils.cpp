@@ -34,7 +34,7 @@ namespace json_utils {
     constexpr auto JSONC_FLAGS =
         rapidjson::kParseCommentsFlag | rapidjson::kParseTrailingCommasFlag;
 
-    JsonResult LoadJson(const std::string& file, rapidjson::Document& json) {
+    JsonResult LoadJson(const tuwString& file, rapidjson::Document& json) {
         FILE* fp = fopen(file.c_str(), "rb");
         if (!fp)
             return { false, "Failed to open " + file };
@@ -46,9 +46,9 @@ namespace json_utils {
         fclose(fp);
 
         if (!ok) {
-            std::string msg("Failed to parse JSON: ");
-            msg += rapidjson::GetParseError_En(ok.Code()) +
-                   ConcatCStrings(" (offset: ", ok.Offset(), ")");
+            tuwString msg = tuwString("Failed to parse JSON: ") +
+                            rapidjson::GetParseError_En(ok.Code()) +
+                            " (offset: " + ok.Offset() + ")";
             return { false, msg };
         }
         if (!json.IsObject())
@@ -57,10 +57,10 @@ namespace json_utils {
         return JSON_RESULT_OK;
     }
 
-    JsonResult SaveJson(rapidjson::Document& json, const std::string& file) {
+    JsonResult SaveJson(rapidjson::Document& json, const tuwString& file) {
         FILE* fp = fopen(file.c_str(), "wb");
         if (!fp)
-            return { false, ConcatCStrings("Failed to open ", file.c_str(), ".") };
+            return { false, "Failed to open " + file + "." };
 
         char writeBuffer[JSON_SIZE_MAX];
         rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
@@ -70,7 +70,7 @@ namespace json_utils {
         return JSON_RESULT_OK;
     }
 
-    std::string JsonToString(rapidjson::Document& json) {
+    tuwString JsonToString(rapidjson::Document& json) {
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         json.Accept(writer);
@@ -101,12 +101,12 @@ namespace json_utils {
         return def;
     }
 
-    static std::string GetLabel(const char* label, const char* key) {
-        std::string msg;
+    static tuwString GetLabel(const char* label, const char* key) {
+        tuwString msg;
         if (*label != '\0') {
-            msg = ConcatCStrings("['", label, "']");
+            msg = tuwString("['") + label + "']";
         }
-        msg += ConcatCStrings("['", key, "']");
+        msg += tuwString("['") + key + "']";
         return msg;
     }
 
@@ -159,7 +159,7 @@ namespace json_utils {
         }
         if (!valid) {
             result.ok = false;
-            result.msg = GetLabel(label, key) + ConcatCStrings(" should be ", type_name, ".");
+            result.msg = GetLabel(label, key) + " should be " + type_name + ".";
         }
     }
 
@@ -223,7 +223,7 @@ namespace json_utils {
         }
         if (!valid) {
             result.ok = false;
-            result.msg = GetLabel(label, key) + ConcatCStrings(" should be ", type_name, ".");
+            result.msg = GetLabel(label, key) + " should be " + type_name + ".";
         }
     }
 
@@ -257,12 +257,12 @@ namespace json_utils {
         }
     }
 
-    static std::vector<std::string> SplitString(const char* str,
+    static std::vector<tuwString> SplitString(const char* str,
                                                 const char delimiter) {
         if (!str)
             return {};
 
-        std::vector<std::string> tokens;
+        std::vector<tuwString> tokens;
 
         const char* start = str;
         while (*start != '\0') {
@@ -278,19 +278,19 @@ namespace json_utils {
     }
 
     static void CheckIndexDuplication(JsonResult& result,
-                                      const std::vector<std::string>& component_ids) {
+                                      const std::vector<tuwString>& component_ids) {
         size_t size = component_ids.size();
         if (size == 0)
             return;
         for (size_t i = 0; i < size - 1; i++) {
-            const std::string& str = component_ids[i];
+            const tuwString& str = component_ids[i];
             if (str.empty()) { continue; }
             for (size_t j = i + 1; j < size; j++) {
                 if (str == component_ids[j]) {
                     result.ok = false;
-                    result.msg = ConcatCStrings("[components][id]"
-                                    " should not be duplicated in a gui definition. (",
-                                    str.c_str(), ")");
+                    result.msg = "[components][id]"
+                                 " should not be duplicated in a gui definition. (" +
+                                 str + ")";
                     return;
                 }
             }
@@ -300,17 +300,17 @@ namespace json_utils {
     // split command by "%" symbol, and calculate which component should be inserted there.
     static void CompileCommand(JsonResult& result,
                                rapidjson::Value& sub_definition,
-                               const std::vector<std::string>& comp_ids,
+                               const std::vector<tuwString>& comp_ids,
                                rapidjson::Document::AllocatorType& alloc) {
-        std::vector<std::string> cmd = SplitString(sub_definition["command"].GetString(), '%');
-        std::vector<std::string> cmd_ids = std::vector<std::string>(0);
-        std::vector<std::string> splitted_cmd = std::vector<std::string>(0);
+        std::vector<tuwString> cmd = SplitString(sub_definition["command"].GetString(), '%');
+        std::vector<tuwString> cmd_ids = std::vector<tuwString>(0);
+        std::vector<tuwString> splitted_cmd = std::vector<tuwString>(0);
         if (sub_definition.HasMember("command_splitted"))
             sub_definition.RemoveMember("command_splitted");
         rapidjson::Value splitted_cmd_json(rapidjson::kArrayType);
 
         bool store_ids = false;
-        for (const std::string& token : cmd) {
+        for (const tuwString& token : cmd) {
             if (store_ids) {
                 cmd_ids.emplace_back(token);
             } else {
@@ -324,12 +324,12 @@ namespace json_utils {
 
         rapidjson::Value& components = sub_definition["components"];;
         rapidjson::Value cmd_int_ids(rapidjson::kArrayType);
-        std::string cmd_str;
+        tuwString cmd_str;
         int comp_size = static_cast<int>(comp_ids.size());
         int non_id_comp = 0;
         for (int i = 0; i < static_cast<int>(cmd_ids.size()); i++) {
             cmd_str += splitted_cmd[i];
-            const std::string& id = cmd_ids[i];
+            const tuwString& id = cmd_ids[i];
             int j;
             if (id == CMD_TOKEN_PERCENT) {
                 j = CMD_ID_PERCENT;
@@ -359,7 +359,7 @@ namespace json_utils {
             if (j >= comp_size)
                 cmd_str += "__comp???__";
             else if (j >= 0)
-                cmd_str += ConcatCStrings("__comp", j, "__");
+                cmd_str += tuwString("__comp") + j + "__";
         }
         if (cmd_ids.size() < splitted_cmd.size())
             cmd_str += splitted_cmd.back();
@@ -374,8 +374,8 @@ namespace json_utils {
                 if (id.GetInt() == j) { found = true; break; }
             if (!found) {
                 result.ok = false;
-                result.msg = ConcatCStrings("[\"components\"][", j,
-                                "] is unused in the command; ") + cmd_str;
+                result.msg = tuwString("[\"components\"][") + j +
+                             "] is unused in the command; " + cmd_str;
                 if (!comp_ids[j].empty())
                     result.msg = "The ID of " + result.msg;
                 return;
@@ -452,7 +452,7 @@ namespace json_utils {
         CheckJsonType(result, sub_definition, "window_name", JsonType::STRING, "", OPTIONAL);
 
         if (!sub_definition.HasMember("label")) {
-            std::string default_label = ConcatCStrings("GUI ", index);
+            tuwString default_label = tuwString("GUI ") + index;
             const char* label = GetString(sub_definition, "window_name", default_label.c_str());
             rapidjson::Value n(label, alloc);
             sub_definition.AddMember("label", n, alloc);
@@ -472,7 +472,7 @@ namespace json_utils {
             if (strcmp(codepage, "utf8") != 0 && strcmp(codepage, "utf-8") != 0 &&
                     strcmp(codepage, "default") != 0) {
                 result.ok = false;
-                result.msg = ConcatCStrings("Unknown codepage: ", codepage);
+                result.msg = tuwString("Unknown codepage: ") + codepage;
                 return;
             }
         }
@@ -484,7 +484,7 @@ namespace json_utils {
         if (!result.ok) return;
 
         // check components
-        std::vector<std::string> comp_ids;
+        std::vector<tuwString> comp_ids;
         for (rapidjson::Value& c : sub_definition["components"].GetArray()) {
             // check if type and label exist
             CheckJsonType(result, c, "label", JsonType::STRING, "components");
@@ -558,7 +558,7 @@ namespace json_utils {
                     break;
                 case COMP_UNKNOWN:
                     result.ok = false;
-                    result.msg = ConcatCStrings("Unknown component type: ", type_str);
+                    result.msg = tuwString("Unknown component type: ") + type_str;
                     break;
             }
             if (!result.ok) return;
@@ -644,14 +644,14 @@ namespace json_utils {
 
     // vX.Y.Z -> 10000*X + 100 * Y + Z
     static int VersionStringToInt(JsonResult& result, const char* string) {
-        std::vector<std::string> version_strings =
+        std::vector<tuwString> version_strings =
             SplitString(string, '.');
         int digit = 10000;
         int version_int = 0;
-        for (const std::string& str : version_strings) {
+        for (const tuwString& str : version_strings) {
             if (str.length() == 0 || str.length() > 2) {
                 result.ok = false;
-                result.msg = ConcatCStrings("Can NOT convert '", string, "' to int.");
+                result.msg = tuwString("Can NOT convert '") + string + "' to int.";
                 return 0;
             }
             if (str.length() == 1) {
@@ -686,7 +686,7 @@ namespace json_utils {
             int required_int = VersionStringToInt(result, required);
             if (tuw_constants::VERSION_INT < required_int) {
                 result.ok = false;
-                result.msg = ConcatCStrings("Version ", required, " is required.");
+                result.msg = tuwString("Version ") + required + " is required.";
             }
         }
     }
@@ -729,7 +729,7 @@ namespace json_utils {
                 CheckJsonType(result, h, "path", JsonType::STRING);
             } else {
                 result.ok = false;
-                result.msg = ConcatCStrings("Unsupported help type: ", type);
+                result.msg = tuwString("Unsupported help type: ") + type;
                 return;
             }
         }

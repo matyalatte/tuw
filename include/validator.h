@@ -1,19 +1,20 @@
 #pragma once
-#include <string>
 #include <vector>
 #include "rapidjson/document.h"
 
+#include "string_utils.h"
+
 class Validator {
  private:
-    std::string m_regex;
-    std::string m_wildcard;
+    tuwString m_regex;
+    tuwString m_wildcard;
     bool m_not_empty;
     bool m_exist;
-    std::string m_regex_error;
-    std::string m_wildcard_error;
-    std::string m_not_empty_error;
-    std::string m_exist_error;
-    std::string m_error_msg;
+    tuwString m_regex_error;
+    tuwString m_wildcard_error;
+    tuwString m_not_empty_error;
+    tuwString m_exist_error;
+    tuwString m_error_msg;
 
  public:
     Validator() : m_regex(""), m_wildcard(""),
@@ -21,6 +22,6 @@ class Validator {
                   m_error_msg("") {}
     ~Validator() {}
     void Initialize(const rapidjson::Value& j);
-    bool Validate(const std::string& str);
-    const std::string& GetError() const { return m_error_msg; }
+    bool Validate(const tuwString& str);
+    const tuwString& GetError() const { return m_error_msg; }
 };

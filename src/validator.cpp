@@ -2,6 +2,7 @@
 #include "validator.h"
 #include "json_utils.h"
 #include "env_utils.h"
+#include "string_utils.h"
 
 void Validator::Initialize(const rapidjson::Value& j) {
     m_regex = json_utils::GetString(j, "regex", "");
@@ -32,7 +33,7 @@ static int IsUnsupportedPattern(const char *pattern) {
     return 0;
 }
 
-bool Validator::Validate(const std::string& str) {
+bool Validator::Validate(const tuwString& str) {
     if (m_not_empty && str.empty()) {
         if (m_not_empty_error.empty())
             m_error_msg = "Empty string is NOT allowed.";

@@ -29,7 +29,7 @@ Component::Component(const rapidjson::Value& j) {
     m_id = json_utils::GetString(j, "id", "");
     if (m_id.empty()) {
         uint32_t hash = Fnv1Hash32(j["label"].GetString());
-        m_id = ConcatCStrings("_", hash);
+        m_id = tuwString("_") + hash;
     }
     m_add_quotes = json_utils::GetBool(j, "add_quotes", false);
     if (j.HasMember("validator"))
@@ -42,18 +42,18 @@ Component::Component(const rapidjson::Value& j) {
 Component::~Component() {
 }
 
-std::string Component::GetString() {
-    std::string str = GetRawString();
+tuwString Component::GetString() {
+    tuwString str = GetRawString();
     if (m_optional && str.empty())
         return "";
     if (m_add_quotes)
-        str = ConcatCStrings("\"", str.c_str(), "\"");
-    return ConcatCStrings(m_prefix.c_str(), str.c_str(), m_suffix.c_str());
+        str = tuwString("\"") + str + "\"";
+    return m_prefix + str + m_suffix;
 }
 
 bool Component::Validate(bool* redraw_flag) {
     // Main frame should run Fit() after this function.
-    std::string str = GetRawString();
+    tuwString str = GetRawString();
     if (m_optional && str.empty())
         return true;
 
@@ -80,7 +80,7 @@ bool Component::Validate(bool* redraw_flag) {
     return validate;
 }
 
-const std::string& Component::GetValidationError() const {
+const tuwString& Component::GetValidationError() const {
     return m_validator.GetError();
 }
 
@@ -214,15 +214,15 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     m_widget = putPathPicker(this, box, j, onOpenFileClicked);
 }
 
-std::string FilePicker::GetRawString() {
+tuwString FilePicker::GetRawString() {
     char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
-    std::string str = text;
+    tuwString str = text;
     uiFreeText(text);
     return str;
 }
 
 static void setConfigForTextBox(const rapidjson::Value& config,
-                                const std::string& id, void *widget) {
+                                const tuwString& id, void *widget) {
     const char* str = json_utils::GetString(config, id.c_str(), nullptr);
     if (str) {
         uiEntry* entry = static_cast<uiEntry*>(widget);
@@ -263,7 +263,7 @@ class FilterList {
 
  public:
     FilterList(): filter_buf(NULL), filters(), ui_filters(NULL) {}
-    void MakeFilters(const std::string& ext) {
+    void MakeFilters(const tuwString& ext) {
         if (filter_buf != NULL)
             delete[] filter_buf;
         filter_buf =  new char[ext.length() + 1];
@@ -364,9 +364,9 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
     m_widget = putPathPicker(this, box, j, onOpenFolderClicked);
 }
 
-std::string DirPicker::GetRawString() {
+tuwString DirPicker::GetRawString() {
     char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
-    std::string str = text;
+    tuwString str = text;
     uiFreeText(text);
     return str;
 }
@@ -398,7 +398,7 @@ void DirPicker::OpenFolder() {
 ComboBox::ComboBox(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
     uiCombobox* combo = uiNewCombobox();
-    std::vector<std::string> values;
+    std::vector<tuwString> values;
     for (const rapidjson::Value& i : j["items"].GetArray()) {
         const char* label = i["label"].GetString();
         uiComboboxAppend(combo, label);
@@ -416,7 +416,7 @@ ComboBox::ComboBox(uiBox* box, const rapidjson::Value& j)
     m_widget = combo;
 }
 
-std::string ComboBox::GetRawString() {
+tuwString ComboBox::GetRawString() {
     int sel = uiComboboxSelected(static_cast<uiCombobox*>(m_widget));
     return m_values[sel];
 }
@@ -441,7 +441,7 @@ void ComboBox::GetConfig(rapidjson::Document& config) {
 RadioButtons::RadioButtons(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
     uiRadioButtons* radio = uiNewRadioButtons();
-    std::vector<std::string> values;
+    std::vector<tuwString> values;
     for (const rapidjson::Value& i : j["items"].GetArray()) {
         const char* label = i["label"].GetString();
         uiRadioButtonsAppend(radio, label);
@@ -459,7 +459,7 @@ RadioButtons::RadioButtons(uiBox* box, const rapidjson::Value& j)
     m_widget = radio;
 }
 
-std::string RadioButtons::GetRawString() {
+tuwString RadioButtons::GetRawString() {
     int sel = uiRadioButtonsSelected(static_cast<uiRadioButtons*>(m_widget));
     return m_values[sel];
 }
@@ -495,7 +495,7 @@ CheckBox::CheckBox(uiBox* box, const rapidjson::Value& j)
     m_widget = check;
 }
 
-std::string CheckBox::GetRawString() {
+tuwString CheckBox::GetRawString() {
     if (uiCheckboxChecked(static_cast<uiCheckbox*>(m_widget)))
         return m_value;
     return "";
@@ -518,7 +518,7 @@ void CheckBox::GetConfig(rapidjson::Document& config) {
 CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
     std::vector<uiCheckbox*>* checks = new std::vector<uiCheckbox*>();
-    std::vector<std::string> values;
+    std::vector<tuwString> values;
     uiBox* check_array_box = uiNewVerticalBox();
     uiBoxSetSpacing(check_array_box, tuw_constants::BOX_CHECKS_SPACE);
     size_t id = 0;
@@ -541,8 +541,8 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
     m_widget = checks;
 }
 
-std::string CheckArray::GetRawString() {
-    std::string str;
+tuwString CheckArray::GetRawString() {
+    tuwString str;
     std::vector<uiCheckbox*> checks;
     checks = *(std::vector<uiCheckbox*>*)m_widget;
     for (size_t i = 0; i < checks.size(); i++) {
@@ -592,9 +592,9 @@ TextBox::TextBox(uiBox* box, const rapidjson::Value& j)
     m_widget = entry;
 }
 
-std::string TextBox::GetRawString() {
+tuwString TextBox::GetRawString() {
     char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
-    std::string str = text;
+    tuwString str = text;
     uiFreeText(text);
     return str;
 }
@@ -639,9 +639,9 @@ IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
     m_widget = picker;
 }
 
-std::string IntPicker::GetRawString() {
+tuwString IntPicker::GetRawString() {
     char* text = uiSpinboxValueText(static_cast<uiSpinbox*>(m_widget));
-    std::string str(text);
+    tuwString str(text);
     uiFreeText(text);
     return str;
 }
@@ -685,9 +685,9 @@ FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
     m_widget = picker;
 }
 
-std::string FloatPicker::GetRawString() {
+tuwString FloatPicker::GetRawString() {
     char* text = uiSpinboxValueText(static_cast<uiSpinbox*>(m_widget));
-    std::string str(text);
+    tuwString str(text);
     uiFreeText(text);
     return str;
 }
