@@ -194,6 +194,10 @@ TEST(tuwStringTest, Index) {
     EXPECT_EQ('s', str[2]);
     EXPECT_EQ('t', str[3]);
     EXPECT_EQ('\0', str[4]);
+    EXPECT_EQ(STR_OK, GetStringError());
+    EXPECT_EQ('\0', str[5]);
+    EXPECT_EQ(STR_BOUNDARY_ERROR, GetStringError());
+    ClearStringError();
 }
 
 TEST(tuwStringTest, IndexNull) {
@@ -281,9 +285,12 @@ TEST(tuwStringTest, Substr) {
     tuwString str = "footestfoo";
     expect_tuwstr("foo", str.substr(0, 3));
     expect_tuwstr("test", str.substr(3, 4));
+    EXPECT_EQ(STR_OK, GetStringError());
     expect_nullstr(str.substr(7, 10));
     expect_nullstr(str.substr(20, 4));
     expect_nullstr(tuwString().substr(0, 3));
+    EXPECT_EQ(STR_BOUNDARY_ERROR, GetStringError());
+    ClearStringError();
 }
 
 // Test begin() and end()

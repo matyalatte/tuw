@@ -206,7 +206,7 @@ tuwString tuwString::substr(size_t start, size_t size) const {
 }
 
 const char& tuwString::operator[](size_t id) const {
-    if (id >= m_size) {
+    if (id > m_size) {
         SetStringError(STR_BOUNDARY_ERROR);
         return ""[0];
     }
