@@ -120,7 +120,8 @@ ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
         }
     } while (subprocess_alive(&process) || out_read_size || err_read_size);
 
-    // Sometimes stderr still have unread characters
+    // Sometimes stdout and stderr still have unread characters
+    ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, BUF_SIZE);
     ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
 
     int return_code;

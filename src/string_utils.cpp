@@ -16,7 +16,7 @@ inline static void SetStringError(StringError err) { g_error_status = err; }
 
 void tuwString::alloc_cstr(const char *str, size_t size) {
     clear();
-    if (str == nullptr || size == 0)
+    if (!str || size == 0)
         return;
 
     m_size = size;
@@ -83,7 +83,7 @@ tuwString& tuwString::operator=(tuwString&& str) {
 }
 
 void tuwString::append(const char* str, size_t size) {
-    if (str == nullptr || size == 0)
+    if (!str || size == 0)
         return;
 
     size_t new_size = m_size + size;
@@ -179,7 +179,7 @@ size_t tuwString::find(const char c) const {
 }
 
 size_t tuwString::find(const char* str) const {
-    if (empty() || str == nullptr) return npos;
+    if (empty() || !str) return npos;
 
     // Note: This function uses a slow algorithm.
     const char* p = begin();
@@ -221,7 +221,7 @@ tuwString operator+(const char* str1, const tuwString& str2) {
 
 tuwWstring::tuwWstring(const wchar_t* str) :
         m_str(nullptr), m_size(0) {
-    if (str == nullptr) return;
+    if (!str) return;
 
     size_t size = wcslen(str);
     if (size == 0)

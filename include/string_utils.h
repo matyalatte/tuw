@@ -40,7 +40,7 @@ class tuwString {
     size_t length() const { return m_size; }
     size_t size() const { return m_size; }
 
-    bool empty() const { return m_str == nullptr || m_str[0] == '\0'; }
+    bool empty() const { return !m_str || m_str[0] == '\0' || m_size == 0; }
 
     // Returns an immutable C string. This can't be null.
     const char* c_str() const {
