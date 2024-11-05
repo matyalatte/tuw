@@ -262,7 +262,7 @@ tuwWstring UTF8toUTF16(const char* str) {
     return wstr;
 }
 
-void PrintFmt(const char* fmt, ...) {
+void FprintFmt(FILE* out, const char* fmt, ...) {
     va_list va;
     va_start(va, fmt);
 
@@ -277,7 +277,7 @@ void PrintFmt(const char* fmt, ...) {
     va_end(va);
 
     WCHAR* wfmt = toUTF16(buf);
-    wprintf(L"%ls", wfmt);
+    fwprintf(out, L"%ls", wfmt);
 
     uiprivFree(buf);
     uiprivFree(wfmt);
@@ -633,7 +633,7 @@ void SetLogEntry(void* log_entry) {
     g_logger.SetLogEntry(log_entry);
 }
 
-void PrintFmt(const char* fmt, ...) {
+void FprintFmt(FILE* out, const char* fmt, ...) {
     va_list va;
     va_start(va, fmt);
     va_list va2;
@@ -644,7 +644,7 @@ void PrintFmt(const char* fmt, ...) {
     buf[size] = 0;
     vsnprintf(buf, size + 1, fmt, va);
     g_logger.Log(buf);
-    printf("%s", buf);
+    fprintf(out, "%s", buf);
     delete[] buf;
     va_end(va);
 }

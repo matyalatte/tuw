@@ -55,6 +55,22 @@ void DestroyProcess(subprocess_s &process, int *return_code, tuwString &err_msg)
     }
 }
 
+void RedirectOutput(FILE* out, const char* buf,
+                    unsigned read_size, bool use_utf8_on_windows) {
+    if (read_size) {
+#ifdef _WIN32
+        if (use_utf8_on_windows) {
+            tuwWstring wout = UTF8toUTF16(buf);
+            fprintf(out, "%ls", wout.c_str());
+        } else {
+            fprintf(out, "%s", buf);
+        }
+#else
+        FprintFmt(out, "%s", buf);
+#endif
+    }
+}
+
 ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
 #ifdef _WIN32
     tuwWstring wcmd = UTF8toUTF16(cmd.c_str());
@@ -104,25 +120,19 @@ ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
     unsigned err_read_size = 0;
 
     do {
-        out_read_size = ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, BUF_SIZE);
-        err_read_size = ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
-        if (out_read_size) {
-#ifdef _WIN32
-            if (use_utf8_on_windows) {
-                tuwWstring wout = UTF8toUTF16(out_buf);
-                printf("%ls", wout.c_str());
-            } else {
-                printf("%s", out_buf);
-            }
-#else
-            PrintFmt("%s", out_buf);
-#endif
-        }
+        out_read_size = ReadIO(process, READ_STDOUT,
+                               out_buf, BUF_SIZE, last_line, LAST_LINE_MAX_LEN);
+        err_read_size = ReadIO(process, READ_STDERR,
+                               err_buf, BUF_SIZE, err_msg, ERR_MSG_MAX_LEN);
+        RedirectOutput(stdout, out_buf, out_read_size, use_utf8_on_windows);
+        RedirectOutput(stderr, err_buf, err_read_size, use_utf8_on_windows);
     } while (subprocess_alive(&process) || out_read_size || err_read_size);
 
     // Sometimes stdout and stderr still have unread characters
-    ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, BUF_SIZE);
-    ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
+    out_read_size = ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, BUF_SIZE);
+    err_read_size = ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
+    RedirectOutput(stdout, out_buf, out_read_size, use_utf8_on_windows);
+    RedirectOutput(stderr, err_buf, err_read_size, use_utf8_on_windows);
 
     int return_code;
     DestroyProcess(process, &return_code, err_msg);
