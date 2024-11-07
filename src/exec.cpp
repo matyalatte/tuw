@@ -6,23 +6,6 @@
 #include "windows.h"
 #endif
 
-inline bool IsNewline(char ch) {
-    return ch == '\n' || ch == '\r';
-}
-
-static tuwString GetLastLine(const tuwString& input) {
-    if (input.empty()) return "";
-    size_t end = input.length();
-
-    // Trim trailing newlines
-    while (end > 0 && IsNewline(input[end - 1])) end--;
-    if (end == 0) return "";
-
-    size_t start = end - 1;
-    while (start > 0 && input[start - 1] != '\n') start--;
-    return input.substr(start, end - start);
-}
-
 enum READ_IO_TYPE : int {
     READ_STDOUT = 0,
     READ_STDERR,
@@ -31,7 +14,7 @@ enum READ_IO_TYPE : int {
 unsigned ReadIO(subprocess_s &process,
                 int read_io_type,
                 char *buf, const unsigned buf_size,
-                tuwString& str, const unsigned str_size) {
+                tuwString& str, const size_t str_size) {
     unsigned read_size = 0;
     if (read_io_type == READ_STDOUT) {
         read_size = subprocess_read_stdout(&process, buf, buf_size);
@@ -69,6 +52,12 @@ void RedirectOutput(FILE* out, const char* buf,
         FprintFmt(out, "%s", buf);
 #endif
     }
+}
+
+inline tuwString TruncateStr(const tuwString& str, size_t size) {
+    if (str.size() > size)
+        return "..." + str.substr(str.size() - size, size);
+    return str;
 }
 
 ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
@@ -112,6 +101,8 @@ ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
         return { -1, "Failed to create a subprocess.\n", ""};
 
     const unsigned BUF_SIZE = 1024;
+    const size_t LAST_LINE_MAX_LEN = BUF_SIZE;
+    const size_t ERR_MSG_MAX_LEN = BUF_SIZE * 2;
     char out_buf[BUF_SIZE + 1];
     char err_buf[BUF_SIZE + 1];
     tuwString last_line;
@@ -129,8 +120,8 @@ ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
     } while (subprocess_alive(&process) || out_read_size || err_read_size);
 
     // Sometimes stdout and stderr still have unread characters
-    out_read_size = ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, BUF_SIZE);
-    err_read_size = ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
+    out_read_size = ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, LAST_LINE_MAX_LEN);
+    err_read_size = ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, ERR_MSG_MAX_LEN);
     RedirectOutput(stdout, out_buf, out_read_size, use_utf8_on_windows);
     RedirectOutput(stderr, err_buf, err_read_size, use_utf8_on_windows);
 
@@ -138,6 +129,8 @@ ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
     DestroyProcess(process, &return_code, err_msg);
 
     last_line = GetLastLine(last_line);
+    last_line = TruncateStr(last_line, LAST_LINE_MAX_LEN);
+    err_msg = TruncateStr(err_msg, ERR_MSG_MAX_LEN);
 
     return { return_code, err_msg, last_line };
 }

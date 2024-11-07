@@ -118,6 +118,9 @@ inline bool operator!=(const char* str1, const tuwString& str2) {
     return str2 != str1;
 }
 
+// Returns only the last line and removes trailing line feeds (\n and \r.)
+tuwString GetLastLine(const tuwString& str);
+
 class tuwWstring {
  private:
     wchar_t* m_str;

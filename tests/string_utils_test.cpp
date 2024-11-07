@@ -306,6 +306,24 @@ TEST(tuwStringTest, IterForNull) {
     EXPECT_EQ(&str.c_str()[0], str.end());
 }
 
+// TestGetLastLine
+TEST(tuwStringTest, GetLastLine) {
+    expect_tuwstr("last", GetLastLine("last"));
+    expect_tuwstr("last", GetLastLine("last\n"));
+    expect_tuwstr("last", GetLastLine("\nlast"));
+    expect_tuwstr("last", GetLastLine("firs\nsecond\nlast\r\n\r\n"));
+}
+
+TEST(tuwStringTest, GetLastLineOneChar) {
+    expect_tuwstr("l", GetLastLine("l"));
+}
+
+TEST(tuwStringTest, GetLastLineNull) {
+    expect_nullstr(GetLastLine(nullptr));
+    expect_nullstr(GetLastLine(""));
+    expect_nullstr(GetLastLine("\n\n\n\n"));
+}
+
 // Test tuwWstring
 void expect_nullwstr(const tuwWstring& str) {
     EXPECT_TRUE(str.empty());
@@ -322,6 +340,8 @@ void expect_tuwwstr(const wchar_t* expected, const tuwWstring& actual) {
 TEST(tuwWstringTest, ConstructWithNull) {
     tuwWstring str(nullptr);
     expect_nullwstr(str);
+    tuwWstring str2("");
+    expect_nullwstr(str2);
 }
 
 TEST(tuwWstringTest, ConstructWithCstr) {

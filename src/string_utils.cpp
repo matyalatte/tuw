@@ -30,7 +30,7 @@ void tuwString::alloc_cstr(const char *str, size_t size) {
     m_str[size] = '\0';
 }
 
-#define get_strlen(str) (str) ? strlen(str) : 0
+#define get_strlen(str) ((str) ? strlen(str) : 0)
 
 tuwString::tuwString(const char* str) :
         m_str(nullptr), m_size(0) {
@@ -156,7 +156,7 @@ DEFINE_PLUS_FOR_NUM(int, "d")
 DEFINE_PLUS_FOR_NUM(size_t, "zu")
 DEFINE_PLUS_FOR_NUM(uint32_t, PRIu32)
 
-#define null_to_empty(str) (str) ? str : ""
+#define null_to_empty(str) ((str) ? str : "")
 
 bool tuwString::operator==(const char* str) const {
     return strcmp(c_str(), null_to_empty(str)) == 0;
@@ -217,6 +217,26 @@ tuwString operator+(const char* str1, const tuwString& str2) {
     tuwString new_str(str1);
     new_str += str2;
     return new_str;
+}
+
+static inline bool IsNewline(char ch) {
+    return ch == '\n' || ch == '\r';
+}
+
+tuwString GetLastLine(const tuwString& str) {
+    if (str.empty()) return "";
+
+    const char* begin = str.begin();
+    const char* end = str.end() - 1;
+    // Trim trailing line feeds.
+    while (end >= begin && IsNewline(*end)) end--;
+    if (end < begin) return "";
+
+    // Search the next line feed.
+    const char* sub_begin = end;
+    while (sub_begin >= begin && !IsNewline(*sub_begin)) sub_begin--;
+    sub_begin++;
+    return str.substr(static_cast<size_t>(sub_begin - begin), end - sub_begin + 1);
 }
 
 tuwWstring::tuwWstring(const wchar_t* str) :
