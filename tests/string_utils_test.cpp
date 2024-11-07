@@ -340,7 +340,7 @@ void expect_tuwwstr(const wchar_t* expected, const tuwWstring& actual) {
 TEST(tuwWstringTest, ConstructWithNull) {
     tuwWstring str(nullptr);
     expect_nullwstr(str);
-    tuwWstring str2("");
+    tuwWstring str2(L"");
     expect_nullwstr(str2);
 }
 

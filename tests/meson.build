@@ -7,6 +7,7 @@ test_sources = [
     'json_check_test.cpp',
     'main_frame_test.cpp',
     'string_utils_test.cpp',
+    'validator_test.cpp',
 ]
 
 # build tests
