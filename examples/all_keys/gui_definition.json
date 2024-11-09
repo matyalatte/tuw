@@ -1,6 +1,6 @@
 {
-    "recommended": "0.7.2",
-    "minimum_required": "0.7.1",
+    "recommended": "0.8.0",
+    "minimum_required": "0.8.0",
     "gui": [
         {
             "window_name": "Components Minimal",

@@ -1,7 +1,10 @@
+ver 0.8.0
 - Array brackets can now be omitted when there is only one element.
 - GUI elements can now be defined in root object.
 - GUI labels became optional.
 - "window_name" can now be default values of GUI labels.
+- Tuw now redirects stderr into the console window.
+- Replaced std::string with a custom string class to reduce the binary size.
 
 ver 0.7.2
 - Added "optional" to ignore some options when a text box is empty.
