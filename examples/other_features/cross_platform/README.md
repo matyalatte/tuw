@@ -14,7 +14,6 @@ Tuw will use the platform-specific command instead of the default `command` valu
 
 ```json
 {
-    "label": "Platform Specific Commands",
     "command_win": "echo Windows!",
     "command_mac": "echo macOS!",
     "command_linux": "echo Linux!",
@@ -35,7 +34,6 @@ Tuw will ignore the component if the current OS does not match the specified pla
 
 ```json
 {
-    "label": "Platform Specific Components",
     "command": "echo %os%",
     "show_last_line": true,
     "components": [
@@ -44,7 +42,7 @@ Tuw will ignore the component if the current OS does not match the specified pla
             "label": "Windows!",
             "id": "os",
             "default": true,
-            "platforms": [ "win" ]
+            "platforms": "win"
         },
         {
             "type": "check",

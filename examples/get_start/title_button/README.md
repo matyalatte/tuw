@@ -6,15 +6,12 @@ You can rename the window title and the execution button.
 
 ```json
 {
-    "gui": [
-        {
-            "label": "Minimal Sample",
-            "window_name": "Title here!",
-            "command": "echo Hello!",
-            "button": "Hello!",
-            "components": []
-        }
-    ]
+    "gui": {
+        "window_name": "Title here!",
+        "command": "echo Hello!",
+        "button": "Hello!",
+        "components": []
+    }
 }
 ```
 

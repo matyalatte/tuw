@@ -8,13 +8,8 @@ When the executed command outputs something to `stderr`, Tuw will display an err
 
 ```json
 {
-    "gui": [
-        {
-            "label": "Error Sample",
-            "command": "notcommand",
-            "components": []
-        }
-    ]
+    "command": "notcommand",
+    "components": []
 }
 ```
 
@@ -26,7 +21,6 @@ You can also customize the success code using the `exit_success` option.
 
 ```json
 {
-    "label": "check_exit_code Sample",
     "command": "echo exit code is zero.",
     "check_exit_code": true,
     "exit_success": 10,
@@ -44,7 +38,6 @@ When `check_exit_code` is enabled, it can also show the last line in the error d
 
 ```json
 {
-    "label": "show_last_line Sample",
     "command": "echo Fake Error!",
     "show_last_line": true,
     "components": []

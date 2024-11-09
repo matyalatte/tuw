@@ -6,7 +6,7 @@ Tuw supports UTF-8 strings.
 
 ```json
 {
-    "label": "Unicode Sample",
+    "window_name": "Unicode Sample",
     "command": "echo file: %รหัส% & echo folder: %-% & echo checkbox: %-%",
     "button": "こんにちは！",
     "components": [

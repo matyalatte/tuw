@@ -41,14 +41,6 @@ jobs:
 
             - First Change
             - Second Change
-
-            ## Notes
-
-            - Linux builds only support distributions using glibc.
-              [Build the executable](https://github.com/matyalatte/${{ env.TOOL_NAME }}/blob/main/docs/Building.md) by yourself if you want to use it on unsupported distros.
-            - `Tuw-*-Windows-x64-ucrt.zip` is much smaller than the standard version, but it only works on Windows10 or later.
-            - Tuw supports more unix-like systems (BSD, Haiku, illumos, etc.)
-              [Building Workflow for Other Platforms - matyalatte/tuw](https://github.com/matyalatte/${{ env.TOOL_NAME }}/blob/main/docs/Build-on-Other.md)
           draft: true
           prerelease: false
 
@@ -71,7 +63,7 @@ jobs:
             exe_ext: .exe
             zip_ext: zip
             arch: UCRT
-            arch_suffix: -x64-ucrt
+            arch_suffix: 10-x64
           - os: ubuntu-20.04
             exe_ext: ""
             zip_ext: tar.bz2

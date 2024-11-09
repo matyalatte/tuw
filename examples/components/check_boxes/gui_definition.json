@@ -1,34 +1,31 @@
 {
-    "gui": [
-        {
-            "label": "Check Boxes",
-            "command": "echo checkbox: %-% & echo options:%-%",
-            "button": "Echo!",
-            "components": [
-                {
-                    "type": "check",
-                    "label": "checkbox",
-                    "value": "checked!"
-                },
-                {
-                    "type": "check_array",
-                    "label": "options",
-                    "items": [
-                        {
-                            "label": "flag1",
-                            "value": " -f1"
-                        },
-                        {
-                            "label": "flag2",
-                            "value": " -f2"
-                        },
-                        {
-                            "label": "flag3",
-                            "value": " -f3"
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+    "gui": {
+        "command": "echo checkbox: %-% & echo options:%-%",
+        "button": "Echo!",
+        "components": [
+            {
+                "type": "check",
+                "label": "checkbox",
+                "value": "checked!"
+            },
+            {
+                "type": "check_array",
+                "label": "options",
+                "items": [
+                    {
+                        "label": "flag1",
+                        "value": " -f1"
+                    },
+                    {
+                        "label": "flag2",
+                        "value": " -f2"
+                    },
+                    {
+                        "label": "flag3",
+                        "value": " -f3"
+                    }
+                ]
+            }
+        ]
+    }
 }

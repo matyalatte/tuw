@@ -5,7 +5,6 @@ You can use the defined ids as variable names in commands.
 
 ```json
 {
-    "label": "IDs",
     "command": "echo x: %x% & echo y: %y% & echo x: %x%",
     "button": "Echo!",
     "components": [
@@ -29,7 +28,6 @@ When you put an undefined id in `%*%`, it'll use one of the components that have
 
 ```json
 {
-    "label": "Undefined IDs",
     "command": "echo x: %-% & echo y: %y% & echo z: %foo%",
     "button": "Echo!",
     "components": [
@@ -61,7 +59,6 @@ There are some predefined ids.
 
 ```json
 {
-    "label": "Reserved IDs",
     "command": "echo percent: %% & echo cwd: %__CWD__% & echo home: %__HOME__%",
     "button": "Echo!",
     "components": []

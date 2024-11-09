@@ -1,5 +1,3 @@
-#pragma once
-
 // Tests for json checking
 // Todo: Write more tests
 
@@ -71,6 +69,14 @@ TEST(JsonCheckTest, checkGUISuccess4) {
     EXPECT_TRUE(result.ok);
 }
 
+TEST(JsonCheckTest, checkGUISuccessRelaxed) {
+    rapidjson::Document test_json;
+    json_utils::JsonResult result = json_utils::LoadJson(JSON_RELAXED, test_json);
+    EXPECT_TRUE(result.ok);
+    json_utils::CheckDefinition(result, test_json);
+    EXPECT_TRUE(result.ok);
+}
+
 void CheckGUIError(rapidjson::Document& test_json, const char* expected) {
     json_utils::JsonResult result = JSON_RESULT_OK;
     json_utils::CheckDefinition(result, test_json);
@@ -82,7 +88,7 @@ TEST(JsonCheckTest, checkGUIFail) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json.RemoveMember("gui");
-    CheckGUIError(test_json, "['gui'] not found.");
+    CheckGUIError(test_json, "['components'] not found.");
 }
 
 TEST(JsonCheckTest, checkGUIFail2) {
@@ -133,6 +139,14 @@ TEST(JsonCheckTest, checkGUIFail7) {
         " echo file: __comp2__ & echo folder: __comp3__ & echo combo: __comp4__"
         " & echo radio: __comp5__ & echo check: __comp6__ & echo check_array: __comp7__"
         " & echo textbox: __comp8__ & echo int: __comp9__ & echo float: __comp???__");
+}
+
+TEST(JsonCheckTest, checkGUIFailRelaxed) {
+    rapidjson::Document test_json;
+    json_utils::JsonResult result = json_utils::LoadJson(JSON_RELAXED, test_json);
+    EXPECT_TRUE(result.ok);
+    test_json.AddMember("exit_success", "a", test_json.GetAllocator());
+    CheckGUIError(test_json, "['exit_success'] should be an int.");
 }
 
 TEST(JsonCheckTest, checkHelpSuccess) {

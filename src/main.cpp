@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <string.h>
 #ifdef _WIN32
 #include <locale.h>
 #else
@@ -49,8 +48,8 @@ bool AskOverwrite(const char *path) {
     return ret == 1 && (answer == "y"[0] || answer == "Y"[0]);
 }
 
-json_utils::JsonResult Merge(const std::string& exe_path, const std::string& json_path,
-                             const std::string& new_path, const bool force) {
+json_utils::JsonResult Merge(const tuwString& exe_path, const tuwString& json_path,
+                             const tuwString& new_path, const bool force) {
     rapidjson::Document json;
     json_utils::JsonResult result = json_utils::LoadJson(json_path, json);
     if (!result.ok) return result;
@@ -82,8 +81,8 @@ json_utils::JsonResult Merge(const std::string& exe_path, const std::string& jso
     return JSON_RESULT_OK;
 }
 
-json_utils::JsonResult Split(const std::string& exe_path, const std::string& json_path,
-                             const std::string& new_path, const bool force) {
+json_utils::JsonResult Split(const tuwString& exe_path, const tuwString& json_path,
+                             const tuwString& new_path, const bool force) {
     ExeContainer exe;
     json_utils::JsonResult result = exe.Read(exe_path);
     if (!result.ok) return result;
@@ -207,7 +206,7 @@ int wmain(int argc, wchar_t* argv[]) {
 #else
 int main(int argc, char* argv[]) {
 #endif
-    std::vector<std::string> args;
+    std::vector<tuwString> args;
     for (int i = 0; i < argc; i++) {
 #ifdef _WIN32
         args.emplace_back(UTF16toUTF8(argv[i]));
@@ -218,7 +217,7 @@ int main(int argc, char* argv[]) {
     char *exe_path_cstr = envuGetExecutablePath();
     char *exe_dir = envuGetDirectory(exe_path_cstr);
     envuSetCwd(exe_dir);
-    std::string exe_path = envuStr(exe_path_cstr);
+    tuwString exe_path = envuStr(exe_path_cstr);
     envuFree(exe_dir);
 
     // Launch GUI if no args.
@@ -232,8 +231,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string json_path;
-    std::string new_exe_path;
+    tuwString json_path;
+    tuwString new_exe_path;
     bool force = false;
 
     for (int i = 2; i < argc; i++) {

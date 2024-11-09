@@ -1,9 +1,6 @@
 {
-    "gui": [
-        {
-            "label": "Minimal Sample",
-            "command": "echo Hello!",
-            "components": []
-        }
-    ]
+    "gui": {
+        "command": "echo Hello!",
+        "components": []
+    }
 }

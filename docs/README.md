@@ -20,8 +20,8 @@ Tuw provides a very simple GUI for your scripts.
 All you need is a JSON file and a tiny executable.  
 **No need for compilers, browsers, or huge executables!**  
 
-![sample](https://github.com/matyalatte/tuw/assets/69258547/9b3c8487-010e-497b-b66c-95af84906dd0)
-<img src=https://user-images.githubusercontent.com/69258547/192090797-f5e5b52d-59aa-4942-a361-2c8b5c7bd746.png width=387></img>  
+![sample](https://github.com/user-attachments/assets/6426fc08-821f-49f5-af74-965273d45d4a)
+<img src=https://github.com/user-attachments/assets/d770ea1d-cead-405c-a48c-48fe9ba3a4cf width=398></img>  
 
 ## Features
 
@@ -39,13 +39,17 @@ All you need is a JSON file and a tiny executable.
 
 You can download executables from [the release page](https://github.com/matyalatte/tuw/releases)
 
--   `Tuw*-Windows*.zip` is for Windows (7 or later.)  
--   `Tuw*-macOS*.tar.bz2` is for macOS (10.9 or later.)  
--   `Tuw*-Linux*.tar.bz2` is for Linux (with GTK3.14, GLIBC2.15, and GLIBCXX3.4.21, or later versions of the libraries.)  
+-   `Tuw-*-Windows-*.zip` is for Windows (7 or later.)  
+-   `Tuw-*-Windows10-*.zip` requires Windows 10 or later, but it's much smaller than the standard version.  
+-   `Tuw-*-macOS.tar.bz2` is for macOS (10.9 or later.)  
+-   `Tuw-*-Linux-*.tar.bz2` is for Linux (with GTK3.14, GLIBC2.15, and GLIBCXX3.4.21, or later versions of the libraries.)  
+
+> [!Note]
+> Tuw also supports [Linux distributions using musl](https://github.com/matyalatte/tuw/blob/main/docs/Build-on-Linux.md) and [other Unix-like systems (BSD, Haiku, illumos, etc.)](https://github.com/matyalatte/Tuw/blob/main/docs/Build-on-Other.md). While there is no release package available for these systems, you can build Tuw from the source code.
 
 ## Examples
 
-There are some [JSON files](../examples/README.md) to learn how to define GUIs.  
+There are many [JSON files](../examples/README.md) to learn how to define GUIs.  
 
 ## JSON Schema
 
@@ -59,7 +63,7 @@ For VSCode, you can add the schema path to `settings.json` (`File > Preferences 
 ```json
 "json.schemas": [
     {
-        "fileMatch": [ "gui_definition.json" ],
+        "fileMatch": [ "gui_definition.json", "gui_definition.jsonc" ],
         "url": "https://raw.githubusercontent.com/matyalatte/tuw/main/schema/schema.json"
     }
 ]

@@ -18,7 +18,7 @@
                     "label": "Windows!",
                     "id": "os",
                     "default": true,
-                    "platforms": [ "win" ]
+                    "platforms": "win"
                 },
                 {
                     "type": "check",

@@ -6,23 +6,6 @@
 #include "windows.h"
 #endif
 
-inline bool IsNewline(char ch) {
-    return ch == '\n' || ch == '\r';
-}
-
-static std::string GetLastLine(const std::string& input) {
-    if (input.empty()) return "";
-    size_t end = input.length();
-
-    // Trim trailing newlines
-    while (end > 0 && IsNewline(input[end - 1])) end--;
-    if (end == 0) return "";
-
-    size_t start = end - 1;
-    while (start > 0 && input[start - 1] != '\n') start--;
-    return input.substr(start, end - start);
-}
-
 enum READ_IO_TYPE : int {
     READ_STDOUT = 0,
     READ_STDERR,
@@ -31,7 +14,7 @@ enum READ_IO_TYPE : int {
 unsigned ReadIO(subprocess_s &process,
                 int read_io_type,
                 char *buf, const unsigned buf_size,
-                std::string& str, const unsigned str_size) {
+                tuwString& str, const size_t str_size) {
     unsigned read_size = 0;
     if (read_io_type == READ_STDOUT) {
         read_size = subprocess_read_stdout(&process, buf, buf_size);
@@ -48,16 +31,45 @@ unsigned ReadIO(subprocess_s &process,
     return read_size;
 }
 
-void DestroyProcess(subprocess_s &process, int *return_code, std::string &err_msg) {
+void DestroyProcess(subprocess_s &process, int *return_code, tuwString &err_msg) {
     if (subprocess_join(&process, return_code) || subprocess_destroy(&process)) {
         *return_code = -1;
         err_msg = "Failed to manage subprocess.\n";
     }
 }
 
-ExecuteResult Execute(const std::string& cmd, bool use_utf8_on_windows) {
+void RedirectOutput(FILE* out, const char* buf,
+                    unsigned read_size, bool use_utf8_on_windows) {
+    if (read_size) {
 #ifdef _WIN32
-    std::wstring wcmd = UTF8toUTF16(cmd.c_str());
+        if (use_utf8_on_windows) {
+            tuwWstring wout = UTF8toUTF16(buf);
+            fprintf(out, "%ls", wout.c_str());
+        } else {
+            fprintf(out, "%s", buf);
+        }
+#else
+        FprintFmt(out, "%s", buf);
+#endif
+    }
+}
+
+inline tuwString TruncateStr(const tuwString& str, size_t size) {
+    if (str.size() > size)
+        return "..." + str.substr(str.size() - size, size);
+    return str;
+}
+
+ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
+#ifdef _WIN32
+    tuwWstring wcmd = UTF8toUTF16(cmd.c_str());
+
+    if (GetStringError() != STR_OK) {
+        // Reject the command as it might have unexpected value.
+        return { -1,
+                 "Fatal error has occored while editing strings.\n",
+                 "" };
+    }
 
     int argc;
     wchar_t** parsed = CommandLineToArgvW(wcmd.c_str(), &argc);
@@ -89,44 +101,43 @@ ExecuteResult Execute(const std::string& cmd, bool use_utf8_on_windows) {
         return { -1, "Failed to create a subprocess.\n", ""};
 
     const unsigned BUF_SIZE = 1024;
+    const size_t LAST_LINE_MAX_LEN = BUF_SIZE;
+    const size_t ERR_MSG_MAX_LEN = BUF_SIZE * 2;
     char out_buf[BUF_SIZE + 1];
     char err_buf[BUF_SIZE + 1];
-    std::string last_line;
-    std::string err_msg;
+    tuwString last_line;
+    tuwString err_msg;
     unsigned out_read_size = 0;
     unsigned err_read_size = 0;
 
     do {
-        out_read_size = ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, BUF_SIZE);
-        err_read_size = ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
-        if (out_read_size) {
-#ifdef _WIN32
-            if (use_utf8_on_windows) {
-                std::wstring wout = UTF8toUTF16(out_buf);
-                printf("%ls", wout.c_str());
-            } else {
-                printf("%s", out_buf);
-            }
-#else
-            PrintFmt("%s", out_buf);
-#endif
-        }
+        out_read_size = ReadIO(process, READ_STDOUT,
+                               out_buf, BUF_SIZE, last_line, LAST_LINE_MAX_LEN);
+        err_read_size = ReadIO(process, READ_STDERR,
+                               err_buf, BUF_SIZE, err_msg, ERR_MSG_MAX_LEN);
+        RedirectOutput(stdout, out_buf, out_read_size, use_utf8_on_windows);
+        RedirectOutput(stderr, err_buf, err_read_size, use_utf8_on_windows);
     } while (subprocess_alive(&process) || out_read_size || err_read_size);
 
-    // Sometimes stderr still have unread characters
-    ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, BUF_SIZE * 2);
+    // Sometimes stdout and stderr still have unread characters
+    out_read_size = ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, LAST_LINE_MAX_LEN);
+    err_read_size = ReadIO(process, READ_STDERR, err_buf, BUF_SIZE, err_msg, ERR_MSG_MAX_LEN);
+    RedirectOutput(stdout, out_buf, out_read_size, use_utf8_on_windows);
+    RedirectOutput(stderr, err_buf, err_read_size, use_utf8_on_windows);
 
     int return_code;
     DestroyProcess(process, &return_code, err_msg);
 
     last_line = GetLastLine(last_line);
+    last_line = TruncateStr(last_line, LAST_LINE_MAX_LEN);
+    err_msg = TruncateStr(err_msg, ERR_MSG_MAX_LEN);
 
     return { return_code, err_msg, last_line };
 }
 
-ExecuteResult LaunchDefaultApp(const std::string& url) {
+ExecuteResult LaunchDefaultApp(const tuwString& url) {
 #ifdef _WIN32
-    std::wstring utf16_url = UTF8toUTF16(url.c_str());
+    tuwWstring utf16_url = UTF8toUTF16(url.c_str());
     const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", utf16_url.c_str(), NULL};
 #elif defined(__TUW_UNIX__) && !defined(__HAIKU__)
     // Linux and BSD
@@ -143,7 +154,7 @@ ExecuteResult LaunchDefaultApp(const std::string& url) {
         return { -1, "Failed to create a subprocess.\n", ""};
 
     int return_code;
-    std::string err_msg;
+    tuwString err_msg;
     DestroyProcess(process, &return_code, err_msg);
 
     return { return_code, err_msg, "" };

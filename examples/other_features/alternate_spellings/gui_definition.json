@@ -1,59 +1,56 @@
 {
-    "gui": [
-        {
-            "label": "Alternate Spellings",
-            "command": "echo folder: %-% & echo combo: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-%",
-            "title": "Alternate Spellings Sample",
-            "component_array": [
-                {
-                    "type": "static_text",
-                    "label": "Still working with alternate spellings!"
-                },
-                {
-                    "type": "dir",
-                    "label": "Some folder path",
-                    "empty_message": "placeholder!",
-                    "add_quote": true
-                },
-                {
-                    "type": "choice",
-                    "label": "combo box",
-                    "item_array": [
-                        {
-                            "label": "value1"
-                        },
-                        {
-                            "label": "value2"
-                        },
-                        {
-                            "label": "value3"
-                        }
-                    ]
-                },
-                {
-                    "type": "checks",
-                    "label": "options",
-                    "item_array": [
-                        {
-                            "label": "flag1"
-                        },
-                        {
-                            "label": "flag2"
-                        },
-                        {
-                            "label": "flag3"
-                        }
-                    ]
-                },
-                {
-                    "type": "text_box",
-                    "label": "text box"
-                },
-                {
-                    "type": "integer",
-                    "label": "Int picker"
-                }
-            ]
-        }
-    ]
+    "gui": {
+        "command": "echo folder: %-% & echo combo: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-%",
+        "title": "Alternate Spellings Sample",
+        "component_array": [
+            {
+                "type": "static_text",
+                "label": "Still working with alternate spellings!"
+            },
+            {
+                "type": "dir",
+                "label": "Some folder path",
+                "empty_message": "placeholder!",
+                "add_quote": true
+            },
+            {
+                "type": "choice",
+                "label": "combo box",
+                "item_array": [
+                    {
+                        "label": "value1"
+                    },
+                    {
+                        "label": "value2"
+                    },
+                    {
+                        "label": "value3"
+                    }
+                ]
+            },
+            {
+                "type": "checks",
+                "label": "options",
+                "item_array": [
+                    {
+                        "label": "flag1"
+                    },
+                    {
+                        "label": "flag2"
+                    },
+                    {
+                        "label": "flag3"
+                    }
+                ]
+            },
+            {
+                "type": "text_box",
+                "label": "text box"
+            },
+            {
+                "type": "integer",
+                "label": "Int picker"
+            }
+        ]
+    }
 }

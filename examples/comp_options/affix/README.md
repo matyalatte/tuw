@@ -6,19 +6,16 @@
 
 ```json
 {
-    "gui": [
-        {
-            "label": "Affix example",
-            "command": "echo %-%",
-            "components": [
-                {
-                    "type": "text",
-                    "label": "Text box",
-                    "prefix": "-pre=",
-                    "suffix": " -suf"
-                }
-            ]
-        }
-    ]
+    "gui": {
+        "command": "echo %-%",
+        "components": [
+            {
+                "type": "text",
+                "label": "Text box",
+                "prefix": "-pre=",
+                "suffix": " -suf"
+            }
+        ]
+    }
 }
 ```

@@ -1,8 +1,8 @@
 // Functions related to json.
 
 #pragma once
-#include <string>
 #include "rapidjson/document.h"
+#include "string_utils.h"
 
 enum CmdPredefinedIds: int {
     CMD_ID_PERCENT = -1,
@@ -18,7 +18,7 @@ namespace json_utils {
 
 struct JsonResult {
     bool ok;
-    std::string msg;
+    tuwString msg;
 };
 
 #define JSON_RESULT_OK { true, "" }
@@ -26,9 +26,9 @@ struct JsonResult {
 // Max binary size for JSON files.
 #define JSON_SIZE_MAX 128 * 1024
 
-JsonResult LoadJson(const std::string& file, rapidjson::Document& json);
-JsonResult SaveJson(rapidjson::Document& json, const std::string& file);
-std::string JsonToString(rapidjson::Document& json);
+JsonResult LoadJson(const tuwString& file, rapidjson::Document& json);
+JsonResult SaveJson(rapidjson::Document& json, const tuwString& file);
+tuwString JsonToString(rapidjson::Document& json);
 
 const char* GetString(const rapidjson::Value& json, const char* key, const char* def);
 bool GetBool(const rapidjson::Value& json, const char* key, bool def);
@@ -39,7 +39,8 @@ void GetDefaultDefinition(rapidjson::Document& definition);
 void CheckVersion(JsonResult& result, rapidjson::Document& definition);
 void CheckDefinition(JsonResult& result, rapidjson::Document& definition);
 void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
+                        int index,
                         rapidjson::Document::AllocatorType& alloc);
-void CheckHelpURLs(JsonResult& result, const rapidjson::Document& definition);
+void CheckHelpURLs(JsonResult& result, rapidjson::Document& definition);
 
 }  // namespace json_utils

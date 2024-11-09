@@ -1,14 +1,140 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "properties": {
-    "recommended": { "$ref": "#/definitions/types/version" },
-    "recommended_version": { "$ref": "#/definitions/types/version" },
-    "minimum_required": { "$ref": "#/definitions/types/version" },
-    "minimum_required_version": { "$ref": "#/definitions/types/version" },
-    "gui": {
-      "type": "array",
-      "items": {
+  "if": {
+    "required": [ "gui" ]
+  },
+  "then": {
+    "properties": {
+      "recommended": { "$ref": "#/definitions/types/version" },
+      "recommended_version": { "$ref": "#/definitions/types/version" },
+      "minimum_required": { "$ref": "#/definitions/types/version" },
+      "minimum_required_version": { "$ref": "#/definitions/types/version" },
+      "gui": { "$ref": "#/definitions/types/gui_array" },
+      "help": { "$ref": "#/definitions/types/help_array" }
+    }
+  },
+  "else": {
+    "allOf": [
+      { "$ref": "#/definitions/types/gui_item" },
+      {
+        "properties": {
+          "recommended": { "$ref": "#/definitions/types/version" },
+          "recommended_version": { "$ref": "#/definitions/types/version" },
+          "minimum_required": { "$ref": "#/definitions/types/version" },
+          "minimum_required_version": { "$ref": "#/definitions/types/version" },
+          "help": { "$ref": "#/definitions/types/help_array" }
+        }
+      }
+    ]
+  },
+  "definitions": {
+    "types": {
+      "version": {
+        "type": "string",
+        "pattern": "^[.0-9]+$",
+        "minLength": 1,
+        "maxLength": 8
+      },
+      "component": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "static_text",
+              "file",
+              "folder",
+              "dir",
+              "choice",
+              "combo",
+              "radio",
+              "check",
+              "check_array",
+              "checks",
+              "text",
+              "text_box",
+              "int",
+              "integer",
+              "float"
+            ]
+          },
+          "label": { "type": "string" },
+          "id": { "type": "string" },
+          "add_quotes": { "type": "boolean" },
+          "optional": { "type": "boolean" },
+          "prefix": { "type": "string" },
+          "suffix": { "type": "string" },
+          "platforms": { "$ref": "#/definitions/types/platform_array" },
+          "platform_array": { "$ref": "#/definitions/types/platform_array" }
+        },
+        "allOf": [
+          { "$ref": "#/definitions/components/file" },
+          { "$ref": "#/definitions/components/folder_or_text" },
+          { "$ref": "#/definitions/components/check" },
+          { "$ref": "#/definitions/components/int" },
+          { "$ref": "#/definitions/components/float" },
+          { "$ref": "#/definitions/components/combo" },
+          { "$ref": "#/definitions/components/check_array" },
+          { "$ref": "#/definitions/components/validator" }
+        ],
+        "required": [ "type", "label" ]
+      },
+      "component_array": {
+        "if": { "type": "object" },
+        "then": { "$ref": "#/definitions/types/component" },
+        "else": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/types/component" }
+        }
+      },
+      "platform": {
+        "type": "string",
+        "enum": [ "win", "mac", "linux" ]
+      },
+      "platform_array": {
+        "if": { "type": "string" },
+        "then": { "$ref": "#/definitions/types/platform" },
+        "else": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/types/platform" }
+        }
+      },
+      "combo_item": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "value": { "type": "string" }
+        },
+        "required": [ "label" ]
+      },
+      "combo_item_array": {
+        "if": { "type": "object" },
+        "then": { "$ref": "#/definitions/types/combo_item" },
+        "else": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/types/combo_item" }
+        }
+      },
+      "checks_item": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "value": { "type": "string" },
+          "tooltip": { "type": "string" },
+          "default": { "type": "boolean" }
+        },
+        "required": [ "label" ]
+      },
+      "checks_item_array": {
+        "if": { "type": "object" },
+        "then": { "$ref": "#/definitions/types/checks_item" },
+        "else": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/types/checks_item" }
+        }
+      },
+      "gui_item": {
         "type": "object",
         "properties": {
           "label": { "type": "string" },
@@ -28,12 +154,9 @@
             "type": "string",
             "enum": [ "default", "utf8", "utf-8" ]
           },
-          "components": { "$ref": "#/definitions/types/components" },
-          "component_array": { "$ref": "#/definitions/types/components" }
+          "components": { "$ref": "#/definitions/types/component_array" },
+          "component_array": { "$ref": "#/definitions/types/component_array" }
         },
-        "required": [
-          "label"
-        ],
         "allOf": [
           {
             "if": {
@@ -60,11 +183,16 @@
             }
           }
         ]
-      }
-    },
-    "help": {
-      "type": "array",
-      "items": {
+      },
+      "gui_array": {
+        "if": { "type": "object" },
+        "then": { "$ref": "#/definitions/types/gui_item" },
+        "else": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/types/gui_item" }
+        }
+      },
+      "help_item": {
         "type": "object",
         "properties": {
           "type": {
@@ -102,99 +230,13 @@
             }
           }
         ]
-      }
-    }
-  },
-  "required": [ "gui" ],
-  "definitions": {
-    "types": {
-      "version": {
-        "type": "string",
-        "pattern": "^[.0-9]+$",
-        "minLength": 1,
-        "maxLength": 8
       },
-      "components": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "enum": [
-                "static_text",
-                "file",
-                "folder",
-                "dir",
-                "choice",
-                "combo",
-                "radio",
-                "check",
-                "check_array",
-                "checks",
-                "text",
-                "text_box",
-                "int",
-                "integer",
-                "float"
-              ]
-            },
-            "label": { "type": "string" },
-            "id": { "type": "string" },
-            "add_quotes": { "type": "boolean" },
-            "optional": { "type": "boolean" },
-            "prefix": { "type": "string" },
-            "suffix": { "type": "string" },
-            "platforms": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [ "win", "mac", "linux" ]
-              }
-            },
-            "platform_array": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [ "win", "mac", "linux" ]
-              }
-            }
-          },
-          "allOf": [
-            { "$ref": "#/definitions/components/file" },
-            { "$ref": "#/definitions/components/folder_or_text" },
-            { "$ref": "#/definitions/components/check" },
-            { "$ref": "#/definitions/components/int" },
-            { "$ref": "#/definitions/components/float" },
-            { "$ref": "#/definitions/components/combo" },
-            { "$ref": "#/definitions/components/check_array" },
-            { "$ref": "#/definitions/components/validator" }
-          ],
-          "required": [ "type", "label" ]
-        }
-      },
-      "combo_items": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "label": { "type": "string" },
-            "value": { "type": "string" }
-          },
-          "required": [ "label" ]
-        }
-      },
-      "checks_items": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "label": { "type": "string" },
-            "value": { "type": "string" },
-            "tooltip": { "type": "string" },
-            "default": { "type": "boolean" }
-          },
-          "required": [ "label" ]
+      "help_array":  {
+        "if": { "type": "object" },
+        "then": { "$ref": "#/definitions/types/help_item" },
+        "else": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/types/help_item" }
         }
       }
     },
@@ -291,8 +333,8 @@
           "properties": {
             "default": { "type": "integer" },
             "tooltip": { "type": "string" },
-            "items": { "$ref": "#/definitions/types/combo_items" },
-            "item_array": { "$ref": "#/definitions/types/combo_items" }
+            "items": { "$ref": "#/definitions/types/combo_item_array" },
+            "item_array": { "$ref": "#/definitions/types/combo_item_array" }
           },
           "if": {
             "not": {
@@ -312,8 +354,8 @@
         },
         "then": {
           "properties": {
-            "items": { "$ref": "#/definitions/types/checks_items" },
-            "item_array": { "$ref": "#/definitions/types/checks_items" }
+            "items": { "$ref": "#/definitions/types/checks_item_array" },
+            "item_array": { "$ref": "#/definitions/types/checks_item_array" }
           },
           "if": {
             "not": {
