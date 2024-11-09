@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdio>
 #include "env_utils.h"
 
 enum StringError : int {
@@ -117,6 +118,9 @@ inline bool operator!=(const char* str1, const tuwString& str2) {
     return str2 != str1;
 }
 
+// Returns only the last line and removes trailing line feeds (\n and \r.)
+tuwString GetLastLine(const tuwString& str);
+
 class tuwWstring {
  private:
     wchar_t* m_str;
@@ -156,11 +160,13 @@ uint32_t Fnv1Hash32(const tuwString& str);
 #ifdef _WIN32
 tuwString UTF16toUTF8(const wchar_t* str);
 tuwWstring UTF8toUTF16(const char* str);
-void PrintFmt(const char* fmt, ...);
+void FprintFmt(FILE* out, const char* fmt, ...);
 void EnableCSI();
 #elif defined(__TUW_UNIX__)
 void SetLogEntry(void* log_entry);
-void PrintFmt(const char* fmt, ...);
+void FprintFmt(FILE* out, const char* fmt, ...);
 #else
-#define PrintFmt(...) printf(__VA_ARGS__)
+#define FprintFmt(...) fprintf(__VA_ARGS__)
 #endif
+
+#define PrintFmt(...) FprintFmt(stdout, __VA_ARGS__)
