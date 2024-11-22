@@ -625,10 +625,11 @@ class Logger {
         }
     }
 
-     void Log(const char* str) {
+     void Log(const char* str) noexcept {
         int markup_length = ConvertAnsiToPangoLength(&m_tag_stack, str);
-        char *markup_str = new char[markup_length + 1];
-        ConvertAnsiToPango(&m_tag_stack, str, markup_str);
+        tuwString markup_str = tuwString(markup_length);
+        if (GetStringError() != STR_OK) return;  // failed to allocate buffer
+        ConvertAnsiToPango(&m_tag_stack, str, markup_str.data());
         if (m_log_entry == NULL) {
             m_log_buffer += markup_str;
         } else {
@@ -650,7 +651,7 @@ class Logger {
                 }
             }
             m_buffer_length += markup_length;
-            uiUnixMultilineEntryMarkupAppend(m_log_entry, markup_str);
+            uiUnixMultilineEntryMarkupAppend(m_log_entry, markup_str.data());
             uiUnixMuntilineEntryScrollToEnd(m_log_entry);
         }
     }
@@ -662,19 +663,20 @@ void SetLogEntry(void* log_entry) noexcept {
     g_logger.SetLogEntry(log_entry);
 }
 
-void FprintFmt(FILE* out, const char* fmt, ...) {
+void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_list va;
     va_start(va, fmt);
     va_list va2;
     va_copy(va2, va);
     size_t size = vsnprintf(NULL, 0, fmt, va2);
     va_end(va2);
-    char* buf = new char[size + 1];
+    tuwString buf_str = tuwString(size);
+    if (GetStringError() != STR_OK) return;  // failed to allocate buffer
+    char* buf = buf_str.data();
     buf[size] = 0;
     vsnprintf(buf, size + 1, fmt, va);
     g_logger.Log(buf);
     fprintf(out, "%s", buf);
-    delete[] buf;
     va_end(va);
 }
 #endif
