@@ -7,7 +7,7 @@
 
 #include "string_utils.h"
 
-static uint32_t ReadUint32(FILE* io) {
+static uint32_t ReadUint32(FILE* io) noexcept {
     unsigned char int_as_bin[4];
     if (fread(int_as_bin, 1, 4, io) != 4)
         return 0;
@@ -15,7 +15,7 @@ static uint32_t ReadUint32(FILE* io) {
            static_cast<uint32_t>(int_as_bin[2] << 16) | static_cast<uint32_t>(int_as_bin[3] << 24);
 }
 
-static void WriteUint32(FILE* io, const uint32_t& num) {
+static void WriteUint32(FILE* io, const uint32_t& num) noexcept {
     unsigned char int_as_bin[4] = {
         static_cast<unsigned char>(num & 0xFF),
         static_cast<unsigned char>((num >> 8) & 0xFF),
@@ -28,14 +28,14 @@ static void WriteUint32(FILE* io, const uint32_t& num) {
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define BUF_SIZE 1024
 
-static tuwString ReadStr(FILE* io, const uint32_t& size) {
+static tuwString ReadStr(FILE* io, const uint32_t& size) noexcept {
     tuwString str(size);
     if (fread(str.data(), 1, size, io) != size)
         return "";
     return str;
 }
 
-static void WriteStr(FILE* io, const tuwString& str) {
+static void WriteStr(FILE* io, const tuwString& str) noexcept {
     fwrite(str.data(), 1, str.size(), io);
 
     // Zero padding
@@ -44,7 +44,7 @@ static void WriteStr(FILE* io, const tuwString& str) {
     fwrite(padding_bytes, 1, padding, io);
 }
 
-static bool CopyBinary(FILE* reader, FILE* writer, uint32_t size) {
+static bool CopyBinary(FILE* reader, FILE* writer, uint32_t size) noexcept {
     char buff[BUF_SIZE];
     while (size > 0) {
         size_t copy_size = MIN(BUF_SIZE, size);
@@ -57,14 +57,14 @@ static bool CopyBinary(FILE* reader, FILE* writer, uint32_t size) {
     return true;
 }
 
-static void ReadMagic(FILE* io, char* magic) {
+static void ReadMagic(FILE* io, char* magic) noexcept {
     magic[4] = '\0';
     if (fread(magic, 1, 4, io) != 4)
         memset(magic, 0, sizeof(char) * 4);
     return;
 }
 
-static uint32_t Length(FILE* io) {
+static uint32_t Length(FILE* io) noexcept {
     uint32_t cur = ftell(io);
     fseek(io, 0, SEEK_END);
     uint32_t len = ftell(io);
@@ -74,7 +74,7 @@ static uint32_t Length(FILE* io) {
 
 static const uint32_t EXE_SIZE_MAX = 20000000;  // Allowed size of exe
 
-json_utils::JsonResult ExeContainer::Read(const tuwString& exe_path) {
+json_utils::JsonResult ExeContainer::Read(const tuwString& exe_path) noexcept {
     if (GetStringError() != STR_OK) {
         // Reject the operation as the exe_path might have an unexpected value.
         return { false, "Fatal error has occurred while editing strings." };
@@ -145,7 +145,7 @@ json_utils::JsonResult ExeContainer::Read(const tuwString& exe_path) {
     return JSON_RESULT_OK;
 }
 
-json_utils::JsonResult ExeContainer::Write(const tuwString& exe_path) {
+json_utils::JsonResult ExeContainer::Write(const tuwString& exe_path) noexcept {
     if (GetStringError() != STR_OK) {
         // Reject the operation as the exe_path might have an unexpected value.
         return { false, "Fatal error has occurred while editing strings." };

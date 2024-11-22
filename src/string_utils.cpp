@@ -9,12 +9,21 @@
 #include "windows/uipriv_windows.hpp"
 #endif
 
-StringError g_error_status = STR_OK;
-StringError GetStringError() { return g_error_status; }
-void ClearStringError() { g_error_status = STR_OK; }
-inline static void SetStringError(StringError err) { g_error_status = err; }
+static StringError g_error_status = STR_OK;
 
-void tuwString::alloc_cstr(const char *str, size_t size) {
+StringError GetStringError() noexcept {
+    return g_error_status;
+}
+
+void ClearStringError() noexcept {
+    g_error_status = STR_OK;
+}
+
+inline static void SetStringError(StringError err) noexcept {
+    g_error_status = err;
+}
+
+void tuwString::alloc_cstr(const char *str, size_t size) noexcept {
     clear();
     if (!str || size == 0)
         return;
@@ -32,28 +41,28 @@ void tuwString::alloc_cstr(const char *str, size_t size) {
 
 #define get_strlen(str) ((str) ? strlen(str) : 0)
 
-tuwString::tuwString(const char* str) :
+tuwString::tuwString(const char* str) noexcept :
         m_str(nullptr), m_size(0) {
     alloc_cstr(str, get_strlen(str));
 }
 
-tuwString::tuwString(const char* str, size_t size) :
+tuwString::tuwString(const char* str, size_t size) noexcept :
         m_str(nullptr), m_size(0) {
     alloc_cstr(str, size);
 }
 
-tuwString::tuwString(const tuwString& str) :
+tuwString::tuwString(const tuwString& str) noexcept :
         m_str(nullptr), m_size(0) {
     alloc_cstr(str.c_str(), str.size());
 }
 
-tuwString::tuwString(tuwString&& str) :
+tuwString::tuwString(tuwString&& str) noexcept :
         m_str(str.m_str), m_size(str.m_size) {
     str.m_str = nullptr;
     str.m_size = 0;
 }
 
-tuwString::tuwString(size_t size) : m_size(size) {
+tuwString::tuwString(size_t size) noexcept : m_size(size) {
     m_str = reinterpret_cast<char*>(calloc(size + 1, sizeof(char)));
     if (!m_str) {
         m_size = 0;
@@ -61,18 +70,18 @@ tuwString::tuwString(size_t size) : m_size(size) {
     }
 }
 
-tuwString& tuwString::operator=(const char* str) {
+tuwString& tuwString::operator=(const char* str) noexcept {
     alloc_cstr(str, get_strlen(str));
     return *this;
 }
 
-tuwString& tuwString::operator=(const tuwString& str) {
+tuwString& tuwString::operator=(const tuwString& str) noexcept {
     if (this == &str) return *this;
     alloc_cstr(str.c_str(), str.size());
     return *this;
 }
 
-tuwString& tuwString::operator=(tuwString&& str) {
+tuwString& tuwString::operator=(tuwString&& str) noexcept {
     if (this == &str) return *this;
     clear();
     m_str = str.m_str;
@@ -82,7 +91,7 @@ tuwString& tuwString::operator=(tuwString&& str) {
     return *this;
 }
 
-void tuwString::append(const char* str, size_t size) {
+void tuwString::append(const char* str, size_t size) noexcept {
     if (!str || size == 0)
         return;
 
@@ -103,23 +112,23 @@ void tuwString::append(const char* str, size_t size) {
     m_size = new_size;
 }
 
-tuwString& tuwString::operator+=(const char* str) {
+tuwString& tuwString::operator+=(const char* str) noexcept {
     append(str, get_strlen(str));
     return *this;
 }
 
-tuwString& tuwString::operator+=(const tuwString& str) {
+tuwString& tuwString::operator+=(const tuwString& str) noexcept {
     append(str.c_str(), str.size());
     return *this;
 }
 
-tuwString tuwString::operator+(const char* str) const {
+tuwString tuwString::operator+(const char* str) const noexcept {
     tuwString new_str(*this);
     new_str += str;
     return new_str;
 }
 
-tuwString tuwString::operator+(const tuwString& str) const {
+tuwString tuwString::operator+(const tuwString& str) const noexcept {
     tuwString new_str(*this);
     new_str += str;
     return new_str;
@@ -127,7 +136,7 @@ tuwString tuwString::operator+(const tuwString& str) const {
 
 // Convert number to c string, and append it to string.
 # define DEFINE_PLUS_FOR_NUM(num_type, fmt) \
-tuwString tuwString::operator+(num_type num) const { \
+tuwString tuwString::operator+(num_type num) const noexcept { \
     tuwString new_str(*this); \
     \
     int num_size = snprintf(nullptr, 0, "%" fmt, num); \
@@ -158,17 +167,17 @@ DEFINE_PLUS_FOR_NUM(uint32_t, PRIu32)
 
 #define null_to_empty(str) ((str) ? str : "")
 
-bool tuwString::operator==(const char* str) const {
+bool tuwString::operator==(const char* str) const noexcept {
     return strcmp(c_str(), null_to_empty(str)) == 0;
 }
 
-bool tuwString::operator==(const tuwString& str) const {
+bool tuwString::operator==(const tuwString& str) const noexcept {
     return strcmp(c_str(), str.c_str()) == 0;
 }
 
 const size_t tuwString::npos = static_cast<size_t>(-1);
 
-size_t tuwString::find(const char c) const {
+size_t tuwString::find(const char c) const noexcept {
     if (empty()) return npos;
     const char* p = begin();
     for (; p < end(); p++) {
@@ -178,7 +187,7 @@ size_t tuwString::find(const char c) const {
     return npos;
 }
 
-size_t tuwString::find(const char* str) const {
+size_t tuwString::find(const char* str) const noexcept {
     if (empty() || !str) return npos;
 
     // Note: This function uses a slow algorithm.
@@ -196,7 +205,7 @@ size_t tuwString::find(const char* str) const {
     return npos;
 }
 
-tuwString tuwString::substr(size_t start, size_t size) const {
+tuwString tuwString::substr(size_t start, size_t size) const noexcept {
     if (start + size > m_size) {
         SetStringError(STR_BOUNDARY_ERROR);
         return tuwString();
@@ -205,7 +214,7 @@ tuwString tuwString::substr(size_t start, size_t size) const {
     return new_str;
 }
 
-const char& tuwString::operator[](size_t id) const {
+const char& tuwString::operator[](size_t id) const noexcept {
     if (id > m_size) {
         SetStringError(STR_BOUNDARY_ERROR);
         return ""[0];
@@ -213,17 +222,17 @@ const char& tuwString::operator[](size_t id) const {
     return c_str()[id];
 }
 
-tuwString operator+(const char* str1, const tuwString& str2) {
+tuwString operator+(const char* str1, const tuwString& str2) noexcept {
     tuwString new_str(str1);
     new_str += str2;
     return new_str;
 }
 
-static inline bool IsNewline(char ch) {
+static inline bool IsNewline(char ch) noexcept {
     return ch == '\n' || ch == '\r';
 }
 
-tuwString GetLastLine(const tuwString& str) {
+tuwString GetLastLine(const tuwString& str) noexcept {
     if (str.empty()) return "";
 
     const char* begin = str.begin();
@@ -239,7 +248,7 @@ tuwString GetLastLine(const tuwString& str) {
     return str.substr(static_cast<size_t>(sub_begin - begin), end - sub_begin + 1);
 }
 
-tuwWstring::tuwWstring(const wchar_t* str) :
+tuwWstring::tuwWstring(const wchar_t* str) noexcept :
         m_str(nullptr), m_size(0) {
     if (!str) return;
 
@@ -261,28 +270,28 @@ tuwWstring::tuwWstring(const wchar_t* str) :
 static const uint32_t FNV_OFFSET_BASIS_32 = 2166136261U;
 static const uint32_t FNV_PRIME_32 = 16777619U;
 
-uint32_t Fnv1Hash32(const tuwString& str) {
+uint32_t Fnv1Hash32(const tuwString& str) noexcept {
     uint32_t hash = FNV_OFFSET_BASIS_32;
     for (const char c : str) hash = (FNV_PRIME_32 * hash) ^ c;
     return hash;
 }
 
 #ifdef _WIN32
-tuwString UTF16toUTF8(const wchar_t* str) {
+tuwString UTF16toUTF8(const wchar_t* str) noexcept {
     char* uchar = toUTF8(str);
     tuwString ustr = uchar;
     uiprivFree(uchar);
     return ustr;
 }
 
-tuwWstring UTF8toUTF16(const char* str) {
+tuwWstring UTF8toUTF16(const char* str) noexcept {
     wchar_t* widechar = toUTF16(str);
     tuwWstring wstr = widechar;
     uiprivFree(widechar);
     return wstr;
 }
 
-void FprintFmt(FILE* out, const char* fmt, ...) {
+void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_list va;
     va_start(va, fmt);
 
@@ -304,7 +313,7 @@ void FprintFmt(FILE* out, const char* fmt, ...) {
 }
 
 // Enable ANSI escape sequences on the console window.
-void EnableCSI() {
+void EnableCSI() noexcept {
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut == INVALID_HANDLE_VALUE)
         return;
@@ -383,7 +392,7 @@ constexpr pango_tag BG_TAGS[] = {
 };
 
 // Get opening markup tag from ANSI escape sequence
-static const pango_tag GetOpeningTag(ansi_escape_code code) {
+static const pango_tag GetOpeningTag(ansi_escape_code code) noexcept {
     if (code == ANSI_BOLD)
         return PangoTag("<b>");
     else if (code == ANSI_ITALIC)
@@ -400,7 +409,7 @@ static const pango_tag GetOpeningTag(ansi_escape_code code) {
 }
 
 // Get closing markup tag from ANSI escape sequence
-static const pango_tag GetClosingTag(ansi_escape_code code) {
+static const pango_tag GetClosingTag(ansi_escape_code code) noexcept {
     if (code == ANSI_BOLD)
         return PangoTag("</b>");
     else if (code == ANSI_ITALIC)
@@ -424,21 +433,21 @@ class TagStack {
     int m_top;
 
  public:
-    TagStack() : m_tags(), m_top(-1) {}
+    TagStack() noexcept : m_tags(), m_top(-1) {}
 
-    void Push(ansi_escape_code code) {
+    void Push(ansi_escape_code code) noexcept {
         if (m_top < MAX_STACK_SIZE - 1)
             m_tags[++m_top] = code;
     }
 
-    int Size() const { return m_top + 1; }
+    int Size() const noexcept { return m_top + 1; }
 
-    void Clear() { m_top = -1; }
+    void Clear() noexcept { m_top = -1; }
 
     using GetTagFunc = const pango_tag (*)(ansi_escape_code);
 
     // Get length of stacked tags
-    int GetTagLength(GetTagFunc GetTag) const {
+    int GetTagLength(GetTagFunc GetTag) const noexcept {
         int len = 0;
         const ansi_escape_code* max_tag = m_tags + m_top;
         for (const ansi_escape_code* code = m_tags; code <= max_tag; code++) {
@@ -447,16 +456,16 @@ class TagStack {
         return len;
     }
 
-    inline int OpeningTagLength() const {
+    inline int OpeningTagLength() const noexcept {
         return GetTagLength(GetOpeningTag);
     }
 
-    inline int ClosingTagLength() const {
+    inline int ClosingTagLength() const noexcept {
         return GetTagLength(GetClosingTag);
     }
 
     // Copy stacked tags to char*
-    int CopyTag(char* output, GetTagFunc GetTag, bool reverse) const {
+    int CopyTag(char* output, GetTagFunc GetTag, bool reverse) const noexcept {
         char* start = output;
         for (int i = 0; i <= m_top; i++) {
             int idx = reverse ? m_top - i : i;
@@ -467,17 +476,17 @@ class TagStack {
         return static_cast<int>(output - start);
     }
 
-    inline int CopyOpeningTag(char* output) const {
+    inline int CopyOpeningTag(char* output) const noexcept {
         return CopyTag(output, GetOpeningTag, false);
     }
 
-    inline int CopyClosingTag(char* output) const {
+    inline int CopyClosingTag(char* output) const noexcept {
         return CopyTag(output, GetClosingTag, true);
     }
 };
 
 // Get string length for ConvertAnsiToPango()
-int ConvertAnsiToPangoLength(TagStack* stack, const char *input) {
+int ConvertAnsiToPangoLength(TagStack* stack, const char *input) noexcept {
     const char *p = input;
     int closing_tag_len = stack->ClosingTagLength();
     int len = stack->OpeningTagLength();
@@ -530,7 +539,7 @@ int ConvertAnsiToPangoLength(TagStack* stack, const char *input) {
 }
 
 // Function to replace ANSI escape sequences with Pango markup
-void ConvertAnsiToPango(TagStack* stack, const char *input, char *output) {
+void ConvertAnsiToPango(TagStack* stack, const char *input, char *output) noexcept {
     const char *p = input;
     char *q = output;
 
@@ -604,11 +613,11 @@ class Logger {
     int m_buffer_length;
 
  public:
-    Logger() : m_log_entry(NULL), m_log_buffer(""),
-               m_tag_stack(), m_buffer_length(0) {}
-    ~Logger() {}
+    Logger() noexcept : m_log_entry(NULL), m_log_buffer(""),
+                        m_tag_stack(), m_buffer_length(0) {}
+    ~Logger() noexcept {}
 
-    void SetLogEntry(void* log_entry) {
+    void SetLogEntry(void* log_entry) noexcept {
         m_log_entry = static_cast<uiMultilineEntry*>(log_entry);
         if (!m_log_buffer.empty()) {
             Log(m_log_buffer.c_str());
@@ -616,7 +625,7 @@ class Logger {
         }
     }
 
-    void Log(const char* str) {
+     void Log(const char* str) {
         int markup_length = ConvertAnsiToPangoLength(&m_tag_stack, str);
         char *markup_str = new char[markup_length + 1];
         ConvertAnsiToPango(&m_tag_stack, str, markup_str);
@@ -649,7 +658,7 @@ class Logger {
 
 Logger g_logger = Logger();
 
-void SetLogEntry(void* log_entry) {
+void SetLogEntry(void* log_entry) noexcept {
     g_logger.SetLogEntry(log_entry);
 }
 

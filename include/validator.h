@@ -21,7 +21,7 @@ class Validator {
                   m_not_empty(false), m_exist(false),
                   m_error_msg("") {}
     ~Validator() {}
-    void Initialize(const rapidjson::Value& j);
-    bool Validate(const tuwString& str);
-    const tuwString& GetError() const { return m_error_msg; }
+    void Initialize(const rapidjson::Value& j) noexcept;
+    bool Validate(const tuwString& str) noexcept;
+    const tuwString& GetError() const noexcept { return m_error_msg; }
 };

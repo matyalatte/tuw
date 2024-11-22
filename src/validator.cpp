@@ -4,7 +4,7 @@
 #include "env_utils.h"
 #include "string_utils.h"
 
-void Validator::Initialize(const rapidjson::Value& j) {
+void Validator::Initialize(const rapidjson::Value& j) noexcept {
     m_regex = json_utils::GetString(j, "regex", "");
     m_regex_error = json_utils::GetString(j, "regex_error", "");
     m_wildcard = json_utils::GetString(j, "wildcard", "");
@@ -16,7 +16,7 @@ void Validator::Initialize(const rapidjson::Value& j) {
     m_error_msg = "";
 }
 
-static int IsUnsupportedPattern(const char *pattern) {
+static int IsUnsupportedPattern(const char *pattern) noexcept {
     // () operators are unsupported in tiny-regex-c
     // https://github.com/matyalatte/tiny-str-match?tab=readme-ov-file#supported-regex-operators
     const char* p = pattern;
@@ -33,7 +33,7 @@ static int IsUnsupportedPattern(const char *pattern) {
     return 0;
 }
 
-bool Validator::Validate(const tuwString& str) {
+bool Validator::Validate(const tuwString& str) noexcept {
     if (m_not_empty && str.empty()) {
         if (m_not_empty_error.empty())
             m_error_msg = "Empty string is NOT allowed.";
