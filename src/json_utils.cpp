@@ -34,7 +34,7 @@ namespace json_utils {
     constexpr auto JSONC_FLAGS =
         rapidjson::kParseCommentsFlag | rapidjson::kParseTrailingCommasFlag;
 
-    JsonResult LoadJson(const tuwString& file, rapidjson::Document& json) {
+    JsonResult LoadJson(const tuwString& file, rapidjson::Document& json) noexcept {
         FILE* fp = fopen(file.c_str(), "rb");
         if (!fp)
             return { false, "Failed to open " + file };
@@ -57,7 +57,7 @@ namespace json_utils {
         return JSON_RESULT_OK;
     }
 
-    JsonResult SaveJson(rapidjson::Document& json, const tuwString& file) {
+    JsonResult SaveJson(rapidjson::Document& json, const tuwString& file) noexcept {
         FILE* fp = fopen(file.c_str(), "wb");
         if (!fp)
             return { false, "Failed to open " + file + "." };
@@ -70,38 +70,38 @@ namespace json_utils {
         return JSON_RESULT_OK;
     }
 
-    tuwString JsonToString(rapidjson::Document& json) {
+    tuwString JsonToString(rapidjson::Document& json) noexcept {
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         json.Accept(writer);
         return buffer.GetString();
     }
 
-    const char* GetString(const rapidjson::Value& json, const char* key, const char* def) {
+    const char* GetString(const rapidjson::Value& json, const char* key, const char* def) noexcept {
         if (json.HasMember(key))
             return json[key].GetString();
         return def;
     }
 
-    bool GetBool(const rapidjson::Value& json, const char* key, bool def) {
+    bool GetBool(const rapidjson::Value& json, const char* key, bool def) noexcept {
         if (json.HasMember(key))
             return json[key].GetBool();
         return def;
     }
 
-    int GetInt(const rapidjson::Value& json, const char* key, int def) {
+    int GetInt(const rapidjson::Value& json, const char* key, int def) noexcept {
         if (json.HasMember(key))
             return json[key].GetInt();
         return def;
     }
 
-    double GetDouble(const rapidjson::Value& json, const char* key, double def) {
+    double GetDouble(const rapidjson::Value& json, const char* key, double def) noexcept {
         if (json.HasMember(key))
             return json[key].GetDouble();
         return def;
     }
 
-    static tuwString GetLabel(const char* label, const char* key) {
+    static tuwString GetLabel(const char* label, const char* key) noexcept {
         tuwString msg;
         if (*label != '\0') {
             msg = tuwString("['") + label + "']";
@@ -122,7 +122,7 @@ namespace json_utils {
     static const bool OPTIONAL = true;
 
     static void CheckJsonType(JsonResult& result, const rapidjson::Value& j, const char* key,
-            const JsonType& type, const char* label = "", const bool& optional = false) {
+            const JsonType& type, const char* label = "", const bool& optional = false) noexcept {
         if (!j.HasMember(key)) {
             if (optional) return;
             result.ok = false;
@@ -165,7 +165,7 @@ namespace json_utils {
 
 
     static bool IsJsonArray(rapidjson::Value& j, const char* key,
-                            rapidjson::Document::AllocatorType& alloc) {
+                            rapidjson::Document::AllocatorType& alloc) noexcept {
         if (!j[key].IsArray()) {
             if (!j[key].IsObject())
                 return false;
@@ -181,7 +181,7 @@ namespace json_utils {
     }
 
     static bool IsStringArray(rapidjson::Value& j, const char* key,
-                              rapidjson::Document::AllocatorType& alloc) {
+                              rapidjson::Document::AllocatorType& alloc) noexcept {
         if (!j[key].IsArray()) {
             if (!j[key].IsString())
                 return false;
@@ -198,7 +198,7 @@ namespace json_utils {
 
     static void CheckJsonArrayType(JsonResult& result, rapidjson::Value& j, const char* key,
             const JsonType& type, rapidjson::Document::AllocatorType& alloc,
-            const char* label = "", const bool& optional = false) {
+            const char* label = "", const bool& optional = false) noexcept {
         if (!j.HasMember(key)) {
             if (optional) return;
             result.ok = false;
@@ -249,7 +249,7 @@ namespace json_utils {
     static void CorrectKey(rapidjson::Value& j,
                            const char* false_key,
                            const char* true_key,
-                           rapidjson::Document::AllocatorType& alloc) {
+                           rapidjson::Document::AllocatorType& alloc) noexcept {
         if (!j.HasMember(true_key) && j.HasMember(false_key)) {
             rapidjson::Value n(true_key, alloc);
             j.AddMember(n, j[false_key], alloc);
@@ -397,7 +397,7 @@ namespace json_utils {
     }
 
     // don't use map. it will make exe larger.
-    int ComptypeToInt(const char* comptype) {
+    int ComptypeToInt(const char* comptype) noexcept {
         if (strcmp(comptype, "static_text") == 0)
             return COMP_STATIC_TEXT;
         else if (strcmp(comptype, "file") == 0)
@@ -432,7 +432,7 @@ namespace json_utils {
     }
 
     void CheckValidator(JsonResult& result, rapidjson::Value& validator,
-                        const char* label) {
+                        const char* label) noexcept {
         CheckJsonType(result, validator, "regex", JsonType::STRING, label, OPTIONAL);
         CheckJsonType(result, validator, "regex_error", JsonType::STRING, label, OPTIONAL);
         CheckJsonType(result, validator, "wildcard", JsonType::STRING, label, OPTIONAL);
@@ -714,7 +714,7 @@ namespace json_utils {
         }
     }
 
-    void CheckHelpURLs(JsonResult& result, rapidjson::Document& definition) {
+    void CheckHelpURLs(JsonResult& result, rapidjson::Document& definition) noexcept {
         if (!definition.HasMember("help")) return;
         CheckJsonArrayType(result, definition, "help", JsonType::JSON, definition.GetAllocator());
         if (!result.ok) return;

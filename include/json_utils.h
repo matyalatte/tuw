@@ -26,14 +26,14 @@ struct JsonResult {
 // Max binary size for JSON files.
 #define JSON_SIZE_MAX 128 * 1024
 
-JsonResult LoadJson(const tuwString& file, rapidjson::Document& json);
-JsonResult SaveJson(rapidjson::Document& json, const tuwString& file);
-tuwString JsonToString(rapidjson::Document& json);
+JsonResult LoadJson(const tuwString& file, rapidjson::Document& json) noexcept;
+JsonResult SaveJson(rapidjson::Document& json, const tuwString& file) noexcept;
+tuwString JsonToString(rapidjson::Document& json) noexcept;
 
-const char* GetString(const rapidjson::Value& json, const char* key, const char* def);
-bool GetBool(const rapidjson::Value& json, const char* key, bool def);
-int GetInt(const rapidjson::Value& json, const char* key, int def);
-double GetDouble(const rapidjson::Value& json, const char* key, double def);
+const char* GetString(const rapidjson::Value& json, const char* key, const char* def) noexcept;
+bool GetBool(const rapidjson::Value& json, const char* key, bool def) noexcept;
+int GetInt(const rapidjson::Value& json, const char* key, int def) noexcept;
+double GetDouble(const rapidjson::Value& json, const char* key, double def) noexcept;
 
 void GetDefaultDefinition(rapidjson::Document& definition);
 void CheckVersion(JsonResult& result, rapidjson::Document& definition);
@@ -41,6 +41,6 @@ void CheckDefinition(JsonResult& result, rapidjson::Document& definition);
 void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
                         int index,
                         rapidjson::Document::AllocatorType& alloc);
-void CheckHelpURLs(JsonResult& result, rapidjson::Document& definition);
+void CheckHelpURLs(JsonResult& result, rapidjson::Document& definition) noexcept;
 
 }  // namespace json_utils

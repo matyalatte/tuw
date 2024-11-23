@@ -14,7 +14,7 @@ enum READ_IO_TYPE : int {
 unsigned ReadIO(subprocess_s &process,
                 int read_io_type,
                 char *buf, const unsigned buf_size,
-                tuwString& str, const size_t str_size) {
+                tuwString& str, const size_t str_size) noexcept {
     unsigned read_size = 0;
     if (read_io_type == READ_STDOUT) {
         read_size = subprocess_read_stdout(&process, buf, buf_size);
@@ -31,7 +31,8 @@ unsigned ReadIO(subprocess_s &process,
     return read_size;
 }
 
-void DestroyProcess(subprocess_s &process, int *return_code, tuwString &err_msg) {
+void DestroyProcess(subprocess_s &process,
+                    int *return_code, tuwString &err_msg) noexcept {
     if (subprocess_join(&process, return_code) || subprocess_destroy(&process)) {
         *return_code = -1;
         err_msg = "Failed to manage subprocess.\n";
@@ -39,7 +40,8 @@ void DestroyProcess(subprocess_s &process, int *return_code, tuwString &err_msg)
 }
 
 void RedirectOutput(FILE* out, const char* buf,
-                    unsigned read_size, bool use_utf8_on_windows) {
+                    unsigned read_size,
+                    bool use_utf8_on_windows) noexcept {
     if (read_size) {
 #ifdef _WIN32
         if (use_utf8_on_windows) {
@@ -54,13 +56,14 @@ void RedirectOutput(FILE* out, const char* buf,
     }
 }
 
-inline tuwString TruncateStr(const tuwString& str, size_t size) {
+inline tuwString TruncateStr(const tuwString& str, size_t size) noexcept {
     if (str.size() > size)
         return "..." + str.substr(str.size() - size, size);
     return str;
 }
 
-ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
+ExecuteResult Execute(const tuwString& cmd,
+                      bool use_utf8_on_windows) noexcept {
 #ifdef _WIN32
     tuwWstring wcmd = UTF8toUTF16(cmd.c_str());
 
@@ -73,7 +76,9 @@ ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
 
     int argc;
     wchar_t** parsed = CommandLineToArgvW(wcmd.c_str(), &argc);
-    wchar_t** argv = new wchar_t*[argc + 3];
+    wchar_t** argv = static_cast<wchar_t**>(malloc((argc + 3) * sizeof(wchar_t*)));
+    if (argv == nullptr)
+        return { -1, "Failed to allocate wchar_t array.\n", ""};
     wchar_t a[] = L"cmd.exe";
     wchar_t b[] = L"/c";
     argv[0] = &a[0];
@@ -94,7 +99,7 @@ ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
 
 #ifdef _WIN32
     LocalFree((LPWSTR)parsed);
-    delete[] argv;
+    free(argv);
 #endif
 
     if (0 != result)
@@ -135,7 +140,7 @@ ExecuteResult Execute(const tuwString& cmd, bool use_utf8_on_windows) {
     return { return_code, err_msg, last_line };
 }
 
-ExecuteResult LaunchDefaultApp(const tuwString& url) {
+ExecuteResult LaunchDefaultApp(const tuwString& url) noexcept {
 #ifdef _WIN32
     tuwWstring utf16_url = UTF8toUTF16(url.c_str());
     const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", utf16_url.c_str(), NULL};
