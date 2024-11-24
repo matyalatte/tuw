@@ -25,23 +25,23 @@ class Component {
     bool m_add_quotes;
 
  public:
-    explicit Component(const rapidjson::Value& j);
-    virtual ~Component();
-    virtual noex::string GetRawString() { return "";}
-    noex::string GetString();
-    const noex::string& GetID() const { return m_id; }
+    explicit Component(const rapidjson::Value& j) noexcept;
+    virtual ~Component() noexcept {}
+    virtual noex::string GetRawString() noexcept { return "";}
+    noex::string GetString() noexcept;
+    const noex::string& GetID() const noexcept { return m_id; }
 
-    virtual void SetConfig(const rapidjson::Value& config) { UNUSED(config); }
-    virtual void GetConfig(rapidjson::Document& config) { UNUSED(config); }
+    virtual void SetConfig(const rapidjson::Value& config) noexcept { UNUSED(config); }
+    virtual void GetConfig(rapidjson::Document& config) noexcept { UNUSED(config); }
 
-    bool HasString() const { return m_has_string; }
-    bool IsWide() const { return m_is_wide; }
+    bool HasString() const noexcept { return m_has_string; }
+    bool IsWide() const noexcept { return m_is_wide; }
 
-    bool Validate(bool* redraw_flag);
-    const noex::string& GetValidationError() const;
-    void PutErrorWidget(uiBox* box);
+    bool Validate(bool* redraw_flag) noexcept;
+    const noex::string& GetValidationError() const noexcept;
+    void PutErrorWidget(uiBox* box) noexcept;
 
-    static Component* PutComponent(uiBox* box, const rapidjson::Value& j);
+    static Component* PutComponent(uiBox* box, const rapidjson::Value& j) noexcept;
 };
 
 // containers for Combo and CheckArray
@@ -50,100 +50,102 @@ class MultipleValuesContainer {
     noex::vector<noex::string> m_values;
 
  public:
-    void SetValues(noex::vector<noex::string> values){
+    void SetValues(noex::vector<noex::string> values) noexcept {
         m_values = values;
     }
 };
 
 class EmptyComponent : public Component {
  public:
-    EmptyComponent(uiBox* box, const rapidjson::Value& j)
+    EmptyComponent(uiBox* box, const rapidjson::Value& j) noexcept
         : Component(j) { UNUSED(box); }
 };
 
 class StaticText : public Component {
  public:
-    StaticText(uiBox* box, const rapidjson::Value& j);
+    StaticText(uiBox* box, const rapidjson::Value& j) noexcept;
 };
 
 class StringComponentBase : public Component {
  public:
-    StringComponentBase(uiBox* box, const rapidjson::Value& j);
-    void GetConfig(rapidjson::Document& config) override;
+    StringComponentBase(uiBox* box, const rapidjson::Value& j) noexcept;
+    void GetConfig(rapidjson::Document& config) noexcept override;
 };
 
 class FilePicker : public StringComponentBase {
  private:
     noex::string m_ext;
  public:
-    noex::string GetRawString() override;
-    FilePicker(uiBox* box, const rapidjson::Value& j);
-    void SetConfig(const rapidjson::Value& config) override;
-    void OpenFile();
+    noex::string GetRawString() noexcept override;
+    FilePicker(uiBox* box, const rapidjson::Value& j) noexcept;
+    void SetConfig(const rapidjson::Value& config) noexcept override;
+    void OpenFile() noexcept;
 };
 
 class DirPicker : public StringComponentBase {
  public:
-    noex::string GetRawString() override;
-    DirPicker(uiBox* box, const rapidjson::Value& j);
-    void SetConfig(const rapidjson::Value& config) override;
-    void OpenFolder();
+    noex::string GetRawString() noexcept override;
+    DirPicker(uiBox* box, const rapidjson::Value& j) noexcept;
+    void SetConfig(const rapidjson::Value& config) noexcept override;
+    void OpenFolder() noexcept;
 };
 
 class ComboBox : public StringComponentBase, MultipleValuesContainer {
  public:
-    noex::string GetRawString() override;
-    ComboBox(uiBox* box, const rapidjson::Value& j);
-    void GetConfig(rapidjson::Document& config) override;
-    void SetConfig(const rapidjson::Value& config) override;
+    noex::string GetRawString() noexcept override;
+    ComboBox(uiBox* box, const rapidjson::Value& j) noexcept;
+    void GetConfig(rapidjson::Document& config) noexcept override;
+    void SetConfig(const rapidjson::Value& config) noexcept override;
 };
 
 class RadioButtons : public StringComponentBase, MultipleValuesContainer {
  public:
-    noex::string GetRawString() override;
-    RadioButtons(uiBox* box, const rapidjson::Value& j);
-    void GetConfig(rapidjson::Document& config) override;
-    void SetConfig(const rapidjson::Value& config) override;
+    noex::string GetRawString() noexcept override;
+    RadioButtons(uiBox* box, const rapidjson::Value& j) noexcept;
+    void GetConfig(rapidjson::Document& config) noexcept override;
+    void SetConfig(const rapidjson::Value& config) noexcept override;
 };
 
 class CheckBox : public Component {
  private:
     noex::string m_value;
  public:
-    noex::string GetRawString() override;
-    CheckBox(uiBox* box, const rapidjson::Value& j);
-    void GetConfig(rapidjson::Document& config) override;
-    void SetConfig(const rapidjson::Value& config) override;
+    noex::string GetRawString() noexcept override;
+    CheckBox(uiBox* box, const rapidjson::Value& j) noexcept;
+    void GetConfig(rapidjson::Document& config) noexcept override;
+    void SetConfig(const rapidjson::Value& config) noexcept override;
 };
 
 class CheckArray : public StringComponentBase, MultipleValuesContainer {
+ private:
+    noex::vector<uiCheckbox*> m_checks;
  public:
-    noex::string GetRawString() override;
-    CheckArray(uiBox* box, const rapidjson::Value& j);
-    void GetConfig(rapidjson::Document& config) override;
-    void SetConfig(const rapidjson::Value& config) override;
+    noex::string GetRawString() noexcept override;
+    CheckArray(uiBox* box, const rapidjson::Value& j) noexcept;
+    void GetConfig(rapidjson::Document& config) noexcept override;
+    void SetConfig(const rapidjson::Value& config) noexcept override;
 };
 
 class TextBox : public StringComponentBase {
  public:
-    noex::string GetRawString() override;
-    TextBox(uiBox* box, const rapidjson::Value& j);
-    void SetConfig(const rapidjson::Value& config) override;
+    noex::string GetRawString() noexcept override;
+    TextBox(uiBox* box, const rapidjson::Value& j) noexcept;
+    void SetConfig(const rapidjson::Value& config) noexcept override;
 };
 
 class IntPicker : public StringComponentBase {
  public:
-    IntPicker(uiBox* box, const rapidjson::Value& j);
-    noex::string GetRawString() override;
-    void GetConfig(rapidjson::Document& config) override;
-    void SetConfig(const rapidjson::Value& config) override;
+    IntPicker(uiBox* box, const rapidjson::Value& j) noexcept;
+    noex::string GetRawString() noexcept override;
+    void GetConfig(rapidjson::Document& config) noexcept override;
+    void SetConfig(const rapidjson::Value& config) noexcept override;
 };
 
 // This is the same as IntPicker cause uiSpinboxDouble is not supported yet.
 class FloatPicker : public StringComponentBase {
  public:
-    FloatPicker(uiBox* box, const rapidjson::Value& j);
-    noex::string GetRawString() override;
-    void GetConfig(rapidjson::Document& config) override;
-    void SetConfig(const rapidjson::Value& config) override;
+    FloatPicker(uiBox* box, const rapidjson::Value& j) noexcept;
+    noex::string GetRawString() noexcept override;
+    void GetConfig(rapidjson::Document& config) noexcept override;
+    void SetConfig(const rapidjson::Value& config) noexcept override;
 };

@@ -10,7 +10,7 @@ constexpr char DEF_JSON[] = "gui_definition.json";
 constexpr char DEF_JSONC[] = "gui_definition.jsonc";
 
 // Main window
-MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Document& config) {
+MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Document& config) noexcept {
     PrintFmt("%s v%s by %s\n", tuw_constants::TOOL_NAME,
               tuw_constants::VERSION, tuw_constants::AUTHOR);
     PrintFmt(tuw_constants::LOGO);
@@ -101,20 +101,20 @@ MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Doc
     Fit();
 }
 
-static int OnClosing(uiWindow *w, void *data) {
+static int OnClosing(uiWindow *w, void *data) noexcept {
     uiQuit();
     UNUSED(w);
     UNUSED(data);
     return 1;
 }
 
-static int OnShouldQuit(void *data) {
+static int OnShouldQuit(void *data) noexcept {
     uiWindow *mainwin = uiWindow(data);
     uiControlDestroy(uiControl(mainwin));
     return 1;
 }
 
-void MainFrame::CreateFrame() {
+void MainFrame::CreateFrame() noexcept {
     m_mainwin = uiNewWindow(tuw_constants::TOOL_NAME, 200, 1, 1);
 #ifdef __APPLE__
     // Move the default position from bottom left to top left.
@@ -158,14 +158,7 @@ void MainFrame::CreateFrame() {
 #endif
 }
 
-struct MenuData {
-    MenuData(MainFrame* mf, int id):
-        main_frame{mf}, menu_id{id} {}
-    MainFrame* main_frame;
-    int menu_id;
-};
-
-static void OnUpdatePanel(uiMenuItem *item, uiWindow *w, void *data) {
+static void OnUpdatePanel(uiMenuItem *item, uiWindow *w, void *data) noexcept {
     MenuData* menu_data = static_cast<MenuData*>(data);
     menu_data->main_frame->UpdatePanel(menu_data->menu_id);
     menu_data->main_frame->Fit();
@@ -173,14 +166,14 @@ static void OnUpdatePanel(uiMenuItem *item, uiWindow *w, void *data) {
     UNUSED(w);
 }
 
-static void OnOpenURL(uiMenuItem *item, uiWindow *w, void *data) {
+static void OnOpenURL(uiMenuItem *item, uiWindow *w, void *data) noexcept {
     MenuData* menu_data = static_cast<MenuData*>(data);
     menu_data->main_frame->OpenURL(menu_data->menu_id);
     UNUSED(item);
     UNUSED(w);
 }
 
-void MainFrame::CreateMenu() {
+void MainFrame::CreateMenu() noexcept {
     uiMenuItem* item;
     uiMenu* menu = NULL;
 
@@ -190,12 +183,14 @@ void MainFrame::CreateMenu() {
         menu = uiNewMenu("Menu");
 #else
     menu = uiNewMenu("Menu");
+
     if (m_definition["gui"].Size() > 1) {
 #endif  // __APPLE__
         int i = 0;
         for (const rapidjson::Value& j : m_definition["gui"].GetArray()) {
             item = uiMenuAppendItem(menu, j["label"].GetString());
-            uiMenuItemOnClicked(item, OnUpdatePanel, new MenuData(this, i));
+            m_menu_data_vec.emplace_back(this, i);
+            uiMenuItemOnClicked(item, OnUpdatePanel, &m_menu_data_vec.back());
             i++;
         }
     }
@@ -208,7 +203,8 @@ void MainFrame::CreateMenu() {
         int i = 0;
         for (const rapidjson::Value& j : m_definition["help"].GetArray()) {
             item = uiMenuAppendItem(menu, j["label"].GetString());
-            uiMenuItemOnClicked(item, OnOpenURL, new MenuData(this, i));
+            m_menu_data_vec.emplace_back(this, i);
+            uiMenuItemOnClicked(item, OnOpenURL, &m_menu_data_vec.back());
             i++;
         }
     }
@@ -216,7 +212,7 @@ void MainFrame::CreateMenu() {
     m_menu_item = uiMenuAppendCheckItem(menu, "Safe Mode");
 }
 
-static bool IsValidURL(const noex::string &url) {
+static bool IsValidURL(const noex::string &url) noexcept {
     for (const char c : { ' ', ';', '|', '&', '\r', '\n' }) {
         if (url.find(c) != noex::string::npos)
             return false;
@@ -224,7 +220,7 @@ static bool IsValidURL(const noex::string &url) {
     return true;
 }
 
-void MainFrame::OpenURL(int id) {
+void MainFrame::OpenURL(int id) noexcept {
     rapidjson::Value& help = m_definition["help"].GetArray()[id];
     const char* type = help["type"].GetString();
     noex::string url;
@@ -308,7 +304,7 @@ void MainFrame::OpenURL(int id) {
     }
 }
 
-static void OnClicked(uiButton *sender, void *data) {
+static void OnClicked(uiButton *sender, void *data) noexcept {
     MainFrame* main_frame = static_cast<MainFrame*>(data);
 
     if (!main_frame->Validate())
@@ -318,7 +314,7 @@ static void OnClicked(uiButton *sender, void *data) {
     UNUSED(sender);
 }
 
-void MainFrame::UpdatePanel(unsigned definition_id) {
+void MainFrame::UpdatePanel(unsigned definition_id) noexcept {
     m_definition_id = definition_id;
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     if (m_definition["gui"].Size() > 1) {
@@ -375,7 +371,7 @@ void MainFrame::UpdatePanel(unsigned definition_id) {
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-void MainFrame::Fit(bool keep_width) {
+void MainFrame::Fit(bool keep_width) noexcept {
     int width = 200;
     if (keep_width) {
         int height;
@@ -394,7 +390,7 @@ void MainFrame::Fit(bool keep_width) {
 }
 
 // Do validation for each component
-bool MainFrame::Validate() {
+bool MainFrame::Validate() noexcept {
     bool validate = true;
     bool redraw_flag = false;
     noex::string val_first_err;
@@ -422,7 +418,7 @@ bool MainFrame::Validate() {
 }
 
 // Make command string
-noex::string MainFrame::GetCommand() {
+noex::string MainFrame::GetCommand() noexcept {
     noex::vector<noex::string> cmd_ary;
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     for (rapidjson::Value& c : sub_definition["command_splitted"].GetArray())
@@ -435,6 +431,9 @@ noex::string MainFrame::GetCommand() {
     for (Component* comp : m_components) {
         comp_strings.emplace_back(comp->GetString());
     }
+
+    if (noex::GetErrorNo() != noex::OK)
+        return "";
 
     noex::string cmd = cmd_ary[0];
     for (size_t i = 0; i < cmd_ids.size(); i++) {
@@ -455,7 +454,7 @@ noex::string MainFrame::GetCommand() {
     return cmd;
 }
 
-void MainFrame::RunCommand() {
+void MainFrame::RunCommand() noexcept {
     noex::string cmd = GetCommand();
     PrintFmt("[RunCommand] Command: %s\n", cmd.c_str());
 
@@ -527,7 +526,7 @@ void MainFrame::RunCommand() {
 }
 
 // read gui_definition.json
-json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definition) {
+json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definition) noexcept {
     json_utils::JsonResult result = JSON_RESULT_OK;
     json_utils::CheckVersion(result, definition);
     if (!result.ok) return result;
@@ -546,12 +545,12 @@ json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definitio
     return result;
 }
 
-void MainFrame::JsonLoadFailed(const noex::string& msg) {
+void MainFrame::JsonLoadFailed(const noex::string& msg) noexcept {
     PrintFmt("[LoadDefinition] Error: %s\n", msg.c_str());
     ShowErrorDialog(msg);
 }
 
-void MainFrame::UpdateConfig() {
+void MainFrame::UpdateConfig() noexcept {
     for (Component *c : m_components)
         c->GetConfig(m_config);
     if (m_config.HasMember("_mode"))
@@ -559,7 +558,7 @@ void MainFrame::UpdateConfig() {
     m_config.AddMember("_mode", m_definition_id, m_config.GetAllocator());
 }
 
-void MainFrame::SaveConfig() {
+void MainFrame::SaveConfig() noexcept {
     UpdateConfig();
     json_utils::JsonResult result = json_utils::SaveJson(m_config, "gui_config.json");
     if (result.ok) {
@@ -569,22 +568,22 @@ void MainFrame::SaveConfig() {
     }
 }
 
-bool g_no_dialog = false;
+static bool g_no_dialog = false;
 
-void MainFrame::ShowSuccessDialog(const char* msg, const char* title) {
+void MainFrame::ShowSuccessDialog(const char* msg, const char* title) noexcept {
     if (g_no_dialog) return;
     uiMsgBox(m_mainwin, title, msg);
 }
 
-void MainFrame::ShowErrorDialog(const char* msg, const char* title) {
+void MainFrame::ShowErrorDialog(const char* msg, const char* title) noexcept {
     if (g_no_dialog) return;
     uiMsgBoxError(m_mainwin, title, msg);
 }
 
-void MainFrameDisableDialog() {
+void MainFrameDisableDialog() noexcept {
     g_no_dialog = true;
 }
 
-void MainFrame::GetDefinition(rapidjson::Document& json) {
+void MainFrame::GetDefinition(rapidjson::Document& json) noexcept {
     json.CopyFrom(m_definition, json.GetAllocator());
 }

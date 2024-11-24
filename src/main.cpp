@@ -12,7 +12,7 @@
 #include "string_utils.h"
 #include "tuw_constants.h"
 
-int main_app() {
+int main_app() noexcept {
 #ifdef _WIN32
     // Enable ANSI escape sequences on the console window.
     EnableCSI();
@@ -39,7 +39,7 @@ int main_app() {
     return 0;
 }
 
-bool AskOverwrite(const char *path) {
+bool AskOverwrite(const char *path) noexcept {
     if (!envuFileExists(path)) return true;
     PrintFmt("Overwrite %s? (y/n)\n", path);
     char answer;
@@ -49,7 +49,7 @@ bool AskOverwrite(const char *path) {
 }
 
 json_utils::JsonResult Merge(const noex::string& exe_path, const noex::string& json_path,
-                             const noex::string& new_path, const bool force) {
+                             const noex::string& new_path, const bool force) noexcept {
     rapidjson::Document json;
     json_utils::JsonResult result = json_utils::LoadJson(json_path, json);
     if (!result.ok) return result;
@@ -82,7 +82,7 @@ json_utils::JsonResult Merge(const noex::string& exe_path, const noex::string& j
 }
 
 json_utils::JsonResult Split(const noex::string& exe_path, const noex::string& json_path,
-                             const noex::string& new_path, const bool force) {
+                             const noex::string& new_path, const bool force) noexcept {
     ExeContainer exe;
     json_utils::JsonResult result = exe.Read(exe_path);
     if (!result.ok) return result;
@@ -114,7 +114,7 @@ json_utils::JsonResult Split(const noex::string& exe_path, const noex::string& j
     return JSON_RESULT_OK;
 }
 
-void PrintUsage() {
+void PrintUsage() noexcept {
     static const char* const usage =
         "Usage: Tuw [<command> [<options>]]\n"
         "\n"
@@ -148,7 +148,7 @@ enum Commands: int {
 };
 
 // don't use map. it will make exe larger.
-int CmdToInt(const char* cmd) {
+int CmdToInt(const char* cmd) noexcept {
     while (*cmd == '-') {
         cmd++;
     }
@@ -179,7 +179,7 @@ enum Options: int {
     OPT_MAX
 };
 
-int OptToInt(const char* opt) {
+int OptToInt(const char* opt) noexcept {
     while (*opt == '-') {
         opt++;
     }
@@ -201,10 +201,10 @@ int OptToInt(const char* opt) {
 }
 
 #ifdef _WIN32
-int wmain(int argc, wchar_t* argv[]) {
+int wmain(int argc, wchar_t* argv[]) noexcept {
     setlocale(LC_CTYPE, "");
 #else
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) noexcept {
 #endif
     noex::vector<noex::string> args;
     for (int i = 0; i < argc; i++) {
