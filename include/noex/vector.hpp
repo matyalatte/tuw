@@ -1,5 +1,6 @@
 #pragma once
 
+#include <type_traits>
 #include <cstring>
 #include <utility>
 
@@ -18,11 +19,8 @@ class vector {
     size_t m_size;
     size_t m_capacity;
 
-    static T& get_default() noexcept {
-        static char buf[sizeof(T)];
-        memset(buf, '\0', sizeof(T));
-        return *reinterpret_cast<T*>(buf);
-    }
+    // if T is C-style struct or not
+    static const bool is_trivial = std::is_trivial<T>::value;
 
  public:
     vector() noexcept : m_data(nullptr), m_size(0), m_capacity(0) {}
@@ -48,9 +46,13 @@ class vector {
         }
 
         // Move or copy existing elements to the new memory
-        for (size_t i = 0; i < m_size; ++i) {
-            new (data + i) T(std::move(m_data[i]));
-            m_data[i].~T();
+        if (is_trivial) {
+            memcpy(data, m_data, m_size * sizeof(T));
+        } else {
+            for (size_t i = 0; i < m_size; ++i) {
+                new (data + i) T(std::move(m_data[i]));
+                m_data[i].~T();
+            }
         }
 
         free(m_data);
@@ -71,8 +73,10 @@ class vector {
 
     void clear() noexcept {
         if (m_data) {
-            for (size_t i = 0; i < m_size; ++i)
-                m_data[i].~T();
+            if (!is_trivial) {
+                for (size_t i = 0; i < m_size; ++i)
+                    m_data[i].~T();
+            }
             free(m_data);
         }
         m_data = nullptr;
@@ -84,7 +88,8 @@ class vector {
         if (empty() || id >= m_size) {
             // boundary error
             SetErrorNo(VEC_BOUNDARY_ERROR);
-            return get_default();
+            static T dummy{};
+            return dummy;
         }
         return m_data[id];
     }
@@ -96,9 +101,12 @@ class vector {
     vector& operator=(const vector& vec) noexcept {
         if (this == &vec) return *this;
         reserve(vec.capacity());
-        if (m_capacity != vec.size()) return *this;
-        for (size_t i = 0; i < vec.size(); ++i) {
-            m_data[i] = vec[i];
+        if (m_capacity != vec.m_size) return *this;
+        if (is_trivial) {
+            memcpy(m_data, vec.m_data, vec.m_size * sizeof(T));
+        } else {
+            for (size_t i = 0; i < vec.m_size; ++i)
+                new (m_data + i) T(vec.m_data[i]);
         }
         m_size = vec.size();
         return *this;
@@ -106,13 +114,24 @@ class vector {
 
     vector& operator=(vector&& vec) noexcept {
         if (this == &vec) return *this;
-        reserve(vec.capacity());
-        if (m_capacity != vec.size()) return *this;
-        for (size_t i = 0; i < vec.size(); ++i) {
-            *(m_data + i) = std::move(vec[i]);
+
+        if (is_trivial) {
+            clear();
+            m_data = vec.m_data;
+            m_size = vec.m_size;
+            m_capacity = vec.m_capacity;
+            vec.m_data = nullptr;
+            vec.m_size = 0;
+            vec.m_capacity = 0;
+        } else {
+            reserve(vec.capacity());
+            if (m_capacity != vec.m_size) return *this;
+            for (size_t i = 0; i < vec.m_size; ++i) {
+                new (m_data + i) T(std::move(vec.m_data[i]));
+            }
+            m_size = vec.size();
+            vec.clear();
         }
-        m_size = vec.size();
-        vec.clear();
         return *this;
     }
 
@@ -127,36 +146,36 @@ class vector {
     }
 
     T* begin() const noexcept {
-        if (empty()) return &get_default();
         return m_data;
     }
 
     T* end() const noexcept {
-        if (empty()) return &get_default();
         return m_data + m_size;
     }
 
     T& back() const noexcept {
-        if (empty()) {
-            SetErrorNo(VEC_BOUNDARY_ERROR);
-            return get_default();
-        }
-        return *(m_data + m_size - 1);
+        return at(m_size - 1);
     }
 
     void push_back(const T& val) noexcept {
         reserve(m_size + 1);
         if (m_capacity < m_size + 1) return;
-        T* new_val = m_data + m_size;
-        *new_val = val;
+        if (is_trivial) {
+            memcpy(m_data + m_size, &val, sizeof(T));
+        } else {
+            new (m_data + m_size) T(val);
+        }
         m_size++;
     }
 
     void push_back(T&& val) noexcept {
         reserve(m_size + 1);
         if (m_capacity < m_size + 1) return;
-        T* new_val = m_data + m_size;
-        *new_val = std::move(val);
+        if (is_trivial) {
+            memcpy(m_data + m_size, &val, sizeof(T));
+        } else {
+            new (m_data + m_size) T(std::move(val));
+        }
         m_size++;
     }
 
@@ -180,9 +199,13 @@ class vector {
         }
 
         // Move or copy existing elements to the new memory
-        for (size_t i = 0; i < m_size; ++i) {
-            new (data + i) T(std::move(m_data[i]));
-            m_data[i].~T();
+        if (is_trivial) {
+            memcpy(data, m_data, m_size * sizeof(T));
+        } else {
+            for (size_t i = 0; i < m_size; ++i) {
+                new (data + i) T(std::move(m_data[i]));
+                m_data[i].~T();
+            }
         }
 
         free(m_data);

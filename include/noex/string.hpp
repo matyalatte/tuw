@@ -1,9 +1,7 @@
 #pragma once
 
-#include <cinttypes>
 #include <wchar.h>
-#include <cstdlib>
-#include <cstring>
+#include <cinttypes>
 
 #include "noex/error.hpp"
 

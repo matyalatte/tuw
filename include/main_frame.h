@@ -9,8 +9,6 @@
 class MainFrame;
 
 struct MenuData {
-    MenuData(MainFrame* mf, int id) noexcept :
-        main_frame{mf}, menu_id{id} {}
     MainFrame* main_frame;
     int menu_id;
 };
@@ -38,10 +36,12 @@ class MainFrame {
     void UpdateConfig() noexcept;
     void ShowSuccessDialog(const char* msg, const char* title = "Success") noexcept;
     void ShowErrorDialog(const char* msg, const char* title = "Error") noexcept;
-    inline void ShowSuccessDialog(const noex::string& msg, const noex::string& title = "Success") noexcept {
+    inline void ShowSuccessDialog(const noex::string& msg,
+                                  const noex::string& title = "Success") noexcept {
         ShowSuccessDialog(msg.c_str(), title.c_str());
     }
-    inline void ShowErrorDialog(const noex::string& msg, const noex::string& title = "Error") noexcept {
+    inline void ShowErrorDialog(const noex::string& msg,
+                                const noex::string& title = "Error") noexcept {
         ShowErrorDialog(msg.c_str(), title.c_str());
     }
     void JsonLoadFailed(const noex::string& msg) noexcept;

@@ -1,5 +1,7 @@
 #include "string_utils.h"
 
+#include <cstring>
+
 #ifdef _WIN32
 #include "windows/uipriv_windows.hpp"
 #endif

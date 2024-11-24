@@ -10,7 +10,8 @@ constexpr char DEF_JSON[] = "gui_definition.json";
 constexpr char DEF_JSONC[] = "gui_definition.jsonc";
 
 // Main window
-MainFrame::MainFrame(const rapidjson::Document& definition, const rapidjson::Document& config) noexcept {
+MainFrame::MainFrame(const rapidjson::Document& definition,
+                     const rapidjson::Document& config) noexcept {
     PrintFmt("%s v%s by %s\n", tuw_constants::TOOL_NAME,
               tuw_constants::VERSION, tuw_constants::AUTHOR);
     PrintFmt(tuw_constants::LOGO);
@@ -184,13 +185,19 @@ void MainFrame::CreateMenu() noexcept {
 #else
     menu = uiNewMenu("Menu");
 
+    size_t menu_item_count = m_definition["gui"].Size();
+    if (m_definition.HasMember("help"))
+        menu_item_count += m_definition["help"].Size();
+    m_menu_data_vec.reserve(menu_item_count);
+
     if (m_definition["gui"].Size() > 1) {
 #endif  // __APPLE__
         int i = 0;
         for (const rapidjson::Value& j : m_definition["gui"].GetArray()) {
             item = uiMenuAppendItem(menu, j["label"].GetString());
-            m_menu_data_vec.emplace_back(this, i);
-            uiMenuItemOnClicked(item, OnUpdatePanel, &m_menu_data_vec.back());
+            m_menu_data_vec.push_back({ this, i });
+            MenuData* m = &m_menu_data_vec.back();
+            uiMenuItemOnClicked(item, OnUpdatePanel, m);
             i++;
         }
     }
@@ -203,8 +210,9 @@ void MainFrame::CreateMenu() noexcept {
         int i = 0;
         for (const rapidjson::Value& j : m_definition["help"].GetArray()) {
             item = uiMenuAppendItem(menu, j["label"].GetString());
-            m_menu_data_vec.emplace_back(this, i);
-            uiMenuItemOnClicked(item, OnOpenURL, &m_menu_data_vec.back());
+            m_menu_data_vec.push_back({ this, i });
+            MenuData* m = &m_menu_data_vec.back();
+            uiMenuItemOnClicked(item, OnOpenURL, m);
             i++;
         }
     }
@@ -296,7 +304,8 @@ void MainFrame::OpenURL(int id) noexcept {
         } else {
             ExecuteResult result = LaunchDefaultApp(url);
             if (result.exit_code != 0) {
-                noex::string msg = noex::string("Failed to open a ") + type + " by an unexpected error.";
+                noex::string msg = noex::string("Failed to open a ") +
+                                   type + " by an unexpected error.";
                 PrintFmt("%sError: %s\n", tag, msg.c_str());
                 ShowErrorDialog(msg.c_str());
             }

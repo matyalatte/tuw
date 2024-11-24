@@ -1,6 +1,7 @@
-#include <cinttypes>
 #include <wchar.h>
+#include <cinttypes>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 #include "noex/string.hpp"
@@ -49,12 +50,12 @@ string::string(const char* str, size_t size) noexcept :
     assign(str, size);
 }
 
-string::string(const noex::string& str) noexcept :
+string::string(const string& str) noexcept :
         m_str(nullptr), m_size(0) {
     assign(str.c_str(), str.size());
 }
 
-string::string(noex::string&& str) noexcept :
+string::string(string&& str) noexcept :
         m_str(str.m_str), m_size(str.m_size) {
     str.m_str = nullptr;
     str.m_size = 0;

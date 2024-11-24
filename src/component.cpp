@@ -540,20 +540,18 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j) noexcept
             uiControlSetTooltip(uiControl(check),
                                             json_utils::GetString(i, "tooltip", ""));
         }
-        m_checks.emplace_back(check);
+        m_checks.push_back(check);
         const char* value = json_utils::GetString(i, "value", label);
         values.emplace_back(value);
         id++;
     }
     uiBoxAppend(box, uiControl(check_array_box), 0);
     SetValues(values);
-    m_widget = &m_checks;
 }
 
 noex::string CheckArray::GetRawString() noexcept {
     noex::string str;
-    noex::vector<uiCheckbox*> checks;
-    for (size_t i = 0; i < checks.size(); i++) {
+    for (size_t i = 0; i < m_checks.size(); i++) {
         if (uiCheckboxChecked(m_checks[i])) {
             str += m_values[i];
         }
