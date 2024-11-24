@@ -48,8 +48,8 @@ bool AskOverwrite(const char *path) {
     return ret == 1 && (answer == "y"[0] || answer == "Y"[0]);
 }
 
-json_utils::JsonResult Merge(const tuwString& exe_path, const tuwString& json_path,
-                             const tuwString& new_path, const bool force) {
+json_utils::JsonResult Merge(const noex::string& exe_path, const noex::string& json_path,
+                             const noex::string& new_path, const bool force) {
     rapidjson::Document json;
     json_utils::JsonResult result = json_utils::LoadJson(json_path, json);
     if (!result.ok) return result;
@@ -81,8 +81,8 @@ json_utils::JsonResult Merge(const tuwString& exe_path, const tuwString& json_pa
     return JSON_RESULT_OK;
 }
 
-json_utils::JsonResult Split(const tuwString& exe_path, const tuwString& json_path,
-                             const tuwString& new_path, const bool force) {
+json_utils::JsonResult Split(const noex::string& exe_path, const noex::string& json_path,
+                             const noex::string& new_path, const bool force) {
     ExeContainer exe;
     json_utils::JsonResult result = exe.Read(exe_path);
     if (!result.ok) return result;
@@ -206,7 +206,7 @@ int wmain(int argc, wchar_t* argv[]) {
 #else
 int main(int argc, char* argv[]) {
 #endif
-    std::vector<tuwString> args;
+    noex::vector<noex::string> args;
     for (int i = 0; i < argc; i++) {
 #ifdef _WIN32
         args.emplace_back(UTF16toUTF8(argv[i]));
@@ -217,7 +217,7 @@ int main(int argc, char* argv[]) {
     char *exe_path_cstr = envuGetExecutablePath();
     char *exe_dir = envuGetDirectory(exe_path_cstr);
     envuSetCwd(exe_dir);
-    tuwString exe_path = envuStr(exe_path_cstr);
+    noex::string exe_path = envuStr(exe_path_cstr);
     envuFree(exe_dir);
 
     // Launch GUI if no args.
@@ -231,8 +231,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    tuwString json_path;
-    tuwString new_exe_path;
+    noex::string json_path;
+    noex::string new_exe_path;
     bool force = false;
 
     for (int i = 2; i < argc; i++) {

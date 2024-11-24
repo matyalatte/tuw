@@ -8,6 +8,7 @@ test_sources = [
     'main_frame_test.cpp',
     'string_utils_test.cpp',
     'validator_test.cpp',
+    'vector_utils_test.cpp',
 ]
 
 # build tests

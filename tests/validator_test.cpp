@@ -123,7 +123,7 @@ TEST(ValidatorTest, Exist) {
         "}";
     Validator validator = GetValidator(config);
     EXPECT_TRUE(validator.Validate(JSON_ALL_KEYS));
-    EXPECT_FALSE(validator.Validate(tuwString(JSON_ALL_KEYS) + ".fake.does_not_exist"));
+    EXPECT_FALSE(validator.Validate(noex::string(JSON_ALL_KEYS) + ".fake.does_not_exist"));
     EXPECT_STREQ("Path does NOT exist.",
                  validator.GetError().c_str());
 }
@@ -135,7 +135,7 @@ TEST(ValidatorTest, ExistCustomError) {
         "    \"exist_error\": \"Custom message!\""
         "}";
     Validator validator = GetValidator(config);
-    EXPECT_FALSE(validator.Validate(tuwString(JSON_ALL_KEYS) + ".fake.does_not_exist"));
+    EXPECT_FALSE(validator.Validate(noex::string(JSON_ALL_KEYS) + ".fake.does_not_exist"));
     EXPECT_STREQ("Custom message!",
                  validator.GetError().c_str());
 }

@@ -1,9 +1,9 @@
 #pragma once
-#include <vector>
 #include "rapidjson/document.h"
 #include "component.h"
 #include "json_utils.h"
 #include "string_utils.h"
+#include "noex/vector.hpp"
 #include "ui.h"
 
 // Main window
@@ -17,7 +17,7 @@ class MainFrame {
     uiWindow* m_logwin;
 #endif
 
-    std::vector<Component*> m_components;
+    noex::vector<Component*> m_components;
     uiGrid* m_grid;
     uiButton* m_run_button;
     uiMenuItem* m_menu_item;
@@ -28,13 +28,13 @@ class MainFrame {
     void UpdateConfig();
     void ShowSuccessDialog(const char* msg, const char* title = "Success");
     void ShowErrorDialog(const char* msg, const char* title = "Error");
-    inline void ShowSuccessDialog(const tuwString& msg, const tuwString& title = "Success") {
+    inline void ShowSuccessDialog(const noex::string& msg, const noex::string& title = "Success") {
         ShowSuccessDialog(msg.c_str(), title.c_str());
     }
-    inline void ShowErrorDialog(const tuwString& msg, const tuwString& title = "Error") {
+    inline void ShowErrorDialog(const noex::string& msg, const noex::string& title = "Error") {
         ShowErrorDialog(msg.c_str(), title.c_str());
     }
-    void JsonLoadFailed(const tuwString& msg);
+    void JsonLoadFailed(const noex::string& msg);
 
  public:
     explicit MainFrame(const rapidjson::Document& definition =
@@ -44,7 +44,7 @@ class MainFrame {
     void UpdatePanel(unsigned definition_id);
     void OpenURL(int id);
     bool Validate();
-    tuwString GetCommand();
+    noex::string GetCommand();
     void RunCommand();
     void GetDefinition(rapidjson::Document& json);
     void SaveConfig();

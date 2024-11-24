@@ -29,7 +29,7 @@ Component::Component(const rapidjson::Value& j) {
     m_id = json_utils::GetString(j, "id", "");
     if (m_id.empty()) {
         uint32_t hash = Fnv1Hash32(j["label"].GetString());
-        m_id = tuwString("_") + hash;
+        m_id = noex::string("_") + hash;
     }
     m_add_quotes = json_utils::GetBool(j, "add_quotes", false);
     if (j.HasMember("validator"))
@@ -42,18 +42,18 @@ Component::Component(const rapidjson::Value& j) {
 Component::~Component() {
 }
 
-tuwString Component::GetString() {
-    tuwString str = GetRawString();
+noex::string Component::GetString() {
+    noex::string str = GetRawString();
     if (m_optional && str.empty())
         return "";
     if (m_add_quotes)
-        str = tuwString("\"") + str + "\"";
+        str = noex::string("\"") + str + "\"";
     return m_prefix + str + m_suffix;
 }
 
 bool Component::Validate(bool* redraw_flag) {
     // Main frame should run Fit() after this function.
-    tuwString str = GetRawString();
+    noex::string str = GetRawString();
     if (m_optional && str.empty())
         return true;
 
@@ -80,7 +80,7 @@ bool Component::Validate(bool* redraw_flag) {
     return validate;
 }
 
-const tuwString& Component::GetValidationError() const {
+const noex::string& Component::GetValidationError() const {
     return m_validator.GetError();
 }
 
@@ -214,15 +214,15 @@ FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
     m_widget = putPathPicker(this, box, j, onOpenFileClicked);
 }
 
-tuwString FilePicker::GetRawString() {
+noex::string FilePicker::GetRawString() {
     char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
-    tuwString str = text;
+    noex::string str = text;
     uiFreeText(text);
     return str;
 }
 
 static void setConfigForTextBox(const rapidjson::Value& config,
-                                const tuwString& id, void *widget) {
+                                const noex::string& id, void *widget) {
     const char* str = json_utils::GetString(config, id.c_str(), nullptr);
     if (str) {
         uiEntry* entry = static_cast<uiEntry*>(widget);
@@ -237,7 +237,7 @@ void FilePicker::SetConfig(const rapidjson::Value& config) {
 class Filter {
  private:
     const char* name;
-    std::vector<const char*> patterns;
+    noex::vector<const char*> patterns;
  public:
     Filter(): name(), patterns() {}
     void SetName(const char* n) {
@@ -258,12 +258,12 @@ class Filter {
 class FilterList {
  private:
     char* filter_buf;
-    std::vector<Filter*> filters;
+    noex::vector<Filter*> filters;
     uiFileDialogParamsFilter* ui_filters;
 
  public:
     FilterList(): filter_buf(NULL), filters(), ui_filters(NULL) {}
-    void MakeFilters(const tuwString& ext) {
+    void MakeFilters(const noex::string& ext) {
         if (filter_buf != NULL)
             delete[] filter_buf;
         filter_buf =  new char[ext.length() + 1];
@@ -364,9 +364,9 @@ DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
     m_widget = putPathPicker(this, box, j, onOpenFolderClicked);
 }
 
-tuwString DirPicker::GetRawString() {
+noex::string DirPicker::GetRawString() {
     char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
-    tuwString str = text;
+    noex::string str = text;
     uiFreeText(text);
     return str;
 }
@@ -398,7 +398,7 @@ void DirPicker::OpenFolder() {
 ComboBox::ComboBox(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
     uiCombobox* combo = uiNewCombobox();
-    std::vector<tuwString> values;
+    noex::vector<noex::string> values;
     for (const rapidjson::Value& i : j["items"].GetArray()) {
         const char* label = i["label"].GetString();
         uiComboboxAppend(combo, label);
@@ -416,7 +416,7 @@ ComboBox::ComboBox(uiBox* box, const rapidjson::Value& j)
     m_widget = combo;
 }
 
-tuwString ComboBox::GetRawString() {
+noex::string ComboBox::GetRawString() {
     int sel = uiComboboxSelected(static_cast<uiCombobox*>(m_widget));
     return m_values[sel];
 }
@@ -441,7 +441,7 @@ void ComboBox::GetConfig(rapidjson::Document& config) {
 RadioButtons::RadioButtons(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
     uiRadioButtons* radio = uiNewRadioButtons();
-    std::vector<tuwString> values;
+    noex::vector<noex::string> values;
     for (const rapidjson::Value& i : j["items"].GetArray()) {
         const char* label = i["label"].GetString();
         uiRadioButtonsAppend(radio, label);
@@ -459,7 +459,7 @@ RadioButtons::RadioButtons(uiBox* box, const rapidjson::Value& j)
     m_widget = radio;
 }
 
-tuwString RadioButtons::GetRawString() {
+noex::string RadioButtons::GetRawString() {
     int sel = uiRadioButtonsSelected(static_cast<uiRadioButtons*>(m_widget));
     return m_values[sel];
 }
@@ -495,7 +495,7 @@ CheckBox::CheckBox(uiBox* box, const rapidjson::Value& j)
     m_widget = check;
 }
 
-tuwString CheckBox::GetRawString() {
+noex::string CheckBox::GetRawString() {
     if (uiCheckboxChecked(static_cast<uiCheckbox*>(m_widget)))
         return m_value;
     return "";
@@ -517,8 +517,8 @@ void CheckBox::GetConfig(rapidjson::Document& config) {
 // CheckArray
 CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
     : StringComponentBase(box, j) {
-    std::vector<uiCheckbox*>* checks = new std::vector<uiCheckbox*>();
-    std::vector<tuwString> values;
+    noex::vector<uiCheckbox*>* checks = new noex::vector<uiCheckbox*>();
+    noex::vector<noex::string> values;
     uiBox* check_array_box = uiNewVerticalBox();
     uiBoxSetSpacing(check_array_box, tuw_constants::BOX_CHECKS_SPACE);
     size_t id = 0;
@@ -541,10 +541,10 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
     m_widget = checks;
 }
 
-tuwString CheckArray::GetRawString() {
-    tuwString str;
-    std::vector<uiCheckbox*> checks;
-    checks = *(std::vector<uiCheckbox*>*)m_widget;
+noex::string CheckArray::GetRawString() {
+    noex::string str;
+    noex::vector<uiCheckbox*> checks;
+    checks = *(noex::vector<uiCheckbox*>*)m_widget;
     for (size_t i = 0; i < checks.size(); i++) {
         if (uiCheckboxChecked(checks[i])) {
             str += m_values[i];
@@ -555,7 +555,7 @@ tuwString CheckArray::GetRawString() {
 
 void CheckArray::SetConfig(const rapidjson::Value& config) {
     if (config.HasMember(m_id.c_str()) && config[m_id.c_str()].IsArray()) {
-        std::vector<uiCheckbox*> checks = *(std::vector<uiCheckbox*>*)m_widget;
+        noex::vector<uiCheckbox*> checks = *(noex::vector<uiCheckbox*>*)m_widget;
         for (unsigned i = 0; i < config[m_id.c_str()].Size() && i < checks.size(); i++) {
             if (config[m_id.c_str()][i].IsBool())
                 uiCheckboxSetChecked(checks[i], config[m_id.c_str()][i].GetBool());
@@ -569,7 +569,7 @@ void CheckArray::GetConfig(rapidjson::Document& config) {
 
     rapidjson::Value ints;
     ints.SetArray();
-    for (uiCheckbox* check : *(std::vector<uiCheckbox*>*)m_widget) {
+    for (uiCheckbox* check : *(noex::vector<uiCheckbox*>*)m_widget) {
         ints.PushBack(static_cast<bool>(uiCheckboxChecked(check)),
                       config.GetAllocator());
     }
@@ -592,9 +592,9 @@ TextBox::TextBox(uiBox* box, const rapidjson::Value& j)
     m_widget = entry;
 }
 
-tuwString TextBox::GetRawString() {
+noex::string TextBox::GetRawString() {
     char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
-    tuwString str = text;
+    noex::string str = text;
     uiFreeText(text);
     return str;
 }
@@ -639,9 +639,9 @@ IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
     m_widget = picker;
 }
 
-tuwString IntPicker::GetRawString() {
+noex::string IntPicker::GetRawString() {
     char* text = uiSpinboxValueText(static_cast<uiSpinbox*>(m_widget));
-    tuwString str(text);
+    noex::string str(text);
     uiFreeText(text);
     return str;
 }
@@ -685,9 +685,9 @@ FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
     m_widget = picker;
 }
 
-tuwString FloatPicker::GetRawString() {
+noex::string FloatPicker::GetRawString() {
     char* text = uiSpinboxValueText(static_cast<uiSpinbox*>(m_widget));
-    tuwString str(text);
+    noex::string str(text);
     uiFreeText(text);
     return str;
 }

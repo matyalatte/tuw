@@ -3,12 +3,12 @@
 
 struct ExecuteResult {
     int exit_code;
-    tuwString err_msg;
-    tuwString last_line;
+    noex::string err_msg;
+    noex::string last_line;
 };
 
 // When use_utf8_on_windows is true,
 // Tuw converts output strings from UTF-8 to UTF-16 on Windows.
-ExecuteResult Execute(const tuwString& cmd,
+ExecuteResult Execute(const noex::string& cmd,
                       bool use_utf8_on_windows = false) noexcept;
-ExecuteResult LaunchDefaultApp(const tuwString& url) noexcept;
+ExecuteResult LaunchDefaultApp(const noex::string& url) noexcept;

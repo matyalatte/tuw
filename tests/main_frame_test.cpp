@@ -15,7 +15,7 @@ class MainFrameTest : public ::testing::Test {
         if (msg != NULL)
             printf("%s\n", msg);
         EXPECT_TRUE(msg == NULL);
-        EXPECT_EQ(STR_OK, GetStringError());
+        EXPECT_EQ(noex::OK, noex::GetErrorNo());
         uiMainSteps();
     }
 
@@ -26,10 +26,10 @@ class MainFrameTest : public ::testing::Test {
         // Need to reset the pointer to the log.
         SetLogEntry(NULL);
     #endif
-        EXPECT_EQ(STR_OK, GetStringError());
+        EXPECT_EQ(noex::OK, noex::GetErrorNo());
     }
 
-    void TestConfig(rapidjson::Document& test_json, tuwString config) {
+    void TestConfig(rapidjson::Document& test_json, noex::string config) {
         rapidjson::Document test_config;
         json_utils::JsonResult result = json_utils::LoadJson(config, test_config);
         EXPECT_TRUE(result.ok);
@@ -98,7 +98,7 @@ TEST_F(MainFrameTest, GetCommand2) {
     rapidjson::Document dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
-    tuwString expected = "echo file: \"test.txt\" & echo folder: \"testdir\"";
+    noex::string expected = "echo file: \"test.txt\" & echo folder: \"testdir\"";
     expected += " & echo combo: value3 & echo radio: value3 & echo check: flag!";
     expected += " & echo check_array:  --f2 & echo textbox: remove this text!";
     expected += " & echo int: 10 & echo float: 0.01";
@@ -111,7 +111,7 @@ TEST_F(MainFrameTest, GetCommand3) {
     rapidjson::Document dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
-    tuwString expected = "echo file:  & echo folder:  & echo combo: value1 & echo radio: value1";
+    noex::string expected = "echo file:  & echo folder:  & echo combo: value1 & echo radio: value1";
     expected += " & echo check:  & echo check_array:  & echo textbox: ";
     expected += " & echo int: 0 & echo float: 0.0";
     EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().c_str());
@@ -128,7 +128,7 @@ TEST_F(MainFrameTest, RunCommandSuccess) {
     main_frame->GetDefinition(actual_json);
     ASSERT_EQ(test_json["help"], actual_json["help"]);
 
-    tuwString cmd = main_frame->GetCommand();
+    noex::string cmd = main_frame->GetCommand();
     ExecuteResult result = Execute(cmd);
     EXPECT_EQ(0, result.exit_code);
     EXPECT_STREQ("", result.err_msg.c_str());
@@ -143,7 +143,7 @@ TEST_F(MainFrameTest, RunCommandFail) {
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
 
-    tuwString cmd = main_frame->GetCommand();
+    noex::string cmd = main_frame->GetCommand();
     ExecuteResult result = Execute(cmd);
     EXPECT_NE(0, result.exit_code);
     EXPECT_STRNE("", result.err_msg.c_str());
@@ -169,7 +169,7 @@ TEST_F(MainFrameTest, RunCommandShowLast) {
     main_frame = new MainFrame(test_json, dummy_config);
     main_frame->UpdatePanel(2);
 
-    tuwString cmd = main_frame->GetCommand();
+    noex::string cmd = main_frame->GetCommand();
     ExecuteResult result = Execute(cmd);
     EXPECT_EQ(0, result.exit_code);
     EXPECT_STREQ("", result.err_msg.c_str());
@@ -187,7 +187,7 @@ TEST_F(MainFrameTest, LoadSaveConfigUTF) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
     test_json["gui"][0].Swap(test_json["gui"][1]);
-    tuwString cmd = test_json["gui"][0]["command"].GetString();
+    noex::string cmd = test_json["gui"][0]["command"].GetString();
     memcpy(cmd.data() + 12, "ファイル", 4);
     test_json["gui"][0]["command"].SetString(rapidjson::StringRef(cmd.c_str()));
     test_json["gui"][0]["components"][1]["id"].SetString("ファイル");

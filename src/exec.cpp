@@ -1,5 +1,4 @@
 #include "exec.h"
-#include <vector>
 #include "subprocess.h"
 #include "string_utils.h"
 #ifdef _WIN32
@@ -14,7 +13,7 @@ enum READ_IO_TYPE : int {
 unsigned ReadIO(subprocess_s &process,
                 int read_io_type,
                 char *buf, const unsigned buf_size,
-                tuwString& str, const size_t str_size) noexcept {
+                noex::string& str, const size_t str_size) noexcept {
     unsigned read_size = 0;
     if (read_io_type == READ_STDOUT) {
         read_size = subprocess_read_stdout(&process, buf, buf_size);
@@ -32,7 +31,7 @@ unsigned ReadIO(subprocess_s &process,
 }
 
 void DestroyProcess(subprocess_s &process,
-                    int *return_code, tuwString &err_msg) noexcept {
+                    int *return_code, noex::string &err_msg) noexcept {
     if (subprocess_join(&process, return_code) || subprocess_destroy(&process)) {
         *return_code = -1;
         err_msg = "Failed to manage subprocess.\n";
@@ -45,7 +44,7 @@ void RedirectOutput(FILE* out, const char* buf,
     if (read_size) {
 #ifdef _WIN32
         if (use_utf8_on_windows) {
-            tuwWstring wout = UTF8toUTF16(buf);
+            noex::wstring wout = UTF8toUTF16(buf);
             fprintf(out, "%ls", wout.c_str());
         } else {
             fprintf(out, "%s", buf);
@@ -56,18 +55,18 @@ void RedirectOutput(FILE* out, const char* buf,
     }
 }
 
-inline tuwString TruncateStr(const tuwString& str, size_t size) noexcept {
+inline noex::string TruncateStr(const noex::string& str, size_t size) noexcept {
     if (str.size() > size)
         return "..." + str.substr(str.size() - size, size);
     return str;
 }
 
-ExecuteResult Execute(const tuwString& cmd,
+ExecuteResult Execute(const noex::string& cmd,
                       bool use_utf8_on_windows) noexcept {
 #ifdef _WIN32
-    tuwWstring wcmd = UTF8toUTF16(cmd.c_str());
+    noex::wstring wcmd = UTF8toUTF16(cmd.c_str());
 
-    if (GetStringError() != STR_OK) {
+    if (noex::GetErrorNo() != noex::OK) {
         // Reject the command as it might have unexpected value.
         return { -1,
                  "Fatal error has occored while editing strings.\n",
@@ -110,8 +109,8 @@ ExecuteResult Execute(const tuwString& cmd,
     const size_t ERR_MSG_MAX_LEN = BUF_SIZE * 2;
     char out_buf[BUF_SIZE + 1];
     char err_buf[BUF_SIZE + 1];
-    tuwString last_line;
-    tuwString err_msg;
+    noex::string last_line;
+    noex::string err_msg;
     unsigned out_read_size = 0;
     unsigned err_read_size = 0;
 
@@ -140,9 +139,9 @@ ExecuteResult Execute(const tuwString& cmd,
     return { return_code, err_msg, last_line };
 }
 
-ExecuteResult LaunchDefaultApp(const tuwString& url) noexcept {
+ExecuteResult LaunchDefaultApp(const noex::string& url) noexcept {
 #ifdef _WIN32
-    tuwWstring utf16_url = UTF8toUTF16(url.c_str());
+    noex::wstring utf16_url = UTF8toUTF16(url.c_str());
     const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", utf16_url.c_str(), NULL};
 #elif defined(__TUW_UNIX__) && !defined(__HAIKU__)
     // Linux and BSD
@@ -159,7 +158,7 @@ ExecuteResult LaunchDefaultApp(const tuwString& url) noexcept {
         return { -1, "Failed to create a subprocess.\n", ""};
 
     int return_code;
-    tuwString err_msg;
+    noex::string err_msg;
     DestroyProcess(process, &return_code, err_msg);
 
     return { return_code, err_msg, "" };

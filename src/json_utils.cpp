@@ -1,7 +1,6 @@
 #include "json_utils.h"
 #include <cstdio>
 #include <cassert>
-#include <vector>
 
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/filewritestream.h"
@@ -11,6 +10,7 @@
 
 #include "tuw_constants.h"
 #include "string_utils.h"
+#include "noex/vector.hpp"
 
 namespace json_utils {
 
@@ -34,7 +34,7 @@ namespace json_utils {
     constexpr auto JSONC_FLAGS =
         rapidjson::kParseCommentsFlag | rapidjson::kParseTrailingCommasFlag;
 
-    JsonResult LoadJson(const tuwString& file, rapidjson::Document& json) noexcept {
+    JsonResult LoadJson(const noex::string& file, rapidjson::Document& json) noexcept {
         FILE* fp = fopen(file.c_str(), "rb");
         if (!fp)
             return { false, "Failed to open " + file };
@@ -46,7 +46,7 @@ namespace json_utils {
         fclose(fp);
 
         if (!ok) {
-            tuwString msg = tuwString("Failed to parse JSON: ") +
+            noex::string msg = noex::string("Failed to parse JSON: ") +
                             rapidjson::GetParseError_En(ok.Code()) +
                             " (offset: " + ok.Offset() + ")";
             return { false, msg };
@@ -57,7 +57,7 @@ namespace json_utils {
         return JSON_RESULT_OK;
     }
 
-    JsonResult SaveJson(rapidjson::Document& json, const tuwString& file) noexcept {
+    JsonResult SaveJson(rapidjson::Document& json, const noex::string& file) noexcept {
         FILE* fp = fopen(file.c_str(), "wb");
         if (!fp)
             return { false, "Failed to open " + file + "." };
@@ -70,7 +70,7 @@ namespace json_utils {
         return JSON_RESULT_OK;
     }
 
-    tuwString JsonToString(rapidjson::Document& json) noexcept {
+    noex::string JsonToString(rapidjson::Document& json) noexcept {
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         json.Accept(writer);
@@ -101,12 +101,12 @@ namespace json_utils {
         return def;
     }
 
-    static tuwString GetLabel(const char* label, const char* key) noexcept {
-        tuwString msg;
+    static noex::string GetLabel(const char* label, const char* key) noexcept {
+        noex::string msg;
         if (*label != '\0') {
-            msg = tuwString("['") + label + "']";
+            msg = noex::string("['") + label + "']";
         }
-        msg += tuwString("['") + key + "']";
+        msg += noex::string("['") + key + "']";
         return msg;
     }
 
@@ -228,7 +228,7 @@ namespace json_utils {
     }
 
     // get default definition of gui
-    void GetDefaultDefinition(rapidjson::Document& definition) {
+    void GetDefaultDefinition(rapidjson::Document& definition) noexcept {
         static const char* def_str = "{"
     #ifdef _WIN32
             "\"command\":\"dir\","
@@ -257,12 +257,12 @@ namespace json_utils {
         }
     }
 
-    static std::vector<tuwString> SplitString(const char* str,
-                                                const char delimiter) {
+    static noex::vector<noex::string> SplitString(const char* str,
+                                                const char delimiter) noexcept {
         if (!str)
             return {};
 
-        std::vector<tuwString> tokens;
+        noex::vector<noex::string> tokens;
 
         const char* start = str;
         while (*start != '\0') {
@@ -278,12 +278,12 @@ namespace json_utils {
     }
 
     static void CheckIndexDuplication(JsonResult& result,
-                                      const std::vector<tuwString>& component_ids) {
+                                      const noex::vector<noex::string>& component_ids) noexcept {
         size_t size = component_ids.size();
         if (size == 0)
             return;
         for (size_t i = 0; i < size - 1; i++) {
-            const tuwString& str = component_ids[i];
+            const noex::string& str = component_ids[i];
             if (str.empty()) { continue; }
             for (size_t j = i + 1; j < size; j++) {
                 if (str == component_ids[j]) {
@@ -300,17 +300,17 @@ namespace json_utils {
     // split command by "%" symbol, and calculate which component should be inserted there.
     static void CompileCommand(JsonResult& result,
                                rapidjson::Value& sub_definition,
-                               const std::vector<tuwString>& comp_ids,
-                               rapidjson::Document::AllocatorType& alloc) {
-        std::vector<tuwString> cmd = SplitString(sub_definition["command"].GetString(), '%');
-        std::vector<tuwString> cmd_ids = std::vector<tuwString>(0);
-        std::vector<tuwString> splitted_cmd = std::vector<tuwString>(0);
+                               const noex::vector<noex::string>& comp_ids,
+                               rapidjson::Document::AllocatorType& alloc) noexcept {
+        noex::vector<noex::string> cmd = SplitString(sub_definition["command"].GetString(), '%');
+        noex::vector<noex::string> cmd_ids;
+        noex::vector<noex::string> splitted_cmd;
         if (sub_definition.HasMember("command_splitted"))
             sub_definition.RemoveMember("command_splitted");
         rapidjson::Value splitted_cmd_json(rapidjson::kArrayType);
 
         bool store_ids = false;
-        for (const tuwString& token : cmd) {
+        for (const noex::string& token : cmd) {
             if (store_ids) {
                 cmd_ids.emplace_back(token);
             } else {
@@ -324,12 +324,12 @@ namespace json_utils {
 
         rapidjson::Value& components = sub_definition["components"];;
         rapidjson::Value cmd_int_ids(rapidjson::kArrayType);
-        tuwString cmd_str;
+        noex::string cmd_str;
         int comp_size = static_cast<int>(comp_ids.size());
         int non_id_comp = 0;
         for (int i = 0; i < static_cast<int>(cmd_ids.size()); i++) {
             cmd_str += splitted_cmd[i];
-            const tuwString& id = cmd_ids[i];
+            const noex::string& id = cmd_ids[i];
             int j;
             if (id == CMD_TOKEN_PERCENT) {
                 j = CMD_ID_PERCENT;
@@ -359,7 +359,7 @@ namespace json_utils {
             if (j >= comp_size)
                 cmd_str += "__comp???__";
             else if (j >= 0)
-                cmd_str += tuwString("__comp") + j + "__";
+                cmd_str += noex::string("__comp") + j + "__";
         }
         if (cmd_ids.size() < splitted_cmd.size())
             cmd_str += splitted_cmd.back();
@@ -374,7 +374,7 @@ namespace json_utils {
                 if (id.GetInt() == j) { found = true; break; }
             if (!found) {
                 result.ok = false;
-                result.msg = tuwString("[\"components\"][") + j +
+                result.msg = noex::string("[\"components\"][") + j +
                              "] is unused in the command; " + cmd_str;
                 if (!comp_ids[j].empty())
                     result.msg = "The ID of " + result.msg;
@@ -446,13 +446,13 @@ namespace json_utils {
     // validate one of definitions (["gui"][i]) and store parsed info
     void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
                             int index,
-                            rapidjson::Document::AllocatorType& alloc) {
+                            rapidjson::Document::AllocatorType& alloc) noexcept {
         CorrectKey(sub_definition, "window_title", "window_name", alloc);
         CorrectKey(sub_definition, "title", "window_name", alloc);
         CheckJsonType(result, sub_definition, "window_name", JsonType::STRING, "", OPTIONAL);
 
         if (!sub_definition.HasMember("label")) {
-            tuwString default_label = tuwString("GUI ") + index;
+            noex::string default_label = noex::string("GUI ") + index;
             const char* label = GetString(sub_definition, "window_name", default_label.c_str());
             rapidjson::Value n(label, alloc);
             sub_definition.AddMember("label", n, alloc);
@@ -472,7 +472,7 @@ namespace json_utils {
             if (strcmp(codepage, "utf8") != 0 && strcmp(codepage, "utf-8") != 0 &&
                     strcmp(codepage, "default") != 0) {
                 result.ok = false;
-                result.msg = tuwString("Unknown codepage: ") + codepage;
+                result.msg = noex::string("Unknown codepage: ") + codepage;
                 return;
             }
         }
@@ -484,7 +484,7 @@ namespace json_utils {
         if (!result.ok) return;
 
         // check components
-        std::vector<tuwString> comp_ids;
+        noex::vector<noex::string> comp_ids;
         for (rapidjson::Value& c : sub_definition["components"].GetArray()) {
             // check if type and label exist
             CheckJsonType(result, c, "label", JsonType::STRING, "components");
@@ -558,7 +558,7 @@ namespace json_utils {
                     break;
                 case COMP_UNKNOWN:
                     result.ok = false;
-                    result.msg = tuwString("Unknown component type: ") + type_str;
+                    result.msg = noex::string("Unknown component type: ") + type_str;
                     break;
             }
             if (!result.ok) return;
@@ -643,15 +643,15 @@ namespace json_utils {
     }
 
     // vX.Y.Z -> 10000*X + 100 * Y + Z
-    static int VersionStringToInt(JsonResult& result, const char* string) {
-        std::vector<tuwString> version_strings =
+    static int VersionStringToInt(JsonResult& result, const char* string) noexcept {
+        noex::vector<noex::string> version_strings =
             SplitString(string, '.');
         int digit = 10000;
         int version_int = 0;
-        for (const tuwString& str : version_strings) {
+        for (const noex::string& str : version_strings) {
             if (str.length() == 0 || str.length() > 2) {
                 result.ok = false;
-                result.msg = tuwString("Can NOT convert '") + string + "' to int.";
+                result.msg = noex::string("Can NOT convert '") + string + "' to int.";
                 return 0;
             }
             if (str.length() == 1) {
@@ -666,7 +666,7 @@ namespace json_utils {
         return version_int;
     }
 
-    void CheckVersion(JsonResult& result, rapidjson::Document& definition) {
+    void CheckVersion(JsonResult& result, rapidjson::Document& definition) noexcept {
         CorrectKey(definition, "recommended_version", "recommended", definition.GetAllocator());
         if (definition.HasMember("recommended")) {
             CheckJsonType(result, definition, "recommended", JsonType::STRING);
@@ -686,12 +686,12 @@ namespace json_utils {
             int required_int = VersionStringToInt(result, required);
             if (tuw_constants::VERSION_INT < required_int) {
                 result.ok = false;
-                result.msg = tuwString("Version ") + required + " is required.";
+                result.msg = noex::string("Version ") + required + " is required.";
             }
         }
     }
 
-    void CheckDefinition(JsonResult& result, rapidjson::Document& definition) {
+    void CheckDefinition(JsonResult& result, rapidjson::Document& definition) noexcept {
         rapidjson::Document::AllocatorType& alloc = definition.GetAllocator();
         if (!definition.HasMember("gui")) {
             // definition["gui"] = definition
@@ -729,7 +729,7 @@ namespace json_utils {
                 CheckJsonType(result, h, "path", JsonType::STRING);
             } else {
                 result.ok = false;
-                result.msg = tuwString("Unsupported help type: ") + type;
+                result.msg = noex::string("Unsupported help type: ") + type;
                 return;
             }
         }
