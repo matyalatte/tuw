@@ -9,6 +9,9 @@ enum ErrorNo : int {
     STR_FORMAT_ERROR,  // Failed to convert number to string.
     VEC_ALLOCATION_ERROR,
     VEC_BOUNDARY_ERROR,
+    EXTERNAL_ALLOCATION_ERROR,  // User defined allocation errors.
+    EXTERNAL_BOUDARY_ERROR,  // User defined boundary errors.
+    EXTERNAL_ERROR,  // User defined errors.
     ERROR_MAX,
 };
 

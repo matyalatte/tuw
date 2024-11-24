@@ -239,45 +239,64 @@ class Filter {
     const char* name;
     noex::vector<const char*> patterns;
  public:
-    Filter(): name(), patterns() {}
-    void SetName(const char* n) {
+    Filter() noexcept : name(), patterns() {}
+    void SetName(const char* n) noexcept {
         name = n;
     }
-    void AddPattern(const char* pattern) {
+    void AddPattern(const char* pattern) noexcept {
         patterns.emplace_back(pattern);
     }
-    uiFileDialogParamsFilter ToLibuiFilter() {
+    uiFileDialogParamsFilter ToLibuiFilter() const noexcept {
         return {
             name,
             patterns.size(),
             &patterns[0]
         };
     }
+
+    static Filter* New() noexcept {
+        Filter* filter = reinterpret_cast<Filter*>(calloc(1, sizeof(Filter)));
+        if (!filter)
+            noex::SetErrorNo(noex::EXTERNAL_ALLOCATION_ERROR);
+        return filter;
+    }
 };
 
 class FilterList {
  private:
-    char* filter_buf;
+    noex::string filter_buf_str;
     noex::vector<Filter*> filters;
-    uiFileDialogParamsFilter* ui_filters;
+    noex::vector<uiFileDialogParamsFilter> ui_filters;
 
  public:
-    FilterList(): filter_buf(NULL), filters(), ui_filters(NULL) {}
-    void MakeFilters(const noex::string& ext) {
-        if (filter_buf != NULL)
-            delete[] filter_buf;
-        filter_buf =  new char[ext.length() + 1];
+    FilterList() noexcept: filter_buf_str(), filters(), ui_filters() {}
+    void MakeFilters(const noex::string& ext) noexcept {
+        filter_buf_str = ext;
+        char* filter_buf = filter_buf_str.data();
+        if (!filter_buf) return;
+
         size_t i = 0;
         size_t start = 0;
         bool is_reading_pattern = false;
-        Filter* filter = new Filter();
+        Filter* filter = Filter::New();
+        if (!filter) {
+            // Allocation error.
+            Clear();
+            return;
+        }
+
         for (const char c : ext) {
             if (c == '|') {
                 filter_buf[i] = 0;
                 if (is_reading_pattern) {
                     filter->AddPattern(&filter_buf[start]);
                     AddFilter(filter);
-                    filter = new Filter();
+                    filter = Filter::New();
+                    if (!filter) {
+                        // Allocation error.
+                        Clear();
+                        return;
+                    }
                 } else {
                     filter->SetName(&filter_buf[start]);
                 }
@@ -288,7 +307,7 @@ class FilterList {
                 filter->AddPattern(&filter_buf[start]);
                 start = i + 1;
             } else {
-                filter_buf[i] = c;
+                // filter_buf[i] = c;
             }
             i++;
         }
@@ -296,35 +315,40 @@ class FilterList {
         if (is_reading_pattern) {
             filter->AddPattern(&filter_buf[start]);
             AddFilter(filter);
+        } else {
+            free(filter);
         }
 
-        ui_filters = new uiFileDialogParamsFilter[filters.size()];
+        ui_filters.reserve(filters.size());
+        if (ui_filters.capacity() != filters.size()) {
+            // Failed to reserve the buffer.
+            Clear();
+            return;
+        }
         for (size_t j = 0; j < filters.size(); j++) {
-            ui_filters[j] = filters[j]->ToLibuiFilter();
+            ui_filters.push_back(filters[j]->ToLibuiFilter());
         }
     }
 
-    ~FilterList() {
-        for (Filter* f : filters) {
-            if (f != NULL)
-                delete f;
-        }
-        if (filter_buf != NULL)
-            delete[] filter_buf;
-        if (ui_filters != NULL)
-            delete[] ui_filters;
+    ~FilterList() noexcept {
+        Clear();
     }
 
-    void AddFilter(Filter* f) {
+    void Clear() noexcept {
+        for (Filter* f : filters)
+            if (!f) free(f);
+    }
+
+    void AddFilter(Filter* f) noexcept {
         filters.emplace_back(f);
     }
 
-    size_t GetSize() {
+    size_t GetSize() const noexcept {
         return filters.size();
     }
 
-    uiFileDialogParamsFilter* ToLibuiFilterList() {
-        return ui_filters;
+    uiFileDialogParamsFilter* ToLibuiFilterList() const noexcept {
+        return ui_filters.data();
     }
 };
 
