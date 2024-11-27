@@ -26,6 +26,14 @@ noex::string GetLastLine(const noex::string& str) noexcept {
     return str.substr(static_cast<size_t>(sub_begin - begin), end - sub_begin + 1);
 }
 
+noex::string envuStr(char *cstr) noexcept {
+    if (cstr == NULL)
+        return "";
+    noex::string str = cstr;
+    envuFree(cstr);
+    return str;
+}
+
 static const uint32_t FNV_OFFSET_BASIS_32 = 2166136261U;
 static const uint32_t FNV_PRIME_32 = 16777619U;
 

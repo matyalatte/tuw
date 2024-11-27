@@ -6,13 +6,8 @@
 // Returns only the last line and removes trailing line feeds (\n and \r.)
 noex::string GetLastLine(const noex::string& str) noexcept;
 
-inline noex::string envuStr(char *cstr) noexcept {
-    if (cstr == NULL)
-        return "";
-    noex::string str = cstr;
-    envuFree(cstr);
-    return str;
-}
+// Convert allocated string with env_utils.h into noex::string
+noex::string envuStr(char *cstr) noexcept;
 
 uint32_t Fnv1Hash32(const noex::string& str) noexcept;
 
