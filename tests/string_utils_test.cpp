@@ -182,7 +182,8 @@ TEST(StringTest, CstrPlusTuwstr) {
 }
 
 TEST(StringTest, NullPlusTuwstr) {
-    noex::string str = nullptr + noex::string("test");
+    char* null = nullptr;
+    noex::string str = null + noex::string("test");
     expect_tuwstr("test", str);
 }
 
@@ -208,7 +209,8 @@ TEST(StringTest, IndexNull) {
 // Test == and !=
 TEST(StringTest, EqualToStr) {
     noex::string str = "test";
-    EXPECT_TRUE(str != nullptr);
+    char* null = nullptr;
+    EXPECT_TRUE(str != null);
     EXPECT_EQ(str, "test");
     EXPECT_EQ(str, noex::string("test"));
     EXPECT_NE(str, "task");
@@ -217,14 +219,16 @@ TEST(StringTest, EqualToStr) {
 
 TEST(StringTest, EqualToStrReverse) {
     noex::string str = "test";
-    EXPECT_NE(nullptr, str);
+    char* null = nullptr;
+    EXPECT_NE(null, str);
     EXPECT_EQ("test", str);
     EXPECT_NE("task", str);
 }
 
 TEST(StringTest, EqualToNull) {
     noex::string str;
-    EXPECT_EQ(str, nullptr);
+    char* null = nullptr;
+    EXPECT_EQ(str, null);
     EXPECT_EQ(str, "");
     EXPECT_EQ(str, noex::string());
     EXPECT_NE(str, "test");
@@ -233,7 +237,8 @@ TEST(StringTest, EqualToNull) {
 
 TEST(StringTest, EqualToNullReverse) {
     noex::string str;
-    EXPECT_EQ(nullptr, str);
+    char* null = nullptr;
+    EXPECT_EQ(null, str);
     EXPECT_EQ("", str);
     EXPECT_NE("test", str);
 }
