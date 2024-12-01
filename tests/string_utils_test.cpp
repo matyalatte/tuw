@@ -43,7 +43,10 @@ TEST(StringTest, ConstructWithCstrAndSize) {
 
 TEST(StringTest, ConstructWithNullAndSize) {
     noex::string str(nullptr, 4);
-    expect_nullstr(str);
+    EXPECT_TRUE(str.empty());
+    EXPECT_EQ(str.size(), 0);
+    EXPECT_STREQ(str.c_str(), "");
+    EXPECT_EQ(str, "");
 }
 
 TEST(StringTest, ConstructWithTuwstr) {

@@ -23,9 +23,8 @@ unsigned ReadIO(subprocess_s &process,
 
     buf[read_size] = 0;
     str += buf;
-    if (str.length() > str_size * 2) {
-        str = str.substr(str.length() - str_size, str_size);
-    }
+    if (str.length() > str_size * 2)
+        str.erase(0, str.length() - str_size);
 
     return read_size;
 }

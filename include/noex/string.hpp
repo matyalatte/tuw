@@ -16,11 +16,14 @@ class basic_string {
  private:
     charT* m_str;
     size_t m_size;
-    void assign(const charT* str, size_t size) noexcept;
+    size_t m_capacity;
+
+    void reserve(size_t capacity) noexcept;
+    void assign(const charT* str, size_t size, size_t capacity) noexcept;
     void append(const charT* str, size_t size) noexcept;
 
  public:
-    basic_string() noexcept : m_str(nullptr), m_size(0) {}
+    basic_string() noexcept : m_str(nullptr), m_size(0), m_capacity(0) {}
     basic_string(const charT* str) noexcept;  // NOLINT(runtime/explicit)
     basic_string(const charT* str, size_t size) noexcept;
     basic_string(const basic_string& str) noexcept;
@@ -32,6 +35,7 @@ class basic_string {
     ~basic_string() noexcept { clear(); }
     inline size_t length() const noexcept { return m_size; }
     inline size_t size() const noexcept { return m_size; }
+    inline size_t capacity() const noexcept { return m_capacity; }
 
     inline bool empty() const noexcept {
         return !m_str || m_size == 0;
@@ -91,6 +95,7 @@ class basic_string {
         this->append(&c, 1);
     }
 
+    void erase(size_t pos, size_t n = npos) noexcept;
     basic_string substr(size_t start, size_t size) const noexcept;
 };
 

@@ -23,20 +23,36 @@ void SetErrorNo(ErrorNo err) noexcept {
 }
 
 template <typename charT>
-void basic_string<charT>::assign(const charT* str, size_t size) noexcept {
-    clear();
-    if (!str || size == 0)
-        return;
+void basic_string<charT>::reserve(size_t capacity) noexcept {
+    // do nothing when it has enough size already.
+    if (capacity <= m_capacity) return;
 
-    m_size = size;
-    m_str = reinterpret_cast<charT*>(malloc((size + 1) * sizeof(charT)));
-    if (!m_str) {
-        m_size = 0;
+    // allocate a new buffer
+    charT* new_str = static_cast<charT*>(calloc(capacity + 1, sizeof(charT)));
+    if (!new_str) {
+        clear();
         SetErrorNo(STR_ALLOCATION_ERROR);
         return;
     }
+
+    // copy the old buffer to the new one.
+    if (m_str) {
+        memcpy(new_str, m_str, (m_size + 1) * sizeof(charT));
+        free(m_str);
+    }
+    m_str = new_str;
+    m_capacity = capacity;
+}
+
+template <typename charT>
+void basic_string<charT>::assign(const charT* str, size_t size, size_t capacity) noexcept {
+    reserve(capacity);
+    if (!m_str || !str)
+        return;
+
     memcpy(m_str, str, size * sizeof(charT));
     m_str[size] = 0;
+    m_size = size;
 }
 
 inline size_t get_strlen(const char* str) noexcept {
@@ -49,34 +65,37 @@ inline size_t get_strlen(const wchar_t* str) noexcept {
 
 template <typename charT>
 basic_string<charT>::basic_string(const charT* str) noexcept :
-        m_str(nullptr), m_size(0) {
-    assign(str, get_strlen(str));
+        m_str(nullptr), m_size(0), m_capacity(0) {
+    size_t size = get_strlen(str);
+    assign(str, size, size);
 }
 
 template <typename charT>
 basic_string<charT>::basic_string(const charT* str, size_t size) noexcept :
-        m_str(nullptr), m_size(0) {
-    assign(str, size);
+        m_str(nullptr), m_size(0), m_capacity(0) {
+    assign(str, size, size);
 }
 
 template <typename charT>
 basic_string<charT>::basic_string(const basic_string<charT>& str) noexcept :
-        m_str(nullptr), m_size(0) {
-    assign(str.c_str(), str.size());
+        m_str(nullptr), m_size(0), m_capacity(0) {
+    assign(str.c_str(), str.m_size, str.m_capacity);
 }
 
 template <typename charT>
 basic_string<charT>::basic_string(basic_string<charT>&& str) noexcept :
-        m_str(str.m_str), m_size(str.m_size) {
+        m_str(str.m_str), m_size(str.m_size), m_capacity(str.m_capacity) {
     str.m_str = nullptr;
     str.m_size = 0;
+    str.m_capacity = 0;
 }
 
 template <typename charT>
-basic_string<charT>::basic_string(size_t size) noexcept : m_size(size) {
+basic_string<charT>::basic_string(size_t size) noexcept : m_size(size), m_capacity(size) {
     m_str = reinterpret_cast<charT*>(calloc(size + 1, sizeof(charT)));
     if (!m_str) {
         m_size = 0;
+        m_capacity = 0;
         SetErrorNo(STR_ALLOCATION_ERROR);
     }
 }
@@ -96,51 +115,44 @@ void basic_string<charT>::clear() noexcept {
         free(m_str);
     m_str = nullptr;
     m_size = 0;
+    m_capacity = 0;
 }
 
 template <typename charT>
 basic_string<charT>& basic_string<charT>::operator=(const charT* str) noexcept {
-    assign(str, get_strlen(str));
+    size_t size = get_strlen(str);
+    assign(str, size, size);
     return *this;
 }
 
 template <typename charT>
 basic_string<charT>& basic_string<charT>::operator=(const basic_string<charT>& str) noexcept {
     if (this == &str) return *this;
-    assign(str.c_str(), str.size());
+    assign(str.c_str(), str.m_size, str.m_capacity);
     return *this;
 }
 
 template <typename charT>
 basic_string<charT>& basic_string<charT>::operator=(basic_string<charT>&& str) noexcept {
     if (this == &str) return *this;
-    clear();
     m_str = str.m_str;
     m_size = str.m_size;
+    m_capacity = str.m_capacity;
     str.m_str = nullptr;
     str.m_size = 0;
+    str.m_capacity = 0;
     return *this;
 }
 
 template <typename charT>
 void basic_string<charT>::append(const charT* str, size_t size) noexcept {
-    if (!str || size == 0)
-        return;
-
     size_t new_size = m_size + size;
-    charT* new_cstr = reinterpret_cast<charT*>(malloc((new_size + 1) * sizeof(charT)));
-    if (!new_cstr) {
-        SetErrorNo(STR_ALLOCATION_ERROR);
+    reserve(new_size);
+    if (!m_str || !str)
         return;
-    }
 
-    if (!empty())
-        memcpy(new_cstr, m_str, m_size * sizeof(charT));
-    memcpy(new_cstr + m_size, str, size * sizeof(charT));
-    new_cstr[new_size] = 0;
-
-    clear();
-    m_str = new_cstr;
+    memcpy(m_str + m_size, str, size * sizeof(charT));
+    m_str[new_size] = 0;
     m_size = new_size;
 }
 
@@ -266,6 +278,23 @@ basic_string<charT> basic_string<charT>::substr(size_t start, size_t size) const
     }
     basic_string<charT> new_str(m_str + start, size);
     return new_str;
+}
+
+template <typename charT>
+void basic_string<charT>::erase(size_t pos, size_t n) noexcept {
+    if (m_size < pos) {
+        SetErrorNo(STR_BOUNDARY_ERROR);
+        return;
+    }
+    if (n == npos) {
+        n = m_size - pos;
+    } else if (m_size < pos + n) {
+        SetErrorNo(STR_BOUNDARY_ERROR);
+        return;
+    }
+    memcpy(m_str + pos, m_str + pos + n, m_size - pos - n);
+    m_size -= n;
+    m_str[m_size] = 0;
 }
 
 template <typename charT>
