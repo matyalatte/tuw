@@ -117,4 +117,12 @@ extern template class basic_string<wchar_t>;
 typedef basic_string<char> string;
 typedef basic_string<wchar_t> wstring;
 
+// to_string functions
+string to_string(int) noexcept;
+string to_string(size_t) noexcept;
+string to_string(uint32_t) noexcept;
+wstring to_wstring(int) noexcept;
+wstring to_wstring(size_t) noexcept;
+wstring to_wstring(uint32_t) noexcept;
+
 }  // namespace noex

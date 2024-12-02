@@ -183,41 +183,39 @@ basic_string<charT> basic_string<charT>::operator+(const basic_string<charT>& st
 }
 
 // Convert number to c string, and append it to string.
-# define DEFINE_PLUS_FOR_NUM(num_type, fmt) \
+# define DEFINE_TO_STRING(num_type, fmt) \
+string to_string(num_type num) noexcept { \
+    char buf[21]; /* assume that the max value of num has 20 digits (2^64). */ \
+    buf[20] = 0; \
+    int num_size = snprintf(buf, 21, "%" fmt, num); \
+    if (num_size <= 0 || num_size > 20) { \
+        SetErrorNo(STR_FORMAT_ERROR); \
+        return ""; \
+    } \
+    return string(buf, num_size); \
+} \
+wstring to_wstring(num_type num) noexcept { \
+    wchar_t buf[21]; /* assume that the max value of num has 20 digits (2^64). */ \
+    buf[20] = 0; \
+    int num_size = swprintf(buf, 21, L"%" fmt, num); \
+    if (num_size <= 0 || num_size > 20) { \
+        SetErrorNo(STR_FORMAT_ERROR); \
+        return L""; \
+    } \
+    return wstring(buf, num_size); \
+} \
 basic_string<char> basic_string<char>::operator+(num_type num) const noexcept { \
-    basic_string<char> new_str(*this); \
-    \
-    int num_size = snprintf(nullptr, 0, "%" fmt, num); \
-    if (num_size <= 0) { \
-        SetErrorNo(STR_FORMAT_ERROR); \
-        return new_str; \
-    } \
-    \
-    char* num_str = reinterpret_cast<char*>(malloc((num_size + 1) * sizeof(char))); \
-    if (!num_str) { \
-        SetErrorNo(STR_ALLOCATION_ERROR); \
-        return new_str; \
-    } \
-    \
-    int ret = snprintf(num_str, num_size + 1, "%" fmt, num); \
-    if (ret == num_size) { \
-        new_str.append(num_str, num_size); \
-    } else { \
-        SetErrorNo(STR_FORMAT_ERROR); \
-    } \
-    free(num_str); \
-    return new_str; \
+    string new_str(*this); \
+    return new_str + to_string(num); \
 } \
 basic_string<wchar_t> basic_string<wchar_t>::operator+(num_type num) const noexcept { \
-    (void)(num);  /* suppress warnings for unused arguments */ \
-    basic_string<wchar_t> new_str(*this); \
-    SetErrorNo(UNIMPLEMENTED_ERROR); \
-    return new_str; \
+    wstring new_str(*this); \
+    return new_str + to_wstring(num); \
 }
 
-DEFINE_PLUS_FOR_NUM(int, "d")
-DEFINE_PLUS_FOR_NUM(size_t, "zu")
-DEFINE_PLUS_FOR_NUM(uint32_t, PRIu32)
+DEFINE_TO_STRING(int, "d")
+DEFINE_TO_STRING(size_t, "zu")
+DEFINE_TO_STRING(uint32_t, PRIu32)
 
 inline bool streq(const char* str1, const char* str2) noexcept {
     return strcmp(str1, str2) == 0;
