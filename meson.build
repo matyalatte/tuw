@@ -130,6 +130,7 @@ tuw_sources += [
     'src/string_utils.cpp',
     'src/validator.cpp',
     'src/noex/string.cpp',
+    'src/noex/vector.cpp',
 ]
 
 if get_option('build_exe')

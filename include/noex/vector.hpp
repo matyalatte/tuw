@@ -1,8 +1,10 @@
 #pragma once
 
 #include <type_traits>
+#include <cstdlib>
 #include <cstring>
 #include <utility>
+#include <new>
 
 #include "noex/error.hpp"
 
@@ -211,6 +213,121 @@ class vector {
         free(m_data);
         m_data = data;
         m_capacity = m_size;
+    }
+};
+
+// vector for void*
+class basic_point_vector {
+ protected:
+    void** m_data;
+    size_t m_size;
+    size_t m_capacity;
+    void assign(const basic_point_vector& vec) noexcept;
+    void assign(basic_point_vector&& vec) noexcept;
+    void** at_base(size_t id) const noexcept;
+
+ public:
+    basic_point_vector() noexcept : m_data(nullptr), m_size(0), m_capacity(0) {}
+    basic_point_vector(const basic_point_vector& vec) noexcept;
+    basic_point_vector(basic_point_vector&& vec) noexcept;
+    ~basic_point_vector() noexcept { clear(); }
+
+    void reserve(size_t capacity) noexcept;
+    size_t length() const noexcept { return m_size; }
+    size_t size() const noexcept { return m_size; }
+    size_t capacity() const noexcept { return m_capacity; }
+
+    bool empty() const noexcept {
+        return m_data == nullptr || m_size == 0;
+    }
+
+    // Returns a pointer to the actual buffer.
+    void** data() const noexcept { return m_data; }
+
+    void clear() noexcept;
+
+    void*& at(size_t id) const noexcept {
+        return *at_base(id);
+    }
+
+    void*& operator[](size_t id) const noexcept {
+        return at(id);
+    }
+
+    basic_point_vector& operator=(const basic_point_vector& vec) noexcept;
+    basic_point_vector& operator=(basic_point_vector&& vec) noexcept;
+
+    bool operator==(const basic_point_vector& vec) const noexcept;
+
+    bool operator!=(const basic_point_vector& str) const noexcept {
+        return !(*this == str);
+    }
+
+    void** begin() const noexcept {
+        return m_data;
+    }
+
+    void** end() const noexcept {
+        return m_data + m_size;
+    }
+
+    void*& back() const noexcept {
+        return at(m_size - 1);
+    }
+
+    void push_back(const void* val) noexcept;
+
+    void emplace_back() noexcept {
+        push_back(nullptr);
+    }
+
+    void emplace_back(const void* val) noexcept {
+        push_back(val);
+    }
+
+    void shrink_to_fit() noexcept;
+};
+
+// Vector for pointers
+template <typename T>
+class vector<T*> : public basic_point_vector {
+ private:
+    static T** cast(void** pointer) noexcept {
+        return static_cast<T**>(static_cast<void*>(pointer));
+    }
+
+ public:
+    // Returns a pointer to the actual buffer.
+    T** data() const noexcept {
+        return cast(m_data);
+    }
+
+    T*& at(size_t id) const noexcept {
+        return *cast(at_base(id));
+    }
+
+    T*& operator[](size_t id) const noexcept {
+        return at(id);
+    }
+
+    T** begin() const noexcept {
+        return cast(m_data);
+    }
+
+    T** end() const noexcept {
+        return cast(m_data + m_size);
+    }
+
+    T*& back() const noexcept {
+        return *cast(at_base(m_size - 1));
+    }
+
+    void push_back(const T* val) noexcept {
+        basic_point_vector::push_back(val);
+    }
+
+    void emplace_back(const T* val) noexcept {
+        push_back(val);
     }
 };
 
