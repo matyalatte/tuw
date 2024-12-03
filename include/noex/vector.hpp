@@ -32,6 +32,9 @@ class vector :
 // base class for non trivial classes
 template <typename T>
 class non_trivial_vector {
+    static_assert(!std::is_trivial<T>::value,
+                  "template paramter T must be a non-trivial class");
+
  private:
     T* m_data;
     size_t m_size;
@@ -237,6 +240,9 @@ class trivial_vector_base {
 // base class for trivial classes
 template <typename T>
 class trivial_vector : public trivial_vector_base {
+    static_assert(std::is_trivial<T>::value,
+                  "template paramter T must be a trivial class");
+
  public:
     trivial_vector() noexcept :
         trivial_vector_base(sizeof(T)) {}

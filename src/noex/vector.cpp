@@ -1,4 +1,5 @@
 #include <type_traits>
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <utility>
@@ -10,6 +11,7 @@ namespace noex {
 
 void trivial_vector_base::assign(const trivial_vector_base& vec) noexcept {
     if (this == &vec) return;
+    assert(m_sizeof_type == vec.m_sizeof_type);
     reserve(vec.m_capacity);
     if (m_capacity != vec.m_size) return;
     memcpy(m_data, vec.m_data, vec.m_size * vec.m_sizeof_type);
@@ -19,6 +21,7 @@ void trivial_vector_base::assign(const trivial_vector_base& vec) noexcept {
 
 void trivial_vector_base::assign(trivial_vector_base&& vec) noexcept {
     if (this == &vec) return;
+    assert(m_sizeof_type == vec.m_sizeof_type);
     clear();
     m_data = vec.m_data;
     m_size = vec.m_size;
