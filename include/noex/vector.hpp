@@ -10,32 +10,45 @@
 
 namespace noex {
 
+template <typename T>
+class trivial_vector;
+template <typename T>
+class non_trivial_vector;
+
 // Vector class that doesn't raise std exceptions.
 // It works without any crashes even when it got a memory allocation error.
 // But you have to check GetErrorNo() after vector allocations
 // or it might have unexpected values.
 template <typename T>
-class vector {
+class vector :
+    public
+        std::conditional<
+            std::is_trivial<T>::value,
+            trivial_vector<T>,
+            non_trivial_vector<T>
+        >::type {
+};
+
+// base class for non trivial classes
+template <typename T>
+class non_trivial_vector {
  private:
     T* m_data;
     size_t m_size;
     size_t m_capacity;
 
-    // if T is C-style struct or not
-    static const bool is_trivial = std::is_trivial<T>::value;
-
  public:
-    vector() noexcept : m_data(nullptr), m_size(0), m_capacity(0) {}
-    vector(const vector& vec) noexcept :
+    non_trivial_vector() noexcept : m_data(nullptr), m_size(0), m_capacity(0) {}
+    non_trivial_vector(const non_trivial_vector& vec) noexcept :
             m_data(nullptr), m_size(0), m_capacity(0) {
         *this = vec;
     }
-    vector(vector&& vec) noexcept :
+    non_trivial_vector(non_trivial_vector&& vec) noexcept :
             m_data(nullptr), m_size(0), m_capacity(0) {
         *this = vec;
     }
 
-    ~vector() noexcept { clear(); }
+    ~non_trivial_vector() noexcept { clear(); }
 
     void reserve(size_t capacity) noexcept {
         if (capacity <= m_capacity) return;
@@ -48,13 +61,9 @@ class vector {
         }
 
         // Move or copy existing elements to the new memory
-        if (is_trivial) {
-            memcpy(data, m_data, m_size * sizeof(T));
-        } else {
-            for (size_t i = 0; i < m_size; ++i) {
-                new (data + i) T(std::move(m_data[i]));
-                m_data[i].~T();
-            }
+        for (size_t i = 0; i < m_size; ++i) {
+            new (data + i) T(std::move(m_data[i]));
+            m_data[i].~T();
         }
 
         free(m_data);
@@ -75,10 +84,8 @@ class vector {
 
     void clear() noexcept {
         if (m_data) {
-            if (!is_trivial) {
-                for (size_t i = 0; i < m_size; ++i)
-                    m_data[i].~T();
-            }
+            for (size_t i = 0; i < m_size; ++i)
+                m_data[i].~T();
             free(m_data);
         }
         m_data = nullptr;
@@ -100,50 +107,36 @@ class vector {
         return at(id);
     }
 
-    vector& operator=(const vector& vec) noexcept {
+    non_trivial_vector& operator=(const non_trivial_vector& vec) noexcept {
         if (this == &vec) return *this;
-        reserve(vec.capacity());
+        reserve(vec.m_capacity);
         if (m_capacity != vec.m_size) return *this;
-        if (is_trivial) {
-            memcpy(m_data, vec.m_data, vec.m_size * sizeof(T));
-        } else {
-            for (size_t i = 0; i < vec.m_size; ++i)
-                new (m_data + i) T(vec.m_data[i]);
-        }
-        m_size = vec.size();
+        for (size_t i = 0; i < vec.m_size; ++i)
+            new (m_data + i) T(vec.m_data[i]);
+        m_size = vec.m_size;
         return *this;
     }
 
-    vector& operator=(vector&& vec) noexcept {
+    non_trivial_vector& operator=(non_trivial_vector&& vec) noexcept {
         if (this == &vec) return *this;
-
-        if (is_trivial) {
-            clear();
-            m_data = vec.m_data;
-            m_size = vec.m_size;
-            m_capacity = vec.m_capacity;
-            vec.m_data = nullptr;
-            vec.m_size = 0;
-            vec.m_capacity = 0;
-        } else {
-            reserve(vec.capacity());
-            if (m_capacity != vec.m_size) return *this;
-            for (size_t i = 0; i < vec.m_size; ++i) {
-                new (m_data + i) T(std::move(vec.m_data[i]));
-            }
-            m_size = vec.size();
-            vec.clear();
+        reserve(vec.m_capacity);
+        if (m_capacity != vec.m_size) return *this;
+        for (size_t i = 0; i < vec.m_size; ++i) {
+            new (m_data + i) T(std::move(vec.m_data[i]));
         }
+        m_size = vec.m_size;
+        vec.clear();
         return *this;
     }
 
-    bool operator==(const vector& vec) const noexcept {
-        if (vec.size() != m_size) return false;
-        for (size_t i = 0; i < vec.size(); ++i)
+    bool operator==(const non_trivial_vector& vec) const noexcept {
+        if (vec.m_size != m_size) return false;
+        for (size_t i = 0; i < vec.m_size; ++i)
             if (m_data[i] != vec[i]) return false;
         return true;
     }
-    inline bool operator!=(const vector& str) const noexcept {
+
+    inline bool operator!=(const non_trivial_vector& str) const noexcept {
         return !(*this == str);
     }
 
@@ -162,22 +155,14 @@ class vector {
     void push_back(const T& val) noexcept {
         reserve(m_size + 1);
         if (m_capacity < m_size + 1) return;
-        if (is_trivial) {
-            memcpy(m_data + m_size, &val, sizeof(T));
-        } else {
-            new (m_data + m_size) T(val);
-        }
+        new (m_data + m_size) T(val);
         m_size++;
     }
 
     void push_back(T&& val) noexcept {
         reserve(m_size + 1);
         if (m_capacity < m_size + 1) return;
-        if (is_trivial) {
-            memcpy(m_data + m_size, &val, sizeof(T));
-        } else {
-            new (m_data + m_size) T(std::move(val));
-        }
+        new (m_data + m_size) T(std::move(val));
         m_size++;
     }
 
@@ -194,20 +179,16 @@ class vector {
     void shrink_to_fit() noexcept {
         if (m_size >= m_capacity) return;
 
-        T* data = static_cast<T*>(calloc(m_size, sizeof(T)));
+        T* data = reinterpret_cast<T*>(calloc(m_size, sizeof(T)));
         if (!data) {
             SetErrorNo(VEC_ALLOCATION_ERROR);
             return;
         }
 
         // Move or copy existing elements to the new memory
-        if (is_trivial) {
-            memcpy(data, m_data, m_size * sizeof(T));
-        } else {
-            for (size_t i = 0; i < m_size; ++i) {
-                new (data + i) T(std::move(m_data[i]));
-                m_data[i].~T();
-            }
+        for (size_t i = 0; i < m_size; ++i) {
+            new (data + i) T(std::move(m_data[i]));
+            m_data[i].~T();
         }
 
         free(m_data);
@@ -216,21 +197,24 @@ class vector {
     }
 };
 
-// vector for void*
-class basic_point_vector {
+// base class for trivial_vector
+class trivial_vector_base {
  protected:
-    void** m_data;
+    char* m_data;
     size_t m_size;
     size_t m_capacity;
-    void assign(const basic_point_vector& vec) noexcept;
-    void assign(basic_point_vector&& vec) noexcept;
-    void** at_base(size_t id) const noexcept;
+    size_t m_sizeof_type;
+
+    void assign(const trivial_vector_base& vec) noexcept;
+    void assign(trivial_vector_base&& vec) noexcept;
+    void* at_base(size_t id) const noexcept;
+    void push_back_base(const void* val) noexcept;
 
  public:
-    basic_point_vector() noexcept : m_data(nullptr), m_size(0), m_capacity(0) {}
-    basic_point_vector(const basic_point_vector& vec) noexcept;
-    basic_point_vector(basic_point_vector&& vec) noexcept;
-    ~basic_point_vector() noexcept { clear(); }
+    trivial_vector_base(size_t sizeof_type) noexcept;
+    trivial_vector_base(const trivial_vector_base& vec) noexcept;
+    trivial_vector_base(trivial_vector_base&& vec) noexcept;
+    ~trivial_vector_base() noexcept { clear(); }
 
     void reserve(size_t capacity) noexcept;
     size_t length() const noexcept { return m_size; }
@@ -241,93 +225,89 @@ class basic_point_vector {
         return m_data == nullptr || m_size == 0;
     }
 
-    // Returns a pointer to the actual buffer.
-    void** data() const noexcept { return m_data; }
-
     void clear() noexcept;
 
-    void*& at(size_t id) const noexcept {
-        return *at_base(id);
-    }
-
-    void*& operator[](size_t id) const noexcept {
-        return at(id);
-    }
-
-    basic_point_vector& operator=(const basic_point_vector& vec) noexcept;
-    basic_point_vector& operator=(basic_point_vector&& vec) noexcept;
-
-    bool operator==(const basic_point_vector& vec) const noexcept;
-
-    bool operator!=(const basic_point_vector& str) const noexcept {
-        return !(*this == str);
-    }
-
-    void** begin() const noexcept {
-        return m_data;
-    }
-
-    void** end() const noexcept {
-        return m_data + m_size;
-    }
-
-    void*& back() const noexcept {
-        return at(m_size - 1);
-    }
-
-    void push_back(const void* val) noexcept;
-
     void emplace_back() noexcept {
-        push_back(nullptr);
-    }
-
-    void emplace_back(const void* val) noexcept {
-        push_back(val);
+        reserve(m_size + 1);
     }
 
     void shrink_to_fit() noexcept;
 };
 
-// Vector for pointers
+// base class for trivial classes
 template <typename T>
-class vector<T*> : public basic_point_vector {
- private:
-    static T** cast(void** pointer) noexcept {
-        return static_cast<T**>(static_cast<void*>(pointer));
-    }
-
+class trivial_vector : public trivial_vector_base {
  public:
+    trivial_vector() noexcept :
+        trivial_vector_base(sizeof(T)) {}
+    trivial_vector(const trivial_vector& vec) noexcept :
+        trivial_vector_base(vec) {}
+    trivial_vector(trivial_vector&& vec) noexcept :
+        trivial_vector_base(vec) {}
+
+    trivial_vector& operator=(const trivial_vector& vec) noexcept {
+        assign(vec);
+        return *this;
+    }
+
+    trivial_vector& operator=(trivial_vector&& vec) noexcept {
+        assign(vec);
+        return *this;
+    }
+
+    bool operator==(const trivial_vector& vec) const noexcept {
+        if (vec.m_size != m_size) return false;
+        T* this_data_p = static_cast<T*>(m_data);
+        T* vec_data_p = static_cast<T*>(vec.m_data);
+        for (size_t i = 0; i < vec.m_size; ++i) {
+            if (*this_data_p != *vec_data_p) return false;
+            this_data_p++;
+            vec_data_p++;
+        }
+        return true;
+    }
+
+    bool operator!=(const trivial_vector& str) const noexcept {
+        return !(*this == str);
+    }
+
+    void push_back(const T val) noexcept {
+        push_back_base(&val);
+    }
+
+    template <typename... Args>
+    void emplace_back(Args&&... args) noexcept {
+        reserve(m_size + 1);
+        if (m_capacity < m_size + 1) return;
+
+        // Use placement new to construct the object in-place
+        new (m_data + m_size * m_sizeof_type) T(std::forward<Args>(args)...);
+        m_size++;
+    }
+
     // Returns a pointer to the actual buffer.
-    T** data() const noexcept {
-        return cast(m_data);
+    T* data() const noexcept {
+        return reinterpret_cast<T*>(m_data);
     }
 
-    T*& at(size_t id) const noexcept {
-        return *cast(at_base(id));
+    T& at(size_t id) const noexcept {
+        return *static_cast<T*>(at_base(id));
     }
 
-    T*& operator[](size_t id) const noexcept {
+    T& operator[](size_t id) const noexcept {
         return at(id);
     }
 
-    T** begin() const noexcept {
-        return cast(m_data);
+    T* begin() const noexcept {
+        return reinterpret_cast<T*>(m_data);
     }
 
-    T** end() const noexcept {
-        return cast(m_data + m_size);
+    T* end() const noexcept {
+        return reinterpret_cast<T*>(m_data + m_size * m_sizeof_type);
     }
 
-    T*& back() const noexcept {
-        return *cast(at_base(m_size - 1));
-    }
-
-    void push_back(const T* val) noexcept {
-        basic_point_vector::push_back(val);
-    }
-
-    void emplace_back(const T* val) noexcept {
-        push_back(val);
+    T& back() const noexcept {
+        return *static_cast<T*>(at_base(m_size - 1));
     }
 };
 

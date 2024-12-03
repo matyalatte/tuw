@@ -8,26 +8,16 @@
 
 namespace noex {
 
-basic_point_vector::basic_point_vector(const basic_point_vector& vec) noexcept :
-        m_data(nullptr), m_size(0), m_capacity(0) {
-    assign(vec);
-}
-
-basic_point_vector::basic_point_vector(basic_point_vector&& vec) noexcept :
-        m_data(nullptr), m_size(0), m_capacity(0) {
-    assign(vec);
-}
-
-void basic_point_vector::assign(const basic_point_vector& vec) noexcept {
+void trivial_vector_base::assign(const trivial_vector_base& vec) noexcept {
     if (this == &vec) return;
-    reserve(vec.capacity());
+    reserve(vec.m_capacity);
     if (m_capacity != vec.m_size) return;
-    memcpy(m_data, vec.m_data, vec.m_size * sizeof(void*));
-    m_size = vec.size();
+    memcpy(m_data, vec.m_data, vec.m_size * vec.m_sizeof_type);
+    m_size = vec.m_size;
     return;
 }
 
-void basic_point_vector::assign(basic_point_vector&& vec) noexcept {
+void trivial_vector_base::assign(trivial_vector_base&& vec) noexcept {
     if (this == &vec) return;
     clear();
     m_data = vec.m_data;
@@ -39,25 +29,40 @@ void basic_point_vector::assign(basic_point_vector&& vec) noexcept {
     return;
 }
 
-// basic_point_vector::
-void basic_point_vector::reserve(size_t capacity) noexcept {
+trivial_vector_base::trivial_vector_base(size_t sizeof_type) noexcept :
+        m_data(nullptr), m_size(0),
+        m_capacity(0), m_sizeof_type(sizeof_type) {}
+
+trivial_vector_base::trivial_vector_base(const trivial_vector_base& vec) noexcept :
+        m_data(nullptr), m_size(0), m_capacity(0),
+        m_sizeof_type(vec.m_sizeof_type) {
+    assign(vec);
+}
+
+trivial_vector_base::trivial_vector_base(trivial_vector_base&& vec) noexcept :
+        m_data(nullptr), m_size(0), m_capacity(0),
+        m_sizeof_type(vec.m_sizeof_type) {
+    assign(vec);
+}
+
+void trivial_vector_base::reserve(size_t capacity) noexcept {
     if (capacity <= m_capacity) return;
 
-    void** data = static_cast<void**>(calloc(capacity, sizeof(void*)));
+    char* data = static_cast<char*>(calloc(capacity, m_sizeof_type));
     if (!data) {
         SetErrorNo(VEC_ALLOCATION_ERROR);
         clear();
         return;
     }
 
-    memcpy(data, m_data, m_size * sizeof(void*));
+    memcpy(data, m_data, m_size * m_sizeof_type);
 
     free(m_data);
     m_data = data;
     m_capacity = capacity;
 }
 
-void basic_point_vector::clear() noexcept {
+void trivial_vector_base::clear() noexcept {
     if (m_data)
         free(m_data);
     m_data = nullptr;
@@ -65,51 +70,33 @@ void basic_point_vector::clear() noexcept {
     m_capacity = 0;
 }
 
-void** basic_point_vector::at_base(size_t id) const noexcept {
+void* trivial_vector_base::at_base(size_t id) const noexcept {
     if (empty() || id >= m_size) {
         // boundary error
         SetErrorNo(VEC_BOUNDARY_ERROR);
-        static void* dummy = nullptr;
-        return &dummy;
+        return nullptr;
     }
-    return m_data + id;
+    return m_data + (id * m_sizeof_type);
 }
 
-basic_point_vector& basic_point_vector::operator=(const basic_point_vector& vec) noexcept {
-    assign(vec);
-    return *this;
-}
-
-basic_point_vector& basic_point_vector::operator=(basic_point_vector&& vec) noexcept {
-    assign(vec);
-    return *this;
-}
-
-bool basic_point_vector::operator==(const basic_point_vector& vec) const noexcept {
-    if (vec.m_size != m_size) return false;
-    for (size_t i = 0; i < vec.m_size; ++i)
-        if (m_data[i] != vec.m_data[i]) return false;
-    return true;
-}
-
-void basic_point_vector::push_back(const void* val) noexcept {
+void trivial_vector_base::push_back_base(const void* val) noexcept {
     reserve(m_size + 1);
     if (m_capacity < m_size + 1) return;
-    memcpy(m_data + m_size, &val, sizeof(void*));
+    memcpy(m_data + m_size * m_sizeof_type, val, m_sizeof_type);
     m_size++;
 }
 
-void basic_point_vector::shrink_to_fit() noexcept {
+void trivial_vector_base::shrink_to_fit() noexcept {
     if (m_size >= m_capacity) return;
 
-    void** data = static_cast<void**>(calloc(m_size, sizeof(void*)));
+    char* data = static_cast<char*>(calloc(m_size, m_sizeof_type));
     if (!data) {
         SetErrorNo(VEC_ALLOCATION_ERROR);
         return;
     }
 
     // Move or copy existing elements to the new memory
-    memcpy(data, m_data, m_size * sizeof(void*));
+    memcpy(data, m_data, m_size * m_sizeof_type);
 
     free(m_data);
     m_data = data;
