@@ -183,34 +183,30 @@ basic_string<charT> basic_string<charT>::operator+(const basic_string<charT>& st
 }
 
 // Convert number to c string, and append it to string.
-# define DEFINE_TO_STRING(num_type, fmt) \
-string to_string(num_type num) noexcept { \
-    char buf[21]; /* assume that the max value of num has 20 digits (2^64). */ \
+# define DEFINE_TO_STRING(num_type, num_fmt) \
+inline int snprintf_wrap(char* buf, size_t size, const char* fmt, const wchar_t* wfmt, num_type num) { \
+    (void) (wfmt); \
+    return snprintf(buf, size, fmt, num); \
+} \
+inline int snprintf_wrap(wchar_t* buf, size_t size, const char* fmt, const wchar_t* wfmt, num_type num) { \
+    (void) (fmt); \
+    return swprintf(buf, size, wfmt, num); \
+} \
+template <typename charT> \
+basic_string<charT> basic_string<charT>::to_string(num_type num) noexcept { \
+    charT buf[21]; /* assume that the max value of num has 20 digits (2^64). */ \
     buf[20] = 0; \
-    int num_size = snprintf(buf, 21, "%" fmt, num); \
+    int num_size = snprintf_wrap(buf, 21, "%" num_fmt, L"%" num_fmt, num); \
     if (num_size <= 0 || num_size > 20) { \
         SetErrorNo(STR_FORMAT_ERROR); \
-        return ""; \
+        return basic_string<charT>(); \
     } \
-    return string(buf, num_size); \
+    return basic_string<charT>(buf, num_size); \
 } \
-wstring to_wstring(num_type num) noexcept { \
-    wchar_t buf[21]; /* assume that the max value of num has 20 digits (2^64). */ \
-    buf[20] = 0; \
-    int num_size = swprintf(buf, 21, L"%" fmt, num); \
-    if (num_size <= 0 || num_size > 20) { \
-        SetErrorNo(STR_FORMAT_ERROR); \
-        return L""; \
-    } \
-    return wstring(buf, num_size); \
-} \
-basic_string<char> basic_string<char>::operator+(num_type num) const noexcept { \
-    string new_str(*this); \
-    return new_str + to_string(num); \
-} \
-basic_string<wchar_t> basic_string<wchar_t>::operator+(num_type num) const noexcept { \
-    wstring new_str(*this); \
-    return new_str + to_wstring(num); \
+template <typename charT> \
+basic_string<charT> basic_string<charT>::operator+(num_type num) const noexcept { \
+    basic_string<charT> new_str(*this); \
+    return new_str + basic_string<charT>::to_string(num); \
 }
 
 DEFINE_TO_STRING(int, "d")

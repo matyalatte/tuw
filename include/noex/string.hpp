@@ -67,6 +67,10 @@ class basic_string {
     basic_string operator+(size_t num) const noexcept;
     basic_string operator+(uint32_t num) const noexcept;
 
+    static basic_string to_string(int num) noexcept;
+    static basic_string to_string(size_t num) noexcept;
+    static basic_string to_string(uint32_t num) noexcept;
+
     bool operator==(const charT* str) const noexcept;
     bool operator==(const basic_string& str) const noexcept;
     inline bool operator!=(const charT* str) const noexcept {
@@ -118,11 +122,14 @@ typedef basic_string<char> string;
 typedef basic_string<wchar_t> wstring;
 
 // to_string functions
-string to_string(int) noexcept;
-string to_string(size_t) noexcept;
-string to_string(uint32_t) noexcept;
-wstring to_wstring(int) noexcept;
-wstring to_wstring(size_t) noexcept;
-wstring to_wstring(uint32_t) noexcept;
+template <typename numT>
+inline string to_string(numT num) {
+    return string::to_string(num);
+}
+
+template <typename numT>
+inline wstring to_wstring(numT num) {
+    return wstring::to_string(num);
+}
 
 }  // namespace noex
