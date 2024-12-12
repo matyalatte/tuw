@@ -44,6 +44,6 @@ Github will upload a zip file on the release page.
 
 ## 10. Download zip
 
-Download `Tuw*.zip` or `*.tar.bz2`.  
+Download `Tuw*.zip` or `*.tar.xz`.  
 
 <img src=https://user-images.githubusercontent.com/69258547/154955303-45705ac4-cf93-4b93-bf7f-cf82537d6c71.png width=500>
