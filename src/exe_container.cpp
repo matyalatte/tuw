@@ -77,7 +77,7 @@ static const uint32_t EXE_SIZE_MAX = 20000000;  // Allowed size of exe
 json_utils::JsonResult ExeContainer::Read(const noex::string& exe_path) noexcept {
     if (noex::get_error_no() != noex::OK) {
         // Reject the operation as the exe_path might have an unexpected value.
-        return { false, "Fatal error has occurred while editing strings." };
+        return { false, "Fatal error has occurred while editing strings or vectors." };
     }
 
     m_exe_path = exe_path;
@@ -148,7 +148,7 @@ json_utils::JsonResult ExeContainer::Read(const noex::string& exe_path) noexcept
 json_utils::JsonResult ExeContainer::Write(const noex::string& exe_path) noexcept {
     if (noex::get_error_no() != noex::OK) {
         // Reject the operation as the exe_path might have an unexpected value.
-        return { false, "Fatal error has occurred while editing strings." };
+        return { false, "Fatal error has occurred while editing strings or vectors." };
     }
 
     assert(!m_exe_path.empty());

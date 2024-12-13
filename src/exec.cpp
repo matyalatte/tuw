@@ -68,7 +68,7 @@ ExecuteResult Execute(const noex::string& cmd,
     if (noex::get_error_no() != noex::OK) {
         // Reject the command as it might have unexpected value.
         return { -1,
-                 "Fatal error has occored while editing strings.\n",
+                 "Fatal error has occored while editing strings or vectors.\n",
                  "" };
     }
 
