@@ -178,18 +178,19 @@ void MainFrame::CreateMenu() noexcept {
     uiMenuItem* item;
     uiMenu* menu = NULL;
 
+    // Note: We should reserve the buffer to prevent realloc,
+    //       or MenuData* pointers can be broken after using push_back()
+    size_t menu_item_count = m_definition["gui"].Size();
+    if (m_definition.HasMember("help"))
+        menu_item_count += m_definition["help"].Size();
+    m_menu_data_vec.reserve(menu_item_count);
+
 #ifdef __APPLE__
     // No need the menu for the quit item on macOS.
     if (m_definition["gui"].Size() > 1) {
         menu = uiNewMenu("Menu");
 #else
     menu = uiNewMenu("Menu");
-
-    size_t menu_item_count = m_definition["gui"].Size();
-    if (m_definition.HasMember("help"))
-        menu_item_count += m_definition["help"].Size();
-    m_menu_data_vec.reserve(menu_item_count);
-
     if (m_definition["gui"].Size() > 1) {
 #endif  // __APPLE__
         int i = 0;
