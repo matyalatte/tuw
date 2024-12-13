@@ -241,6 +241,7 @@ namespace json_utils {
             "}";
         rapidjson::ParseResult ok = definition.Parse(def_str);
         assert(ok);
+        (void) ok;  // GCC says it's unused even if you use it for assertion.
         JsonResult result = JSON_RESULT_OK;
         CheckDefinition(result, definition);
         assert(result.ok);
