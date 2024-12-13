@@ -246,18 +246,30 @@ class Filter {
  private:
     const char* name;
     noex::vector<const char*> patterns;
+
  public:
     Filter() noexcept : name(nullptr), patterns() {}
+
     Filter(const Filter& filter) {
         name = filter.name;
         patterns = filter.patterns;
     }
+
+    Filter& operator=(const Filter& filter) {
+        if (this == &filter) return *this;
+        name = filter.name;
+        patterns = filter.patterns;
+        return *this;
+    }
+
     void SetName(const char* n) noexcept {
         name = n;
     }
+
     void AddPattern(const char* pattern) noexcept {
         patterns.emplace_back(pattern);
     }
+
     uiFileDialogParamsFilter ToLibuiFilter() const noexcept {
         return {
             name,
@@ -275,6 +287,7 @@ class FilterList {
 
  public:
     FilterList() noexcept: filter_buf_str(), filters(), ui_filters() {}
+
     void MakeFilters(const noex::string& ext) noexcept {
         filter_buf_str = ext;
         char* filter_buf = filter_buf_str.data();
