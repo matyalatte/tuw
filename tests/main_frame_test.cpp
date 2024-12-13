@@ -15,7 +15,7 @@ class MainFrameTest : public ::testing::Test {
         if (msg != NULL)
             printf("%s\n", msg);
         EXPECT_TRUE(msg == NULL);
-        EXPECT_EQ(noex::OK, noex::GetErrorNo());
+        EXPECT_EQ(noex::OK, noex::get_error_no());
         uiMainSteps();
     }
 
@@ -26,7 +26,7 @@ class MainFrameTest : public ::testing::Test {
         // Need to reset the pointer to the log.
         SetLogEntry(NULL);
     #endif
-        EXPECT_EQ(noex::OK, noex::GetErrorNo());
+        EXPECT_EQ(noex::OK, noex::get_error_no());
     }
 
     void TestConfig(rapidjson::Document& test_json, noex::string config) {

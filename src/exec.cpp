@@ -65,7 +65,7 @@ ExecuteResult Execute(const noex::string& cmd,
 #ifdef _WIN32
     noex::wstring wcmd = UTF8toUTF16(cmd.c_str());
 
-    if (noex::GetErrorNo() != noex::OK) {
+    if (noex::get_error_no() != noex::OK) {
         // Reject the command as it might have unexpected value.
         return { -1,
                  "Fatal error has occored while editing strings.\n",

@@ -198,10 +198,10 @@ TEST(StringTest, Index) {
     EXPECT_EQ('s', str[2]);
     EXPECT_EQ('t', str[3]);
     EXPECT_EQ('\0', str[4]);
-    EXPECT_EQ(noex::OK, noex::GetErrorNo());
+    EXPECT_EQ(noex::OK, noex::get_error_no());
     EXPECT_EQ('\0', str[5]);
-    EXPECT_EQ(noex::STR_BOUNDARY_ERROR, noex::GetErrorNo());
-    noex::ClearErrorNo();
+    EXPECT_EQ(noex::STR_BOUNDARY_ERROR, noex::get_error_no());
+    noex::clear_error_no();
 }
 
 TEST(StringTest, IndexNull) {
@@ -293,12 +293,12 @@ TEST(StringTest, Substr) {
     noex::string str = "footestfoo";
     expect_tuwstr("foo", str.substr(0, 3));
     expect_tuwstr("test", str.substr(3, 4));
-    EXPECT_EQ(noex::OK, noex::GetErrorNo());
+    EXPECT_EQ(noex::OK, noex::get_error_no());
     expect_nullstr(str.substr(7, 10));
     expect_nullstr(str.substr(20, 4));
     expect_nullstr(noex::string().substr(0, 3));
-    EXPECT_EQ(noex::STR_BOUNDARY_ERROR, noex::GetErrorNo());
-    noex::ClearErrorNo();
+    EXPECT_EQ(noex::STR_BOUNDARY_ERROR, noex::get_error_no());
+    noex::clear_error_no();
 }
 
 // Test begin() and end()

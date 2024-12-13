@@ -10,15 +10,15 @@ namespace noex {
 
 static ErrorNo g_error_status = OK;
 
-ErrorNo GetErrorNo() noexcept {
+ErrorNo get_error_no() noexcept {
     return g_error_status;
 }
 
-void ClearErrorNo() noexcept {
+void clear_error_no() noexcept {
     g_error_status = noex::OK;
 }
 
-void SetErrorNo(ErrorNo err) noexcept {
+void set_error_no(ErrorNo err) noexcept {
     g_error_status = err;
 }
 
@@ -31,7 +31,7 @@ void basic_string<charT>::reserve(size_t capacity) noexcept {
     charT* new_str = static_cast<charT*>(calloc(capacity + 1, sizeof(charT)));
     if (!new_str) {
         clear();
-        SetErrorNo(STR_ALLOCATION_ERROR);
+        set_error_no(STR_ALLOCATION_ERROR);
         return;
     }
 
@@ -96,7 +96,7 @@ basic_string<charT>::basic_string(size_t size) noexcept : m_size(size), m_capaci
     if (!m_str) {
         m_size = 0;
         m_capacity = 0;
-        SetErrorNo(STR_ALLOCATION_ERROR);
+        set_error_no(STR_ALLOCATION_ERROR);
     }
 }
 
@@ -198,7 +198,7 @@ basic_string<charT> basic_string<charT>::to_string(num_type num) noexcept { \
     buf[20] = 0; \
     int num_size = snprintf_wrap(buf, 21, "%" num_fmt, L"%" num_fmt, num); \
     if (num_size <= 0 || num_size > 20) { \
-        SetErrorNo(STR_FORMAT_ERROR); \
+        set_error_no(STR_FORMAT_ERROR); \
         return basic_string<charT>(); \
     } \
     return basic_string<charT>(buf, num_size); \
@@ -267,7 +267,7 @@ size_t basic_string<charT>::find(const charT* str) const noexcept {
 template <typename charT>
 basic_string<charT> basic_string<charT>::substr(size_t start, size_t size) const noexcept {
     if (start + size > m_size) {
-        SetErrorNo(STR_BOUNDARY_ERROR);
+        set_error_no(STR_BOUNDARY_ERROR);
         return basic_string<charT>();
     }
     basic_string<charT> new_str(m_str + start, size);
@@ -277,13 +277,13 @@ basic_string<charT> basic_string<charT>::substr(size_t start, size_t size) const
 template <typename charT>
 void basic_string<charT>::erase(size_t pos, size_t n) noexcept {
     if (m_size < pos) {
-        SetErrorNo(STR_BOUNDARY_ERROR);
+        set_error_no(STR_BOUNDARY_ERROR);
         return;
     }
     if (n == npos) {
         n = m_size - pos;
     } else if (m_size < pos + n) {
-        SetErrorNo(STR_BOUNDARY_ERROR);
+        set_error_no(STR_BOUNDARY_ERROR);
         return;
     }
     memcpy(m_str + pos, m_str + pos + n, m_size - pos - n);
@@ -294,7 +294,7 @@ void basic_string<charT>::erase(size_t pos, size_t n) noexcept {
 template <typename charT>
 const charT& basic_string<charT>::operator[](size_t id) const noexcept {
     if (id > m_size) {
-        SetErrorNo(STR_BOUNDARY_ERROR);
+        set_error_no(STR_BOUNDARY_ERROR);
         return reinterpret_cast<const charT*>(dummy)[0];
     }
     return c_str()[id];

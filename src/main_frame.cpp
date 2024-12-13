@@ -294,7 +294,7 @@ void MainFrame::OpenURL(int id) noexcept {
                           "URL: " + url;
         ShowSuccessDialog(msg, "Safe Mode");
     } else {
-        if (noex::GetErrorNo() != noex::OK) {
+        if (noex::get_error_no() != noex::OK) {
             // Reject the URL as it might have an unexpected value.
             const char* msg = "The URL was not opened "
                               "because a fatal error has occurred while editing strings. "
@@ -441,7 +441,7 @@ noex::string MainFrame::GetCommand() noexcept {
         comp_strings.emplace_back(comp->GetString());
     }
 
-    if (noex::GetErrorNo() != noex::OK)
+    if (noex::get_error_no() != noex::OK)
         return "";
 
     noex::string cmd = cmd_ary[0];
@@ -496,7 +496,7 @@ void MainFrame::RunCommand() noexcept {
     bool show_last_line = json_utils::GetBool(sub_definition, "show_last_line", false);
     bool show_success_dialog = json_utils::GetBool(sub_definition, "show_success_dialog", true);
 
-    if (noex::GetErrorNo() != noex::OK) {
+    if (noex::get_error_no() != noex::OK) {
         const char* msg = "Fatal error has occurred while editing strings. "
                           "Please reboot the application.";
         PrintFmt("[RunCommand] Error: %s\n", msg);

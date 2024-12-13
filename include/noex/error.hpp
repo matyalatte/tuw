@@ -17,11 +17,11 @@ enum ErrorNo : int {
 };
 
 // Returns the error status for tuwString.
-ErrorNo GetErrorNo() noexcept;
+ErrorNo get_error_no() noexcept;
 
-void SetErrorNo(ErrorNo err) noexcept;
+void set_error_no(ErrorNo err) noexcept;
 
 // Set noex::OK to the error status.
-void ClearErrorNo() noexcept;
+void clear_error_no() noexcept;
 
 }  // namespace noex

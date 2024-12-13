@@ -395,7 +395,7 @@ class Logger {
      void Log(const char* str) noexcept {
         int markup_length = ConvertAnsiToPangoLength(&m_tag_stack, str);
         noex::string markup_str = noex::string(markup_length);
-        if (noex::GetErrorNo() != noex::OK) return;  // failed to allocate buffer
+        if (noex::get_error_no() != noex::OK) return;  // failed to allocate buffer
         ConvertAnsiToPango(&m_tag_stack, str, markup_str.data());
         if (m_log_entry == NULL) {
             m_log_buffer += markup_str;
@@ -438,7 +438,7 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     size_t size = vsnprintf(NULL, 0, fmt, va2);
     va_end(va2);
     noex::string buf_str = noex::string(size);
-    if (noex::GetErrorNo() != noex::OK) return;  // failed to allocate buffer
+    if (noex::get_error_no() != noex::OK) return;  // failed to allocate buffer
     char* buf = buf_str.data();
     buf[size] = 0;
     vsnprintf(buf, size + 1, fmt, va);

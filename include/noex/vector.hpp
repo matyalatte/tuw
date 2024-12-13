@@ -17,7 +17,7 @@ class non_trivial_vector;
 
 // Vector class that doesn't raise std exceptions.
 // It works without any crashes even when it got a memory allocation error.
-// But you have to check GetErrorNo() after vector allocations
+// But you have to check get_error_no() after vector allocations
 // or it might have unexpected values.
 template <typename T>
 class vector :
@@ -58,7 +58,7 @@ class non_trivial_vector {
 
         T* data = reinterpret_cast<T*>(calloc(capacity, sizeof(T)));
         if (!data) {
-            SetErrorNo(VEC_ALLOCATION_ERROR);
+            set_error_no(VEC_ALLOCATION_ERROR);
             clear();
             return;
         }
@@ -99,7 +99,7 @@ class non_trivial_vector {
     T& at(size_t id) const noexcept {
         if (empty() || id >= m_size) {
             // boundary error
-            SetErrorNo(VEC_BOUNDARY_ERROR);
+            set_error_no(VEC_BOUNDARY_ERROR);
             static T dummy{};
             return dummy;
         }
@@ -184,7 +184,7 @@ class non_trivial_vector {
 
         T* data = reinterpret_cast<T*>(calloc(m_size, sizeof(T)));
         if (!data) {
-            SetErrorNo(VEC_ALLOCATION_ERROR);
+            set_error_no(VEC_ALLOCATION_ERROR);
             return;
         }
 

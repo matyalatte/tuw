@@ -9,7 +9,7 @@ TEST(VectorTest, Construct) {
     EXPECT_TRUE(vec.empty());
     EXPECT_EQ(0, vec.size());
     EXPECT_EQ(0, vec.capacity());
-    EXPECT_EQ(noex::OK, noex::GetErrorNo());
+    EXPECT_EQ(noex::OK, noex::get_error_no());
 }
 
 TEST(VectorTest, Push) {
@@ -19,7 +19,7 @@ TEST(VectorTest, Push) {
     EXPECT_EQ(1, vec.size());
     EXPECT_EQ(1, vec.capacity());
     EXPECT_EQ(2, vec[0]);
-    EXPECT_EQ(noex::OK, noex::GetErrorNo());
+    EXPECT_EQ(noex::OK, noex::get_error_no());
 }
 
 TEST(VectorTest, Reserve) {
@@ -28,7 +28,7 @@ TEST(VectorTest, Reserve) {
     EXPECT_TRUE(vec.empty());
     EXPECT_EQ(0, vec.size());
     EXPECT_EQ(10, vec.capacity());
-    EXPECT_EQ(noex::OK, noex::GetErrorNo());
+    EXPECT_EQ(noex::OK, noex::get_error_no());
 }
 
 TEST(VectorTest, ReservePush) {
@@ -39,7 +39,7 @@ TEST(VectorTest, ReservePush) {
     EXPECT_EQ(1, vec.size());
     EXPECT_EQ(10, vec.capacity());
     EXPECT_EQ(2, vec[0]);
-    EXPECT_EQ(noex::OK, noex::GetErrorNo());
+    EXPECT_EQ(noex::OK, noex::get_error_no());
 }
 
 TEST(VectorTest, Shrink) {
@@ -51,12 +51,12 @@ TEST(VectorTest, Shrink) {
     EXPECT_FALSE(vec.empty());
     EXPECT_EQ(3, vec.size());
     EXPECT_EQ(10, vec.capacity());
-    EXPECT_EQ(noex::OK, noex::GetErrorNo());
+    EXPECT_EQ(noex::OK, noex::get_error_no());
     vec.shrink_to_fit();
     EXPECT_FALSE(vec.empty());
     EXPECT_EQ(3, vec.size());
     EXPECT_EQ(3, vec.capacity());
-    EXPECT_EQ(noex::OK, noex::GetErrorNo());
+    EXPECT_EQ(noex::OK, noex::get_error_no());
 }
 
 TEST(VectorTest, Clear) {
@@ -68,12 +68,12 @@ TEST(VectorTest, Clear) {
     EXPECT_FALSE(vec.empty());
     EXPECT_EQ(3, vec.size());
     EXPECT_EQ(10, vec.capacity());
-    EXPECT_EQ(noex::OK, noex::GetErrorNo());
+    EXPECT_EQ(noex::OK, noex::get_error_no());
     vec.clear();
     EXPECT_TRUE(vec.empty());
     EXPECT_EQ(0, vec.size());
     EXPECT_EQ(0, vec.capacity());
-    EXPECT_EQ(noex::OK, noex::GetErrorNo());
+    EXPECT_EQ(noex::OK, noex::get_error_no());
 }
 
 TEST(VectorTest, EmplaceBack) {
@@ -86,7 +86,7 @@ TEST(VectorTest, EmplaceBack) {
     EXPECT_EQ(2, vec.capacity());
     EXPECT_STREQ("aaa", vec[0].c_str());
     EXPECT_STREQ("bbb", vec[1].c_str());
-    EXPECT_EQ(noex::OK, noex::GetErrorNo());
+    EXPECT_EQ(noex::OK, noex::get_error_no());
 }
 
 struct TestObj {
@@ -115,5 +115,5 @@ TEST(VectorTest, StructVec) {
     EXPECT_EQ(4, vec[1].b);
     EXPECT_EQ(5, *vec[2].a);
     EXPECT_EQ(6, vec[2].b);
-    EXPECT_EQ(noex::OK, noex::GetErrorNo());
+    EXPECT_EQ(noex::OK, noex::get_error_no());
 }

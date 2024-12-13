@@ -53,7 +53,7 @@ void trivial_vector_base::reserve(size_t capacity) noexcept {
 
     char* data = static_cast<char*>(calloc(capacity, m_sizeof_type));
     if (!data) {
-        SetErrorNo(VEC_ALLOCATION_ERROR);
+        set_error_no(VEC_ALLOCATION_ERROR);
         clear();
         return;
     }
@@ -76,7 +76,7 @@ void trivial_vector_base::clear() noexcept {
 void* trivial_vector_base::at_base(size_t id) const noexcept {
     if (empty() || id >= m_size) {
         // boundary error
-        SetErrorNo(VEC_BOUNDARY_ERROR);
+        set_error_no(VEC_BOUNDARY_ERROR);
         return nullptr;
     }
     return m_data + (id * m_sizeof_type);
@@ -94,7 +94,7 @@ void trivial_vector_base::shrink_to_fit() noexcept {
 
     char* data = static_cast<char*>(calloc(m_size, m_sizeof_type));
     if (!data) {
-        SetErrorNo(VEC_ALLOCATION_ERROR);
+        set_error_no(VEC_ALLOCATION_ERROR);
         return;
     }
 

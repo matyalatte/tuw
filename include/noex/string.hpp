@@ -9,7 +9,7 @@ namespace noex {
 
 // String class that doesn't raise std errors.
 // It works without any crashes even when it got a memory allocation error.
-// But you have to check GetErrorNo() after string allocations
+// But you have to check get_error_no() after string allocations
 // or it might have an unexpected value (an empty string).
 template <typename charT>
 class basic_string {

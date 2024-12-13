@@ -94,7 +94,7 @@ Component* NewComp(uiBox* box, const rapidjson::Value& j) noexcept {
     if (comp) {
         new (comp) CompT(box, j);
     } else {
-        noex::SetErrorNo(noex::EXTERNAL_ALLOCATION_ERROR);
+        noex::set_error_no(noex::EXTERNAL_ALLOCATION_ERROR);
     }
     return comp;
 }
