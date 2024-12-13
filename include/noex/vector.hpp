@@ -33,7 +33,7 @@ class vector :
 template <typename T>
 class non_trivial_vector {
     static_assert(!std::is_trivial<T>::value,
-                  "template paramter T must be a non-trivial class");
+                  "template parameter T must be a non-trivial class");
 
  private:
     T* m_data;
@@ -214,7 +214,7 @@ class trivial_vector_base {
     void push_back_base(const void* val) noexcept;
 
  public:
-    trivial_vector_base(size_t sizeof_type) noexcept;
+    trivial_vector_base(size_t sizeof_type) noexcept;  // NOLINT(runtime/explicit)
     trivial_vector_base(const trivial_vector_base& vec) noexcept;
     trivial_vector_base(trivial_vector_base&& vec) noexcept;
     ~trivial_vector_base() noexcept { clear(); }
@@ -241,7 +241,7 @@ class trivial_vector_base {
 template <typename T>
 class trivial_vector : public trivial_vector_base {
     static_assert(std::is_trivial<T>::value,
-                  "template paramter T must be a trivial class");
+                  "template parameter T must be a trivial class");
 
  public:
     trivial_vector() noexcept :

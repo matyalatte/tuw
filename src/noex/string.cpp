@@ -184,11 +184,13 @@ basic_string<charT> basic_string<charT>::operator+(const basic_string<charT>& st
 
 // Convert number to c string, and append it to string.
 # define DEFINE_TO_STRING(num_type, num_fmt) \
-inline int snprintf_wrap(char* buf, size_t size, const char* fmt, const wchar_t* wfmt, num_type num) { \
+inline int snprintf_wrap(char* buf, size_t size, const char* fmt, \
+                         const wchar_t* wfmt, num_type num) { \
     (void) (wfmt); \
     return snprintf(buf, size, fmt, num); \
 } \
-inline int snprintf_wrap(wchar_t* buf, size_t size, const char* fmt, const wchar_t* wfmt, num_type num) { \
+inline int snprintf_wrap(wchar_t* buf, size_t size, const char* fmt, \
+                         const wchar_t* wfmt, num_type num) { \
     (void) (fmt); \
     return swprintf(buf, size, wfmt, num); \
 } \

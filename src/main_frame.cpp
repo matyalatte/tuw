@@ -290,16 +290,17 @@ void MainFrame::OpenURL(int id) noexcept {
 
     if (IsSafeMode()) {
         noex::string msg = "The URL was not opened because the safe mode is enabled.\n"
-                          "You can disable it from the menu bar (Debug > Safe Mode.)\n"
-                          "\n"
-                          "URL: " + url;
+                           "You can disable it from the menu bar (Debug > Safe Mode.)\n"
+                           "\n"
+                           "URL: " + url;
         ShowSuccessDialog(msg, "Safe Mode");
     } else {
         if (noex::get_error_no() != noex::OK) {
             // Reject the URL as it might have an unexpected value.
-            const char* msg = "The URL was not opened "
-                              "because a fatal error has occurred while editing strings or vectors. "
-                              "Please reboot the application.";
+            const char* msg =
+                "The URL was not opened "
+                "because a fatal error has occurred while editing strings or vectors. "
+                "Please reboot the application.";
             PrintFmt("%sError: %s\n", tag, msg);
             ShowErrorDialog(msg);
         } else {
