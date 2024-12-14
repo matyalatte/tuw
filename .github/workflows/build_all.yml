@@ -68,7 +68,12 @@ jobs:
             exe_ext: ""
             zip_ext: tar.xz
             arch: ""
-            arch_suffix: ""
+            arch_suffix: "-arm64"
+          - os: macos-14
+            exe_ext: ""
+            zip_ext: tar.xz
+            arch: ""
+            arch_suffix: "-universal"
 
     name: build-${{ matrix.os }}${{ matrix.arch_suffix }}
     runs-on: ${{ matrix.os }}
@@ -98,8 +103,12 @@ jobs:
         run: batch_files/build.bat Release ${{ matrix.arch }}
 
       - name: Build exe for Unix
-        if: runner.os != 'Windows'
+        if: (runner.os != 'Windows') && (matrix.arch_suffix != '-universal')
         run: bash shell_scripts/build.sh Release
+
+      - name: Build universal binary for Unix
+        if: (runner.os != 'Windows') && (matrix.arch_suffix == '-universal')
+        run: bash shell_scripts/build_universal.sh Release
 
       - name: Show info about exe
         run: bash shell_scripts/exe_info.sh build/Release${{ matrix.arch }}/${{ env.TOOL_NAME }}${{ matrix.exe_ext }}

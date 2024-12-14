@@ -69,18 +69,20 @@ elif tuw_OS == 'darwin'
     add_global_arguments(macosx_version_min, language: languages)
     add_global_link_arguments(macosx_version_min, language: languages)
 
-    # Check if SDKs support universal binaries or not.
-    arch = ['-arch', 'x86_64', '-arch', 'arm64']
-    c_compiler = meson.get_compiler('c')
-    result = c_compiler.run(
-        'int main(void) { return 0; }',
-        name : 'universal binary test',
-        args: arch)
-    if result.compiled()
-        add_global_arguments(arch, language: languages)
-        add_global_link_arguments(arch, language: languages)
-    else
-        warning('Universal build is disabled since your SDKs do not support it.')
+    if get_option('macosx_universal')
+        # Check if SDKs support universal binaries or not.
+        arch = ['-arch', 'x86_64', '-arch', 'arm64']
+        c_compiler = meson.get_compiler('c')
+        result = c_compiler.run(
+            'int main(void) { return 0; }',
+            name : 'universal binary test',
+            args: arch)
+        if result.compiled()
+            add_global_arguments(arch, language: languages)
+            add_global_link_arguments(arch, language: languages)
+        else
+            warning('Universal build is disabled since your SDKs do not support it.')
+        endif
     endif
 
     if not tuw_compiler.startswith('clang')
