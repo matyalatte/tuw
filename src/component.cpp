@@ -250,10 +250,8 @@ class Filter {
  public:
     Filter() noexcept : name(nullptr), patterns() {}
 
-    Filter(const Filter& filter) {
-        name = filter.name;
-        patterns = filter.patterns;
-    }
+    Filter(const Filter& filter) :
+        name(filter.name), patterns(filter.patterns) {}
 
     Filter& operator=(const Filter& filter) {
         if (this == &filter) return *this;

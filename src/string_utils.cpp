@@ -68,15 +68,12 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_end(va2);
     n++;
 
-    char* buf = reinterpret_cast<char *>(uiprivAlloc(n * sizeof (char), "char[]"));
-    vsprintf_s(buf, n, fmt, va);
+    noex::string buf = noex::string(n);
+    vsprintf_s(buf.data(), buf.size(), fmt, va);
     va_end(va);
 
-    WCHAR* wfmt = toUTF16(buf);
-    fwprintf(out, L"%ls", wfmt);
-
-    uiprivFree(buf);
-    uiprivFree(wfmt);
+    noex::wstring wbuf = UTF8toUTF16(buf.c_str());
+    fwprintf(out, L"%ls", wbuf.c_str());
 }
 
 // Enable ANSI escape sequences on the console window.
@@ -437,13 +434,10 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_copy(va2, va);
     size_t size = vsnprintf(NULL, 0, fmt, va2);
     va_end(va2);
-    noex::string buf_str = noex::string(size);
-    if (noex::get_error_no() != noex::OK) return;  // failed to allocate buffer
-    char* buf = buf_str.data();
-    buf[size] = 0;
-    vsnprintf(buf, size + 1, fmt, va);
-    g_logger.Log(buf);
-    fprintf(out, "%s", buf);
+    noex::string buf = noex::string(size + 1);
+    vsnprintf(buf.data(), buf.size(), fmt, va);
+    g_logger.Log(buf.c_str());
+    fprintf(out, "%s", buf.c_str());
     va_end(va);
 }
 #endif
