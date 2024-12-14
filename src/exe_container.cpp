@@ -28,14 +28,14 @@ static void WriteUint32(FILE* io, const uint32_t& num) noexcept {
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define BUF_SIZE 1024
 
-static tuwString ReadStr(FILE* io, const uint32_t& size) noexcept {
-    tuwString str(size);
+static noex::string ReadStr(FILE* io, const uint32_t& size) noexcept {
+    noex::string str(size);
     if (fread(str.data(), 1, size, io) != size)
         return "";
     return str;
 }
 
-static void WriteStr(FILE* io, const tuwString& str) noexcept {
+static void WriteStr(FILE* io, const noex::string& str) noexcept {
     fwrite(str.data(), 1, str.size(), io);
 
     // Zero padding
@@ -74,10 +74,10 @@ static uint32_t Length(FILE* io) noexcept {
 
 static const uint32_t EXE_SIZE_MAX = 20000000;  // Allowed size of exe
 
-json_utils::JsonResult ExeContainer::Read(const tuwString& exe_path) noexcept {
-    if (GetStringError() != STR_OK) {
+json_utils::JsonResult ExeContainer::Read(const noex::string& exe_path) noexcept {
+    if (noex::get_error_no() != noex::OK) {
         // Reject the operation as the exe_path might have an unexpected value.
-        return { false, "Fatal error has occurred while editing strings." };
+        return { false, "Fatal error has occurred while editing strings or vectors." };
     }
 
     m_exe_path = exe_path;
@@ -104,7 +104,7 @@ json_utils::JsonResult ExeContainer::Read(const tuwString& exe_path) noexcept {
     m_exe_size = end_off + ReadUint32(file_io);
     if (EXE_SIZE_MAX <= m_exe_size || end_off < m_exe_size) {
         fclose(file_io);
-        return { false, tuwString("Unexpected exe size. (") + m_exe_size + ")" };
+        return { false, noex::string("Unexpected exe size. (") + m_exe_size + ")" };
     }
     fseek(file_io, m_exe_size, SEEK_SET);
 
@@ -112,31 +112,31 @@ json_utils::JsonResult ExeContainer::Read(const tuwString& exe_path) noexcept {
     ReadMagic(file_io, magic);
     if (strcmp(magic, "JSON") != 0) {
         fclose(file_io);
-        return { false, tuwString("Invalid magic. (") + magic + ")" };
+        return { false, noex::string("Invalid magic. (") + magic + ")" };
     }
 
     uint32_t json_size = ReadUint32(file_io);
     uint32_t stored_hash = ReadUint32(file_io);
     if (JSON_SIZE_MAX <= json_size || end_off < m_exe_size + json_size + 20) {
         fclose(file_io);
-        return { false, tuwString("Unexpected json size. (") + json_size + ")" };
+        return { false, noex::string("Unexpected json size. (") + json_size + ")" };
     }
 
     // Read json data
-    tuwString json_str = ReadStr(file_io, json_size);
+    noex::string json_str = ReadStr(file_io, json_size);
     fclose(file_io);
 
     if (json_str.length() != json_size)
         return { false, "Unexpected char detected." };
 
     if (stored_hash != Fnv1Hash32(json_str))
-        return { false, tuwString("Invalid JSON hash. (") + stored_hash + ")" };
+        return { false, noex::string("Invalid JSON hash. (") + stored_hash + ")" };
 
     rapidjson::ParseResult ok = m_json.Parse(json_str.c_str());
     if (!ok) {
         return {
             false,
-            tuwString("Failed to parse JSON: ") +
+            noex::string("Failed to parse JSON: ") +
                 rapidjson::GetParseError_En(ok.Code()) +
                 " (offset: " + ok.Offset() + ")"
         };
@@ -145,20 +145,20 @@ json_utils::JsonResult ExeContainer::Read(const tuwString& exe_path) noexcept {
     return JSON_RESULT_OK;
 }
 
-json_utils::JsonResult ExeContainer::Write(const tuwString& exe_path) noexcept {
-    if (GetStringError() != STR_OK) {
+json_utils::JsonResult ExeContainer::Write(const noex::string& exe_path) noexcept {
+    if (noex::get_error_no() != noex::OK) {
         // Reject the operation as the exe_path might have an unexpected value.
-        return { false, "Fatal error has occurred while editing strings." };
+        return { false, "Fatal error has occurred while editing strings or vectors." };
     }
 
     assert(!m_exe_path.empty());
-    tuwString json_str;
+    noex::string json_str;
     if (HasJson())
         json_str = json_utils::JsonToString(m_json);
 
     uint32_t json_size = static_cast<uint32_t>(json_str.length());
     if (JSON_SIZE_MAX <= json_size)
-        return { false, tuwString("Unexpected json size. (") + json_size + ")" };
+        return { false, noex::string("Unexpected json size. (") + json_size + ")" };
 
     FILE* old_io = fopen(m_exe_path.c_str(), "rb");
     if (!old_io)
@@ -186,7 +186,7 @@ json_utils::JsonResult ExeContainer::Write(const tuwString& exe_path) noexcept {
         if (strcmp(magic, "JSON") != 0) {
             fclose(old_io);
             fclose(new_io);
-            return { false, tuwString("Invalid magic. (") + magic + ")" };
+            return { false, noex::string("Invalid magic. (") + magic + ")" };
         }
     }
 

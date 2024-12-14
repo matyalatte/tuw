@@ -12,7 +12,7 @@
 #include "string_utils.h"
 #include "tuw_constants.h"
 
-int main_app() {
+int main_app() noexcept {
 #ifdef _WIN32
     // Enable ANSI escape sequences on the console window.
     EnableCSI();
@@ -39,7 +39,7 @@ int main_app() {
     return 0;
 }
 
-bool AskOverwrite(const char *path) {
+bool AskOverwrite(const char *path) noexcept {
     if (!envuFileExists(path)) return true;
     PrintFmt("Overwrite %s? (y/n)\n", path);
     char answer;
@@ -48,8 +48,8 @@ bool AskOverwrite(const char *path) {
     return ret == 1 && (answer == "y"[0] || answer == "Y"[0]);
 }
 
-json_utils::JsonResult Merge(const tuwString& exe_path, const tuwString& json_path,
-                             const tuwString& new_path, const bool force) {
+json_utils::JsonResult Merge(const noex::string& exe_path, const noex::string& json_path,
+                             const noex::string& new_path, const bool force) noexcept {
     rapidjson::Document json;
     json_utils::JsonResult result = json_utils::LoadJson(json_path, json);
     if (!result.ok) return result;
@@ -81,8 +81,8 @@ json_utils::JsonResult Merge(const tuwString& exe_path, const tuwString& json_pa
     return JSON_RESULT_OK;
 }
 
-json_utils::JsonResult Split(const tuwString& exe_path, const tuwString& json_path,
-                             const tuwString& new_path, const bool force) {
+json_utils::JsonResult Split(const noex::string& exe_path, const noex::string& json_path,
+                             const noex::string& new_path, const bool force) noexcept {
     ExeContainer exe;
     json_utils::JsonResult result = exe.Read(exe_path);
     if (!result.ok) return result;
@@ -114,7 +114,7 @@ json_utils::JsonResult Split(const tuwString& exe_path, const tuwString& json_pa
     return JSON_RESULT_OK;
 }
 
-void PrintUsage() {
+void PrintUsage() noexcept {
     static const char* const usage =
         "Usage: Tuw [<command> [<options>]]\n"
         "\n"
@@ -148,7 +148,7 @@ enum Commands: int {
 };
 
 // don't use map. it will make exe larger.
-int CmdToInt(const char* cmd) {
+int CmdToInt(const char* cmd) noexcept {
     while (*cmd == '-') {
         cmd++;
     }
@@ -179,7 +179,7 @@ enum Options: int {
     OPT_MAX
 };
 
-int OptToInt(const char* opt) {
+int OptToInt(const char* opt) noexcept {
     while (*opt == '-') {
         opt++;
     }
@@ -201,12 +201,12 @@ int OptToInt(const char* opt) {
 }
 
 #ifdef _WIN32
-int wmain(int argc, wchar_t* argv[]) {
+int wmain(int argc, wchar_t* argv[]) noexcept {
     setlocale(LC_CTYPE, "");
 #else
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) noexcept {
 #endif
-    std::vector<tuwString> args;
+    noex::vector<noex::string> args;
     for (int i = 0; i < argc; i++) {
 #ifdef _WIN32
         args.emplace_back(UTF16toUTF8(argv[i]));
@@ -217,7 +217,7 @@ int main(int argc, char* argv[]) {
     char *exe_path_cstr = envuGetExecutablePath();
     char *exe_dir = envuGetDirectory(exe_path_cstr);
     envuSetCwd(exe_dir);
-    tuwString exe_path = envuStr(exe_path_cstr);
+    noex::string exe_path = envuStr(exe_path_cstr);
     envuFree(exe_dir);
 
     // Launch GUI if no args.
@@ -231,8 +231,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    tuwString json_path;
-    tuwString new_exe_path;
+    noex::string json_path;
+    noex::string new_exe_path;
     bool force = false;
 
     for (int i = 2; i < argc; i++) {

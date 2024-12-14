@@ -9,6 +9,7 @@
 #include "exe_container.h"
 #include "validator.h"
 #include "env_utils.h"
+#include "noex/vector.hpp"
 
 // you need to copy it from examples/all_keys to the json folder
 constexpr char JSON_ALL_KEYS[] = "./json/gui_definition.json";

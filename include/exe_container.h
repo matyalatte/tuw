@@ -5,7 +5,7 @@
 
 class ExeContainer {
  private:
-    tuwString m_exe_path;
+    noex::string m_exe_path;
     uint32_t m_exe_size;
     rapidjson::Document m_json;
 
@@ -16,8 +16,8 @@ class ExeContainer {
         m_json.SetObject();
     }
 
-    json_utils::JsonResult Read(const tuwString& exe_path) noexcept;
-    json_utils::JsonResult Write(const tuwString& exe_path) noexcept;
+    json_utils::JsonResult Read(const noex::string& exe_path) noexcept;
+    json_utils::JsonResult Write(const noex::string& exe_path) noexcept;
 
     bool HasJson() noexcept {
         return m_json.IsObject() && !m_json.ObjectEmpty();

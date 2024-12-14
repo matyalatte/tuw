@@ -33,7 +33,7 @@ static int IsUnsupportedPattern(const char *pattern) noexcept {
     return 0;
 }
 
-bool Validator::Validate(const tuwString& str) noexcept {
+bool Validator::Validate(const noex::string& str) noexcept {
     if (m_not_empty && str.empty()) {
         if (m_not_empty_error.empty())
             m_error_msg = "Empty string is NOT allowed.";

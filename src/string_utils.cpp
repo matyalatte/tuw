@@ -1,238 +1,16 @@
 #include "string_utils.h"
 
-#include <inttypes.h>
-#include <wchar.h>
-#include <cstdio>
 #include <cstring>
 
 #ifdef _WIN32
 #include "windows/uipriv_windows.hpp"
 #endif
 
-static StringError g_error_status = STR_OK;
-
-StringError GetStringError() noexcept {
-    return g_error_status;
-}
-
-void ClearStringError() noexcept {
-    g_error_status = STR_OK;
-}
-
-inline static void SetStringError(StringError err) noexcept {
-    g_error_status = err;
-}
-
-void tuwString::alloc_cstr(const char *str, size_t size) noexcept {
-    clear();
-    if (!str || size == 0)
-        return;
-
-    m_size = size;
-    m_str = reinterpret_cast<char*>(malloc(size + 1));
-    if (!m_str) {
-        m_size = 0;
-        SetStringError(STR_ALLOCATION_ERROR);
-        return;
-    }
-    memcpy(m_str, str, size);
-    m_str[size] = '\0';
-}
-
-#define get_strlen(str) ((str) ? strlen(str) : 0)
-
-tuwString::tuwString(const char* str) noexcept :
-        m_str(nullptr), m_size(0) {
-    alloc_cstr(str, get_strlen(str));
-}
-
-tuwString::tuwString(const char* str, size_t size) noexcept :
-        m_str(nullptr), m_size(0) {
-    alloc_cstr(str, size);
-}
-
-tuwString::tuwString(const tuwString& str) noexcept :
-        m_str(nullptr), m_size(0) {
-    alloc_cstr(str.c_str(), str.size());
-}
-
-tuwString::tuwString(tuwString&& str) noexcept :
-        m_str(str.m_str), m_size(str.m_size) {
-    str.m_str = nullptr;
-    str.m_size = 0;
-}
-
-tuwString::tuwString(size_t size) noexcept : m_size(size) {
-    m_str = reinterpret_cast<char*>(calloc(size + 1, sizeof(char)));
-    if (!m_str) {
-        m_size = 0;
-        SetStringError(STR_ALLOCATION_ERROR);
-    }
-}
-
-tuwString& tuwString::operator=(const char* str) noexcept {
-    alloc_cstr(str, get_strlen(str));
-    return *this;
-}
-
-tuwString& tuwString::operator=(const tuwString& str) noexcept {
-    if (this == &str) return *this;
-    alloc_cstr(str.c_str(), str.size());
-    return *this;
-}
-
-tuwString& tuwString::operator=(tuwString&& str) noexcept {
-    if (this == &str) return *this;
-    clear();
-    m_str = str.m_str;
-    m_size = str.m_size;
-    str.m_str = nullptr;
-    str.m_size = 0;
-    return *this;
-}
-
-void tuwString::append(const char* str, size_t size) noexcept {
-    if (!str || size == 0)
-        return;
-
-    size_t new_size = m_size + size;
-    char* new_cstr = reinterpret_cast<char*>(malloc(new_size + 1));
-    if (!new_cstr) {
-        SetStringError(STR_ALLOCATION_ERROR);
-        return;
-    }
-
-    if (!empty())
-        memcpy(new_cstr, m_str, m_size);
-    memcpy(new_cstr + m_size, str, size);
-    new_cstr[new_size] = '\0';
-
-    clear();
-    m_str = new_cstr;
-    m_size = new_size;
-}
-
-tuwString& tuwString::operator+=(const char* str) noexcept {
-    append(str, get_strlen(str));
-    return *this;
-}
-
-tuwString& tuwString::operator+=(const tuwString& str) noexcept {
-    append(str.c_str(), str.size());
-    return *this;
-}
-
-tuwString tuwString::operator+(const char* str) const noexcept {
-    tuwString new_str(*this);
-    new_str += str;
-    return new_str;
-}
-
-tuwString tuwString::operator+(const tuwString& str) const noexcept {
-    tuwString new_str(*this);
-    new_str += str;
-    return new_str;
-}
-
-// Convert number to c string, and append it to string.
-# define DEFINE_PLUS_FOR_NUM(num_type, fmt) \
-tuwString tuwString::operator+(num_type num) const noexcept { \
-    tuwString new_str(*this); \
-    \
-    int num_size = snprintf(nullptr, 0, "%" fmt, num); \
-    if (num_size <= 0) { \
-        SetStringError(STR_FORMAT_ERROR); \
-        return new_str; \
-    } \
-    \
-    char* num_str = reinterpret_cast<char*>(malloc(num_size + 1)); \
-    if (!num_str) { \
-        SetStringError(STR_ALLOCATION_ERROR); \
-        return new_str; \
-    } \
-    \
-    int ret = snprintf(num_str, num_size + 1, "%" fmt, num); \
-    if (ret == num_size) { \
-        new_str.append(num_str, num_size); \
-    } else { \
-        SetStringError(STR_FORMAT_ERROR); \
-    } \
-    free(num_str); \
-    return new_str; \
-}
-
-DEFINE_PLUS_FOR_NUM(int, "d")
-DEFINE_PLUS_FOR_NUM(size_t, "zu")
-DEFINE_PLUS_FOR_NUM(uint32_t, PRIu32)
-
-#define null_to_empty(str) ((str) ? str : "")
-
-bool tuwString::operator==(const char* str) const noexcept {
-    return strcmp(c_str(), null_to_empty(str)) == 0;
-}
-
-bool tuwString::operator==(const tuwString& str) const noexcept {
-    return strcmp(c_str(), str.c_str()) == 0;
-}
-
-const size_t tuwString::npos = static_cast<size_t>(-1);
-
-size_t tuwString::find(const char c) const noexcept {
-    if (empty()) return npos;
-    const char* p = begin();
-    for (; p < end(); p++) {
-        if (*p == c)
-            return static_cast<size_t>(p - m_str);
-    }
-    return npos;
-}
-
-size_t tuwString::find(const char* str) const noexcept {
-    if (empty() || !str) return npos;
-
-    // Note: This function uses a slow algorithm.
-    const char* p = begin();
-    for (; p < end(); p++) {
-        const char* tmp_p = p;
-        const char* str_p = str;
-        while (tmp_p < end() && *str_p != '\0' && *tmp_p == *str_p) {
-            tmp_p++;
-            str_p++;
-        }
-        if (*str_p == '\0')
-            return static_cast<size_t>(p - m_str);
-    }
-    return npos;
-}
-
-tuwString tuwString::substr(size_t start, size_t size) const noexcept {
-    if (start + size > m_size) {
-        SetStringError(STR_BOUNDARY_ERROR);
-        return tuwString();
-    }
-    tuwString new_str(m_str + start, size);
-    return new_str;
-}
-
-const char& tuwString::operator[](size_t id) const noexcept {
-    if (id > m_size) {
-        SetStringError(STR_BOUNDARY_ERROR);
-        return ""[0];
-    }
-    return c_str()[id];
-}
-
-tuwString operator+(const char* str1, const tuwString& str2) noexcept {
-    tuwString new_str(str1);
-    new_str += str2;
-    return new_str;
-}
-
 static inline bool IsNewline(char ch) noexcept {
     return ch == '\n' || ch == '\r';
 }
 
-tuwString GetLastLine(const tuwString& str) noexcept {
+noex::string GetLastLine(const noex::string& str) noexcept {
     if (str.empty()) return "";
 
     const char* begin = str.begin();
@@ -248,45 +26,34 @@ tuwString GetLastLine(const tuwString& str) noexcept {
     return str.substr(static_cast<size_t>(sub_begin - begin), end - sub_begin + 1);
 }
 
-tuwWstring::tuwWstring(const wchar_t* str) noexcept :
-        m_str(nullptr), m_size(0) {
-    if (!str) return;
-
-    size_t size = wcslen(str);
-    if (size == 0)
-        return;
-
-    m_str = reinterpret_cast<wchar_t*>(malloc((size + 1) * sizeof(wchar_t)));
-    if (!m_str) {
-        SetStringError(STR_ALLOCATION_ERROR);
-        return;
-    }
-
-    m_size = size;
-    memcpy(m_str, str, size * sizeof(wchar_t));
-    m_str[size] = L'\0';
+noex::string envuStr(char *cstr) noexcept {
+    if (cstr == NULL)
+        return "";
+    noex::string str = cstr;
+    envuFree(cstr);
+    return str;
 }
 
 static const uint32_t FNV_OFFSET_BASIS_32 = 2166136261U;
 static const uint32_t FNV_PRIME_32 = 16777619U;
 
-uint32_t Fnv1Hash32(const tuwString& str) noexcept {
+uint32_t Fnv1Hash32(const noex::string& str) noexcept {
     uint32_t hash = FNV_OFFSET_BASIS_32;
     for (const char c : str) hash = (FNV_PRIME_32 * hash) ^ c;
     return hash;
 }
 
 #ifdef _WIN32
-tuwString UTF16toUTF8(const wchar_t* str) noexcept {
+noex::string UTF16toUTF8(const wchar_t* str) noexcept {
     char* uchar = toUTF8(str);
-    tuwString ustr = uchar;
+    noex::string ustr = uchar;
     uiprivFree(uchar);
     return ustr;
 }
 
-tuwWstring UTF8toUTF16(const char* str) noexcept {
+noex::wstring UTF8toUTF16(const char* str) noexcept {
     wchar_t* widechar = toUTF16(str);
-    tuwWstring wstr = widechar;
+    noex::wstring wstr = widechar;
     uiprivFree(widechar);
     return wstr;
 }
@@ -301,15 +68,12 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_end(va2);
     n++;
 
-    char* buf = reinterpret_cast<char *>(uiprivAlloc(n * sizeof (char), "char[]"));
-    vsprintf_s(buf, n, fmt, va);
+    noex::string buf = noex::string(n);
+    vsprintf_s(buf.data(), buf.size(), fmt, va);
     va_end(va);
 
-    WCHAR* wfmt = toUTF16(buf);
-    fwprintf(out, L"%ls", wfmt);
-
-    uiprivFree(buf);
-    uiprivFree(wfmt);
+    noex::wstring wbuf = UTF8toUTF16(buf.c_str());
+    fwprintf(out, L"%ls", wbuf.c_str());
 }
 
 // Enable ANSI escape sequences on the console window.
@@ -608,7 +372,7 @@ void ConvertAnsiToPango(TagStack* stack, const char *input, char *output) noexce
 class Logger {
  private:
     uiMultilineEntry* m_log_entry;
-    tuwString m_log_buffer;
+    noex::string m_log_buffer;
     TagStack m_tag_stack;  // stack for markup tags
     int m_buffer_length;
 
@@ -627,8 +391,8 @@ class Logger {
 
      void Log(const char* str) noexcept {
         int markup_length = ConvertAnsiToPangoLength(&m_tag_stack, str);
-        tuwString markup_str = tuwString(markup_length);
-        if (GetStringError() != STR_OK) return;  // failed to allocate buffer
+        noex::string markup_str = noex::string(markup_length);
+        if (noex::get_error_no() != noex::OK) return;  // failed to allocate buffer
         ConvertAnsiToPango(&m_tag_stack, str, markup_str.data());
         if (m_log_entry == NULL) {
             m_log_buffer += markup_str;
@@ -670,13 +434,10 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_copy(va2, va);
     size_t size = vsnprintf(NULL, 0, fmt, va2);
     va_end(va2);
-    tuwString buf_str = tuwString(size);
-    if (GetStringError() != STR_OK) return;  // failed to allocate buffer
-    char* buf = buf_str.data();
-    buf[size] = 0;
-    vsnprintf(buf, size + 1, fmt, va);
-    g_logger.Log(buf);
-    fprintf(out, "%s", buf);
+    noex::string buf = noex::string(size + 1);
+    vsnprintf(buf.data(), buf.size(), fmt, va);
+    g_logger.Log(buf.c_str());
+    fprintf(out, "%s", buf.c_str());
     va_end(va);
 }
 #endif

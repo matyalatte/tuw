@@ -21,7 +21,7 @@ enum ComponentType: int {
 };
 
 // Base class for GUI components (file picker, combo box, etc.)
-Component::Component(const rapidjson::Value& j) {
+Component::Component(const rapidjson::Value& j) noexcept {
     m_widget = nullptr;
     m_has_string = false;
     m_is_wide = false;
@@ -29,7 +29,7 @@ Component::Component(const rapidjson::Value& j) {
     m_id = json_utils::GetString(j, "id", "");
     if (m_id.empty()) {
         uint32_t hash = Fnv1Hash32(j["label"].GetString());
-        m_id = tuwString("_") + hash;
+        m_id = noex::string("_") + hash;
     }
     m_add_quotes = json_utils::GetBool(j, "add_quotes", false);
     if (j.HasMember("validator"))
@@ -39,21 +39,18 @@ Component::Component(const rapidjson::Value& j) {
     m_suffix = json_utils::GetString(j, "suffix", "");
 }
 
-Component::~Component() {
-}
-
-tuwString Component::GetString() {
-    tuwString str = GetRawString();
+noex::string Component::GetString() noexcept {
+    noex::string str = GetRawString();
     if (m_optional && str.empty())
         return "";
     if (m_add_quotes)
-        str = tuwString("\"") + str + "\"";
+        str = noex::string("\"") + str + "\"";
     return m_prefix + str + m_suffix;
 }
 
-bool Component::Validate(bool* redraw_flag) {
+bool Component::Validate(bool* redraw_flag) noexcept {
     // Main frame should run Fit() after this function.
-    tuwString str = GetRawString();
+    noex::string str = GetRawString();
     if (m_optional && str.empty())
         return true;
 
@@ -80,53 +77,64 @@ bool Component::Validate(bool* redraw_flag) {
     return validate;
 }
 
-const tuwString& Component::GetValidationError() const {
+const noex::string& Component::GetValidationError() const noexcept {
     return m_validator.GetError();
 }
 
-void Component::PutErrorWidget(uiBox* box) {
+void Component::PutErrorWidget(uiBox* box) noexcept {
     m_error_widget = uiNewLabel("");
     uiLabelSetTextColor(m_error_widget, 1.0, 0.0, 0.0);
     uiControlHide(uiControl(m_error_widget));
     uiBoxAppend(box, uiControl(m_error_widget), 0);
 }
 
-Component* Component::PutComponent(uiBox* box, const rapidjson::Value& j) {
+template <typename CompT>
+Component* NewComp(uiBox* box, const rapidjson::Value& j) noexcept {
+    CompT* comp = reinterpret_cast<CompT*>(calloc(1, sizeof(CompT)));
+    if (comp) {
+        new (comp) CompT(box, j);
+    } else {
+        noex::set_error_no(noex::EXTERNAL_ALLOCATION_ERROR);
+    }
+    return comp;
+}
+
+Component* Component::PutComponent(uiBox* box, const rapidjson::Value& j) noexcept {
     Component* comp = nullptr;
     int type = j["type_int"].GetInt();
     switch (type) {
         case COMP_STATIC_TEXT:
-            comp = new StaticText(box, j);
+            comp = NewComp<StaticText>(box, j);
             break;
         case COMP_FILE:
-            comp = new FilePicker(box, j);
+            comp = NewComp<FilePicker>(box, j);
             break;
         case COMP_FOLDER:
-            comp = new DirPicker(box, j);
+            comp = NewComp<DirPicker>(box, j);
             break;
         case COMP_COMBO:
-            comp = new ComboBox(box, j);
+            comp = NewComp<ComboBox>(box, j);
             break;
         case COMP_RADIO:
-            comp = new RadioButtons(box, j);
+            comp = NewComp<RadioButtons>(box, j);
             break;
         case COMP_CHECK:
-            comp = new CheckBox(box, j);
+            comp = NewComp<CheckBox>(box, j);
             break;
         case COMP_CHECK_ARRAY:
-            comp = new CheckArray(box, j);
+            comp = NewComp<CheckArray>(box, j);
             break;
         case COMP_TEXT:
-            comp = new TextBox(box, j);
+            comp = NewComp<TextBox>(box, j);
             break;
         case COMP_INT:
-            comp = new IntPicker(box, j);
+            comp = NewComp<IntPicker>(box, j);
             break;
         case COMP_FLOAT:
-            comp = new FloatPicker(box, j);
+            comp = NewComp<FloatPicker>(box, j);
             break;
         default:
-            comp = new EmptyComponent(box, j);
+            comp = NewComp<EmptyComponent>(box, j);
             break;
     }
     comp->PutErrorWidget(box);
@@ -134,7 +142,7 @@ Component* Component::PutComponent(uiBox* box, const rapidjson::Value& j) {
 }
 
 // Static Text
-StaticText::StaticText(uiBox* box, const rapidjson::Value& j)
+StaticText::StaticText(uiBox* box, const rapidjson::Value& j) noexcept
     : Component(j) {
     uiLabel* text = uiNewLabel(m_label.c_str());
     uiBoxAppend(box, uiControl(text), 0);
@@ -144,14 +152,14 @@ StaticText::StaticText(uiBox* box, const rapidjson::Value& j)
 
 // Base Class for strings
 StringComponentBase::StringComponentBase(
-    uiBox* box, const rapidjson::Value& j)
+    uiBox* box, const rapidjson::Value& j) noexcept
     : Component(j) {
     m_has_string = false;
     uiLabel* text = uiNewLabel(m_label.c_str());
     uiBoxAppend(box, uiControl(text), 0);
 }
 
-void StringComponentBase::GetConfig(rapidjson::Document& config) {
+void StringComponentBase::GetConfig(rapidjson::Document& config) noexcept {
     if (config.HasMember(m_id.c_str()))
         config.RemoveMember(m_id.c_str());
     rapidjson::Value n(m_id.c_str(), config.GetAllocator());
@@ -159,25 +167,25 @@ void StringComponentBase::GetConfig(rapidjson::Document& config) {
     config.AddMember(n, val, config.GetAllocator());
 }
 
-static uiWindow* GetToplevel(uiControl* c) {
+static uiWindow* GetToplevel(uiControl* c) noexcept {
     if (uiControlToplevel(c)) return uiWindow(c);
     return GetToplevel(uiControlParent(c));
 }
 
-static void onOpenFileClicked(uiButton *b, void *data) {
+static void onOpenFileClicked(uiButton *b, void *data) noexcept {
     FilePicker* picker = static_cast<FilePicker*>(data);
     picker->OpenFile();
     UNUSED(b);
 }
 
-static void onFilesDropped(uiEntry *e, int count, char** names, void *data) {
+static void onFilesDropped(uiEntry *e, int count, char** names, void *data) noexcept {
     if (count < 1) return;
     uiEntrySetText(e, names[0]);
     UNUSED(data);
 }
 
 static uiEntry *putPathPicker(void* component, uiBox* box, const rapidjson::Value& j,
-                              void (*click_func)(uiButton *sender, void *senderData)) {
+                              void (*click_func)(uiButton *sender, void *senderData)) noexcept {
     const char* value = json_utils::GetString(j, "default", "");
     const char* placeholder = json_utils::GetString(j, "placeholder", "");
     const char* button_label = json_utils::GetString(j, "button", "Browse");
@@ -207,22 +215,22 @@ static uiEntry *putPathPicker(void* component, uiBox* box, const rapidjson::Valu
 }
 
 // File Picker
-FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j)
+FilePicker::FilePicker(uiBox* box, const rapidjson::Value& j) noexcept
     : StringComponentBase(box, j) {
     m_is_wide = true;
     m_ext = json_utils::GetString(j, "extension", "any files (*.*)|*.*");
     m_widget = putPathPicker(this, box, j, onOpenFileClicked);
 }
 
-tuwString FilePicker::GetRawString() {
+noex::string FilePicker::GetRawString() noexcept {
     char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
-    tuwString str = text;
+    noex::string str = text;
     uiFreeText(text);
     return str;
 }
 
 static void setConfigForTextBox(const rapidjson::Value& config,
-                                const tuwString& id, void *widget) {
+                                const noex::string& id, void *widget) noexcept {
     const char* str = json_utils::GetString(config, id.c_str(), nullptr);
     if (str) {
         uiEntry* entry = static_cast<uiEntry*>(widget);
@@ -230,23 +238,37 @@ static void setConfigForTextBox(const rapidjson::Value& config,
     }
 }
 
-void FilePicker::SetConfig(const rapidjson::Value& config) {
+void FilePicker::SetConfig(const rapidjson::Value& config) noexcept {
     setConfigForTextBox(config, m_id, m_widget);
 }
 
 class Filter {
  private:
     const char* name;
-    std::vector<const char*> patterns;
+    noex::vector<const char*> patterns;
+
  public:
-    Filter(): name(), patterns() {}
-    void SetName(const char* n) {
+    Filter() noexcept : name(nullptr), patterns() {}
+
+    Filter(const Filter& filter) :
+        name(filter.name), patterns(filter.patterns) {}
+
+    Filter& operator=(const Filter& filter) {
+        if (this == &filter) return *this;
+        name = filter.name;
+        patterns = filter.patterns;
+        return *this;
+    }
+
+    void SetName(const char* n) noexcept {
         name = n;
     }
-    void AddPattern(const char* pattern) {
+
+    void AddPattern(const char* pattern) noexcept {
         patterns.emplace_back(pattern);
     }
-    uiFileDialogParamsFilter ToLibuiFilter() {
+
+    uiFileDialogParamsFilter ToLibuiFilter() const noexcept {
         return {
             name,
             patterns.size(),
@@ -257,78 +279,77 @@ class Filter {
 
 class FilterList {
  private:
-    char* filter_buf;
-    std::vector<Filter*> filters;
-    uiFileDialogParamsFilter* ui_filters;
+    noex::string filter_buf_str;
+    noex::vector<Filter> filters;
+    noex::vector<uiFileDialogParamsFilter> ui_filters;
 
  public:
-    FilterList(): filter_buf(NULL), filters(), ui_filters(NULL) {}
-    void MakeFilters(const tuwString& ext) {
-        if (filter_buf != NULL)
-            delete[] filter_buf;
-        filter_buf =  new char[ext.length() + 1];
+    FilterList() noexcept: filter_buf_str(), filters(), ui_filters() {}
+
+    void MakeFilters(const noex::string& ext) noexcept {
+        filter_buf_str = ext;
+        char* filter_buf = filter_buf_str.data();
+        if (!filter_buf) return;
+
         size_t i = 0;
         size_t start = 0;
         bool is_reading_pattern = false;
-        Filter* filter = new Filter();
+        Filter filter = Filter();
+
         for (const char c : ext) {
             if (c == '|') {
                 filter_buf[i] = 0;
                 if (is_reading_pattern) {
-                    filter->AddPattern(&filter_buf[start]);
+                    filter.AddPattern(&filter_buf[start]);
                     AddFilter(filter);
-                    filter = new Filter();
+                    filter = Filter();
                 } else {
-                    filter->SetName(&filter_buf[start]);
+                    filter.SetName(&filter_buf[start]);
                 }
                 is_reading_pattern = !is_reading_pattern;
                 start = i + 1;
             } else if (is_reading_pattern && (c == ';')) {
                 filter_buf[i] = 0;
-                filter->AddPattern(&filter_buf[start]);
+                filter.AddPattern(&filter_buf[start]);
                 start = i + 1;
             } else {
-                filter_buf[i] = c;
+                // filter_buf[i] = c;
             }
             i++;
         }
         filter_buf[i] = 0;
         if (is_reading_pattern) {
-            filter->AddPattern(&filter_buf[start]);
+            filter.AddPattern(&filter_buf[start]);
             AddFilter(filter);
         }
 
-        ui_filters = new uiFileDialogParamsFilter[filters.size()];
+        ui_filters.reserve(filters.size());
+        if (ui_filters.capacity() != filters.size()) {
+            // Failed to reserve the buffer.
+            filters.clear();
+            return;
+        }
         for (size_t j = 0; j < filters.size(); j++) {
-            ui_filters[j] = filters[j]->ToLibuiFilter();
+            ui_filters.push_back(filters[j].ToLibuiFilter());
         }
     }
 
-    ~FilterList() {
-        for (Filter* f : filters) {
-            if (f != NULL)
-                delete f;
-        }
-        if (filter_buf != NULL)
-            delete[] filter_buf;
-        if (ui_filters != NULL)
-            delete[] ui_filters;
+    ~FilterList() noexcept {}
+
+    void AddFilter(const Filter& f) noexcept {
+        filters.push_back(f);
     }
 
-    void AddFilter(Filter* f) {
-        filters.emplace_back(f);
-    }
-
-    size_t GetSize() {
+    size_t GetSize() const noexcept {
         return filters.size();
     }
 
-    uiFileDialogParamsFilter* ToLibuiFilterList() {
-        return ui_filters;
+    uiFileDialogParamsFilter* ToLibuiFilterList() const noexcept {
+        return ui_filters.data();
     }
 };
 
-void FilePicker::OpenFile() {
+void FilePicker::OpenFile() noexcept {
     uiEntry *entry = static_cast<uiEntry*>(m_widget);
     char *filename;
 
@@ -351,31 +372,31 @@ void FilePicker::OpenFile() {
     uiFreeText(filename);
 }
 
-static void onOpenFolderClicked(uiButton *b, void *data) {
+static void onOpenFolderClicked(uiButton *b, void *data) noexcept {
     DirPicker* picker = static_cast<DirPicker*>(data);
     picker->OpenFolder();
     UNUSED(b);
 }
 
 // Dir Picker
-DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j)
+DirPicker::DirPicker(uiBox* box, const rapidjson::Value& j) noexcept
     : StringComponentBase(box, j) {
     m_is_wide = true;
     m_widget = putPathPicker(this, box, j, onOpenFolderClicked);
 }
 
-tuwString DirPicker::GetRawString() {
+noex::string DirPicker::GetRawString() noexcept {
     char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
-    tuwString str = text;
+    noex::string str = text;
     uiFreeText(text);
     return str;
 }
 
-void DirPicker::SetConfig(const rapidjson::Value& config) {
+void DirPicker::SetConfig(const rapidjson::Value& config) noexcept {
     setConfigForTextBox(config, m_id, m_widget);
 }
 
-void DirPicker::OpenFolder() {
+void DirPicker::OpenFolder() noexcept {
     uiEntry *entry = uiEntry(m_widget);
     char *filename;
 
@@ -395,10 +416,10 @@ void DirPicker::OpenFolder() {
 }
 
 // ComboBox
-ComboBox::ComboBox(uiBox* box, const rapidjson::Value& j)
+ComboBox::ComboBox(uiBox* box, const rapidjson::Value& j) noexcept
     : StringComponentBase(box, j) {
     uiCombobox* combo = uiNewCombobox();
-    std::vector<tuwString> values;
+    noex::vector<noex::string> values;
     for (const rapidjson::Value& i : j["items"].GetArray()) {
         const char* label = i["label"].GetString();
         uiComboboxAppend(combo, label);
@@ -416,12 +437,12 @@ ComboBox::ComboBox(uiBox* box, const rapidjson::Value& j)
     m_widget = combo;
 }
 
-tuwString ComboBox::GetRawString() {
+noex::string ComboBox::GetRawString() noexcept {
     int sel = uiComboboxSelected(static_cast<uiCombobox*>(m_widget));
     return m_values[sel];
 }
 
-void ComboBox::SetConfig(const rapidjson::Value& config) {
+void ComboBox::SetConfig(const rapidjson::Value& config) noexcept {
     if (config.HasMember(m_id.c_str()) && config[m_id.c_str()].IsInt()) {
         int i = config[m_id.c_str()].GetInt();
         if (i >= 0 && i < static_cast<int>(m_values.size()))
@@ -429,7 +450,7 @@ void ComboBox::SetConfig(const rapidjson::Value& config) {
     }
 }
 
-void ComboBox::GetConfig(rapidjson::Document& config) {
+void ComboBox::GetConfig(rapidjson::Document& config) noexcept {
     if (config.HasMember(m_id.c_str()))
         config.RemoveMember(m_id.c_str());
     int sel = uiComboboxSelected(static_cast<uiCombobox*>(m_widget));
@@ -438,10 +459,10 @@ void ComboBox::GetConfig(rapidjson::Document& config) {
 }
 
 // RadioButtons
-RadioButtons::RadioButtons(uiBox* box, const rapidjson::Value& j)
+RadioButtons::RadioButtons(uiBox* box, const rapidjson::Value& j) noexcept
     : StringComponentBase(box, j) {
     uiRadioButtons* radio = uiNewRadioButtons();
-    std::vector<tuwString> values;
+    noex::vector<noex::string> values;
     for (const rapidjson::Value& i : j["items"].GetArray()) {
         const char* label = i["label"].GetString();
         uiRadioButtonsAppend(radio, label);
@@ -459,12 +480,12 @@ RadioButtons::RadioButtons(uiBox* box, const rapidjson::Value& j)
     m_widget = radio;
 }
 
-tuwString RadioButtons::GetRawString() {
+noex::string RadioButtons::GetRawString() noexcept {
     int sel = uiRadioButtonsSelected(static_cast<uiRadioButtons*>(m_widget));
     return m_values[sel];
 }
 
-void RadioButtons::SetConfig(const rapidjson::Value& config) {
+void RadioButtons::SetConfig(const rapidjson::Value& config) noexcept {
     if (config.HasMember(m_id.c_str()) && config[m_id.c_str()].IsInt()) {
         int i = config[m_id.c_str()].GetInt();
         if (i >= 0 && i < static_cast<int>(m_values.size()))
@@ -472,7 +493,7 @@ void RadioButtons::SetConfig(const rapidjson::Value& config) {
     }
 }
 
-void RadioButtons::GetConfig(rapidjson::Document& config) {
+void RadioButtons::GetConfig(rapidjson::Document& config) noexcept {
     if (config.HasMember(m_id.c_str()))
         config.RemoveMember(m_id.c_str());
     int sel = uiRadioButtonsSelected(static_cast<uiRadioButtons*>(m_widget));
@@ -481,7 +502,7 @@ void RadioButtons::GetConfig(rapidjson::Document& config) {
 }
 
 // CheckBox
-CheckBox::CheckBox(uiBox* box, const rapidjson::Value& j)
+CheckBox::CheckBox(uiBox* box, const rapidjson::Value& j) noexcept
     : Component(j) {
     m_has_string = true;
     uiCheckbox* check = uiNewCheckbox(m_label.c_str());
@@ -495,18 +516,18 @@ CheckBox::CheckBox(uiBox* box, const rapidjson::Value& j)
     m_widget = check;
 }
 
-tuwString CheckBox::GetRawString() {
+noex::string CheckBox::GetRawString() noexcept {
     if (uiCheckboxChecked(static_cast<uiCheckbox*>(m_widget)))
         return m_value;
     return "";
 }
 
-void CheckBox::SetConfig(const rapidjson::Value& config) {
+void CheckBox::SetConfig(const rapidjson::Value& config) noexcept {
     if (config.HasMember(m_id.c_str()) && config[m_id.c_str()].IsBool())
         uiCheckboxSetChecked(static_cast<uiCheckbox*>(m_widget), config[m_id.c_str()].GetBool());
 }
 
-void CheckBox::GetConfig(rapidjson::Document& config) {
+void CheckBox::GetConfig(rapidjson::Document& config) noexcept {
     if (config.HasMember(m_id.c_str()))
         config.RemoveMember(m_id.c_str());
     bool checked = uiCheckboxChecked(static_cast<uiCheckbox*>(m_widget));
@@ -515,10 +536,9 @@ void CheckBox::GetConfig(rapidjson::Document& config) {
 }
 
 // CheckArray
-CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
+CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j) noexcept
     : StringComponentBase(box, j) {
-    std::vector<uiCheckbox*>* checks = new std::vector<uiCheckbox*>();
-    std::vector<tuwString> values;
+    noex::vector<noex::string> values;
     uiBox* check_array_box = uiNewVerticalBox();
     uiBoxSetSpacing(check_array_box, tuw_constants::BOX_CHECKS_SPACE);
     size_t id = 0;
@@ -531,45 +551,41 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j)
             uiControlSetTooltip(uiControl(check),
                                             json_utils::GetString(i, "tooltip", ""));
         }
-        checks->emplace_back(check);
+        m_checks.push_back(check);
         const char* value = json_utils::GetString(i, "value", label);
         values.emplace_back(value);
         id++;
     }
     uiBoxAppend(box, uiControl(check_array_box), 0);
     SetValues(values);
-    m_widget = checks;
 }
 
-tuwString CheckArray::GetRawString() {
-    tuwString str;
-    std::vector<uiCheckbox*> checks;
-    checks = *(std::vector<uiCheckbox*>*)m_widget;
-    for (size_t i = 0; i < checks.size(); i++) {
-        if (uiCheckboxChecked(checks[i])) {
+noex::string CheckArray::GetRawString() noexcept {
+    noex::string str;
+    for (size_t i = 0; i < m_checks.size(); i++) {
+        if (uiCheckboxChecked(m_checks[i])) {
             str += m_values[i];
         }
     }
     return str;
 }
 
-void CheckArray::SetConfig(const rapidjson::Value& config) {
+void CheckArray::SetConfig(const rapidjson::Value& config) noexcept {
     if (config.HasMember(m_id.c_str()) && config[m_id.c_str()].IsArray()) {
-        std::vector<uiCheckbox*> checks = *(std::vector<uiCheckbox*>*)m_widget;
-        for (unsigned i = 0; i < config[m_id.c_str()].Size() && i < checks.size(); i++) {
+        for (unsigned i = 0; i < config[m_id.c_str()].Size() && i < m_checks.size(); i++) {
             if (config[m_id.c_str()][i].IsBool())
-                uiCheckboxSetChecked(checks[i], config[m_id.c_str()][i].GetBool());
+                uiCheckboxSetChecked(m_checks[i], config[m_id.c_str()][i].GetBool());
         }
     }
 }
 
-void CheckArray::GetConfig(rapidjson::Document& config) {
+void CheckArray::GetConfig(rapidjson::Document& config) noexcept {
     if (config.HasMember(m_id.c_str()))
         config.RemoveMember(m_id.c_str());
 
     rapidjson::Value ints;
     ints.SetArray();
-    for (uiCheckbox* check : *(std::vector<uiCheckbox*>*)m_widget) {
+    for (uiCheckbox* check : m_checks) {
         ints.PushBack(static_cast<bool>(uiCheckboxChecked(check)),
                       config.GetAllocator());
     }
@@ -578,7 +594,7 @@ void CheckArray::GetConfig(rapidjson::Document& config) {
 }
 
 // TextBox
-TextBox::TextBox(uiBox* box, const rapidjson::Value& j)
+TextBox::TextBox(uiBox* box, const rapidjson::Value& j) noexcept
     : StringComponentBase(box, j) {
     m_is_wide = true;
     const char* value = json_utils::GetString(j, "default", "");
@@ -592,18 +608,18 @@ TextBox::TextBox(uiBox* box, const rapidjson::Value& j)
     m_widget = entry;
 }
 
-tuwString TextBox::GetRawString() {
+noex::string TextBox::GetRawString() noexcept {
     char* text = uiEntryText(static_cast<uiEntry*>(m_widget));
-    tuwString str = text;
+    noex::string str = text;
     uiFreeText(text);
     return str;
 }
 
-void TextBox::SetConfig(const rapidjson::Value& config) {
+void TextBox::SetConfig(const rapidjson::Value& config) noexcept {
     setConfigForTextBox(config, m_id, m_widget);
 }
 
-static void initSpinbox(uiSpinbox* picker, uiBox* box, const rapidjson::Value& j) {
+static void initSpinbox(uiSpinbox* picker, uiBox* box, const rapidjson::Value& j) noexcept {
     uiBox* hbox = uiNewHorizontalBox();
     uiBoxAppend(hbox, uiControl(picker), 0);
     uiBoxAppend(box, uiControl(hbox), 0);
@@ -611,7 +627,7 @@ static void initSpinbox(uiSpinbox* picker, uiBox* box, const rapidjson::Value& j
         uiControlSetTooltip(uiControl(picker), json_utils::GetString(j, "tooltip", ""));
 }
 
-IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
+IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j) noexcept
     : StringComponentBase(box, j) {
     int min = json_utils::GetInt(j, "min", 0);
     int max = json_utils::GetInt(j, "max", 100);
@@ -639,14 +655,14 @@ IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j)
     m_widget = picker;
 }
 
-tuwString IntPicker::GetRawString() {
+noex::string IntPicker::GetRawString() noexcept {
     char* text = uiSpinboxValueText(static_cast<uiSpinbox*>(m_widget));
-    tuwString str(text);
+    noex::string str(text);
     uiFreeText(text);
     return str;
 }
 
-void IntPicker::GetConfig(rapidjson::Document& config) {
+void IntPicker::GetConfig(rapidjson::Document& config) noexcept {
     if (config.HasMember(m_id.c_str()))
         config.RemoveMember(m_id.c_str());
     rapidjson::Value n(m_id.c_str(), config.GetAllocator());
@@ -654,14 +670,14 @@ void IntPicker::GetConfig(rapidjson::Document& config) {
     config.AddMember(n, val, config.GetAllocator());
 }
 
-void IntPicker::SetConfig(const rapidjson::Value& config) {
+void IntPicker::SetConfig(const rapidjson::Value& config) noexcept {
     if (config.HasMember(m_id.c_str()) && config[m_id.c_str()].IsInt()) {
         int val = config[m_id.c_str()].GetInt();
         uiSpinboxSetValue(static_cast<uiSpinbox*>(m_widget), val);
     }
 }
 
-FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
+FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j) noexcept
     : StringComponentBase(box, j) {
     double min = json_utils::GetDouble(j, "min", 0.0);
     double max = json_utils::GetDouble(j, "max", 100.0);
@@ -685,14 +701,14 @@ FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j)
     m_widget = picker;
 }
 
-tuwString FloatPicker::GetRawString() {
+noex::string FloatPicker::GetRawString() noexcept {
     char* text = uiSpinboxValueText(static_cast<uiSpinbox*>(m_widget));
-    tuwString str(text);
+    noex::string str(text);
     uiFreeText(text);
     return str;
 }
 
-void FloatPicker::GetConfig(rapidjson::Document& config) {
+void FloatPicker::GetConfig(rapidjson::Document& config) noexcept {
     if (config.HasMember(m_id.c_str()))
         config.RemoveMember(m_id.c_str());
     rapidjson::Value n(m_id.c_str(), config.GetAllocator());
@@ -700,7 +716,7 @@ void FloatPicker::GetConfig(rapidjson::Document& config) {
     config.AddMember(n, val, config.GetAllocator());
 }
 
-void FloatPicker::SetConfig(const rapidjson::Value& config) {
+void FloatPicker::SetConfig(const rapidjson::Value& config) noexcept {
     if (config.HasMember(m_id.c_str()) && config[m_id.c_str()].IsDouble()) {
         double val = config[m_id.c_str()].GetDouble();
         uiSpinboxSetValueDouble(static_cast<uiSpinbox*>(m_widget), val);
