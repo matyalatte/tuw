@@ -100,7 +100,8 @@ basic_string<charT>::basic_string(size_t size) noexcept : m_size(size), m_capaci
     }
 }
 
-static const char dummy[2] = { 0, 0 };
+// We use 4-byte null as a dummy string as wchar_t can be UTF-32.
+static const char dummy[4] = { 0, 0, 0, 0 };
 
 template <typename charT>
 const charT* basic_string<charT>::c_str() const noexcept {
