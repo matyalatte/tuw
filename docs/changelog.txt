@@ -1,3 +1,11 @@
+ver 0.8.1
+- Fixed a memory leak on Linux. (#59)
+- Removed std::exception from tuw. (#63)
+  (but libui still uses STL for Windows build.)
+- Linux/UNIX packages now uses .tar.xz as a compression format. (#62)
+- Universal binary became optional on macOS. (#64)
+- Added arm64-only build to the release packages for macOS. (#64)
+
 ver 0.8.0
 - Array brackets can now be omitted when there is only one element.
 - GUI elements can now be defined in root object.
