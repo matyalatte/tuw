@@ -19,8 +19,7 @@ You can install meson and ninja via Homebrew. (`brew install meson ninja`)
 
 ## Build
 
-Run `bash shell_scripts/build.sh`.  
-The executable will be generated in `build/Release/`.  
+Run `bash shell_scripts/build.sh`. The executable will be generated in `build/Release/`. You can also use `shell_scripts/build_universal.sh` instead of `build.sh` to build universal binary.
 
 ## Debug
 
