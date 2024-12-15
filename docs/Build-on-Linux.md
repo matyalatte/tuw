@@ -48,9 +48,9 @@ Required GLIBC versions
 2.4
 2.7
 2.15
+2.28
 Required GLIBCXX versions
 3.4
-3.4.21
 ```
 
 ## Dockerfiles
