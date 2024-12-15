@@ -42,7 +42,7 @@ You can download executables from [the release page](https://github.com/matyalat
 -   `Tuw-*-Windows-*.zip` is for Windows (7 or later.)  
 -   `Tuw-*-Windows10-*.zip` requires Windows 10 or later, but it's much smaller than the standard version.  
 -   `Tuw-*-macOS.tar.xz` is for macOS (10.9 or later.)  
--   `Tuw-*-Linux-*.tar.xz` is for Linux (with GTK3.14, GLIBC2.15, and GLIBCXX3.4.21, or later versions of the libraries.)  
+-   `Tuw-*-Linux-*.tar.xz` is for Linux (with GTK3.14, GLIBC2.28, and GLIBCXX3.4, or later versions of the libraries.)  
 
 > [!Note]
 > Tuw also supports [Linux distributions using musl](https://github.com/matyalatte/tuw/blob/main/docs/Build-on-Linux.md) and [other Unix-like systems (BSD, Haiku, illumos, etc.)](https://github.com/matyalatte/Tuw/blob/main/docs/Build-on-Other.md). While there is no release package available for these systems, you can build Tuw from the source code.
