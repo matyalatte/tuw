@@ -26,7 +26,13 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
     bool ignore_external_json = false;
 
     bool exists_external_json = true;
-    if (!json_path) {
+    noex::string workdir;
+    if (json_path) {
+        char* full_json_path = envuGetFullPath(json_path);
+        workdir = envuStr(envuGetDirectory(full_json_path));
+        envuFree(full_json_path);
+    } else {
+        workdir = envuStr(envuGetDirectory(exe_path.c_str()));
         // Find gui_definition.json
         json_path = DEF_JSON;
         if (!envuFileExists(json_path)) {
@@ -62,7 +68,7 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
                 if (!result.ok)
                     m_definition.SetObject();
             } else {
-                result = { false, "gui_definition.json not found." };
+                result = { false, noex::string(json_path) + " not found." };
             }
         }
     }
@@ -90,6 +96,17 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
 #ifdef __TUW_UNIX__
     uiMainStep(1);  // Need uiMainStep before using uiMsgBox
 #endif
+
+    // Set working directory
+    if (workdir.empty()) {
+        // Failed to determine a workdir.
+        char* cwd = envuGetCwd();
+        PrintFmt("[LoadDefinition] CWD: %s\n", cwd);
+        envuFree(cwd);
+    } else {
+        PrintFmt("[LoadDefinition] CWD: %s\n", workdir.c_str());
+        envuSetCwd(workdir.c_str());
+    }
 
     if (ignore_external_json) {
         noex::string msg = noex::string("WARNING: Using embedded JSON. ") +

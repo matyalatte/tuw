@@ -214,11 +214,8 @@ int main(int argc, char* argv[]) noexcept {
         args.emplace_back(argv[i]);
 #endif
     }
-    char *exe_path_cstr = envuGetExecutablePath();
-    char *exe_dir = envuGetDirectory(exe_path_cstr);
-    envuSetCwd(exe_dir);
-    noex::string exe_path = envuStr(exe_path_cstr);
-    envuFree(exe_dir);
+
+    noex::string exe_path = envuStr(envuGetExecutablePath());
 
     // Launch GUI if no args.
     if (argc <= 1) return main_app();

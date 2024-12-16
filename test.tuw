@@ -1,0 +1,238 @@
+{
+    "recommended": "0.5.0",
+    "minimum_required": "0.5.0",
+    "gui": [
+        {
+            "label": "IDs",
+            "command": "echo hello 1>&2",
+            "components": []
+        },
+        {
+            "label": "utf.py",
+            "command": "python\\python utf.py",
+            "codepage": "utf-8",
+            "components": []
+        },
+        {
+            "label": "Components Minimal",
+            "show_success_dialog": false,
+            "command": "echo file: %-% & echo folder: %-% & echo combo: %-% & echo check: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-% & echo float: %-%",
+            "components": [
+                {
+                    "type": "static_text",
+                    "label": "All components with their required keys."
+                },
+                {
+                    "type": "file",
+                    "label": "Some file path"
+                },
+                {
+                    "type": "folder",
+                    "label": "Some folder path"
+                },
+                {
+                    "type": "radio",
+                    "label": "combo box",
+                    "items": [
+                        {
+                            "label": "value1"
+                        },
+                        {
+                            "label": "value2"
+                        },
+                        {
+                            "label": "value3"
+                        }
+                    ]
+                },
+                {
+                    "type": "check",
+                    "label": "flag!"
+                },
+                {
+                    "type": "check_array",
+                    "label": "options",
+                    "items": [
+                        {
+                            "label": "flag1"
+                        },
+                        {
+                            "label": "flag2"
+                        },
+                        {
+                            "label": "flag3"
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "label": "text box"
+                },
+                {
+                    "type": "int",
+                    "label": "Int picker"
+                },
+                {
+                    "type": "float",
+                    "label": "Float picker"
+                }
+            ]
+        },
+        {
+            "label": "Components Optional",
+            "command": "echo file: %file% & echo folder: %folder% & echo combo: %combo% & echo check: %check% & echo check_array: %options% & echo textbox: %text% & echo int: %integer% & echo float: %double%",
+            "components": [
+                {
+                    "type": "static_text",
+                    "label": "All components with their optional keys.",
+                    "platforms": ["win", "linux", "mac"]
+                },
+                {
+                    "type": "file",
+                    "label": "PNG or JPG",
+                    "id": "file",
+                    "extension": "png or jpg (*.png;*.jpg)|*.png;*.jpg|all|*",
+                    "placeholder": "Drop a file here!",
+                    "button": "...",
+                    "default": "test.txt",
+                    "add_quotes": true,
+                    "tooltip": "Tooltip!",
+                    "platforms": ["win", "linux", "mac"],
+                    "validator": {
+                        "exist_error": "",
+                        "wildcard_error": "",
+                        "regex_error": "",
+                        "not_empty_error": ""
+                    }
+                },
+                {
+                    "type": "folder",
+                    "label": "Folder path",
+                    "id": "folder",
+                    "placeholder": "Drop a folder here!",
+                    "button": "Browse",
+                    "default": "testdir",
+                    "add_quotes": true,
+                    "tooltip": "Tooltip?",
+                    "platforms": ["win", "linux", "mac"]
+                },
+                {
+                    "type": "radio",
+                    "label": "Combo box",
+                    "id": "combo",
+                    "items": [
+                        {
+                            "label": "item1",
+                            "value": "value1"
+                        },
+                        {
+                            "label": "item2",
+                            "value": "value2"
+                        },
+                        {
+                            "label": "item3",
+                            "value": "value3"
+                        }
+                    ],
+                    "default": 2,
+                    "tooltip": "choose one of items.",
+                    "platforms": ["win", "linux", "mac"]
+                },
+                {
+                    "type": "check",
+                    "label": "Checkbox",
+                    "id": "check",
+                    "value": "flag!",
+                    "default": true,
+                    "tooltip": "check this flag!",
+                    "platforms": ["win", "linux", "mac"]
+                },
+                {
+                    "type": "check_array",
+                    "label": "Options",
+                    "id": "options",
+                    "items": [
+                        {
+                            "label": "item1",
+                            "value": " --f1",
+                            "default": false,
+                            "tooltip": "flag1"
+                        },
+                        {
+                            "label": "item2",
+                            "value": " --f2",
+                            "default": true,
+                            "tooltip": "flag2"
+                        },
+                        {
+                            "label": "item3",
+                            "value": " --f3",
+                            "default": false,
+                            "tooltip": "flag3"
+                        }
+                    ],
+                    "platforms": ["win", "linux", "mac"]
+                },
+                {
+                    "type": "text",
+                    "label": "Text box",
+                    "id": "text",
+                    "placeholder": "type here!",
+                    "default": "remove this text!",
+                    "tooltip": "text box.",
+                    "platforms": ["win", "linux", "mac"]
+                },
+                {
+                    "type": "int",
+                    "label": "Int picker",
+                    "id": "integer",
+                    "default": 10,
+                    "min": -50,
+                    "max": 50,
+                    "inc": 10,
+                    "wrap": true,
+                    "tooltip": "int!",
+                    "platforms": ["win", "linux", "mac"]
+                },
+                {
+                    "type": "float",
+                    "label": "Float picker",
+                    "id": "double",
+                    "default": 0.01,
+                    "min": 0,
+                    "max": 1,
+                    "digits": 2,
+                    "inc": 0.01,
+                    "wrap": false,
+                    "tooltip": "float!",
+                    "platforms": ["win", "linux", "mac"]
+                }
+            ]
+        },
+        {
+            "label": "GUI Optional",
+            "window_name": "Window Title Here",
+            "command_win": "color.bat",
+            "command_linux": "echo home: %__HOME__%; echo cwd: %__CWD__%; echo percent: %%; echo sample message!",
+            "command_mac": "echo home: %__HOME__%; echo cwd: %__CWD__%; echo percent: %%; echo sample message!",
+            "show_success_dialog": true,
+            "button": "Run!",
+            "show_last_line": true,
+            "check_exit_code": true,
+            "exit_success": 0,
+            "components": [
+                {
+                    "type": "static_text",
+                    "label": "show_last_line can show a message."
+                }
+            ]
+        }
+    ],
+    "help": [
+        {
+            "type": "url",
+            "label": "test",
+            "url":"http://test.com"
+        }
+    ]
+}
