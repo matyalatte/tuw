@@ -12,7 +12,7 @@
 #include "string_utils.h"
 #include "tuw_constants.h"
 
-int main_app() noexcept {
+int main_app(const char* json_path = nullptr) noexcept {
 #ifdef _WIN32
     // Enable ANSI escape sequences on the console window.
     EnableCSI();
@@ -34,7 +34,7 @@ int main_app() noexcept {
     uiMainSteps();
 #endif
 
-    MainFrame main_frame = MainFrame();
+    MainFrame main_frame = MainFrame(json_path);
     uiMain();
     return 0;
 }
@@ -221,8 +221,12 @@ int main(int argc, char* argv[]) noexcept {
     envuFree(exe_dir);
 
     // Launch GUI if no args.
-    if (argc == 1) return main_app();
+    if (argc <= 1) return main_app();
 
+    // Launch GUI with a JSON path.
+    if (args[1].contains('.')) return main_app(args[1].c_str());
+
+    // Run as a CLI tool
     const char* cmd_str = args[1].c_str();
     int cmd_int = CmdToInt(cmd_str);
     if (cmd_int == CMD_UNKNOWN) {

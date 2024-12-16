@@ -10,8 +10,9 @@ constexpr char DEF_JSON[] = "gui_definition.json";
 constexpr char DEF_JSONC[] = "gui_definition.jsonc";
 
 // Main window
-MainFrame::MainFrame(const rapidjson::Document& definition,
-                     const rapidjson::Document& config) noexcept {
+void MainFrame::Initialize(const rapidjson::Document& definition,
+                           const rapidjson::Document& config,
+                           const char* json_path) noexcept {
     PrintFmt("%s v%s by %s\n", tuw_constants::TOOL_NAME,
               tuw_constants::VERSION, tuw_constants::AUTHOR);
     PrintFmt(tuw_constants::LOGO);
@@ -23,19 +24,21 @@ MainFrame::MainFrame(const rapidjson::Document& definition,
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
     bool ignore_external_json = false;
-    const char* json_path = DEF_JSON;
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
-        bool exists_external_json = true;
+
+    bool exists_external_json = true;
+    if (!json_path) {
         // Find gui_definition.json
-        if (!envuFileExists(DEF_JSON)) {
+        json_path = DEF_JSON;
+        if (!envuFileExists(json_path)) {
             // Find gui_definition.jsonc
             if (envuFileExists(DEF_JSONC))
                 json_path = DEF_JSONC;
-            else
-                exists_external_json = false;
         }
+    }
+    exists_external_json = envuFileExists(json_path);
 
+    json_utils::JsonResult result = JSON_RESULT_OK;
+    if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
         ExeContainer exe;
 
         result = exe.Read(exe_path);

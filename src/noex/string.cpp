@@ -238,7 +238,7 @@ template <typename charT>
 const size_t basic_string<charT>::npos = static_cast<size_t>(-1);
 
 template <typename charT>
-size_t basic_string<charT>::find(const charT c) const noexcept {
+size_t basic_string<charT>::find(charT c) const noexcept {
     if (empty()) return npos;
     const charT* p = begin();
     for (; p < end(); p++) {
