@@ -89,13 +89,23 @@ class basic_string {
     }
 
     static const size_t npos;
-    size_t find(const charT c) const noexcept;
+    size_t find(charT c) const noexcept;
     size_t find(const charT* str) const noexcept;
     inline size_t find(const basic_string& str) const noexcept {
         return find(str.c_str());
     }
 
-    inline void push_back(const charT c) noexcept {
+    inline bool contains(charT c) const noexcept {
+        return find(c) != npos;
+    }
+    inline bool contains(const charT* str) const noexcept {
+        return find(str) != npos;
+    }
+    inline bool contains(const basic_string& str) const noexcept {
+        return find(str) != npos;
+    }
+
+    inline void push_back(charT c) noexcept {
         this->append(&c, 1);
     }
 
