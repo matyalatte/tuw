@@ -105,6 +105,8 @@ class basic_string {
         return find(str) != npos;
     }
 
+    bool starts_with(const charT* str) const noexcept;
+
     inline void push_back(charT c) noexcept {
         this->append(&c, 1);
     }

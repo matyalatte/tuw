@@ -268,6 +268,12 @@ size_t basic_string<charT>::find(const charT* str) const noexcept {
 }
 
 template <typename charT>
+bool basic_string<charT>::starts_with(const charT* str) const noexcept {
+    size_t len = get_strlen(str);
+    return m_size >= len && streq(str, substr(0, len).c_str());
+}
+
+template <typename charT>
 basic_string<charT> basic_string<charT>::substr(size_t start, size_t size) const noexcept {
     if (start + size > m_size) {
         set_error_no(STR_BOUNDARY_ERROR);
