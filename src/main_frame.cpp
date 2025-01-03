@@ -97,15 +97,20 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
     uiMainStep(1);  // Need uiMainStep before using uiMsgBox
 #endif
 
-    // Set working directory
-    if (workdir.empty()) {
-        // Failed to determine a workdir.
+    if (!workdir.empty()) {
+        // Set working directory
+        int ret = envuSetCwd(workdir.c_str());
+        if (ret != 0) {
+            // Failed to set CWD
+            PrintFmt("[LoadDefinition] Failed to set a path as CWD. (%s)\n", workdir.c_str());
+        }
+    }
+
+    {
+        // Show CWD
         char* cwd = envuGetCwd();
         PrintFmt("[LoadDefinition] CWD: %s\n", cwd);
         envuFree(cwd);
-    } else {
-        PrintFmt("[LoadDefinition] CWD: %s\n", workdir.c_str());
-        envuSetCwd(workdir.c_str());
     }
 
     if (ignore_external_json) {
