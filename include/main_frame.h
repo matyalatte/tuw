@@ -13,6 +13,8 @@ struct MenuData {
     int menu_id;
 };
 
+#define EMPTY_DOCUMENT rapidjson::Document(rapidjson::kObjectType)
+
 // Main window
 class MainFrame {
  private:
@@ -47,10 +49,20 @@ class MainFrame {
     void JsonLoadFailed(const noex::string& msg) noexcept;
 
  public:
-    explicit MainFrame(const rapidjson::Document& definition =
-                           rapidjson::Document(rapidjson::kObjectType),
-                       const rapidjson::Document& config =
-                           rapidjson::Document(rapidjson::kObjectType)) noexcept;
+    explicit MainFrame(const rapidjson::Document& definition = EMPTY_DOCUMENT,
+                       const rapidjson::Document& config = EMPTY_DOCUMENT,
+                       const char* json_path = nullptr) noexcept {
+        Initialize(definition, config, json_path);
+    }
+
+    explicit MainFrame(const char* json_path) noexcept {
+        Initialize(EMPTY_DOCUMENT, EMPTY_DOCUMENT, json_path);
+    }
+
+    void Initialize(const rapidjson::Document& definition,
+                    const rapidjson::Document& config,
+                    const char* json_path) noexcept;
+
     void UpdatePanel(unsigned definition_id) noexcept;
     void OpenURL(int id) noexcept;
     bool Validate() noexcept;
