@@ -208,13 +208,13 @@ int main(int argc, char* argv[]) noexcept {
 #endif  // _WIN32
     noex::vector<noex::string> args;
     for (int i = 0; i < argc; i++) {
-#if defined(__APPLE__)
+#ifdef __APPLE__
         // Note: When you run Tuw as a macOS application,
         //       The first argument will be its PSN (process serial number).
         noex::string arg = argv[i];
         if (arg.starts_with("-psn_"))
             continue;  // Ignore the PSN
-#endif  // defined(__APPLE__)
+#endif  // __APPLE__
 #ifdef _WIN32
         args.emplace_back(UTF16toUTF8(argv[i]));
 #else
