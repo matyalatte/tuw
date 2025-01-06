@@ -288,6 +288,20 @@ TEST(StringTest, Pushback) {
     expect_tuwstr("test", str);
 }
 
+// Test starts_with()
+TEST(StringTest, StartsWith) {
+    noex::string str = "teststr";
+    EXPECT_TRUE(str.starts_with("t"));
+    EXPECT_TRUE(str.starts_with("test"));
+    EXPECT_TRUE(str.starts_with("teststr"));
+    EXPECT_FALSE(str.starts_with("e"));
+    EXPECT_FALSE(str.starts_with("est"));
+    EXPECT_FALSE(str.starts_with("teststrt"));
+    str = "-psn_0_xxxxxx";
+    EXPECT_TRUE(str.starts_with("-psn_"));
+    EXPECT_FALSE(str.starts_with("-help"));
+}
+
 // Test substr()
 TEST(StringTest, Substr) {
     noex::string str = "footestfoo";

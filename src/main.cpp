@@ -205,20 +205,27 @@ int wmain(int argc, wchar_t* argv[]) noexcept {
     setlocale(LC_CTYPE, "");
 #else
 int main(int argc, char* argv[]) noexcept {
-#endif
+#endif  // _WIN32
     noex::vector<noex::string> args;
     for (int i = 0; i < argc; i++) {
+#ifdef __APPLE__
+        // Note: When you run Tuw as a macOS application,
+        //       The first argument will be its PSN (process serial number).
+        noex::string arg = argv[i];
+        if (arg.starts_with("-psn_"))
+            continue;  // Ignore the PSN
+#endif  // __APPLE__
 #ifdef _WIN32
         args.emplace_back(UTF16toUTF8(argv[i]));
 #else
         args.emplace_back(argv[i]);
-#endif
+#endif  // _WIN32
     }
 
     noex::string exe_path = envuStr(envuGetExecutablePath());
 
     // Launch GUI if no args.
-    if (argc <= 1) return main_app();
+    if (args.size() <= 1) return main_app();
 
     // Launch GUI with a JSON path.
     if (args[1].contains('.')) return main_app(args[1].c_str());
@@ -236,10 +243,10 @@ int main(int argc, char* argv[]) noexcept {
     noex::string new_exe_path;
     bool force = false;
 
-    for (int i = 2; i < argc; i++) {
+    for (size_t i = 2; i < args.size(); i++) {
         const char* opt_str = args[i].c_str();
         int opt_int = OptToInt(opt_str);
-        if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && argc <= i + 1) {
+        if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && args.size() <= i + 1) {
             PrintUsage();
             fprintf(stderr, "Error: This option requires a file path. (%s)\n", opt_str);
             return 1;
