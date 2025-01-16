@@ -146,24 +146,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [ x64, arm64 ]
-    runs-on: ubuntu-latest
+        include:
+          - host: ubuntu-latest
+            arch: x64
+          - host: ubuntu-24.04-arm
+            arch: arm64
+
+    runs-on: ${{ matrix.host }}
     needs: setup
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build x64 version on Ubuntu 20.04
-        if : matrix.arch == 'x64'
+      - name: Build with docker
         run: |
           sudo apt-get update
           docker build -t tuw_ubuntu -f docker/ubuntu.dockerfile ./
-
-      - name: Build ARM64 version on Ubuntu 20.04
-        if : matrix.arch == 'arm64'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qemu-user-static binfmt-support
-          docker buildx build --platform linux/arm64 -t tuw_ubuntu -f docker/ubuntu.dockerfile ./
 
       - name: Copy files
         run: |
