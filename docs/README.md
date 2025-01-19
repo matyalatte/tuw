@@ -61,9 +61,12 @@ You can use it to validate definitions while editing files.
 For VSCode, you can add the schema path to `settings.json` (`File > Preferences > Settings > JSON:Schemas > Edit in settings.json`.)  
 
 ```json
+"files.associations": {
+    "*.tuw": "jsonc"
+},
 "json.schemas": [
     {
-        "fileMatch": [ "gui_definition.json", "gui_definition.jsonc" ],
+        "fileMatch": [ "gui_definition.json", "gui_definition.jsonc", "*.tuw" ],
         "url": "https://raw.githubusercontent.com/matyalatte/tuw/main/schema/schema.json"
     }
 ]

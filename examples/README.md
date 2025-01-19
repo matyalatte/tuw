@@ -6,8 +6,9 @@ You can see some JSON files to learn how to use Tuw.
 
 -   [Minimal](./get_start/minimal/): Example for a minimal GUI.
 -   [Title and Button](./get_start/title_button/): Options to rename the window title and the execution button.
--   [Putting Components](./get_start/put_component/): Example for a text box.
+-   [Put Components](./get_start/put_component/): Example for a text box.
 -   [JSON Embedding](./get_start/json_embed): You can embed JSON into exe!
+-   [Open a JSON with Tuw](./get_start/open_json_with_tuw): You can open any JSON files with Tuw to launch GUI!
 
 ![minimal](https://github.com/matyalatte/tuw/assets/69258547/7be563b8-1ee0-4500-94c4-5ca575ad185f)  
 

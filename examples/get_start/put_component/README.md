@@ -1,4 +1,4 @@
-# Putting Components
+# Put Components
 
 You can put a text box in the GUI.  
 
