@@ -1,8 +1,6 @@
 # Open a JSON file with Tuw
 
-Tuw can take the first argument as a JSON path if the path includes a file extension. 
-By renaming your JSON files to `*.tuw` and setting Tuw as a default application for `*.tuw` files, 
-you can launch GUIs just by clicking on these files.  
+Tuw can take the first argument as a JSON path if the path includes a file extension. By renaming your JSON files to `*.tuw` and setting Tuw as a default application for `*.tuw` files, you can launch GUIs just by clicking on the files.  
 
 ![default app](https://github.com/user-attachments/assets/73e42775-d609-4f0d-b2a1-43cb8f4455cf)
 
@@ -24,7 +22,7 @@ On Windows, setting Tuw as the default application is straightforward. However, 
 </mime-info>
 ```
 
-### 2. Make `~/.local/share/applications/tuw.desktop`.
+### 2. Make `~/.local/share/applications/tuw.desktop`
 
 Replace `/full/path/to/Tuw` with your path to Tuw. And save it as `tuw.desktop`.
 
@@ -41,10 +39,13 @@ Categories=Utility;Application;
 ```
 
 ### 3. Update database
+
+You can apply the changes with the following commands.
+
 ```console
-$ update-mime-database ~/.local/share/mime
-$ update-desktop-database ~/.local/share/applications/
-$ xdg-mime default tuw.desktop application/x-tuw
+update-mime-database ~/.local/share/mime
+update-desktop-database ~/.local/share/applications/
+xdg-mime default tuw.desktop application/x-tuw
 ```
 
 ## macOS 10.15
@@ -67,9 +68,8 @@ on open fileList
 end open
 ```
 
-### 2. Export the script as an application. (File > Export...)
+### 2. Export the script as an application (File > Export...)
 
 ![export_applescript](https://github.com/user-attachments/assets/29a9f20f-804c-46ac-b134-a1a127b84153)
 
-
-### 3. Right click a .tuw file and set Tuw as a default application.
+### 3. Right click a .tuw file and set Tuw as a default application
