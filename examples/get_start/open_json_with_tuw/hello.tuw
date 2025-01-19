@@ -1,0 +1,13 @@
+{
+    "gui": {
+        "window_name": "Title here!",
+        "command": "echo %-%",
+        "button": "Hello!",
+        "components": [
+            {
+                "type": "text",
+                "label": "Type 'Hello!'"
+            }
+        ]
+    }
+}

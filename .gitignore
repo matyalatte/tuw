@@ -6,6 +6,8 @@
 *.jsonc
 !examples/**/gui_definition.jsonc
 !tests/**/*.jsonc
+*.tuw
+!examples/**/*.tuw
 
 *.txt
 !changelog.txt

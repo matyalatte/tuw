@@ -1,3 +1,14 @@
+ver 0.9.0
+- Tuw now takes the first argument as a JSON path. (#67)
+  (You can now launch GUI just by clicking *.tuw files
+   if you rename JSON files to *.tuw and set Tuw as a default application for opening *.tuw.)
+- Tuw now uses the default CWD to resolve paths in command-line arguments. (#67)
+  (Old versions used executable's directory as CWD.)
+- Fixed an error when launching tuw as a macOS application. (#68)
+- Disabled the best-fit mapping on Windows to remove potential issues. (#71)
+- Disabled c++ stack unwinding on Linux and macOS. (#72)
+- Uploaded source files with subprojects to the release page. (#69)
+
 ver 0.8.1
 - Fixed a memory leak on Linux. (#59)
 - Removed std::exception from tuw. (#63)
