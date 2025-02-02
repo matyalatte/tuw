@@ -505,6 +505,7 @@ namespace json_utils {
             switch (type) {
                 case COMP_FILE:
                     CheckJsonType(result, c, "extension", JsonType::STRING, label, OPTIONAL);
+                    CheckJsonType(result, c, "use_save_dialog", JsonType::BOOLEAN, label, OPTIONAL);
                     /* Falls through. */
                 case COMP_FOLDER:
                     CheckJsonType(result, c, "button", JsonType::STRING, label, OPTIONAL);

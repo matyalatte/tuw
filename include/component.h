@@ -75,6 +75,7 @@ class StringComponentBase : public Component {
 class FilePicker : public StringComponentBase {
  private:
     noex::string m_ext;
+    bool m_use_save_dialog;
  public:
     noex::string GetRawString() noexcept override;
     FilePicker(uiBox* box, const rapidjson::Value& j) noexcept;
