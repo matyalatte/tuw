@@ -15,6 +15,9 @@ struct MenuData {
 
 #define EMPTY_DOCUMENT rapidjson::Document(rapidjson::kObjectType)
 
+// Get "gui_definition.*"
+noex::string GetDefaultJsonPath();
+
 // Main window
 class MainFrame {
  private:
@@ -61,7 +64,7 @@ class MainFrame {
 
     void Initialize(const rapidjson::Document& definition,
                     const rapidjson::Document& config,
-                    const char* json_path) noexcept;
+                    noex::string json_path) noexcept;
 
     void UpdatePanel(unsigned definition_id) noexcept;
     void OpenURL(int id) noexcept;

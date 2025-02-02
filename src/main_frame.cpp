@@ -6,13 +6,20 @@
 #include "string_utils.h"
 #include "tuw_constants.h"
 
-constexpr char DEF_JSON[] = "gui_definition.json";
-constexpr char DEF_JSONC[] = "gui_definition.jsonc";
+noex::string GetDefaultJsonPath() {
+    noex::string def_name = "gui_definition.";
+    for (const char* ext : { "jsonc", "tuw" }) {
+        noex::string json_path = def_name + ext;
+        if (envuFileExists(json_path.c_str()))
+            return json_path;
+    }
+    return def_name + "json";
+}
 
 // Main window
 void MainFrame::Initialize(const rapidjson::Document& definition,
                            const rapidjson::Document& config,
-                           const char* json_path) noexcept {
+                           noex::string json_path) noexcept {
     PrintFmt("%s v%s by %s\n", tuw_constants::TOOL_NAME,
               tuw_constants::VERSION, tuw_constants::AUTHOR);
     PrintFmt(tuw_constants::LOGO);
@@ -27,21 +34,16 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
 
     bool exists_external_json = true;
     noex::string workdir;
-    if (json_path) {
-        char* full_json_path = envuGetFullPath(json_path);
+    if (!json_path.empty()) {
+        char* full_json_path = envuGetFullPath(json_path.c_str());
         workdir = envuStr(envuGetDirectory(full_json_path));
         envuFree(full_json_path);
     } else {
         workdir = envuStr(envuGetDirectory(exe_path.c_str()));
         // Find gui_definition.json
-        json_path = DEF_JSON;
-        if (!envuFileExists(json_path)) {
-            // Find gui_definition.jsonc
-            if (envuFileExists(DEF_JSONC))
-                json_path = DEF_JSONC;
-        }
+        json_path = GetDefaultJsonPath();
     }
-    exists_external_json = envuFileExists(json_path);
+    exists_external_json = envuFileExists(json_path.c_str());
 
     json_utils::JsonResult result = JSON_RESULT_OK;
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
@@ -63,12 +65,12 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
 
         if (!result.ok) {
             if (exists_external_json) {
-                PrintFmt("[LoadDefinition] Loaded %s\n", json_path);
+                PrintFmt("[LoadDefinition] Loaded %s\n", json_path.c_str());
                 result = json_utils::LoadJson(json_path, m_definition);
                 if (!result.ok)
                     m_definition.SetObject();
             } else {
-                result = { false, noex::string(json_path) + " not found." };
+                result = { false, json_path + " not found." };
             }
         }
     }
@@ -114,8 +116,8 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
     }
 
     if (ignore_external_json) {
-        noex::string msg = noex::string("WARNING: Using embedded JSON. ") +
-                        json_path + " was ignored.\n";
+        noex::string msg = "WARNING: Using embedded JSON. " +
+                            json_path + " was ignored.\n";
         PrintFmt("[LoadDefinition] %s", msg.c_str());
         ShowSuccessDialog(msg, "Warning");
     }
