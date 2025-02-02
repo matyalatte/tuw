@@ -277,7 +277,7 @@ int main(int argc, char* argv[]) noexcept {
 
     if (json_path.empty()) {
         if (cmd_int == CMD_MERGE)
-            json_path = "gui_definition.json";
+            json_path = GetDefaultJsonPath();
         else
             json_path = "new.json";
     }
@@ -299,11 +299,6 @@ int main(int argc, char* argv[]) noexcept {
 
     switch (cmd_int) {
         case CMD_MERGE:
-            if (!envuFileExists(json_path.c_str()) &&
-                envuFileExists((json_path + "c").c_str())) {
-                // Not found .json but found .jsonc
-                json_path.push_back('c');
-            }
             result = Merge(exe_path, json_path, new_exe_path, force);
             break;
         case CMD_SPLIT:
