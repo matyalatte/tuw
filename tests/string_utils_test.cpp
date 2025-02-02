@@ -24,7 +24,7 @@ TEST(StringTest, GetLastLine) {
     expect_tuwstr("last", GetLastLine("last"));
     expect_tuwstr("last", GetLastLine("last\n"));
     expect_tuwstr("last", GetLastLine("\nlast"));
-    expect_tuwstr("last", GetLastLine("firs\nsecond\nlast\r\n\r\n"));
+    expect_tuwstr("last", GetLastLine("first\nsecond\nlast\r\n\r\n"));
 }
 
 TEST(StringTest, GetLastLineOneChar) {
