@@ -32,18 +32,32 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
     m_config.CopyFrom(config, m_config.GetAllocator());
     bool ignore_external_json = false;
 
-    bool exists_external_json = true;
     noex::string workdir;
-    if (!json_path.empty()) {
+    if (json_path.empty()) {
+        workdir = envuStr(envuGetDirectory(exe_path.c_str()));
+    } else {
         char* full_json_path = envuGetFullPath(json_path.c_str());
+        if (!full_json_path)
+            json_path = full_json_path;
         workdir = envuStr(envuGetDirectory(full_json_path));
         envuFree(full_json_path);
-    } else {
-        workdir = envuStr(envuGetDirectory(exe_path.c_str()));
+    }
+
+    if (!workdir.empty()) {
+        // Set working directory
+        int ret = envuSetCwd(workdir.c_str());
+        if (ret != 0) {
+            // Failed to set CWD
+            PrintFmt("[LoadDefinition] Failed to set a path as CWD. (%s)\n", workdir.c_str());
+        }
+    }
+
+    if (json_path.empty()) {
         // Find gui_definition.json
         json_path = GetDefaultJsonPath();
     }
-    exists_external_json = envuFileExists(json_path.c_str());
+
+    bool exists_external_json = envuFileExists(json_path.c_str());
 
     json_utils::JsonResult result = JSON_RESULT_OK;
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
@@ -98,15 +112,6 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
 #ifdef __TUW_UNIX__
     uiMainStep(1);  // Need uiMainStep before using uiMsgBox
 #endif
-
-    if (!workdir.empty()) {
-        // Set working directory
-        int ret = envuSetCwd(workdir.c_str());
-        if (ret != 0) {
-            // Failed to set CWD
-            PrintFmt("[LoadDefinition] Failed to set a path as CWD. (%s)\n", workdir.c_str());
-        }
-    }
 
     {
         // Show CWD
