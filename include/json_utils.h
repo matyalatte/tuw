@@ -15,9 +15,9 @@ constexpr char CMD_TOKEN_CURRENT_DIR[] = "__CWD__";
 constexpr char CMD_TOKEN_HOME_DIR[] = "__HOME__";
 
 #ifdef _WIN32
-FILE* FileOpen(const char* path, const char* perm) noexcept;
+FILE* FileOpen(const char* path, const char* mode) noexcept;
 #else
-#define FileOpen(path, perm) fopen(path, perm)
+#define FileOpen(path, mode) fopen(path, mode)
 #endif
 
 namespace json_utils {

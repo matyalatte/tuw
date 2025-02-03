@@ -13,13 +13,13 @@
 #include "noex/vector.hpp"
 
 #ifdef _WIN32
-FILE* FileOpen(const char* path, const char* perm) noexcept {
+FILE* FileOpen(const char* path, const char* mode) noexcept {
     // Use wfopen as fopen might not use utf-8.
     noex::wstring wpath = UTF8toUTF16(path);
-    noex::wstring wperm = UTF8toUTF16(perm);
-    if (wpath.empty() || wperm.empty())
+    noex::wstring wmode = UTF8toUTF16(mode);
+    if (wpath.empty() || wmode.empty())
         return nullptr;
-    return _wfopen(wpath.c_str(), wperm.c_str());
+    return _wfopen(wpath.c_str(), wmode.c_str());
 }
 #endif
 
