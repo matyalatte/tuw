@@ -142,23 +142,13 @@ static int OnShouldQuit(void *data) noexcept {
     return 1;
 }
 
-void MainFrame::CreateFrame() noexcept {
-    m_mainwin = uiNewWindow(tuw_constants::TOOL_NAME, 200, 1, 1);
-#ifdef __APPLE__
-    // Move the default position from bottom left to top left.
-    uiWindowSetPosition(m_mainwin, 0, 0);
-#endif
-    uiWindowOnClosing(m_mainwin, OnClosing, NULL);
-    uiOnShouldQuit(OnShouldQuit, m_mainwin);
-    uiControlShow(uiControl(m_mainwin));
-    uiWindowSetMargined(m_mainwin, 1);
-
 #ifdef __TUW_UNIX__
+static uiWindow* CreateLogWindowForGtk() {
     // Console window for linux
     char *exe_path = envuGetExecutablePath();
-    m_logwin = uiNewWindow(exe_path, 600, 400, 0);
+    uiWindow *log_win = uiNewWindow(exe_path, 600, 400, 0);
     envuFree(exe_path);
-    uiWindowOnClosing(m_logwin, OnClosing, NULL);
+    uiWindowOnClosing(log_win, OnClosing, NULL);
     uiMultilineEntry* log_entry = uiNewMultilineEntry();
 
     /*
@@ -181,9 +171,26 @@ void MainFrame::CreateFrame() noexcept {
     SetLogEntry(log_entry);
     uiBox* log_box = uiNewVerticalBox();
     uiBoxAppend(log_box, uiControl(log_entry), 1);
-    uiWindowSetChild(m_logwin, uiControl(log_box));
-    uiControlShow(uiControl(m_logwin));
+    uiWindowSetChild(log_win, uiControl(log_box));
+    uiControlShow(uiControl(log_win));
+    return log_win;
+}
 #endif
+
+void MainFrame::CreateFrame() noexcept {
+#ifdef __TUW_UNIX__
+    m_logwin = CreateLogWindowForGtk();
+#endif
+
+    m_mainwin = uiNewWindow(tuw_constants::TOOL_NAME, 200, 1, 1);
+#ifdef __APPLE__
+    // Move the default position from bottom left to top left.
+    uiWindowSetPosition(m_mainwin, 0, 0);
+#endif
+    uiWindowOnClosing(m_mainwin, OnClosing, NULL);
+    uiOnShouldQuit(OnShouldQuit, m_mainwin);
+    uiControlShow(uiControl(m_mainwin));
+    uiWindowSetMargined(m_mainwin, 1);
 }
 
 static void OnUpdatePanel(uiMenuItem *item, uiWindow *w, void *data) noexcept {
