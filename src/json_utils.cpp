@@ -12,6 +12,17 @@
 #include "string_utils.h"
 #include "noex/vector.hpp"
 
+#ifdef _WIN32
+FILE* FileOpen(const char* path, const char* perm) noexcept {
+    // Use wfopen as fopen might not use utf-8.
+    noex::wstring wpath = UTF8toUTF16(path);
+    noex::wstring wperm = UTF8toUTF16(perm);
+    if (wpath.empty() || wperm.empty())
+        return nullptr;
+    return _wfopen(wpath.c_str(), wperm.c_str());
+}
+#endif
+
 namespace json_utils {
 
     enum ComponentType: int {
@@ -35,7 +46,7 @@ namespace json_utils {
         rapidjson::kParseCommentsFlag | rapidjson::kParseTrailingCommasFlag;
 
     JsonResult LoadJson(const noex::string& file, rapidjson::Document& json) noexcept {
-        FILE* fp = fopen(file.c_str(), "rb");
+        FILE* fp = FileOpen(file.c_str(), "rb");
         if (!fp)
             return { false, "Failed to open " + file };
 
@@ -58,7 +69,7 @@ namespace json_utils {
     }
 
     JsonResult SaveJson(rapidjson::Document& json, const noex::string& file) noexcept {
-        FILE* fp = fopen(file.c_str(), "wb");
+        FILE* fp = FileOpen(file.c_str(), "wb");
         if (!fp)
             return { false, "Failed to open " + file + "." };
 

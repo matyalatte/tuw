@@ -81,7 +81,7 @@ json_utils::JsonResult ExeContainer::Read(const noex::string& exe_path) noexcept
     }
 
     m_exe_path = exe_path;
-    FILE* file_io = fopen(exe_path.c_str(), "rb");
+    FILE* file_io = FileOpen(exe_path.c_str(), "rb");
     if (!file_io)
         return { false, "Failed to open " + exe_path };
 
@@ -160,11 +160,11 @@ json_utils::JsonResult ExeContainer::Write(const noex::string& exe_path) noexcep
     if (JSON_SIZE_MAX <= json_size)
         return { false, noex::string("Unexpected json size. (") + json_size + ")" };
 
-    FILE* old_io = fopen(m_exe_path.c_str(), "rb");
+    FILE* old_io = FileOpen(m_exe_path.c_str(), "rb");
     if (!old_io)
         return { false, "Failed to open a file. (" + m_exe_path + ")" };
 
-    FILE* new_io = fopen(exe_path.c_str(), "wb");
+    FILE* new_io = FileOpen(exe_path.c_str(), "wb");
     if (!new_io) {
         fclose(old_io);
         return { false, "Failed to open a file. (" + exe_path + ")" };
