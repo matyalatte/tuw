@@ -14,6 +14,7 @@ uint32_t Fnv1Hash32(const noex::string& str) noexcept;
 #ifdef _WIN32
 noex::string UTF16toUTF8(const wchar_t* str) noexcept;
 noex::wstring UTF8toUTF16(const char* str) noexcept;
+noex::string ANSItoUTF8(const noex::string& str) noexcept;
 void FprintFmt(FILE* out, const char* fmt, ...) noexcept;
 void EnableCSI() noexcept;
 #elif defined(__TUW_UNIX__)
@@ -23,4 +24,7 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept;
 #define FprintFmt(...) fprintf(__VA_ARGS__)
 #endif
 
+// Note: PrintFmt() and FprintFmt() only support UTF-8 strings.
+//       Some localized versions of Windows might require ANSItoUTF8()
+//       before printing strings.
 #define PrintFmt(...) FprintFmt(stdout, __VA_ARGS__)
