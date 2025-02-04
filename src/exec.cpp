@@ -46,6 +46,7 @@ void RedirectOutput(FILE* out, const char* buf,
             noex::wstring wout = UTF8toUTF16(buf);
             fprintf(out, "%ls", wout.c_str());
         } else {
+            // ANSI code page (It might not be UTF8)
             fprintf(out, "%s", buf);
         }
 #else
@@ -135,6 +136,10 @@ ExecuteResult Execute(const noex::string& cmd,
     last_line = TruncateStr(last_line, LAST_LINE_MAX_LEN);
     err_msg = TruncateStr(err_msg, ERR_MSG_MAX_LEN);
 
+#ifdef _WIN32
+    if (!use_utf8_on_windows)
+        return { return_code, ANSItoUTF8(err_msg), ANSItoUTF8(last_line) };
+#endif
     return { return_code, err_msg, last_line };
 }
 
@@ -160,5 +165,5 @@ ExecuteResult LaunchDefaultApp(const noex::string& url) noexcept {
     noex::string err_msg;
     DestroyProcess(process, &return_code, err_msg);
 
-    return { return_code, err_msg, "" };
+    return { return_code, ANSItoUTF8(err_msg), "" };
 }

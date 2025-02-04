@@ -58,6 +58,27 @@ noex::wstring UTF8toUTF16(const char* str) noexcept {
     return wstr;
 }
 
+// Note: Some localized versions of Windows (e.g. Japanese, Chinese, Korean, etc.)
+//       still use non-UTF encodings for char strings.
+//       So, we have to convert redirected buffers to UTF8 with this function.
+noex::string ANSItoUTF8(const noex::string& str) noexcept {
+    if (str.empty())
+        return "";
+
+    int wstr_len = MultiByteToWideChar(CP_ACP, 0, str.data(), str.size() + 1, NULL, 0);
+    if (wstr_len == 0)
+        return "";  // Failed to convert
+
+    noex::wstring wstr(wstr_len);
+    if (wstr.empty())
+        return "";  // Allocation error
+
+    int ret = MultiByteToWideChar(CP_ACP, 0, str.data(), str.size() + 1, wstr.data(), wstr.size());
+    if (ret != wstr_len)
+        return "";  // Failed to convert
+    return UTF16toUTF8(wstr.data());
+}
+
 void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_list va;
     va_start(va, fmt);
