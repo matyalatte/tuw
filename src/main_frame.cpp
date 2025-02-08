@@ -6,13 +6,20 @@
 #include "string_utils.h"
 #include "tuw_constants.h"
 
-constexpr char DEF_JSON[] = "gui_definition.json";
-constexpr char DEF_JSONC[] = "gui_definition.jsonc";
+noex::string GetDefaultJsonPath() {
+    noex::string def_name = "gui_definition.";
+    for (const char* ext : { "jsonc", "tuw" }) {
+        noex::string json_path = def_name + ext;
+        if (envuFileExists(json_path.c_str()))
+            return json_path;
+    }
+    return def_name + "json";
+}
 
 // Main window
 void MainFrame::Initialize(const rapidjson::Document& definition,
                            const rapidjson::Document& config,
-                           const char* json_path) noexcept {
+                           noex::string json_path) noexcept {
     PrintFmt("%s v%s by %s\n", tuw_constants::TOOL_NAME,
               tuw_constants::VERSION, tuw_constants::AUTHOR);
     PrintFmt(tuw_constants::LOGO);
@@ -25,23 +32,32 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
     m_config.CopyFrom(config, m_config.GetAllocator());
     bool ignore_external_json = false;
 
-    bool exists_external_json = true;
     noex::string workdir;
-    if (json_path) {
-        char* full_json_path = envuGetFullPath(json_path);
+    if (json_path.empty()) {
+        workdir = envuStr(envuGetDirectory(exe_path.c_str()));
+    } else {
+        char* full_json_path = envuGetFullPath(json_path.c_str());
+        if (full_json_path)
+            json_path = full_json_path;
         workdir = envuStr(envuGetDirectory(full_json_path));
         envuFree(full_json_path);
-    } else {
-        workdir = envuStr(envuGetDirectory(exe_path.c_str()));
-        // Find gui_definition.json
-        json_path = DEF_JSON;
-        if (!envuFileExists(json_path)) {
-            // Find gui_definition.jsonc
-            if (envuFileExists(DEF_JSONC))
-                json_path = DEF_JSONC;
+    }
+
+    if (!workdir.empty()) {
+        // Set working directory
+        int ret = envuSetCwd(workdir.c_str());
+        if (ret != 0) {
+            // Failed to set CWD
+            PrintFmt("[LoadDefinition] Failed to set a path as CWD. (%s)\n", workdir.c_str());
         }
     }
-    exists_external_json = envuFileExists(json_path);
+
+    if (json_path.empty()) {
+        // Find gui_definition.json
+        json_path = GetDefaultJsonPath();
+    }
+
+    bool exists_external_json = envuFileExists(json_path.c_str());
 
     json_utils::JsonResult result = JSON_RESULT_OK;
     if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
@@ -63,12 +79,12 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
 
         if (!result.ok) {
             if (exists_external_json) {
-                PrintFmt("[LoadDefinition] Loaded %s\n", json_path);
+                PrintFmt("[LoadDefinition] Loaded %s\n", json_path.c_str());
                 result = json_utils::LoadJson(json_path, m_definition);
                 if (!result.ok)
                     m_definition.SetObject();
             } else {
-                result = { false, noex::string(json_path) + " not found." };
+                result = { false, json_path + " not found." };
             }
         }
     }
@@ -97,15 +113,6 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
     uiMainStep(1);  // Need uiMainStep before using uiMsgBox
 #endif
 
-    if (!workdir.empty()) {
-        // Set working directory
-        int ret = envuSetCwd(workdir.c_str());
-        if (ret != 0) {
-            // Failed to set CWD
-            PrintFmt("[LoadDefinition] Failed to set a path as CWD. (%s)\n", workdir.c_str());
-        }
-    }
-
     {
         // Show CWD
         char* cwd = envuGetCwd();
@@ -114,8 +121,8 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
     }
 
     if (ignore_external_json) {
-        noex::string msg = noex::string("WARNING: Using embedded JSON. ") +
-                        json_path + " was ignored.\n";
+        noex::string msg = "WARNING: Using embedded JSON. " +
+                            json_path + " was ignored.\n";
         PrintFmt("[LoadDefinition] %s", msg.c_str());
         ShowSuccessDialog(msg, "Warning");
     }
@@ -140,23 +147,13 @@ static int OnShouldQuit(void *data) noexcept {
     return 1;
 }
 
-void MainFrame::CreateFrame() noexcept {
-    m_mainwin = uiNewWindow(tuw_constants::TOOL_NAME, 200, 1, 1);
-#ifdef __APPLE__
-    // Move the default position from bottom left to top left.
-    uiWindowSetPosition(m_mainwin, 0, 0);
-#endif
-    uiWindowOnClosing(m_mainwin, OnClosing, NULL);
-    uiOnShouldQuit(OnShouldQuit, m_mainwin);
-    uiControlShow(uiControl(m_mainwin));
-    uiWindowSetMargined(m_mainwin, 1);
-
 #ifdef __TUW_UNIX__
+static uiWindow* CreateLogWindowForGtk() {
     // Console window for linux
     char *exe_path = envuGetExecutablePath();
-    m_logwin = uiNewWindow(exe_path, 600, 400, 0);
+    uiWindow *log_win = uiNewWindow(exe_path, 600, 400, 0);
     envuFree(exe_path);
-    uiWindowOnClosing(m_logwin, OnClosing, NULL);
+    uiWindowOnClosing(log_win, OnClosing, NULL);
     uiMultilineEntry* log_entry = uiNewMultilineEntry();
 
     /*
@@ -179,9 +176,26 @@ void MainFrame::CreateFrame() noexcept {
     SetLogEntry(log_entry);
     uiBox* log_box = uiNewVerticalBox();
     uiBoxAppend(log_box, uiControl(log_entry), 1);
-    uiWindowSetChild(m_logwin, uiControl(log_box));
-    uiControlShow(uiControl(m_logwin));
+    uiWindowSetChild(log_win, uiControl(log_box));
+    uiControlShow(uiControl(log_win));
+    return log_win;
+}
 #endif
+
+void MainFrame::CreateFrame() noexcept {
+#ifdef __TUW_UNIX__
+    m_logwin = CreateLogWindowForGtk();
+#endif
+
+    m_mainwin = uiNewWindow(tuw_constants::TOOL_NAME, 200, 1, 1);
+#ifdef __APPLE__
+    // Move the default position from bottom left to top left.
+    uiWindowSetPosition(m_mainwin, 0, 0);
+#endif
+    uiWindowOnClosing(m_mainwin, OnClosing, NULL);
+    uiOnShouldQuit(OnShouldQuit, m_mainwin);
+    uiControlShow(uiControl(m_mainwin));
+    uiWindowSetMargined(m_mainwin, 1);
 }
 
 static void OnUpdatePanel(uiMenuItem *item, uiWindow *w, void *data) noexcept {
