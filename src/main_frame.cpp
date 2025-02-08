@@ -37,7 +37,7 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
         workdir = envuStr(envuGetDirectory(exe_path.c_str()));
     } else {
         char* full_json_path = envuGetFullPath(json_path.c_str());
-        if (!full_json_path)
+        if (full_json_path)
             json_path = full_json_path;
         workdir = envuStr(envuGetDirectory(full_json_path));
         envuFree(full_json_path);
