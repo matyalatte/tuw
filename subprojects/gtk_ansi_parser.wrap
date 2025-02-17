@@ -1,0 +1,7 @@
+[wrap-git]
+url = https://github.com/matyalatte/gtk-ansi-parser.git
+revision = 007cff5deda0fc8987d50b8d1042bdf405f001e1
+depth = 1
+
+[provide]
+gtk_ansi_parser = gtkansi_dep
