@@ -123,14 +123,18 @@ class Logger {
     GtkAnsiParser* m_ansi_parser;
 
  public:
-    Logger() noexcept : m_log_entry(NULL), m_log_buffer(""),
+    Logger() noexcept : m_log_entry(nullptr), m_log_buffer(""),
                         m_ansi_parser() {}
     ~Logger() noexcept {
         gtk_ansi_free(m_ansi_parser);
     }
 
-    void SetLogEntry(void* log_entry) noexcept {
-        m_log_entry = static_cast<uiMultilineEntry*>(log_entry);
+    void SetLogEntry(uiMultilineEntry* log_entry) noexcept {
+        gtk_ansi_free(m_ansi_parser);
+        m_ansi_parser = nullptr;
+        m_log_entry = log_entry;
+        if (!m_log_entry)
+            return;
         GtkWidget *scrolled_window =
             reinterpret_cast<GtkWidget*>(uiControlHandle(uiControl(m_log_entry)));
         GtkTextView *text_view = GTK_TEXT_VIEW(gtk_bin_get_child(GTK_BIN(scrolled_window)));
@@ -143,7 +147,7 @@ class Logger {
     }
 
     void Log(const char* str) noexcept {
-        if (m_log_entry == NULL) {
+        if (!m_log_entry) {
             m_log_buffer += str;
         } else {
             gtk_ansi_append(m_ansi_parser, str);
@@ -155,7 +159,7 @@ class Logger {
 Logger g_logger = Logger();
 
 void SetLogEntry(void* log_entry) noexcept {
-    g_logger.SetLogEntry(log_entry);
+    g_logger.SetLogEntry(static_cast<uiMultilineEntry*>(log_entry));
 }
 
 void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
