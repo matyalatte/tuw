@@ -116,6 +116,26 @@ void EnableCSI() noexcept {
 #include "ui.h"
 #include "gtk_ansi.h"
 
+static void SetMonospaceFont(GtkWidget* text_widget) {
+    /*
+    If your monospace font doesn't work,
+    you should make a config file to change the default font.
+    ```
+    <!-- ~/.config/fontconfig/fonts.conf -->
+    <match target="pattern">
+        <test name="family" qual="any">
+            <string>monospace</string>
+        </test>
+        <edit binding="strong" mode="prepend" name="family">
+            <string>Source Code Pro</string>
+        </edit>
+    </match>
+    ```
+    */
+    GtkStyleContext* style = gtk_widget_get_style_context(text_widget);
+    gtk_style_context_add_class(style, "monospace");
+}
+
 class Logger {
  private:
     uiMultilineEntry* m_log_entry;
@@ -137,7 +157,12 @@ class Logger {
             return;
         GtkWidget *scrolled_window =
             reinterpret_cast<GtkWidget*>(uiControlHandle(uiControl(m_log_entry)));
-        GtkTextView *text_view = GTK_TEXT_VIEW(gtk_bin_get_child(GTK_BIN(scrolled_window)));
+
+        GtkWidget *text_widget = gtk_bin_get_child(GTK_BIN(scrolled_window));
+        SetMonospaceFont(text_widget);
+
+        // Make parser
+        GtkTextView *text_view = GTK_TEXT_VIEW(text_widget);
         GtkTextBuffer *buf = gtk_text_view_get_buffer(text_view);
         m_ansi_parser = gtk_ansi_new(buf);
         if (!m_log_buffer.empty()) {
