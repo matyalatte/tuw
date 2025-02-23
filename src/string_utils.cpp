@@ -165,6 +165,7 @@ class Logger {
         GtkTextView *text_view = GTK_TEXT_VIEW(text_widget);
         GtkTextBuffer *buf = gtk_text_view_get_buffer(text_view);
         m_ansi_parser = gtk_ansi_new(buf);
+        gtk_ansi_set_default_color_with_textview(m_ansi_parser, text_view);
         if (!m_log_buffer.empty()) {
             Log(m_log_buffer.c_str());
             m_log_buffer = "";
