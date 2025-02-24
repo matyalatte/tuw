@@ -166,17 +166,20 @@ class Logger {
         GtkTextBuffer *buf = gtk_text_view_get_buffer(text_view);
         m_ansi_parser = gtk_ansi_new(buf);
         gtk_ansi_set_default_color_with_textview(m_ansi_parser, text_view);
-        if (!m_log_buffer.empty()) {
-            Log(m_log_buffer.c_str());
-            m_log_buffer = "";
-        }
+        if (!m_log_buffer.empty())
+            Log("");
     }
 
     void Log(const char* str) noexcept {
         if (!m_log_entry) {
             m_log_buffer += str;
         } else {
-            gtk_ansi_append(m_ansi_parser, str);
+            // Note: gtk_ansi_append returns the last few bytes
+            //       when they are incomplete sequences
+            const char* rest;
+            m_log_buffer += str;
+            rest = gtk_ansi_append(m_ansi_parser, m_log_buffer.c_str());
+            m_log_buffer = rest;
             uiUnixMuntilineEntryScrollToEnd(m_log_entry);
         }
     }

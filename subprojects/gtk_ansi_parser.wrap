@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/matyalatte/gtk-ansi-parser.git
-revision = b1b3d99cb71e73996b3b3209e1950a3e0be65b90
+revision = 41b3467a63d4cbe4ad96d78614574d454c64eead
 depth = 1
 
 [provide]
