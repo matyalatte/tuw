@@ -31,6 +31,7 @@ subprojects/subprocess
 subprojects/google*
 subprojects/env_utils
 subprojects/tiny_str_match
+subprojects/gtk_ansi_parser
 
 # built files
 *.exe

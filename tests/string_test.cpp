@@ -78,6 +78,12 @@ TEST(StringTest, AssignNull) {
     expect_nullstr(str);
 }
 
+TEST(StringTest, AssignNullToStr) {
+    noex::string str = "aaa";
+    str = nullptr;
+    expect_nullstr(str);
+}
+
 TEST(StringTest, AssignCstr) {
     noex::string str = "test";
     expect_tuwstr("test", str);

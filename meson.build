@@ -17,6 +17,7 @@ tuw_sources = []
 tuw_manifest = []
 tuw_link_args = []
 tuw_cpp_args = []
+tuw_dependencies = []
 tuw_OS = host_machine.system()
 tuw_compiler = meson.get_compiler('c').get_id()
 tuw_is_release = get_option('buildtype').startswith('release') or (get_option('buildtype').startswith('custom') and not get_option('debug'))
@@ -89,6 +90,9 @@ elif tuw_OS == 'darwin'
         warning('This project has NOT been tested with your compiler. (' + tuw_compiler + ')')
     endif
 else
+    gtkansi_dep = dependency('gtk_ansi_parser', fallback : ['gtk_ansi_parser', 'gtkansi_dep'])
+    tuw_dependencies += [gtkansi_dep]
+
     tuw_link_args += ['-no-pie']
     tuw_cpp_args += ['-D__TUW_UNIX__']
     if tuw_compiler != 'gcc'
@@ -121,7 +125,7 @@ subprocess_dep = dependency('subprocess', fallback : ['subprocess', 'subprocess_
 env_utils_dep = dependency('env_utils', fallback : ['env_utils', 'env_utils_dep'])
 tiny_str_match_dep = dependency('tiny_str_match', fallback : ['tiny_str_match', 'tiny_str_match_dep'])
 
-tuw_dependencies = [libui_dep, rapidjson_dep, subprocess_dep, env_utils_dep, tiny_str_match_dep]
+tuw_dependencies += [libui_dep, rapidjson_dep, subprocess_dep, env_utils_dep, tiny_str_match_dep]
 
 tuw_sources += [
     'src/main_frame.cpp',
