@@ -93,3 +93,4 @@ Files in this repository are available under the [MIT license](../license.txt).
 | [subprocess.h](https://github.com/sheredom/subprocess.h) | Command processor | [Unlicense](https://github.com/sheredom/subprocess.h/blob/master/LICENSE) |
 | [c-env-utils](https://github.com/matyalatte/c-env-utils) | Utilities for environment info | [MIT](http://opensource.org/licenses/MIT) |
 | [tiny-str-match](https://github.com/matyalatte/tiny-str-match) | String validator | [MIT](http://opensource.org/licenses/MIT) |
+| [gtk-ansi-parser](https://github.com/matyalatte/gtk-ansi-parser) | ANSI parser for GtkTextBuffer | [MIT](http://opensource.org/licenses/MIT) |

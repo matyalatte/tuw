@@ -155,23 +155,6 @@ static uiWindow* CreateLogWindowForGtk() {
     envuFree(exe_path);
     uiWindowOnClosing(log_win, OnClosing, NULL);
     uiMultilineEntry* log_entry = uiNewMultilineEntry();
-
-    /*
-    If your monospace font doesn't work,
-    you should make a config file to change the default font.
-    ```
-    <!-- ~/.config/fontconfig/fonts.conf -->
-    <match target="pattern">
-        <test name="family" qual="any">
-            <string>monospace</string>
-        </test>
-        <edit binding="strong" mode="prepend" name="family">
-            <string>Source Code Pro</string>
-        </edit>
-    </match>
-    ```
-    */
-    uiUnixMultilineEntrySetMonospace(log_entry, 1);
     uiMultilineEntrySetReadOnly(log_entry, 1);
     SetLogEntry(log_entry);
     uiBox* log_box = uiNewVerticalBox();

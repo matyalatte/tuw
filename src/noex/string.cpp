@@ -47,8 +47,10 @@ void basic_string<charT>::reserve(size_t capacity) noexcept {
 template <typename charT>
 void basic_string<charT>::assign(const charT* str, size_t size, size_t capacity) noexcept {
     reserve(capacity);
-    if (!m_str || !str)
+    if (!m_str || !str) {
+        clear();
         return;
+    }
 
     memcpy(m_str, str, size * sizeof(charT));
     m_str[size] = 0;
