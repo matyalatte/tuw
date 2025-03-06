@@ -3,6 +3,8 @@
 #include "string_utils.h"
 #ifdef _WIN32
 #include "windows.h"
+#else
+#include <time.h>
 #endif
 
 enum READ_IO_TYPE : int {
@@ -97,6 +99,7 @@ ExecuteResult Execute(const noex::string& cmd,
     argv[argc + 2] = 0;
 #else
     const char* argv[] = {"/bin/sh", "-c", cmd.c_str(), NULL};
+    struct timespec  ten_ms = { 0, 10 * 1000000 };  // 10ms;
 #endif
 
     struct subprocess_s process;
@@ -124,13 +127,22 @@ ExecuteResult Execute(const noex::string& cmd,
     unsigned err_read_size = 0;
 
     do {
-        out_read_size = ReadIO(process, READ_STDOUT,
-                               out_buf, BUF_SIZE, last_line, LAST_LINE_MAX_LEN);
-        err_read_size = ReadIO(process, READ_STDERR,
-                               err_buf, BUF_SIZE, err_msg, ERR_MSG_MAX_LEN);
-        RedirectOutput(stdout, out_buf, out_read_size, use_utf8_on_windows);
-        RedirectOutput(stderr, err_buf, err_read_size, use_utf8_on_windows);
-    } while (subprocess_alive(&process) || out_read_size || err_read_size);
+        do {
+            out_read_size = ReadIO(process, READ_STDOUT,
+                                out_buf, BUF_SIZE, last_line, LAST_LINE_MAX_LEN);
+            RedirectOutput(stdout, out_buf, out_read_size, use_utf8_on_windows);
+        } while (out_read_size);
+        do {
+            err_read_size = ReadIO(process, READ_STDERR,
+                            err_buf, BUF_SIZE, err_msg, ERR_MSG_MAX_LEN);
+            RedirectOutput(stderr, err_buf, err_read_size, use_utf8_on_windows);
+        } while (err_read_size);
+#ifdef _WIN32
+        Sleep(10);  // wait 10ms
+#else
+        nanosleep(&ten_ms, nullptr);
+#endif
+    } while (subprocess_alive(&process));
 
     // Sometimes stdout and stderr still have unread characters
     out_read_size = ReadIO(process, READ_STDOUT, out_buf, BUF_SIZE, last_line, LAST_LINE_MAX_LEN);
