@@ -59,7 +59,7 @@ void RedirectOutput(FILE* out, const char* buf,
         WriteFile(file, buf, read_size, &written, NULL);
     }
 #else
-    FprintFmt(out, "%s", buf);
+    Fwrite(out, buf, read_size);
 #endif
 }
 

@@ -204,5 +204,10 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     fprintf(out, "%s", buf.c_str());
     va_end(va);
 }
+
+void Fwrite(FILE* out, const char* buf, size_t buf_size) noexcept {
+    g_logger.Log(buf);
+    fwrite(buf, sizeof(char), buf_size, out);
+}
 #endif
 
