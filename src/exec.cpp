@@ -104,9 +104,9 @@ ExecuteResult Execute(const noex::string& cmd,
     if (0 != result)
         return { -1, "Failed to create a subprocess.\n", ""};
 
-    const unsigned BUF_SIZE = 1024;
-    const size_t LAST_LINE_MAX_LEN = BUF_SIZE;
-    const size_t ERR_MSG_MAX_LEN = BUF_SIZE * 2;
+    const unsigned BUF_SIZE = 65536;  // 64KB
+    const size_t LAST_LINE_MAX_LEN = 1024;
+    const size_t ERR_MSG_MAX_LEN = 2048;
     char out_buf[BUF_SIZE + 1];
     char err_buf[BUF_SIZE + 1];
     noex::string last_line;
