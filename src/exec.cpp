@@ -38,22 +38,31 @@ void DestroyProcess(subprocess_s &process,
 }
 
 void RedirectOutput(FILE* out, const char* buf,
-                    unsigned read_size,
-                    bool use_utf8_on_windows) noexcept {
-    if (read_size) {
+    unsigned read_size,
+    bool use_utf8_on_windows) noexcept {
+    if (!read_size)
+        return;
+
+    // Note: We shouldn't use printf as it's too slow for redirection.
 #ifdef _WIN32
-        if (use_utf8_on_windows) {
-            noex::wstring wout = UTF8toUTF16(buf);
-            fprintf(out, "%ls", wout.c_str());
-        } else {
-            // ANSI code page (It might not be UTF8)
-            fprintf(out, "%s", buf);
-        }
-#else
-        FprintFmt(out, "%s", buf);
-#endif
+    HANDLE file;
+    DWORD written;
+    if (out == stdout)
+        file = GetStdHandle(STD_OUTPUT_HANDLE);
+    else
+        file = GetStdHandle(STD_ERROR_HANDLE);
+    if (use_utf8_on_windows) {
+        noex::wstring wout = UTF8toUTF16(buf);
+        WriteConsoleW(file, wout.c_str(), wout.size(), &written, NULL);
+    } else {
+        // ANSI code page (It might not be UTF8)
+        WriteFile(file, buf, read_size, &written, NULL);
     }
+#else
+    FprintFmt(out, "%s", buf);
+#endif
 }
+
 
 inline noex::string TruncateStr(const noex::string& str, size_t size) noexcept {
     if (str.size() > size)
