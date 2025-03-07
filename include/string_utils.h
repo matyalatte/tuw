@@ -24,11 +24,10 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept;
 void EnableCSI() noexcept;
 #elif defined(__TUW_UNIX__)
 void SetLogEntry(void* log_entry) noexcept;
+void Log(const char* str) noexcept;
 void FprintFmt(FILE* out, const char* fmt, ...) noexcept;
-void Fwrite(FILE* out, const char* buf, size_t buf_size) noexcept;
 #else
 #define FprintFmt(...) fprintf(__VA_ARGS__)
-#define Fwrite(out, buf, buf_size) fwrite(buf, sizeof(char), buf_size, out)
 #endif
 
 // Note: PrintFmt() and FprintFmt() only support UTF-8 strings.
