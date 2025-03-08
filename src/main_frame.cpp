@@ -517,7 +517,7 @@ void MainFrame::RunCommand() noexcept {
 
 #ifdef __TUW_UNIX__
     // Disable the main window on Unix
-    // since we calls the main loop while running commands
+    // since we call the main loop while running commands
     GtkWidget* widget = reinterpret_cast<GtkWidget*>(uiControlHandle(uiControl(m_mainwin)));
     gtk_widget_set_sensitive(widget, FALSE);
 #endif
