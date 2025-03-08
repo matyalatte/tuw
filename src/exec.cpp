@@ -66,9 +66,17 @@ class RedirectContext {
                 break;
 
             // Store last characters
-            m_last_chars += m_buf;
-            if (m_last_chars.length() > LAST_CHARS_MAX_LEN * 2)
-                m_last_chars.erase(0, m_last_chars.length() - LAST_CHARS_MAX_LEN);
+            // TODO: Use a ring buffer to remove string.erase()
+            // Note: We use LAST_CHARS_MAX_LEN * 2 to avoid shifting memory
+            //       with string.erase()
+            if (m_last_chars.length() + read_size <= LAST_CHARS_MAX_LEN * 2) {
+                m_last_chars += m_buf;
+            } else if (read_size >= LAST_CHARS_MAX_LEN) {
+                m_last_chars = m_buf + read_size - LAST_CHARS_MAX_LEN;
+            } else {
+                m_last_chars.erase(0, m_last_chars.length() + read_size - LAST_CHARS_MAX_LEN);
+                m_last_chars += m_buf;
+            }
 
             // Redirect to console
         #ifdef _WIN32
