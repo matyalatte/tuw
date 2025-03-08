@@ -27,10 +27,15 @@ class RedirectContext {
     char m_buf[BUF_SIZE + 1];
     noex::string m_last_chars;  // Stores the last characters
 
-    noex::string TruncateStr(const noex::string& str, size_t size) noexcept {
-        if (str.size() > size)
-            return "..." + str.substr(str.size() - size, size);
-        return str;
+    noex::string TruncateStr(noex::string* str) noexcept {
+        if (str->size() < LAST_CHARS_MAX_LEN)
+            return *str;
+        char* buf = str->data();
+        char* new_buf = buf + str->size() - LAST_CHARS_MAX_LEN;
+        *new_buf = '.';
+        *(new_buf + 1) = '.';
+        *(new_buf + 2) = '.';
+        return new_buf;
     }
 
  public:
@@ -99,12 +104,12 @@ class RedirectContext {
     }
 
     noex::string GetLastChars() noexcept {
-        return TruncateStr(m_last_chars, LAST_CHARS_MAX_LEN);
+        return TruncateStr(&m_last_chars);
     }
 
     noex::string GetLine() noexcept {
         noex::string last_line = GetLastLine(m_last_chars);
-        last_line = TruncateStr(last_line, LAST_CHARS_MAX_LEN);
+        last_line = TruncateStr(&last_line);
         return last_line;
     }
 };
