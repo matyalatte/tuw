@@ -1,6 +1,9 @@
 #include "exec.h"
 #include "subprocess.h"
 #include "string_utils.h"
+#ifdef __TUW_UNIX__
+#include <gtk/gtk.h>
+#endif
 #ifdef _WIN32
 #include "windows.h"
 #else
@@ -172,6 +175,11 @@ ExecuteResult Execute(const noex::string& cmd,
     do {
         stdout_context.RedirectOutput(process);
         stderr_context.RedirectOutput(process);
+#ifdef __TUW_UNIX__
+        // Update the console window
+        while (gtk_events_pending())
+            gtk_main_iteration_do(FALSE);
+#endif
 #ifdef _WIN32
         Sleep(10);  // wait 10ms
 #else
