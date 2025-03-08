@@ -65,7 +65,8 @@ noex::string ANSItoUTF8(const noex::string& str) noexcept {
     if (str.empty())
         return "";
 
-    int wstr_len = MultiByteToWideChar(CP_ACP, 0, str.data(), str.size() + 1, NULL, 0);
+    int wstr_len = MultiByteToWideChar(CP_ACP, 0,
+        str.data(), static_cast<int>(str.size() + 1), NULL, 0);
     if (wstr_len == 0)
         return "";  // Failed to convert
 
@@ -73,7 +74,9 @@ noex::string ANSItoUTF8(const noex::string& str) noexcept {
     if (wstr.empty())
         return "";  // Allocation error
 
-    int ret = MultiByteToWideChar(CP_ACP, 0, str.data(), str.size() + 1, wstr.data(), wstr.size());
+    int ret = MultiByteToWideChar(CP_ACP, 0,
+        str.data(), static_cast<int>(str.size() + 1),
+        wstr.data(), static_cast<int>(wstr.size()));
     if (ret != wstr_len)
         return "";  // Failed to convert
     return UTF16toUTF8(wstr.data());

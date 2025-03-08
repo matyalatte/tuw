@@ -16,7 +16,7 @@ struct MenuData {
 #define EMPTY_DOCUMENT rapidjson::Document(rapidjson::kObjectType)
 
 // Get "gui_definition.*"
-noex::string GetDefaultJsonPath();
+noex::string GetDefaultJsonPath() noexcept;
 
 // Main window
 class MainFrame {

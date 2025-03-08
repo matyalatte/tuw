@@ -9,7 +9,7 @@
 #include <gtk/gtk.h>
 #endif
 
-noex::string GetDefaultJsonPath() {
+noex::string GetDefaultJsonPath() noexcept {
     noex::string def_name = "gui_definition.";
     for (const char* ext : { "jsonc", "tuw" }) {
         noex::string json_path = def_name + ext;
@@ -151,7 +151,7 @@ static int OnShouldQuit(void *data) noexcept {
 }
 
 #ifdef __TUW_UNIX__
-static uiWindow* CreateLogWindowForGtk() {
+static uiWindow* CreateLogWindowForGtk() noexcept {
     // Console window for linux
     char *exe_path = envuGetExecutablePath();
     uiWindow *log_win = uiNewWindow(exe_path, 600, 400, 0);
