@@ -191,6 +191,10 @@ void SetLogEntry(void* log_entry) noexcept {
     g_logger.SetLogEntry(static_cast<uiMultilineEntry*>(log_entry));
 }
 
+void Log(const char* str) noexcept {
+    g_logger.Log(str);
+}
+
 void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_list va;
     va_start(va, fmt);
