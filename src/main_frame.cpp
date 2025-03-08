@@ -5,6 +5,9 @@
 #include "exec.h"
 #include "string_utils.h"
 #include "tuw_constants.h"
+#ifdef __TUW_UNIX__
+#include <gtk/gtk.h>
+#endif
 
 noex::string GetDefaultJsonPath() {
     noex::string def_name = "gui_definition.";
@@ -512,7 +515,16 @@ void MainFrame::RunCommand() noexcept {
     const char* codepage = json_utils::GetString(sub_definition, "codepage", "");
     bool use_utf8_on_windows = strcmp(codepage, "utf8") == 0 || strcmp(codepage, "utf-8") == 0;
 
+#ifdef __TUW_UNIX__
+    // Disable the main window on Unix
+    // since we call the main loop while running commands
+    GtkWidget* widget = reinterpret_cast<GtkWidget*>(uiControlHandle(uiControl(m_mainwin)));
+    gtk_widget_set_sensitive(widget, FALSE);
+#endif
     ExecuteResult result = Execute(cmd, use_utf8_on_windows);
+#ifdef __TUW_UNIX__
+    gtk_widget_set_sensitive(widget, TRUE);
+#endif
     uiButtonSetText(m_run_button, text);
 
     bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);
