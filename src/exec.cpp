@@ -19,13 +19,13 @@ class RedirectContext {
  private:
 #ifdef _WIN32
     HANDLE m_file;
+    bool m_use_utf8_on_windows;
 #else
     FILE* m_file;
 #endif
     int m_io_type;
     char m_buf[BUF_SIZE + 1];
     noex::string m_last_chars;  // Stores the last characters
-    bool m_use_utf8_on_windows;
 
     noex::string TruncateStr(const noex::string& str, size_t size) noexcept {
         if (str.size() > size)
@@ -35,7 +35,9 @@ class RedirectContext {
 
  public:
     explicit RedirectContext(int read_io_type, int use_utf8_on_windows) noexcept :
+    #ifdef _WIN32
             m_use_utf8_on_windows(use_utf8_on_windows),
+    #endif
             m_io_type(read_io_type), m_last_chars() {
     #ifdef _WIN32
         if (read_io_type == READ_STDOUT)
@@ -73,7 +75,9 @@ class RedirectContext {
             DWORD written;
             if (m_use_utf8_on_windows) {
                 noex::wstring wout = UTF8toUTF16(m_buf);
-                WriteConsoleW(m_file, wout.c_str(), static_cast<DWORD>(wout.size()), &written, NULL);
+                WriteConsoleW(m_file,
+                    wout.c_str(), static_cast<DWORD>(wout.size()),
+                    &written, NULL);
             } else {
                 WriteFile(m_file, m_buf, static_cast<DWORD>(read_size), &written, NULL);
             }
