@@ -205,16 +205,10 @@ ExecuteResult Execute(const noex::string& cmd,
     return { return_code, err_msg, last_line };
 }
 
-ExecuteResult LaunchDefaultApp(const noex::string& url) noexcept {
 #ifdef _WIN32
-    noex::wstring utf16_url = UTF8toUTF16(url.c_str());
-    const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", utf16_url.c_str(), NULL};
-#elif defined(__TUW_UNIX__) && !defined(__HAIKU__)
-    // Linux and BSD
-    const char* argv[] = {"xdg-open", url.c_str(), NULL};
+static ExecuteResult LaunchDefaultAppBase(const wchar_t** argv) noexcept {
 #else
-    // macOS and Haiku OS
-    const char* argv[] = {"open", url.c_str(), NULL};
+static ExecuteResult LaunchDefaultAppBase(const char** argv) noexcept {
 #endif
     struct subprocess_s process;
     int options = subprocess_option_inherit_environment
@@ -228,4 +222,27 @@ ExecuteResult LaunchDefaultApp(const noex::string& url) noexcept {
     DestroyProcess(process, &return_code, err_msg);
 
     return { return_code, ANSItoUTF8(err_msg), "" };
+}
+
+ExecuteResult LaunchDefaultApp(const noex::string& url) noexcept {
+#ifdef _WIN32
+    noex::wstring utf16_url = UTF8toUTF16(url.c_str());
+    const wchar_t* argv[] = {L"cmd.exe", L"/c", L"start", utf16_url.c_str(), NULL};
+#elif defined(__TUW_UNIX__) && !defined(__HAIKU__)
+    // Linux and BSD
+    const char* argv[] = {"xdg-open", url.c_str(), NULL};
+#else
+    // macOS and Haiku OS
+    const char* argv[] = {"open", url.c_str(), NULL};
+#endif
+
+    ExecuteResult res = LaunchDefaultAppBase(argv);
+#if defined(__TUW_UNIX__) && !defined(__HAIKU__)
+    if (res.exit_code != 0) {
+        // Try "gio open" if xdg-open failed
+        const char* argv2[] = {"gio", "open", url.c_str(), NULL};
+        res = LaunchDefaultAppBase(argv2);
+    }
+#endif
+    return res;
 }
