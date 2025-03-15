@@ -104,14 +104,14 @@ jobs:
 
       - name: Build exe for Unix
         if: (runner.os != 'Windows') && (matrix.arch_suffix != '-universal')
-        run: bash shell_scripts/build.sh Release
+        run: ./shell_scripts/build.sh Release
 
       - name: Build universal binary for Unix
         if: (runner.os != 'Windows') && (matrix.arch_suffix == '-universal')
-        run: bash shell_scripts/build_universal.sh Release
+        run: ./shell_scripts/build_universal.sh Release
 
       - name: Show info about exe
-        run: bash shell_scripts/exe_info.sh build/Release${{ matrix.arch }}/${{ env.TOOL_NAME }}${{ matrix.exe_ext }}
+        run: ./shell_scripts/exe_info.sh build/Release${{ matrix.arch }}/${{ env.TOOL_NAME }}${{ matrix.exe_ext }}
         shell: bash
 
       - name: Copy files
@@ -174,7 +174,7 @@ jobs:
         shell: bash
 
       - name: Show info about exe
-        run: bash shell_scripts/exe_info.sh ${{ env.TOOL_NAME }}
+        run: ./shell_scripts/exe_info.sh ${{ env.TOOL_NAME }}
         shell: bash
 
       - name: Archive release for Unix

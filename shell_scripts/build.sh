@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Build an executable.
 # Tuw will be generated in ../build/${build_type}
 
-# You can specify build type as an argument like "bash build.sh Debug"
+# You can specify build type as an argument like "./build.sh Debug"
 if [ "$1" = "Debug" ]; then
     build_type="Debug"
     preset="--native-file presets/debug.ini"

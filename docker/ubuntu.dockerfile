@@ -16,7 +16,7 @@
 #
 #   -You can run tests on the container.
 #    docker build -t tuw_ubuntu -f docker/ubuntu.dockerfile ./
-#    docker run --rm --init -i tuw_ubuntu xvfb-run bash test.sh
+#    docker run --rm --init -i tuw_ubuntu xvfb-run ./test.sh
 
 # Base image
 FROM ubuntu:20.04
@@ -38,4 +38,4 @@ COPY . /Tuw
 
 # Build
 WORKDIR /Tuw/shell_scripts
-RUN bash build.sh
+RUN ./build.sh

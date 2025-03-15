@@ -20,7 +20,7 @@ On FreeBSD, you can get all the required tools with `pkg`.
 pkg install git bash pkgconf meson ninja
 git clone https://github.com/matyalatte/tuw.git
 cd tuw
-bash shell_scripts/build.sh
+./shell_scripts/build.sh
 ./build/Release/Tuw
 ```
 
@@ -32,7 +32,7 @@ On OpenBSD, you can get all the required tools with `pkg_add`.
 pkg_add bash meson ninja
 git clone https://github.com/matyalatte/tuw.git
 cd tuw
-bash shell_scripts/build.sh
+./shell_scripts/build.sh
 ./build/Release/Tuw
 ```
 
@@ -44,7 +44,7 @@ On NetBSD, you can get all the required tools with `pkgin`.
 pkgin in git mozilla-rootcerts-openssl bash pkgconf meson ninja
 git clone https://github.com/matyalatte/tuw.git
 cd tuw
-bash shell_scripts/build.sh
+./shell_scripts/build.sh
 ./build/Release/Tuw
 ```
 
@@ -56,7 +56,7 @@ On Haiku, you can get all the required tools with `pkgman`.
 pkgman install meson ninja gtk3_devel
 git clone https://github.com/matyalatte/tuw.git
 cd tuw
-bash shell_scripts/build.sh
+./shell_scripts/build.sh
 ./build/Release/Tuw
 ```
 
@@ -86,6 +86,6 @@ On OpenIndiana, you can get all the required tools with `pkg`.
 pkg install bash git meson
 git clone https://github.com/matyalatte/tuw.git
 cd tuw
-bash shell_scripts/build.sh
+./shell_scripts/build.sh
 ./build/Release/Tuw
 ```
