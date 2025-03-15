@@ -35,4 +35,4 @@ You can use check boxes.
 ```
 
 -   `check` is a check box. The `value` will be inputted into commands if you check the check box.
--   `check_array` is an array of `check` components. It concatenates checked values into a string, and inject it into commands.
+-   `check_array` is an array of `check` components. It concatenates checked values into a string, and injects it into commands.
