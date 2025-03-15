@@ -174,7 +174,9 @@ jobs:
         shell: bash
 
       - name: Show info about exe
-        run: ./shell_scripts/exe_info.sh ${{ env.TOOL_NAME }}
+        run: |
+          ./shell_scripts/exe_info.sh ${{ env.TOOL_NAME }}
+          ./shell_scripts/check_glibc_compatibility.sh ${{ env.TOOL_NAME }}
         shell: bash
 
       - name: Archive release for Unix
