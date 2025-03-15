@@ -1,3 +1,4 @@
+ver 0.9.2
 - Improved the performance of redirection (#91)
   (Fixed a Windows-specific issue where stdout redirection was unexpectedly slow.)
 - FIxed a Linux-specific issue where the console window looks like freezing while running commands. (#89)
