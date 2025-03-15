@@ -5,8 +5,11 @@
 #include "exec.h"
 #include "string_utils.h"
 #include "tuw_constants.h"
+#ifdef __TUW_UNIX__
+#include <gtk/gtk.h>
+#endif
 
-noex::string GetDefaultJsonPath() {
+noex::string GetDefaultJsonPath() noexcept {
     noex::string def_name = "gui_definition.";
     for (const char* ext : { "jsonc", "tuw" }) {
         noex::string json_path = def_name + ext;
@@ -148,30 +151,13 @@ static int OnShouldQuit(void *data) noexcept {
 }
 
 #ifdef __TUW_UNIX__
-static uiWindow* CreateLogWindowForGtk() {
+static uiWindow* CreateLogWindowForGtk() noexcept {
     // Console window for linux
     char *exe_path = envuGetExecutablePath();
     uiWindow *log_win = uiNewWindow(exe_path, 600, 400, 0);
     envuFree(exe_path);
     uiWindowOnClosing(log_win, OnClosing, NULL);
     uiMultilineEntry* log_entry = uiNewMultilineEntry();
-
-    /*
-    If your monospace font doesn't work,
-    you should make a config file to change the default font.
-    ```
-    <!-- ~/.config/fontconfig/fonts.conf -->
-    <match target="pattern">
-        <test name="family" qual="any">
-            <string>monospace</string>
-        </test>
-        <edit binding="strong" mode="prepend" name="family">
-            <string>Source Code Pro</string>
-        </edit>
-    </match>
-    ```
-    */
-    uiUnixMultilineEntrySetMonospace(log_entry, 1);
     uiMultilineEntrySetReadOnly(log_entry, 1);
     SetLogEntry(log_entry);
     uiBox* log_box = uiNewVerticalBox();
@@ -529,7 +515,16 @@ void MainFrame::RunCommand() noexcept {
     const char* codepage = json_utils::GetString(sub_definition, "codepage", "");
     bool use_utf8_on_windows = strcmp(codepage, "utf8") == 0 || strcmp(codepage, "utf-8") == 0;
 
+#ifdef __TUW_UNIX__
+    // Disable the main window on Unix
+    // since we call the main loop while running commands
+    GtkWidget* widget = reinterpret_cast<GtkWidget*>(uiControlHandle(uiControl(m_mainwin)));
+    gtk_widget_set_sensitive(widget, FALSE);
+#endif
     ExecuteResult result = Execute(cmd, use_utf8_on_windows);
+#ifdef __TUW_UNIX__
+    gtk_widget_set_sensitive(widget, TRUE);
+#endif
     uiButtonSetText(m_run_button, text);
 
     bool check_exit_code = json_utils::GetBool(sub_definition, "check_exit_code", false);

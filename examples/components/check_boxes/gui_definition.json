@@ -1,15 +1,17 @@
 {
     "gui": {
-        "command": "echo checkbox: %-% & echo options:%-%",
+        "command": "echo checkbox: %ch% & echo options:%array%",
         "button": "Echo!",
         "components": [
             {
                 "type": "check",
+                "id": "ch",
                 "label": "checkbox",
                 "value": "checked!"
             },
             {
                 "type": "check_array",
+                "id": "array",
                 "label": "options",
                 "items": [
                     {

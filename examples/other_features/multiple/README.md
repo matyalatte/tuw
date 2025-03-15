@@ -12,22 +12,24 @@ When `"label"` is not defined, `"window_name"` will be used as the GUI label.
     "gui": [
         {
             "label": "Sample GUI",
-            "command": "echo file: %-%",
+            "command": "echo file: %var%",
             "button": "Echo!",
             "components": [
                 {
                     "type": "file",
+                    "id": "var",
                     "label": "Some file path"
                 }
             ]
         },
         {
             "window_name": "Sample GUI2",
-            "command": "echo text_box: %-%",
+            "command": "echo text_box: %var%",
             "button": "Echo!",
             "components": [
                 {
                     "type": "text",
+                    "id": "var",
                     "label": "Some text"
                 }
             ]

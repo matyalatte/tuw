@@ -1,6 +1,6 @@
 {
     "gui": {
-        "command": "echo textbox: %c%",
+        "command": "echo textbox: %str%",
         "button": "Echo!",
         "components": [
             {
@@ -9,6 +9,7 @@
             },
             {
                 "type": "text",
+                "id": "str",
                 "label": "Some text"
             }
         ]

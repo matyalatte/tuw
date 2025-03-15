@@ -7,10 +7,11 @@
 ```json
 {
     "gui": {
-        "command": "echo %-%",
+        "command": "echo %x%",
         "components": [
             {
                 "type": "text",
+                "id": "x",
                 "label": "Text box",
                 "optional": true,
                 "prefix": "-pre=",

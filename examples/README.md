@@ -1,6 +1,7 @@
 # Examples
 
 You can see some JSON files to learn how to use Tuw.
+(If you don't have Tuw yet, you can download it from [here](https://github.com/matyalatte/tuw/releases))
 
 ## 1. Getting Started
 

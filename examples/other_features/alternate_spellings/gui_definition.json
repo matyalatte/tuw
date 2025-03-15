@@ -1,6 +1,6 @@
 {
     "gui": {
-        "command": "echo folder: %-% & echo combo: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-%",
+        "command": "echo folder: %dir% & echo combo: %combo% & echo check_array: %opt% & echo textbox: %str% & echo int: %int%",
         "title": "Alternate Spellings Sample",
         "component_array": [
             {
@@ -9,12 +9,14 @@
             },
             {
                 "type": "dir",
+                "id": "dir",
                 "label": "Some folder path",
                 "empty_message": "placeholder!",
                 "add_quote": true
             },
             {
                 "type": "choice",
+                "id": "combo",
                 "label": "combo box",
                 "item_array": [
                     {
@@ -30,6 +32,7 @@
             },
             {
                 "type": "checks",
+                "id": "opt",
                 "label": "options",
                 "item_array": [
                     {
@@ -45,10 +48,12 @@
             },
             {
                 "type": "text_box",
+                "id": "str",
                 "label": "text box"
             },
             {
                 "type": "integer",
+                "id": "int",
                 "label": "Int picker"
             }
         ]

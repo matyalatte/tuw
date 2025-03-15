@@ -24,6 +24,7 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept;
 void EnableCSI() noexcept;
 #elif defined(__TUW_UNIX__)
 void SetLogEntry(void* log_entry) noexcept;
+void Log(const char* str) noexcept;
 void FprintFmt(FILE* out, const char* fmt, ...) noexcept;
 #else
 #define FprintFmt(...) fprintf(__VA_ARGS__)

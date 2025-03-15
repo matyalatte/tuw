@@ -1,20 +1,23 @@
 {
     "gui": {
         "window_name": "Placeholder sample",
-        "command": "echo %-% %-% %-%",
+        "command": "echo %x% %y% %z%",
         "components": [
             {
                 "type": "file",
+                "id": "x",
                 "label": "Some file",
                 "placeholder": "Drop a file here!"
             },
             {
                 "type": "folder",
+                "id": "y",
                 "label": "Some folder",
                 "placeholder": "Drop a folder here!"
             },
             {
                 "type": "text",
+                "id": "z",
                 "label": "Some text",
                 "placeholder": "Type here!"
             }
