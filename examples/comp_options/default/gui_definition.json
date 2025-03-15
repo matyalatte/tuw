@@ -1,15 +1,17 @@
 {
     "gui": {
-        "command": "echo file: %-% & echo options: %-%",
+        "command": "echo file: %x% & echo options: %opt%",
         "components": [
             {
                 "type": "file",
+                "id": "x",
                 "label": "Some file path",
                 "extension": "any files (*)|*",
                 "default": "./foo/bar"
             },
             {
                 "type": "check_array",
+                "id": "opt",
                 "label": "options",
                 "items": [
                     {

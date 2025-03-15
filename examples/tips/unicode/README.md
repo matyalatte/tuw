@@ -7,23 +7,25 @@ Tuw supports UTF-8 strings.
 ```json
 {
     "window_name": "Unicode Sample",
-    "command": "echo file: %รหัส% & echo folder: %-% & echo checkbox: %-%",
+    "command": "echo file: %รหัส% & echo folder: %dir% & echo checkbox: %check%",
     "button": "こんにちは！",
     "components": [
         {
             "type": "file",
+            "id": "รหัส",
             "label": "文件",
             "extension": "any files | *",
-            "default": "ああああ",
-            "id": "รหัส"
+            "default": "ああああ"
         },
         {
             "type": "folder",
+            "id": "dir",
             "label": "폴더",
             "default": "いいいい",
         },
         {
             "type": "check",
+            "id": "check",
             "label": "вариант",
             "default": true
         }

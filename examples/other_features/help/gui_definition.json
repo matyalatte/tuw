@@ -1,7 +1,7 @@
 {
     "gui": {
         "window_name": "Sample GUI",
-        "command": "echo file: %-% & echo folder: %-% & echo checkbox: %-%",
+        "command": "echo file: %f% & echo folder: %dir% & echo checkbox: %opt%",
         "components": [
             {
                 "type": "static_text",
@@ -9,16 +9,19 @@
             },
             {
                 "type": "file",
+                "id": "f",
                 "label": "Some file path",
                 "extension": "any files (*)|*",
                 "placeholder": "Drop a file here!"
             },
             {
                 "type": "folder",
+                "id": "dir",
                 "label": "Some folder path"
             },
             {
                 "type": "check",
+                "id": "opt",
                 "label": "flag"
             }
         ]

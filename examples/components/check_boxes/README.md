@@ -8,11 +8,13 @@ You can use check boxes.
 "components": [
     {
         "type": "check",
+        "id": "ch",
         "label": "checkbox",
         "value": "checked!"
     },
     {
         "type": "check_array",
+        "id": "array",
         "label": "options",
         "items": [
             {
@@ -33,4 +35,4 @@ You can use check boxes.
 ```
 
 -   `check` is a check box. The `value` will be inputted into commands if you check the check box.
--   `check_array` is an array of `check` components.
+-   `check_array` is an array of `check` components. It concatenates checked values into a string, and inject it into commands.

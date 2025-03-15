@@ -15,5 +15,5 @@ You can rename the window title and the execution button.
 }
 ```
 
--   `window_name` is an optional key to rename the window title.
--   `button` is an optional key to rename the execution button.
+-   `window_name` is an option to rename the window title.
+-   `button` is an option to rename the execution button.

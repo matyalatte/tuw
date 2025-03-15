@@ -1,6 +1,6 @@
 # Alternate Spellings
 
-Tuw supports multiple spellings for some JSON keys and values.  
+Tuw supports multiple spellings for some component types and options.
 This allows you to use more comfortable or familiar terms while configuring Tuw.  
 
 ## Component Types
@@ -13,7 +13,7 @@ This allows you to use more comfortable or familiar terms while configuring Tuw.
 |  check_array  |  checks  |
 |  int  |  integer  |
 
-## Keys
+## Options
 
 |  Standard  |  Alternatives |
 | ---- | ---- |

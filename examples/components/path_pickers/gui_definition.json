@@ -1,17 +1,19 @@
 {
     "gui": {
         "window_name": "Picker sample",
-        "command": "copy %foo% %bar%",
+        "command": "copy %img% %out%",
         "button": "copy",
         "components": [
             {
                 "type": "file",
-                "label": "PNG file you want to copy",
-                "extension": "PNG files (*.png)|*.png",
+                "id": "img",
+                "label": "Image file you want to copy",
+                "extension": "BMP and GIF files (*.bmp;*.gif)|*.bmp;*.gif|PNG files (*.png)|*.png",
                 "add_quotes": true
             },
             {
                 "type": "folder",
+                "id": "out",
                 "label": "Output path",
                 "add_quotes": true
             }
