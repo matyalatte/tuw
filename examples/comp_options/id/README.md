@@ -1,6 +1,6 @@
 # ID
 
-`id` is an optional key for components.  
+`id` is an option for components.
 You can use the defined ids as variable names in commands.  
 
 ```json

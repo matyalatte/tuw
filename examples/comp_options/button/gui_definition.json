@@ -1,15 +1,17 @@
 {
     "gui": {
         "window_name": "Button sample",
-        "command": "echo %-% %-%",
+        "command": "echo %f% %dir%",
         "components": [
             {
                 "type": "file",
+                "id": "f",
                 "label": "Some file",
                 "button": "..."
             },
             {
                 "type": "folder",
+                "id": "dir",
                 "label": "Some folder",
                 "button": "Open"
             }

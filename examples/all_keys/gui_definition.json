@@ -4,7 +4,7 @@
     "gui": [
         {
             "window_name": "Components Minimal",
-            "command": "echo file: %-% & echo folder: %-% & echo combo: %-% & echo radio: %-% & echo check: %-% & echo check_array: %-% & echo textbox: %-% & echo int: %-% & echo float: %-%",
+            "command": "echo file: %file% & echo folder: %folder% & echo combo: %combo% & echo radio: %radio% & echo check: %check% & echo check_array: %options% & echo textbox: %text% & echo int: %integer% & echo float: %double%",
             "components": [
                 {
                     "type": "static_text",
@@ -12,14 +12,17 @@
                 },
                 {
                     "type": "file",
+                    "id": "file",
                     "label": "Some file path"
                 },
                 {
                     "type": "folder",
+                    "id": "folder",
                     "label": "Some folder path"
                 },
                 {
                     "type": "combo",
+                    "id": "combo",
                     "label": "combo box",
                     "items": [
                         {
@@ -35,6 +38,7 @@
                 },
                 {
                     "type": "radio",
+                    "id": "radio",
                     "label": "radio box",
                     "items": [
                         {
@@ -50,10 +54,12 @@
                 },
                 {
                     "type": "check",
+                    "id": "check",
                     "label": "flag!"
                 },
                 {
                     "type": "check_array",
+                    "id": "options",
                     "label": "options",
                     "items": [
                         {
@@ -69,14 +75,17 @@
                 },
                 {
                     "type": "text",
+                    "id": "text",
                     "label": "text box"
                 },
                 {
                     "type": "int",
+                    "id": "integer",
                     "label": "Int picker"
                 },
                 {
                     "type": "float",
+                    "id": "double",
                     "label": "Float picker"
                 }
             ]

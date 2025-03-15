@@ -12,7 +12,9 @@
 
 ![build](https://github.com/matyalatte/tuw/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/tuw/actions/workflows/test.yml/badge.svg)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4aee3ee5172e4c38915d07f9c62725d3)](https://app.codacy.com/gh/matyalatte/tuw/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![donate](https://img.shields.io/static/v1?label=donate&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/matyalatte)  
+[Examples](../examples/README.md) | [Build Instructions](./Building.md) | [FAQ](./FAQ.md)
 
 ## Only 300KB for a portable GUI
 
@@ -21,7 +23,7 @@ All you need is a JSON file and a tiny executable.
 **No need for compilers, browsers, or huge executables!**  
 
 ![sample](https://github.com/user-attachments/assets/6426fc08-821f-49f5-af74-965273d45d4a)
-<img src=https://github.com/user-attachments/assets/d770ea1d-cead-405c-a48c-48fe9ba3a4cf width=398></img>  
+<img src=https://github.com/user-attachments/assets/6a43c5d9-beed-4f27-8a82-5dfd5fd9c3b5 width=398></img>  
 
 ## Features
 

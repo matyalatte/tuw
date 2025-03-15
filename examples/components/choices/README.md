@@ -8,6 +8,7 @@ You can use a combo box or radio buttons to let users select one of the choices.
 "components": [
     {
         "type": "combo",
+        "id": "cb",
         "label": "Combo box",
         "items": [
             {
@@ -25,6 +26,7 @@ You can use a combo box or radio buttons to let users select one of the choices.
     },
     {
         "type": "radio",
+        "id": "rb",
         "label": "Radio buttons",
         "items": [
             {
@@ -43,7 +45,6 @@ You can use a combo box or radio buttons to let users select one of the choices.
 ]
 ```
 
-`combo` is the type for a combo box, and `radio` is for radio buttons.  
-They require `items` to specify choices.  
-Each item should have a `label` to specify the string that will be displayed in the GUI.  
-You can also use `value` to specify the actual value that will be injected into commands.  
+`combo` is the type for a combo box, and `radio` is for radio buttons.
+They require `items` to specify choices.
+You can also use `value` to specify the actual value that is injected into commands.  

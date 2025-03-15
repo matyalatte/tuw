@@ -4,7 +4,7 @@ There are optional keys to create platform-specific GUIs without needing separat
 
 ## "command_'os'"
 
-You can use optional keys to override commands based on the operating system:
+You can use options to override commands based on the operating system:
 
 -   `command_win` for Windows
 -   `command_mac` for macOS

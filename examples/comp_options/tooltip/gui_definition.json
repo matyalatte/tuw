@@ -1,6 +1,6 @@
 {
     "gui": {
-        "command": "echo file: %-% & echo folder: %-% & echo options: %-%",
+        "command": "echo file: %x% & echo folder: %y% & echo options: %z%",
         "components": [
             {
                 "type": "static_text",
@@ -8,17 +8,20 @@
             },
             {
                 "type": "file",
+                "id": "x",
                 "label": "Some file path",
                 "extension": "any files (*)|*",
                 "tooltip": "tooltip for file path!"
             },
             {
                 "type": "folder",
+                "id": "y",
                 "label": "Some folder path",
                 "tooltip": "tooltip for folder path!"
             },
             {
                 "type": "check_array",
+                "id": "z",
                 "label": "options",
                 "items": [
                     {

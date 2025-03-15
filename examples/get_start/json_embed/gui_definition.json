@@ -9,6 +9,7 @@
             "components": [
                 {
                     "type": "file",
+                    "id": "json",
                     "label": "JSON file",
                     "default": "gui_definition.json",
                     "extension": "JSON files (*.json)|*.json",
@@ -57,6 +58,7 @@
                 },
                 {
                     "type": "file",
+                    "id": "json",
                     "label": "New json file",
                     "default": "new.json",
                     "extension": "JSON files (*.json)|*.json",

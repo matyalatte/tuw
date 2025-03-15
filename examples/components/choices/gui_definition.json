@@ -1,10 +1,11 @@
 {
     "gui": {
-        "command": "echo combo: %a% & echo radio: %b%",
+        "command": "echo combo: %cb% & echo radio: %rb%",
         "button": "Echo!",
         "components": [
             {
                 "type": "combo",
+                "id": "cb",
                 "label": "Combo box",
                 "items": [
                     {
@@ -22,6 +23,7 @@
             },
             {
                 "type": "radio",
+                "id": "rb",
                 "label": "Radio buttons",
                 "items": [
                     {

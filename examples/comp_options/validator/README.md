@@ -1,7 +1,7 @@
 # Validators
 
-`validator` is an optional key for components used to validate input strings before execution.
-It allows you to specify constraints and custom error messages about string validation.
+`validator` is an option for components used to validate input strings before execution.
+It allows you to specify constraints and custom error messages about string validation.  
 
 ![validator](https://github.com/matyalatte/tuw/assets/69258547/7231512d-f68e-4908-bf7f-d7a4f0a72213)  
 
@@ -17,6 +17,7 @@ You can use four kinds of constraints.
 ```json
 {
     "type": "file",
+    "id": "path",
     "label": "Some file path",
     "validator": {
         "exist": true,
@@ -41,6 +42,7 @@ You can overwrite default error messages using `*_error` options.
 ```json
 {
     "type": "file",
+    "id": "path",
     "label": "Some file path",
     "validator": {
         "exist": true,

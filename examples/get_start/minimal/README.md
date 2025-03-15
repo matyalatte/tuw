@@ -2,7 +2,7 @@
 
 Tuw reads `./gui_definition.json` (, `.jsonc`, or `.tuw`) when launching the executable. You can define a GUI in the JSON file.  
   
-The following JSON is for a minimal GUI that you can create.  
+The following JSON is for a minimal GUI that you can create.
 It has only a button to echo `Hello!`.  
 
 ![minimal](https://github.com/matyalatte/tuw/assets/69258547/a47047d4-0b7c-48cf-bf6b-18b62476e71c)

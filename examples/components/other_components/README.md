@@ -12,10 +12,11 @@ There are more components you can use.
     },
     {
         "type": "text",
+        "id": "str",
         "label": "Some text"
     }
 ]
 ```
 
--   `static_text` is a string component. You don't need to use `%*%` in a command for this component.
+-   `static_text` is a string component. You don't need an id for this component.
 -   `text` is a text box.

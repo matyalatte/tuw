@@ -2,7 +2,7 @@
     "gui": [
         {
             "label": "Validator",
-            "command": "echo file: %-%",
+            "command": "echo file: %path%",
             "components": [
                 {
                     "type": "static_text",
@@ -10,6 +10,7 @@
                 },
                 {
                     "type": "file",
+                    "id": "path",
                     "label": "Some file path",
                     "validator": {
                         "exist": true,
@@ -22,7 +23,7 @@
         },
         {
             "label": "Custom error messages",
-            "command": "echo file: %-%",
+            "command": "echo file: %path%",
             "components": [
                 {
                     "type": "static_text",
@@ -30,6 +31,7 @@
                 },
                 {
                     "type": "file",
+                    "id": "path",
                     "label": "Some file path",
                     "validator": {
                         "exist": true,

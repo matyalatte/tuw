@@ -133,12 +133,13 @@ TEST(JsonCheckTest, checkGUIFail6) {
 TEST(JsonCheckTest, checkGUIFail7) {
     rapidjson::Document test_json;
     GetTestJson(test_json);
+    test_json["gui"][0]["components"][1].RemoveMember("id");
     test_json["gui"][0]["components"][1].AddMember("id", "aaa", test_json.GetAllocator());
     CheckGUIError(test_json,
         "The ID of [\"components\"][1] is unused in the command;"
-        " echo file: __comp2__ & echo folder: __comp3__ & echo combo: __comp4__"
-        " & echo radio: __comp5__ & echo check: __comp6__ & echo check_array: __comp7__"
-        " & echo textbox: __comp8__ & echo int: __comp9__ & echo float: __comp???__");
+        " echo file: __comp???__ & echo folder: __comp2__ & echo combo: __comp3__"
+        " & echo radio: __comp4__ & echo check: __comp5__ & echo check_array: __comp6__"
+        " & echo textbox: __comp7__ & echo int: __comp8__ & echo float: __comp9__");
 }
 
 TEST(JsonCheckTest, checkGUIFailRelaxed) {

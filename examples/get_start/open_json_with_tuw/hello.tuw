@@ -1,11 +1,12 @@
 {
     "gui": {
         "window_name": "Title here!",
-        "command": "echo %-%",
+        "command": "echo %entry%",
         "button": "Hello!",
         "components": [
             {
                 "type": "text",
+                "id": "entry",
                 "label": "Type 'Hello!'"
             }
         ]

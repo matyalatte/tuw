@@ -6,6 +6,7 @@
             "components": [
                 {
                     "type": "folder",
+                    "id": "dir",
                     "label": "a folder"
                 }
             ]
@@ -16,6 +17,7 @@
             "components": [
                 {
                     "type": "folder",
+                    "id": "dir",
                     "label": "a folder"
                 }
             ]

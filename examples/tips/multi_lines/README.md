@@ -18,6 +18,7 @@ And some commands like `for` loop require parentheses `()`.
     "components": [
         {
             "type": "folder",
+            "id": "dir",
             "label": "a folder"
         }
     ]
