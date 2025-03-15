@@ -26,9 +26,9 @@ You can put a text box in the GUI.
 `components` is an array of GUI components (e.g., file pickers).
 Each component should have the following keys.  
 
--   `type` is the component type. `text` is for a text box.
--   [`id`](../../comp_options/id) is an option to name a component. You can use it as a variable name in commands.
--   `label` is the string written above the text box.
+-   `type`: Component type. `text` is for a text box.
+-   [`id`](../../comp_options/id): Component name. You can use it as a variable name in commands.
+-   `label`: String written above the text box.
 
 You can see [more examples](../../#2-components) for other component types.
 
