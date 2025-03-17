@@ -82,6 +82,10 @@ For VSCode, you can add the schema path to `settings.json` (`File > Preferences 
 
 [Building Executables](./Building.md)
 
+## Contributing
+
+[Contributing to Tuw](./CONTRIBUTING.md)
+
 ## License
 
 Files in this repository are available under the [MIT license](../license.txt).  
