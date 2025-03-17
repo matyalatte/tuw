@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Generate html report for coverage (./Tuw/coverage-report/index.html)
 # It only works with GCC.
 
-# You can specify build type as an argument like "bash coverage.sh Release"
+# You can specify build type as an argument like "./coverage.sh Release"
 if [ "$1" = "Debug" ]; then
     build_type="Debug"
 else

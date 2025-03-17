@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Checks required versions of GLIBC and GLIBCXX.
-# bash ./check_glibc_compatibility.sh path/to/your/binary
+# ./check_glibc_compatibility.sh path/to/your/binary
 
 glibc_deps=$(objdump -T $1 | grep GLIBC_ | sed 's/.*GLIBC_\([.0-9]*\).*/\1/g' | sort -Vu)
 glibcxx_deps=$(objdump -T $1 | grep GLIBCXX_ | sed 's/.*GLIBCXX_\([.0-9]*\).*/\1/g' | sort -Vu)

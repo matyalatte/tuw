@@ -61,7 +61,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew install --cask xquartz
-          bash shell_scripts/test.sh
+          ./shell_scripts/test.sh
 
   test_linux:
     needs: lint
@@ -75,7 +75,7 @@ jobs:
       - name: Test with docker
         run: |
           docker build -t tuw_test -f docker/${{ matrix.os }}.dockerfile ./
-          docker run --rm --init -i tuw_test xvfb-run bash test.sh
+          docker run --rm --init -i tuw_test xvfb-run ./test.sh
 
   build_tests_windows_arm64:
     runs-on: windows-2022

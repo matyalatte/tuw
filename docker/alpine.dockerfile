@@ -16,7 +16,7 @@
 #
 #   -You can run tests on the container.
 #    docker build -t tuw_alpine -f docker/alpine.dockerfile ./
-#    docker run --rm --init -i tuw_alpine xvfb-run bash test.sh
+#    docker run --rm --init -i tuw_alpine xvfb-run ./test.sh
 
 # Base image
 FROM alpine:3.16.5
@@ -38,4 +38,4 @@ COPY .. /Tuw
 
 # Build
 WORKDIR /Tuw/shell_scripts
-RUN bash build.sh
+RUN ./build.sh
