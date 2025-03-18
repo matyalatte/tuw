@@ -117,3 +117,31 @@ TEST(VectorTest, StructVec) {
     EXPECT_EQ(6, vec[2].b);
     EXPECT_EQ(noex::OK, noex::get_error_no());
 }
+
+TEST(VectorTest, Assign) {
+    noex::vector<int> vec;
+    vec.push_back(1);
+    vec.push_back(2);
+    vec.push_back(3);
+    vec.push_back(4);
+    EXPECT_EQ(4, vec.size());
+    EXPECT_EQ(4, vec[3]);
+    noex::vector<int> vec2(vec);
+    EXPECT_EQ(4, vec2.size());
+    EXPECT_EQ(4, vec2[3]);
+    EXPECT_EQ(noex::OK, noex::get_error_no());
+}
+
+TEST(VectorTest, Move) {
+    noex::vector<int> vec;
+    vec.push_back(1);
+    vec.push_back(2);
+    vec.push_back(3);
+    vec.push_back(4);
+    EXPECT_EQ(4, vec.size());
+    EXPECT_EQ(4, vec[3]);
+    noex::vector<int> vec2(std::move(vec));
+    EXPECT_EQ(4, vec2.size());
+    EXPECT_EQ(4, vec2[3]);
+    EXPECT_EQ(noex::OK, noex::get_error_no());
+}
