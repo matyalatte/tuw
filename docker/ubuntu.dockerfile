@@ -7,16 +7,12 @@
 #    docker run --name tuw_ubuntu tuw_ubuntu
 #
 # 3. Use "docker cp" to get the built executable.
-#    docker cp tuw_ubuntu:/Tuw/build/Release/Tuw ./
+#    docker cp tuw_ubuntu:/Tuw/build/Release-Test/Tuw ./
 #
 # Notes:
 #   -You can use buildx for cross compiling
 #    sudo apt install -y qemu-user-static binfmt-support
 #    docker buildx build --platform linux/arm64 -t tuw_ubuntu -f docker/ubuntu.dockerfile ./
-#
-#   -You can run tests on the container.
-#    docker build -t tuw_ubuntu -f docker/ubuntu.dockerfile ./
-#    docker run --rm --init -i tuw_ubuntu xvfb-run ./test.sh
 
 # Base image
 FROM ubuntu:20.04
@@ -38,4 +34,4 @@ COPY . /Tuw
 
 # Build
 WORKDIR /Tuw/shell_scripts
-RUN ./build.sh
+RUN xvfb-run ./test.sh

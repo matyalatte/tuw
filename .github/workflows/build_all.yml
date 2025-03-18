@@ -165,7 +165,7 @@ jobs:
       - name: Copy files
         run: |
           docker run --name tuw_ubuntu tuw_ubuntu
-          docker cp tuw_ubuntu:/Tuw/build/Release/${{ env.TOOL_NAME }} ./
+          docker cp tuw_ubuntu:/Tuw/build/Release-Test/${{ env.TOOL_NAME }} ./
           mkdir -p archive/${{ env.TOOL_NAME }}
           cp ${{ env.TOOL_NAME }} archive/${{ env.TOOL_NAME }}
           cp examples/other_features/help/gui_definition.json archive/${{ env.TOOL_NAME }}

@@ -35,10 +35,9 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 @pushd %~dp0\..
-    meson setup build\%BUILD_TYPE%%~2 %PRESET%%OPTIONS%
+    meson setup build\%BUILD_TYPE%%~2 %PRESET%%OPTIONS% -Dbuild_test=false
     if %ERRORLEVEL% neq 0 goto :buildend
     cd build\%BUILD_TYPE%%~2
     meson compile -v
     :buildend
 popd
-pause

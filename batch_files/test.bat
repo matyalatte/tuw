@@ -4,18 +4,18 @@ REM You can also get coverage report if OpenCppCoverage is installed.
 
 if /I "%~1"=="Debug" (
     set BUILD_TYPE=Debug
-    set PRESET=--native-file presets\debug.ini --native-file presets\test.ini
+    set PRESET=--native-file presets\debug.ini
 ) else (
     set BUILD_TYPE=Release
-    set PRESET=--native-file presets\release.ini --native-file presets\test.ini
+    set PRESET=--native-file presets\release.ini
 )
 echo Build type: %BUILD_TYPE%
 
 if /I "%~2"=="ARM" (
     if /I "%~1"=="Debug" (
-        set PRESET=--cross-file presets\windows_arm64.ini --cross-file presets\debug.ini --cross-file presets\test.ini
+        set PRESET=--cross-file presets\windows_arm64.ini --cross-file presets\debug.ini
     ) else (
-        set PRESET=--cross-file presets\windows_arm64.ini --cross-file presets\release.ini --cross-file presets\test.ini
+        set PRESET=--cross-file presets\windows_arm64.ini --cross-file presets\release.ini
     )
 )
 
@@ -72,5 +72,4 @@ if %ERRORLEVEL% NEQ 0 (
     :testend
 @popd
 
-pause
 if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%

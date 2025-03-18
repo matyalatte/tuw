@@ -139,37 +139,36 @@ tuw_sources += [
     'src/noex/vector.cpp',
 ]
 
-if get_option('build_exe')
-    executable('Tuw',
-        tuw_manifest + tuw_sources + ['src/main.cpp'],
-        dependencies : tuw_dependencies,
-        cpp_args: tuw_cpp_args,
-        link_args: tuw_link_args,
-        gnu_symbol_visibility: 'hidden',
-        include_directories: include_directories('include'),
-        install : false)
-endif
+# build codes as a library for testing
+tuw_lib = library('tuw_lib',
+    tuw_manifest + tuw_sources,
+    dependencies : tuw_dependencies,
+    cpp_args: tuw_cpp_args,
+    link_args: tuw_link_args,
+    include_directories: include_directories('include'),
+    build_rpath: '',
+    install_rpath: '',
+    name_prefix: 'lib',
+    install: false,
+    gnu_symbol_visibility: 'hidden',
+    soversion: '',
+    darwin_versions: [])
+
+tuw_dep = declare_dependency(include_directories: include_directories('include'),
+    dependencies : tuw_dependencies,
+    link_with : tuw_lib)
+
+# main app
+executable('Tuw',
+    tuw_manifest + ['src/main.cpp'],
+    dependencies : tuw_dep,
+    cpp_args: tuw_cpp_args,
+    link_args: tuw_link_args,
+    gnu_symbol_visibility: 'hidden',
+    include_directories: include_directories('include'),
+    install : false)
 
 if get_option('build_test')
-    # build codes as a library
-    tuw_lib = library('tuw_lib',
-        tuw_manifest + tuw_sources,
-        dependencies : tuw_dependencies,
-        cpp_args: tuw_cpp_args,
-        link_args: tuw_link_args,
-        include_directories: include_directories('include'),
-        build_rpath: '',
-        install_rpath: '',
-        name_prefix: 'lib',
-        install: false,
-        gnu_symbol_visibility: 'hidden',
-        soversion: '',
-        darwin_versions: [])
-
-    tuw_dep = declare_dependency(include_directories: include_directories('include'),
-        dependencies : tuw_dependencies,
-	    link_with : tuw_lib)
-
     # get gtest
     gtest_proj = subproject('gtest')
     gtest_dep = gtest_proj.get_variable('gtest_dep')

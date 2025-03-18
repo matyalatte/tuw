@@ -75,7 +75,6 @@ jobs:
       - name: Test with docker
         run: |
           docker build -t tuw_test -f docker/${{ matrix.os }}.dockerfile ./
-          docker run --rm --init -i tuw_test xvfb-run ./test.sh
 
   build_tests_windows_arm64:
     runs-on: windows-2022

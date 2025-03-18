@@ -7,16 +7,12 @@
 #    docker run --name tuw_alpine tuw_alpine
 #
 # 3. Use "docker cp" to get the built executable.
-#    docker cp tuw_alpine:/Tuw/build/Release/Tuw ./
+#    docker cp tuw_alpine:/Tuw/build/Release-Test/Tuw ./
 #
 # Notes:
 #   -You can use buildx for cross compiling
 #    sudo apt install -y qemu-user-static binfmt-support
 #    docker buildx build --platform linux/arm64 -t tuw_alpine_arm -f docker/alpine.dockerfile ./
-#
-#   -You can run tests on the container.
-#    docker build -t tuw_alpine -f docker/alpine.dockerfile ./
-#    docker run --rm --init -i tuw_alpine xvfb-run ./test.sh
 
 # Base image
 FROM alpine:3.16.5
@@ -38,4 +34,4 @@ COPY .. /Tuw
 
 # Build
 WORKDIR /Tuw/shell_scripts
-RUN ./build.sh
+RUN xvfb-run ./test.sh

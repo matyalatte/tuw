@@ -1,3 +1,3 @@
 @pushd %~dp0
-test.bat Release ARM
+call test.bat Release ARM
 popd
