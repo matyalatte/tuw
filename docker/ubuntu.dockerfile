@@ -7,12 +7,15 @@
 #    docker run --name tuw_ubuntu tuw_ubuntu
 #
 # 3. Use "docker cp" to get the built executable.
-#    docker cp tuw_ubuntu:/Tuw/build/Release-Test/Tuw ./
+#    docker cp tuw_ubuntu:/Tuw/build/Release/Tuw ./
 #
 # Notes:
 #   -You can use buildx for cross compiling
 #    sudo apt install -y qemu-user-static binfmt-support
 #    docker buildx build --platform linux/arm64 -t tuw_ubuntu -f docker/ubuntu.dockerfile ./
+#
+#   -You can run test.sh with build-arg
+#    docker build --build-arg TEST=true -t tuw_ubuntu -f docker/ubuntu.dockerfile ./
 
 # Base image
 FROM ubuntu:20.04
@@ -32,6 +35,13 @@ RUN pip3 install meson==1.3.1 ninja==1.11.1
 # Clone the repo
 COPY . /Tuw
 
+# Run test.sh when true
+ARG TEST=false
+
 # Build
 WORKDIR /Tuw/shell_scripts
-RUN xvfb-run ./test.sh
+RUN if [ "$TEST" = "true" ]; then \
+        xvfb-run ./test.sh; \
+    else \
+        ./build.sh; \
+    fi
