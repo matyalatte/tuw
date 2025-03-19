@@ -67,7 +67,7 @@ class MainFrame {
                     noex::string json_path) noexcept;
 
     void UpdatePanel(unsigned definition_id) noexcept;
-    void OpenURL(int id) noexcept;
+    noex::string OpenURL(int id) noexcept;
     bool Validate() noexcept;
     noex::string GetCommand() noexcept;
     void RunCommand() noexcept;

@@ -2,6 +2,7 @@
 // Todo: Write more tests
 
 #include "test_utils.h"
+#include "process_utils.h"
 
 class MainFrameTest : public ::testing::Test {
  protected:
@@ -192,4 +193,60 @@ TEST_F(MainFrameTest, LoadSaveConfigUTF) {
     test_json["gui"][0]["command"].SetString(rapidjson::StringRef(cmd.c_str()));
     test_json["gui"][0]["components"][1]["id"].SetString("ファイル");
     TestConfig(test_json, JSON_CONFIG_UTF);
+}
+
+class OpenURLTest : public MainFrameTest {
+ protected:
+    rapidjson::Document definition;
+    rapidjson::Document config;
+
+    void SetUp() override {
+        MainFrameTest::SetUp();
+        GetTestJson(definition);
+        GetDummyConfig(config);
+    }
+
+    void ReplaceURL(const char* url) {
+        definition["help"][0].RemoveMember("url");
+        rapidjson::Value urlValue;
+        urlValue.SetString(url, definition.GetAllocator());
+        definition["help"][0].AddMember("url", urlValue, definition.GetAllocator());
+    }
+};
+
+#if USE_BROWSER
+TEST_F(OpenURLTest, OpenUrl) {
+    main_frame = new MainFrame(definition, config);
+    noex::string msg = main_frame->OpenURL(0);
+    EXPECT_STREQ(msg.c_str(), "");
+}
+#endif  // USE_BROWSER
+
+TEST_F(OpenURLTest, OpenUrlWithFilePath) {
+    ReplaceURL("file:///test.txt");
+    main_frame = new MainFrame(definition, config);
+    noex::string msg = main_frame->OpenURL(0);
+    const char* expected =
+        "Use 'file' type for a path, not 'url' type. (file:///test.txt)";
+    EXPECT_STREQ(msg.c_str(), expected);
+}
+
+TEST_F(OpenURLTest, OpenUrlWithFtps) {
+    ReplaceURL("ftps://example.com");
+    main_frame = new MainFrame(definition, config);
+    noex::string msg = main_frame->OpenURL(0);
+    const char* expected =
+        "Unsupported scheme detected. "
+        "It should be http or https. (ftps)";
+    EXPECT_STREQ(msg.c_str(), expected);
+}
+
+TEST_F(OpenURLTest, OpenUrlWithSpace) {
+    ReplaceURL("https://example .com");
+    main_frame = new MainFrame(definition, config);
+    noex::string msg = main_frame->OpenURL(0);
+    const char* expected =
+        "URL should NOT contains ' ', ';', '|', '&', '\\r', nor '\\n'.\n"
+        "URL: https://example .com";
+    EXPECT_STREQ(msg.c_str(), expected);
 }

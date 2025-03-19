@@ -10,6 +10,7 @@ test_sources = [
     'validator_test.cpp',
     'string_test.cpp',
     'vector_test.cpp',
+    'process_utils.cpp',
 ]
 
 # build tests

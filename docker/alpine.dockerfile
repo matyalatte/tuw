@@ -20,12 +20,17 @@
 # Base image
 FROM alpine:3.16.5
 
+# Run test.sh when true
+ARG TEST=false
+
 # Install packages
 RUN apk update && \
     apk add --no-cache \
         alpine-sdk linux-headers bash gtk+3.0-dev \
-        py3-pip python3 ttf-freefont \
-        xorg-server xvfb
+        py3-pip python3 ttf-freefont && \
+    if [ "$TEST" = "true" ]; then \
+        apk add --no-cache dbus-x11 xdg-utils xorg-server xvfb firefox; \
+    fi
 
 # Need ttf-freefont to avoid a GTK warning
 # "Native Windows wider or taller than * pixels are not supported"
@@ -36,14 +41,13 @@ RUN pip3 install meson==1.3.1 ninja==1.11.1
 # Clone the repo
 COPY . /Tuw
 
-# Run test.sh when true
-ARG TEST=false
-
 # Build
+ENV XDG_CURRENT_DESKTOP=GNOME
 WORKDIR /Tuw/shell_scripts
 RUN if [ "$TEST" = "true" ]; then \
         Xvfb :99 -screen 0 1024x768x24 & \
         export DISPLAY=:99 && \
+        gio mime x-scheme-handler/https org.mozilla.firefox.desktop && \
         ./test.sh; \
     else \
         ./build.sh; \

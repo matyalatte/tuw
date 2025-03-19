@@ -254,7 +254,7 @@ static bool IsValidURL(const noex::string &url) noexcept {
     return true;
 }
 
-void MainFrame::OpenURL(int id) noexcept {
+noex::string MainFrame::OpenURL(int id) noexcept {
     rapidjson::Value& help = m_definition["help"].GetArray()[id];
     const char* type = help["type"].GetString();
     noex::string url;
@@ -273,13 +273,13 @@ void MainFrame::OpenURL(int id) noexcept {
                                 url + ")";
                 PrintFmt("%sError: %s\n", tag, msg.c_str());
                 ShowErrorDialog(msg);
-                return;
+                return msg;
             } else if (scheme != "https" && scheme != "http") {
                 noex::string msg = "Unsupported scheme detected. "
                                 "It should be http or https. (" + scheme + ")";
                 PrintFmt("%sError: %s\n", tag, msg.c_str());
                 ShowErrorDialog(msg);
-                return;
+                return msg;
             }
         } else {
             url = "https://" + url;
@@ -295,7 +295,7 @@ void MainFrame::OpenURL(int id) noexcept {
             noex::string msg = "File does not exist. (" + url + ")";
             PrintFmt("%sError: %s\n", tag, msg.c_str());
             ShowErrorDialog(msg);
-            return;
+            return msg;
         }
     }
 
@@ -310,7 +310,7 @@ void MainFrame::OpenURL(int id) noexcept {
                           "URL: " + url;
         PrintFmt("%sError: %s\n", tag, msg.c_str());
         ShowErrorDialog(msg.c_str());
-        return;
+        return msg;
     }
 
     if (IsSafeMode()) {
@@ -319,6 +319,7 @@ void MainFrame::OpenURL(int id) noexcept {
                            "\n"
                            "URL: " + url;
         ShowSuccessDialog(msg, "Safe Mode");
+        return msg;
     } else {
         if (noex::get_error_no() != noex::OK) {
             // Reject the URL as it might have an unexpected value.
@@ -328,6 +329,7 @@ void MainFrame::OpenURL(int id) noexcept {
                 "Please reboot the application.";
             PrintFmt("%sError: %s\n", tag, msg);
             ShowErrorDialog(msg);
+            return msg;
         } else {
             ExecuteResult result = LaunchDefaultApp(url);
             if (result.exit_code != 0) {
@@ -335,9 +337,11 @@ void MainFrame::OpenURL(int id) noexcept {
                                    type + " by an unexpected error.";
                 PrintFmt("%sError: %s\n", tag, msg.c_str());
                 ShowErrorDialog(msg.c_str());
+                return msg;
             }
         }
     }
+    return "";
 }
 
 static void OnClicked(uiButton *sender, void *data) noexcept {
