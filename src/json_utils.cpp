@@ -345,7 +345,7 @@ static void CompileCommand(JsonResult& result,
         int j;
         if (id == CMD_TOKEN_PERCENT) {
             j = CMD_ID_PERCENT;
-            cmd_str += "%";
+            cmd_str.push_back('%');
         } else if (id == CMD_TOKEN_CURRENT_DIR) {
             j = CMD_ID_CURRENT_DIR;
             cmd_str += id;
