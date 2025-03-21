@@ -27,7 +27,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2022, macos-14]
+        include:
+          - os: windows-2022
+            buildtype: Release
+          - os: windows-2022
+            buildtype: Debug
+          - os: macos-14
+            buildtype: Release
     runs-on: ${{ matrix.os }}
     needs: lint
     steps:
@@ -54,14 +60,14 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           cd batch_files
-          ./test.bat
+          ./test.bat ${{ matrix.buildtype }}
 
       # xquartz has xvfb functions
       - name: build and run tests for mac
         if: runner.os == 'macOS'
         run: |
           brew install --cask xquartz
-          ./shell_scripts/test.sh
+          ./shell_scripts/test.sh ${{ matrix.buildtype }}
 
   test_linux:
     needs: lint

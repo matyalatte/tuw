@@ -54,7 +54,7 @@ json_utils::JsonResult Merge(const noex::string& exe_path, const noex::string& j
     json_utils::JsonResult result = json_utils::LoadJson(json_path, json);
     if (!result.ok) return result;
 
-    if (json.Size() == 0) {
+    if (!json.IsObject() || json.MemberEnd() - json.MemberBegin() <= 0) {
         PrintFmt("JSON file loaded but it has no data.\n");
         return JSON_RESULT_OK;
     }
