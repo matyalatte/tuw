@@ -44,7 +44,7 @@ noex::string Component::GetString() noexcept {
     if (m_optional && str.empty())
         return "";
     if (m_add_quotes)
-        str = noex::string("\"") + str + "\"";
+        str = "\"" + str + "\"";
     return m_prefix + str + m_suffix;
 }
 
@@ -146,8 +146,6 @@ StaticText::StaticText(uiBox* box, const rapidjson::Value& j) noexcept
     : Component(j) {
     uiLabel* text = uiNewLabel(m_label.c_str());
     uiBoxAppend(box, uiControl(text), 0);
-    if (j.HasMember("tooltip"))
-        uiControlSetTooltip(uiControl(text), json_utils::GetString(j, "tooltip", ""));
 }
 
 // Base Class for strings
@@ -184,6 +182,11 @@ static void onFilesDropped(uiEntry *e, int count, char** names, void *data) noex
     UNUSED(data);
 }
 
+static void SetTooltip(uiControl* c, const rapidjson::Value& j) {
+    if (j.HasMember("tooltip"))
+        uiControlSetTooltip(c, json_utils::GetString(j, "tooltip", ""));
+}
+
 static uiEntry *putPathPicker(void* component, uiBox* box, const rapidjson::Value& j,
                               void (*click_func)(uiButton *sender, void *senderData)) noexcept {
     const char* value = json_utils::GetString(j, "default", "");
@@ -209,8 +212,7 @@ static uiEntry *putPathPicker(void* component, uiBox* box, const rapidjson::Valu
     uiGridSetSpacing(grid, tuw_constants::GRID_COMP_XSPACE, 0);
 
     uiBoxAppend(box, uiControl(grid), 0);
-    if (j.HasMember("tooltip"))
-        uiControlSetTooltip(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
+    SetTooltip(uiControl(entry), j);
     return entry;
 }
 
@@ -432,8 +434,7 @@ ComboBox::ComboBox(uiBox* box, const rapidjson::Value& j) noexcept
     uiComboboxSetSelected(combo, json_utils::GetInt(j, "default", 0) % j["items"].Size());
 
     SetValues(values);
-    if (j.HasMember("tooltip"))
-        uiControlSetTooltip(uiControl(combo), json_utils::GetString(j, "tooltip", ""));
+    SetTooltip(uiControl(combo), j);
     m_widget = combo;
 }
 
@@ -475,8 +476,7 @@ RadioButtons::RadioButtons(uiBox* box, const rapidjson::Value& j) noexcept
     uiRadioButtonsSetSelected(radio, json_utils::GetInt(j, "default", 0) % j["items"].Size());
 
     SetValues(values);
-    if (j.HasMember("tooltip"))
-        uiControlSetTooltip(uiControl(radio), json_utils::GetString(j, "tooltip", ""));
+    SetTooltip(uiControl(radio), j);
     m_widget = radio;
 }
 
@@ -511,8 +511,7 @@ CheckBox::CheckBox(uiBox* box, const rapidjson::Value& j) noexcept
 
     m_value = json_utils::GetString(j, "value", m_label.c_str());
 
-    if (j.HasMember("tooltip"))
-        uiControlSetTooltip(uiControl(check), json_utils::GetString(j, "tooltip", ""));
+    SetTooltip(uiControl(check), j);
     m_widget = check;
 }
 
@@ -547,10 +546,7 @@ CheckArray::CheckArray(uiBox* box, const rapidjson::Value& j) noexcept
         uiCheckbox* check = uiNewCheckbox(label);
         uiCheckboxSetChecked(check, json_utils::GetBool(i, "default", false));
         uiBoxAppend(check_array_box, uiControl(check), 0);
-        if (i.HasMember("tooltip")) {
-            uiControlSetTooltip(uiControl(check),
-                                            json_utils::GetString(i, "tooltip", ""));
-        }
+        SetTooltip(uiControl(check), i);
         m_checks.push_back(check);
         const char* value = json_utils::GetString(i, "value", label);
         values.emplace_back(value);
@@ -603,8 +599,7 @@ TextBox::TextBox(uiBox* box, const rapidjson::Value& j) noexcept
     uiEntrySetText(entry, value);
     uiEntrySetPlaceholder(entry, placeholder);
     uiBoxAppend(box, uiControl(entry), 0);
-    if (j.HasMember("tooltip"))
-        uiControlSetTooltip(uiControl(entry), json_utils::GetString(j, "tooltip", ""));
+    SetTooltip(uiControl(entry), j);
     m_widget = entry;
 }
 
@@ -623,8 +618,7 @@ static void initSpinbox(uiSpinbox* picker, uiBox* box, const rapidjson::Value& j
     uiBox* hbox = uiNewHorizontalBox();
     uiBoxAppend(hbox, uiControl(picker), 0);
     uiBoxAppend(box, uiControl(hbox), 0);
-    if (j.HasMember("tooltip"))
-        uiControlSetTooltip(uiControl(picker), json_utils::GetString(j, "tooltip", ""));
+    SetTooltip(uiControl(picker), j);
 }
 
 IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j) noexcept
