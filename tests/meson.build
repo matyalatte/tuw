@@ -22,3 +22,11 @@ test_exe = executable('unit_test',
     install : false)
 
 test('unit_test', test_exe)
+
+python = import('python').find_installation()
+configure_file(input : 'cli_test.py', output : 'cli_test.py', copy: true)
+test('cli_test',
+    python,
+    args: ['cli_test.py'],
+    workdir: meson.current_build_dir(),
+)

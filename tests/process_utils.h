@@ -17,12 +17,6 @@ void KillProcess(PidType pid, const std::string& name);
 std::string GetDefaultBrowser();
 void CloseNewBrowser(const std::vector<PidType>& old_ids);
 
-#if defined(_WIN32) || defined(__linux__)
 #ifndef USE_BROWSER
 #define USE_BROWSER 1
-#endif
-#else
-#ifndef USE_BROWSER
-#define USE_BROWSER 0
-#endif
 #endif

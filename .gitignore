@@ -73,6 +73,7 @@ out
 # python
 python
 *.py
+!tests/*.py
 *.pyd
 *.dll
 *.cat

@@ -55,7 +55,7 @@ if %ERRORLEVEL% NEQ 0 (
     if %GET_COVERAGE% equ 0 goto nocoverage
 
     REM Test and get coverage report from tests.
-    set MODULES=--modules %cd%\build\%BUILD_TYPE%%~2-Test\tests
+    set MODULES=--modules %cd%\build\%BUILD_TYPE%%~2-Test\
     set SOURCES=--sources %cd%\src
     set EXPORT_TYPE=--export_type html:%cd%\coverage-report
     set WORKDIR=--working_dir %cd%
