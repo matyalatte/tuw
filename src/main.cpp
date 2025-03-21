@@ -48,28 +48,29 @@ bool AskOverwrite(const char *path) noexcept {
     return ret == 1 && (answer == "y"[0] || answer == "Y"[0]);
 }
 
-json_utils::JsonResult Merge(const noex::string& exe_path, const noex::string& json_path,
-                             const noex::string& new_path, const bool force) noexcept {
+noex::string Merge(const noex::string& exe_path, const noex::string& json_path,
+                    const noex::string& new_path, const bool force) noexcept {
     rapidjson::Document json;
-    json_utils::JsonResult result = json_utils::LoadJson(json_path, json);
-    if (!result.ok) return result;
+    noex::string err;
+    err = json_utils::LoadJson(json_path, json);
+    if (!err.empty()) return err;
 
     if (!json.IsObject() || json.MemberEnd() - json.MemberBegin() <= 0) {
         PrintFmt("JSON file loaded but it has no data.\n");
-        return JSON_RESULT_OK;
+        return "";
     }
     ExeContainer exe;
-    result = exe.Read(exe_path);
-    if (!result.ok) return result;
+    err = exe.Read(exe_path);
+    if (!err.empty()) return err;
 
     PrintFmt("Importing a json file... (%s)\n", json_path.c_str());
     exe.SetJson(json);
     if (!force && !AskOverwrite(new_path.c_str())) {
         PrintFmt("The operation has been cancelled.\n");
-        return JSON_RESULT_OK;
+        return "";
     }
-    result = exe.Write(new_path);
-    if (!result.ok) return result;
+    err = exe.Write(new_path);
+    if (!err.empty()) return err;
     PrintFmt("Generated an executable. (%s)\n", new_path.c_str());
 #ifndef _WIN32
     // Allow executing file as program.
@@ -78,17 +79,17 @@ json_utils::JsonResult Merge(const noex::string& exe_path, const noex::string& j
           S_IRGRP | S_IXGRP |  // r-x
           S_IROTH | S_IXOTH);  // r-x
 #endif
-    return JSON_RESULT_OK;
+    return "";
 }
 
-json_utils::JsonResult Split(const noex::string& exe_path, const noex::string& json_path,
-                             const noex::string& new_path, const bool force) noexcept {
+noex::string Split(const noex::string& exe_path, const noex::string& json_path,
+                    const noex::string& new_path, const bool force) noexcept {
     ExeContainer exe;
-    json_utils::JsonResult result = exe.Read(exe_path);
-    if (!result.ok) return result;
+    noex::string err = exe.Read(exe_path);
+    if (!err.empty()) return err;
     if (!exe.HasJson()) {
         PrintFmt("The executable has no json data.\n");
-        return JSON_RESULT_OK;
+        return "";
     }
     PrintFmt("Extracting JSON data from the executable...\n");
     rapidjson::Document json;
@@ -96,12 +97,12 @@ json_utils::JsonResult Split(const noex::string& exe_path, const noex::string& j
     exe.RemoveJson();
     if (!force && (!AskOverwrite(new_path.c_str()) || !AskOverwrite(json_path.c_str()))) {
         PrintFmt("The operation has been cancelled.\n");
-        return JSON_RESULT_OK;
+        return "";
     }
-    result = exe.Write(new_path);
-    if (!result.ok) return result;
-    result = json_utils::SaveJson(json, json_path);
-    if (!result.ok) return result;
+    err = exe.Write(new_path);
+    if (!err.empty()) return err;
+    err = json_utils::SaveJson(json, json_path);
+    if (!err.empty()) return err;
     PrintFmt("Generated an executable. (%s)\n", new_path.c_str());
     PrintFmt("Exported a json file. (%s)\n", json_path.c_str());
 #ifndef _WIN32
@@ -111,7 +112,7 @@ json_utils::JsonResult Split(const noex::string& exe_path, const noex::string& j
           S_IRGRP | S_IXGRP |  // r-x
           S_IROTH | S_IXOTH);  // r-x
 #endif
-    return JSON_RESULT_OK;
+    return "";
 }
 
 void PrintUsage() noexcept {
@@ -295,14 +296,14 @@ int main(int argc, char* argv[]) noexcept {
     }
 
     rapidjson::Document json(rapidjson::kObjectType);
-    json_utils::JsonResult result = JSON_RESULT_OK;
+    noex::string err;
 
     switch (cmd_int) {
         case CMD_MERGE:
-            result = Merge(exe_path, json_path, new_exe_path, force);
+            err = Merge(exe_path, json_path, new_exe_path, force);
             break;
         case CMD_SPLIT:
-            result = Split(exe_path, json_path, new_exe_path, force);
+            err = Split(exe_path, json_path, new_exe_path, force);
             break;
         case CMD_VERSION:
             PrintFmt("%s\n", tuw_constants::VERSION);
@@ -314,8 +315,8 @@ int main(int argc, char* argv[]) noexcept {
             break;
     }
 
-    if (!result.ok) {
-        fprintf(stderr, "Error: %s\n", result.msg.c_str());
+    if (!err.empty()) {
+        fprintf(stderr, "Error: %s\n", err.c_str());
         return 1;
     }
     return 0;

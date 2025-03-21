@@ -32,8 +32,10 @@ struct JsonResult {
 // Max binary size for JSON files.
 #define JSON_SIZE_MAX 128 * 1024
 
-JsonResult LoadJson(const noex::string& file, rapidjson::Document& json) noexcept;
-JsonResult SaveJson(rapidjson::Document& json, const noex::string& file) noexcept;
+// Returns an empty string if succeed. An error message otherwise.
+noex::string LoadJson(const noex::string& file, rapidjson::Document& json) noexcept;
+noex::string SaveJson(rapidjson::Document& json, const noex::string& file) noexcept;
+
 noex::string JsonToString(rapidjson::Document& json) noexcept;
 
 const char* GetString(const rapidjson::Value& json, const char* key, const char* def) noexcept;

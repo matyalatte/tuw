@@ -32,13 +32,13 @@ class MainFrameTest : public ::testing::Test {
 
     void TestConfig(rapidjson::Document& test_json, noex::string config) {
         rapidjson::Document test_config;
-        json_utils::JsonResult result = json_utils::LoadJson(config, test_config);
-        EXPECT_TRUE(result.ok);
+        noex::string err = json_utils::LoadJson(config, test_config);
+        EXPECT_TRUE(err.empty());
         main_frame = new MainFrame(test_json, test_config);
         main_frame->SaveConfig();
         rapidjson::Document saved_config;
-        result = json_utils::LoadJson("gui_config.json", saved_config);
-        EXPECT_TRUE(result.ok);
+        err = json_utils::LoadJson("gui_config.json", saved_config);
+        EXPECT_TRUE(err.empty());
         EXPECT_EQ(test_config, saved_config);
     }
 };

@@ -5,26 +5,24 @@
 
 TEST(JsonCheckTest, LoadJsonFail) {
     rapidjson::Document test_json;
-    json_utils::JsonResult result = json_utils::LoadJson("fake.json", test_json);
+    noex::string err = json_utils::LoadJson("fake.json", test_json);
     const char* expected = "Failed to open fake.json";
-    EXPECT_FALSE(result.ok);
-    EXPECT_STREQ(expected, result.msg.c_str());
+    EXPECT_STREQ(expected, err.c_str());
 }
 
 TEST(JsonCheckTest, LoadJsonFail2) {
     rapidjson::Document test_json;
-    json_utils::JsonResult result = json_utils::LoadJson(JSON_BROKEN, test_json);
+    noex::string err = json_utils::LoadJson(JSON_BROKEN, test_json);
     const char* expected = "Failed to parse JSON: Missing a comma or '}'"
                            " after an object member.";
-    EXPECT_FALSE(result.ok);
-    EXPECT_STREQ(expected, result.msg.substr(0, 68).c_str());
+    EXPECT_STREQ(expected, err.substr(0, 68).c_str());
 }
 
 TEST(JsonCheckTest, LoadJsonWithComments) {
     // Check if json parser supports c-style comments and trailing commas.
     rapidjson::Document test_json;
-    json_utils::JsonResult result = json_utils::LoadJson(JSON_RELAXED, test_json);
-    EXPECT_TRUE(result.ok);
+    noex::string err = json_utils::LoadJson(JSON_RELAXED, test_json);
+    EXPECT_TRUE(err.empty());
 }
 
 TEST(JsonCheckTest, LoadJsonSuccess) {
@@ -71,8 +69,9 @@ TEST(JsonCheckTest, checkGUISuccess4) {
 
 TEST(JsonCheckTest, checkGUISuccessRelaxed) {
     rapidjson::Document test_json;
-    json_utils::JsonResult result = json_utils::LoadJson(JSON_RELAXED, test_json);
-    EXPECT_TRUE(result.ok);
+    noex::string err = json_utils::LoadJson(JSON_RELAXED, test_json);
+    EXPECT_TRUE(err.empty());
+    json_utils::JsonResult result = JSON_RESULT_OK;
     json_utils::CheckDefinition(result, test_json);
     EXPECT_TRUE(result.ok);
 }
@@ -144,8 +143,8 @@ TEST(JsonCheckTest, checkGUIFail7) {
 
 TEST(JsonCheckTest, checkGUIFailRelaxed) {
     rapidjson::Document test_json;
-    json_utils::JsonResult result = json_utils::LoadJson(JSON_RELAXED, test_json);
-    EXPECT_TRUE(result.ok);
+    noex::string err = json_utils::LoadJson(JSON_RELAXED, test_json);
+    EXPECT_TRUE(err.empty());
     test_json.AddMember("exit_success", "a", test_json.GetAllocator());
     CheckGUIError(test_json, "['exit_success'] should be an int.");
 }

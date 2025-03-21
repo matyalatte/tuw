@@ -74,16 +74,16 @@ static uint32_t Length(FILE* io) noexcept {
 
 static const uint32_t EXE_SIZE_MAX = 20000000;  // Allowed size of exe
 
-json_utils::JsonResult ExeContainer::Read(const noex::string& exe_path) noexcept {
+noex::string ExeContainer::Read(const noex::string& exe_path) noexcept {
     if (noex::get_error_no() != noex::OK) {
         // Reject the operation as the exe_path might have an unexpected value.
-        return { false, "Fatal error has occurred while editing strings or vectors." };
+        return "Fatal error has occurred while editing strings or vectors.";
     }
 
     m_exe_path = exe_path;
     FILE* file_io = FileOpen(exe_path.c_str(), "rb");
     if (!file_io)
-        return { false, "Failed to open " + exe_path };
+        return "Failed to open " + exe_path;
 
     // Read the last 4 bytes
     fseek(file_io, 0, SEEK_END);
@@ -96,7 +96,7 @@ json_utils::JsonResult ExeContainer::Read(const noex::string& exe_path) noexcept
         // Json data not found
         m_exe_size = end_off;
         fclose(file_io);
-        return JSON_RESULT_OK;
+        return "";
     }
 
     // Read exe size
@@ -104,7 +104,7 @@ json_utils::JsonResult ExeContainer::Read(const noex::string& exe_path) noexcept
     m_exe_size = end_off + ReadUint32(file_io);
     if (EXE_SIZE_MAX <= m_exe_size || end_off < m_exe_size) {
         fclose(file_io);
-        return { false, noex::string("Unexpected exe size. (") + m_exe_size + ")" };
+        return noex::string("Unexpected exe size. (") + m_exe_size + ")";
     }
     fseek(file_io, m_exe_size, SEEK_SET);
 
@@ -112,14 +112,14 @@ json_utils::JsonResult ExeContainer::Read(const noex::string& exe_path) noexcept
     ReadMagic(file_io, magic);
     if (strcmp(magic, "JSON") != 0) {
         fclose(file_io);
-        return { false, noex::string("Invalid magic. (") + magic + ")" };
+        return noex::string("Invalid magic. (") + magic + ")";
     }
 
     uint32_t json_size = ReadUint32(file_io);
     uint32_t stored_hash = ReadUint32(file_io);
     if (JSON_SIZE_MAX <= json_size || end_off < m_exe_size + json_size + 20) {
         fclose(file_io);
-        return { false, noex::string("Unexpected json size. (") + json_size + ")" };
+        return noex::string("Unexpected json size. (") + json_size + ")";
     }
 
     // Read json data
@@ -127,28 +127,25 @@ json_utils::JsonResult ExeContainer::Read(const noex::string& exe_path) noexcept
     fclose(file_io);
 
     if (json_str.length() != json_size)
-        return { false, "Unexpected char detected." };
+        return "Unexpected char detected.";
 
     if (stored_hash != Fnv1Hash32(json_str))
-        return { false, noex::string("Invalid JSON hash. (") + stored_hash + ")" };
+        return noex::string("Invalid JSON hash. (") + stored_hash + ")";
 
     rapidjson::ParseResult ok = m_json.Parse(json_str.c_str());
     if (!ok) {
-        return {
-            false,
-            noex::string("Failed to parse JSON: ") +
+        return noex::string("Failed to parse JSON: ") +
                 rapidjson::GetParseError_En(ok.Code()) +
-                " (offset: " + ok.Offset() + ")"
-        };
+                " (offset: " + ok.Offset() + ")";
     }
 
-    return JSON_RESULT_OK;
+    return "";
 }
 
-json_utils::JsonResult ExeContainer::Write(const noex::string& exe_path) noexcept {
+noex::string ExeContainer::Write(const noex::string& exe_path) noexcept {
     if (noex::get_error_no() != noex::OK) {
         // Reject the operation as the exe_path might have an unexpected value.
-        return { false, "Fatal error has occurred while editing strings or vectors." };
+        return "Fatal error has occurred while editing strings or vectors.";
     }
 
     assert(!m_exe_path.empty());
@@ -158,16 +155,16 @@ json_utils::JsonResult ExeContainer::Write(const noex::string& exe_path) noexcep
 
     uint32_t json_size = static_cast<uint32_t>(json_str.length());
     if (JSON_SIZE_MAX <= json_size)
-        return { false, noex::string("Unexpected json size. (") + json_size + ")" };
+        return noex::string("Unexpected json size. (") + json_size + ")";
 
     FILE* old_io = FileOpen(m_exe_path.c_str(), "rb");
     if (!old_io)
-        return { false, "Failed to open a file. (" + m_exe_path + ")" };
+        return "Failed to open a file. (" + m_exe_path + ")";
 
     FILE* new_io = FileOpen(exe_path.c_str(), "wb");
     if (!new_io) {
         fclose(old_io);
-        return { false, "Failed to open a file. (" + exe_path + ")" };
+        return "Failed to open a file. (" + exe_path + ")";
     }
     m_exe_path = exe_path;
 
@@ -175,8 +172,8 @@ json_utils::JsonResult ExeContainer::Write(const noex::string& exe_path) noexcep
     if (!ok) {
         fclose(old_io);
         fclose(new_io);
-        return { false, "Failed to copy the original executable (" +
-                        m_exe_path + ")" };
+        return "Failed to copy the original executable (" +
+                m_exe_path + ")";
     }
 
     uint32_t pos = ftell(old_io);
@@ -186,14 +183,14 @@ json_utils::JsonResult ExeContainer::Write(const noex::string& exe_path) noexcep
         if (strcmp(magic, "JSON") != 0) {
             fclose(old_io);
             fclose(new_io);
-            return { false, noex::string("Invalid magic. (") + magic + ")" };
+            return noex::string("Invalid magic. (") + magic + ")";
         }
     }
 
     fclose(old_io);
     if (json_size == 0) {
         fclose(new_io);
-        return JSON_RESULT_OK;
+        return "";
     }
 
     // Write json data
@@ -204,5 +201,5 @@ json_utils::JsonResult ExeContainer::Write(const noex::string& exe_path) noexcep
     WriteUint32(new_io, m_exe_size - ftell(new_io) - 8);
     fwrite("JSON", 1, 4, new_io);
     fclose(new_io);
-    return JSON_RESULT_OK;
+    return "";
 }

@@ -33,7 +33,6 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
 
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
-    bool ignore_external_json = false;
 
     noex::string workdir;
     if (json_path.empty()) {
@@ -60,50 +59,54 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
         json_path = GetDefaultJsonPath();
     }
 
+    bool ignore_external_json = false;
     bool exists_external_json = envuFileExists(json_path.c_str());
+    bool loaded = m_definition.IsObject() && !m_definition.ObjectEmpty();
+    noex::string err;
 
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
+    if (!loaded) {
         ExeContainer exe;
 
-        result = exe.Read(exe_path);
-        if (result.ok) {
-            if (exe.HasJson()) {
-                PrintFmt("[LoadDefinition] Found JSON in the executable.\n");
-                exe.GetJson(m_definition);
-                ignore_external_json = exists_external_json;
-            } else {
-                PrintFmt("[LoadDefinition] Embedded JSON not found.\n");
-                result = { false, "" };
-            }
+        err = exe.Read(exe_path);
+        if (err.empty() && exe.HasJson()) {
+            PrintFmt("[LoadDefinition] Found JSON in the executable.\n");
+            exe.GetJson(m_definition);
+            ignore_external_json = exists_external_json;
+            loaded = true;
         } else {
-            PrintFmt("[LoadDefinition] ERROR: %s\n", result.msg.c_str());
-        }
+            if (err.empty())
+                PrintFmt("[LoadDefinition] Embedded JSON not found.\n");
+            else
+                PrintFmt("[LoadDefinition] ERROR: %s\n", err.c_str());
 
-        if (!result.ok) {
             if (exists_external_json) {
                 PrintFmt("[LoadDefinition] Loaded %s\n", json_path.c_str());
-                result = json_utils::LoadJson(json_path, m_definition);
-                if (!result.ok)
+                err = json_utils::LoadJson(json_path, m_definition);
+                if (err.empty())
+                    loaded = true;
+                else
                     m_definition.SetObject();
             } else {
-                result = { false, json_path + " not found." };
+                err = json_path + " not found.";
             }
         }
     }
 
     if (!config.IsObject() || config.ObjectEmpty()) {
-        json_utils::JsonResult cfg_result =
+        noex::string cfg_err =
             json_utils::LoadJson("gui_config.json", m_config);
-        if (!cfg_result.ok) {
+        if (!cfg_err.empty()) {
             m_config.SetObject();
         }
     }
 
-    if (result.ok)
-        result = CheckDefinition(m_definition);
+    if (loaded) {
+        json_utils::JsonResult result = CheckDefinition(m_definition);
+        loaded = result.ok;
+        err = result.msg;
+    }
 
-    if (!result.ok)
+    if (!loaded)
         json_utils::GetDefaultDefinition(m_definition);
 
     unsigned definition_id = json_utils::GetInt(m_config, "_mode", 0);
@@ -130,8 +133,8 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
         ShowSuccessDialog(msg, "Warning");
     }
 
-    if (!result.ok)
-        ShowErrorDialogWithLog("LoadDefinition", result.msg);
+    if (!loaded)
+        ShowErrorDialogWithLog("LoadDefinition", err);
 
     UpdatePanel(definition_id);
     Fit();
@@ -582,11 +585,11 @@ void MainFrame::UpdateConfig() noexcept {
 
 void MainFrame::SaveConfig() noexcept {
     UpdateConfig();
-    json_utils::JsonResult result = json_utils::SaveJson(m_config, "gui_config.json");
-    if (result.ok) {
+    noex::string err = json_utils::SaveJson(m_config, "gui_config.json");
+    if (err.empty()) {
         PrintFmt("[SaveConfig] Saved gui_config.json\n");
     } else {
-        PrintFmt("[SaveConfig] Error: %s\n", result.msg.c_str());
+        PrintFmt("[SaveConfig] Error: %s\n", err.c_str());
     }
 }
 
@@ -602,7 +605,8 @@ void MainFrame::ShowErrorDialog(const char* msg, const char* title) noexcept {
     uiMsgBoxError(m_mainwin, title, msg);
 }
 
-void MainFrame::ShowErrorDialogWithLog(const char* func, const char* msg, const char* title) noexcept {
+void MainFrame::ShowErrorDialogWithLog(
+        const char* func, const char* msg, const char* title) noexcept {
     PrintFmt("[%s] Error: %s\n", func, msg);
     ShowErrorDialog(msg, title);
 }

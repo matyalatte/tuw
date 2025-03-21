@@ -21,7 +21,7 @@ constexpr char JSON_CONFIG_UTF[] = "./json/config_utf.json";
 constexpr char JSON_RELAXED[] = "./json/relaxed.jsonc";
 
 inline void GetTestJson(rapidjson::Document& json) {
-    json_utils::JsonResult result = json_utils::LoadJson(JSON_ALL_KEYS, json);
-    EXPECT_TRUE(result.ok);
+    noex::string err = json_utils::LoadJson(JSON_ALL_KEYS, json);
+    EXPECT_TRUE(err.empty());
     EXPECT_FALSE(json.ObjectEmpty());
 }

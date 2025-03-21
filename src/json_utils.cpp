@@ -45,10 +45,10 @@ enum ComponentType: int {
 constexpr auto JSONC_FLAGS =
     rapidjson::kParseCommentsFlag | rapidjson::kParseTrailingCommasFlag;
 
-JsonResult LoadJson(const noex::string& file, rapidjson::Document& json) noexcept {
+noex::string LoadJson(const noex::string& file, rapidjson::Document& json) noexcept {
     FILE* fp = FileOpen(file.c_str(), "rb");
     if (!fp)
-        return { false, "Failed to open " + file };
+        return "Failed to open " + file;
 
     char readBuffer[JSON_SIZE_MAX];
     rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
@@ -60,25 +60,25 @@ JsonResult LoadJson(const noex::string& file, rapidjson::Document& json) noexcep
         noex::string msg = noex::string("Failed to parse JSON: ") +
                         rapidjson::GetParseError_En(ok.Code()) +
                         " (offset: " + ok.Offset() + ")";
-        return { false, msg };
+        return msg;
     }
     if (!json.IsObject())
         json.SetObject();
 
-    return JSON_RESULT_OK;
+    return "";
 }
 
-JsonResult SaveJson(rapidjson::Document& json, const noex::string& file) noexcept {
+noex::string SaveJson(rapidjson::Document& json, const noex::string& file) noexcept {
     FILE* fp = FileOpen(file.c_str(), "wb");
     if (!fp)
-        return { false, "Failed to open " + file + "." };
+        return "Failed to open " + file + ".";
 
     char writeBuffer[JSON_SIZE_MAX];
     rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
     rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);
     json.Accept(writer);
     fclose(fp);
-    return JSON_RESULT_OK;
+    return "";
 }
 
 noex::string JsonToString(rapidjson::Document& json) noexcept {
