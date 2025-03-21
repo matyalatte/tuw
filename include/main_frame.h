@@ -41,15 +41,24 @@ class MainFrame {
     void UpdateConfig() noexcept;
     void ShowSuccessDialog(const char* msg, const char* title = "Success") noexcept;
     void ShowErrorDialog(const char* msg, const char* title = "Error") noexcept;
-    inline void ShowSuccessDialog(const noex::string& msg,
-                                  const noex::string& title = "Success") noexcept {
-        ShowSuccessDialog(msg.c_str(), title.c_str());
+    void ShowErrorDialogWithLog(
+        const char* func, const char* msg, const char* title = "Error") noexcept;
+    inline void ShowSuccessDialog(
+            const noex::string& msg,
+            const char* title = "Success") noexcept {
+        ShowSuccessDialog(msg.c_str(), title);
     }
-    inline void ShowErrorDialog(const noex::string& msg,
-                                const noex::string& title = "Error") noexcept {
-        ShowErrorDialog(msg.c_str(), title.c_str());
+    inline void ShowErrorDialog(
+            const noex::string& msg,
+            const char* title = "Error") noexcept {
+        ShowErrorDialog(msg.c_str(), title);
     }
-    void JsonLoadFailed(const noex::string& msg) noexcept;
+    inline void ShowErrorDialogWithLog(
+            const char* func,
+            const noex::string& msg,
+            const char* title = "Error") noexcept {
+        ShowErrorDialogWithLog(func, msg.c_str(), title);
+    }
 
  public:
     explicit MainFrame(const rapidjson::Document& definition = EMPTY_DOCUMENT,
@@ -67,7 +76,8 @@ class MainFrame {
                     noex::string json_path) noexcept;
 
     void UpdatePanel(unsigned definition_id) noexcept;
-    noex::string OpenURL(int id) noexcept;
+    noex::string OpenURLBase(int id) noexcept;
+    void OpenURL(int id) noexcept;
     bool Validate() noexcept;
     noex::string GetCommand() noexcept;
     void RunCommand() noexcept;

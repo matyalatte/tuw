@@ -217,7 +217,7 @@ class OpenURLTest : public MainFrameTest {
 #if USE_BROWSER
 TEST_F(OpenURLTest, OpenUrl) {
     main_frame = new MainFrame(definition, config);
-    noex::string msg = main_frame->OpenURL(0);
+    noex::string msg = main_frame->OpenURLBase(0);
     EXPECT_STREQ(msg.c_str(), "");
 }
 #endif  // USE_BROWSER
@@ -225,7 +225,7 @@ TEST_F(OpenURLTest, OpenUrl) {
 TEST_F(OpenURLTest, OpenUrlWithFilePath) {
     ReplaceURL("file:///test.txt");
     main_frame = new MainFrame(definition, config);
-    noex::string msg = main_frame->OpenURL(0);
+    noex::string msg = main_frame->OpenURLBase(0);
     const char* expected =
         "Use 'file' type for a path, not 'url' type. (file:///test.txt)";
     EXPECT_STREQ(msg.c_str(), expected);
@@ -234,7 +234,7 @@ TEST_F(OpenURLTest, OpenUrlWithFilePath) {
 TEST_F(OpenURLTest, OpenUrlWithFtps) {
     ReplaceURL("ftps://example.com");
     main_frame = new MainFrame(definition, config);
-    noex::string msg = main_frame->OpenURL(0);
+    noex::string msg = main_frame->OpenURLBase(0);
     const char* expected =
         "Unsupported scheme detected. "
         "It should be http or https. (ftps)";
@@ -244,7 +244,7 @@ TEST_F(OpenURLTest, OpenUrlWithFtps) {
 TEST_F(OpenURLTest, OpenUrlWithSpace) {
     ReplaceURL("https://example .com");
     main_frame = new MainFrame(definition, config);
-    noex::string msg = main_frame->OpenURL(0);
+    noex::string msg = main_frame->OpenURLBase(0);
     const char* expected =
         "URL should NOT contains ' ', ';', '|', '&', '\\r', nor '\\n'.\n"
         "URL: https://example .com";

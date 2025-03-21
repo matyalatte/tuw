@@ -131,7 +131,7 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
     }
 
     if (!result.ok)
-        JsonLoadFailed(result.msg);
+        ShowErrorDialogWithLog("LoadDefinition", result.msg);
 
     UpdatePanel(definition_id);
     Fit();
@@ -254,32 +254,23 @@ static bool IsValidURL(const noex::string &url) noexcept {
     return true;
 }
 
-noex::string MainFrame::OpenURL(int id) noexcept {
+noex::string MainFrame::OpenURLBase(int id) noexcept {
     rapidjson::Value& help = m_definition["help"].GetArray()[id];
     const char* type = help["type"].GetString();
     noex::string url;
-    const char* tag = "";
 
     if (strcmp(type, "url") == 0) {
         url = help["url"].GetString();
-        tag = "[OpenURL] ";
 
         size_t pos = url.find("://");
         if (pos != noex::string::npos) {
             noex::string scheme = url.substr(0, pos);
             // scheme should be http or https
             if (scheme == "file") {
-                noex::string msg = "Use 'file' type for a path, not 'url' type. (" +
-                                url + ")";
-                PrintFmt("%sError: %s\n", tag, msg.c_str());
-                ShowErrorDialog(msg);
-                return msg;
+                return "Use 'file' type for a path, not 'url' type. (" + url + ")";
             } else if (scheme != "https" && scheme != "http") {
-                noex::string msg = "Unsupported scheme detected. "
-                                "It should be http or https. (" + scheme + ")";
-                PrintFmt("%sError: %s\n", tag, msg.c_str());
-                ShowErrorDialog(msg);
-                return msg;
+                return "Unsupported scheme detected. "
+                        "It should be http or https. (" + scheme + ")";
             }
         } else {
             url = "https://" + url;
@@ -289,59 +280,49 @@ noex::string MainFrame::OpenURL(int id) noexcept {
         char *url_cstr = envuGetRealPath(help["path"].GetString());
         int exists = envuFileExists(url_cstr);
         url = envuStr(url_cstr);
-        tag = "[OpenFile] ";
 
-        if (!exists) {
-            noex::string msg = "File does not exist. (" + url + ")";
-            PrintFmt("%sError: %s\n", tag, msg.c_str());
-            ShowErrorDialog(msg);
-            return msg;
-        }
+        if (!exists)
+            return "File does not exist. (" + url + ")";
     }
 
-    PrintFmt("%s%s\n", tag, url.c_str());
+    PrintFmt("[OpenURL] %s\n", url.c_str());
 
     if (strcmp(type, "file") == 0) {
         url = "file:" + url;
     }
 
     if (!IsValidURL(url)) {
-        noex::string msg = "URL should NOT contains ' ', ';', '|', '&', '\\r', nor '\\n'.\n"
-                          "URL: " + url;
-        PrintFmt("%sError: %s\n", tag, msg.c_str());
-        ShowErrorDialog(msg.c_str());
-        return msg;
+        return "URL should NOT contains ' ', ';', '|', '&', '\\r', nor '\\n'.\n"
+                "URL: " + url;
     }
 
     if (IsSafeMode()) {
         noex::string msg = "The URL was not opened because the safe mode is enabled.\n"
-                           "You can disable it from the menu bar (Debug > Safe Mode.)\n"
-                           "\n"
-                           "URL: " + url;
+                            "You can disable it from the menu bar (Debug > Safe Mode.)\n"
+                            "\n"
+                            "URL: " + url;
         ShowSuccessDialog(msg, "Safe Mode");
-        return msg;
     } else {
         if (noex::get_error_no() != noex::OK) {
             // Reject the URL as it might have an unexpected value.
-            const char* msg =
-                "The URL was not opened "
-                "because a fatal error has occurred while editing strings or vectors. "
-                "Please reboot the application.";
-            PrintFmt("%sError: %s\n", tag, msg);
-            ShowErrorDialog(msg);
-            return msg;
+            return "The URL was not opened "
+                    "because a fatal error has occurred while editing strings or vectors. "
+                    "Please reboot the application.";
         } else {
             ExecuteResult result = LaunchDefaultApp(url);
             if (result.exit_code != 0) {
-                noex::string msg = noex::string("Failed to open a ") +
-                                   type + " by an unexpected error.";
-                PrintFmt("%sError: %s\n", tag, msg.c_str());
-                ShowErrorDialog(msg.c_str());
-                return msg;
+                return noex::string("Failed to open a ") +
+                        type + " by an unexpected error.";
             }
         }
     }
     return "";
+}
+
+void MainFrame::OpenURL(int id) noexcept {
+    noex::string err = OpenURLBase(id);
+    if (!err.empty())
+        ShowErrorDialogWithLog("OpenURL", err);
 }
 
 static void OnClicked(uiButton *sender, void *data) noexcept {
@@ -539,14 +520,12 @@ void MainFrame::RunCommand() noexcept {
     if (noex::get_error_no() != noex::OK) {
         const char* msg = "Fatal error has occurred while editing strings or vectors. "
                           "Please reboot the application.";
-        PrintFmt("[RunCommand] Error: %s\n", msg);
-        ShowErrorDialog(msg);
+        ShowErrorDialogWithLog("RunCommand", msg);
         return;
     }
 
     if (!result.err_msg.empty()) {
-        PrintFmt("[RunCommand] Error: %s\n", result.err_msg.c_str());
-        ShowErrorDialog(result.err_msg);
+        ShowErrorDialogWithLog("RunCommand", result.err_msg);
         return;
     }
 
@@ -556,8 +535,7 @@ void MainFrame::RunCommand() noexcept {
             err_msg = result.last_line;
         else
             err_msg = noex::string("Invalid exit code (") + result.exit_code + ")";
-        PrintFmt("[RunCommand] Error: %s\n", err_msg.c_str());
-        ShowErrorDialog(err_msg);
+        ShowErrorDialogWithLog("RunCommand", err_msg);
         return;
     }
 
@@ -594,11 +572,6 @@ json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definitio
     return result;
 }
 
-void MainFrame::JsonLoadFailed(const noex::string& msg) noexcept {
-    PrintFmt("[LoadDefinition] Error: %s\n", msg.c_str());
-    ShowErrorDialog(msg);
-}
-
 void MainFrame::UpdateConfig() noexcept {
     for (Component *c : m_components)
         c->GetConfig(m_config);
@@ -627,6 +600,11 @@ void MainFrame::ShowSuccessDialog(const char* msg, const char* title) noexcept {
 void MainFrame::ShowErrorDialog(const char* msg, const char* title) noexcept {
     if (g_no_dialog) return;
     uiMsgBoxError(m_mainwin, title, msg);
+}
+
+void MainFrame::ShowErrorDialogWithLog(const char* func, const char* msg, const char* title) noexcept {
+    PrintFmt("[%s] Error: %s\n", func, msg);
+    ShowErrorDialog(msg, title);
 }
 
 void MainFrameDisableDialog() noexcept {
