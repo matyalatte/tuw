@@ -153,21 +153,24 @@ int CmdToInt(const char* cmd) noexcept {
     while (*cmd == '-') {
         cmd++;
     }
+    char c = *cmd;
+    if (c && !cmd[1]) {
+        if (c == 'm')
+            return CMD_MERGE;
+        if (c == 's')
+            return CMD_SPLIT;
+        if (c == 'v')
+            return CMD_VERSION;
+        if (c == 'h')
+            return CMD_HELP;
+    }
     if (strcmp(cmd, "merge") == 0)
         return CMD_MERGE;
-    else if (strcmp(cmd, "m") == 0)
-        return CMD_MERGE;
-    else if (strcmp(cmd, "split") == 0)
+    if (strcmp(cmd, "split") == 0)
         return CMD_SPLIT;
-    else if (strcmp(cmd, "s") == 0)
-        return CMD_SPLIT;
-    else if (strcmp(cmd, "ver") == 0)
+    if (strcmp(cmd, "ver") == 0)
         return CMD_VERSION;
-    else if (strcmp(cmd, "v") == 0)
-        return CMD_VERSION;
-    else if (strcmp(cmd, "help") == 0)
-        return CMD_HELP;
-    else if (strcmp(cmd, "h") == 0)
+    if (strcmp(cmd, "help") == 0)
         return CMD_HELP;
     return CMD_UNKNOWN;
 }
@@ -184,19 +187,20 @@ int OptToInt(const char* opt) noexcept {
     while (*opt == '-') {
         opt++;
     }
+    char c = *opt;
+    if (c && !opt[1]) {
+        if (c == 'j')
+            return OPT_JSON;
+        if (c == 'e')
+            return OPT_EXE;
+        if (c == 'f' || c == 'y')
+            return OPT_FORCE;
+    }
     if (strcmp(opt, "json") == 0)
         return OPT_JSON;
-    else if (strcmp(opt, "j") == 0)
-        return OPT_JSON;
-    else if (strcmp(opt, "exe") == 0)
+    if (strcmp(opt, "exe") == 0)
         return OPT_EXE;
-    else if (strcmp(opt, "e") == 0)
-        return OPT_EXE;
-    else if (strcmp(opt, "force") == 0)
-        return OPT_FORCE;
-    else if (strcmp(opt, "f") == 0)
-        return OPT_FORCE;
-    else if (strcmp(opt, "y") == 0)
+    if (strcmp(opt, "force") == 0)
         return OPT_FORCE;
     return OPT_UNKNOWN;
 }
@@ -252,28 +256,18 @@ int main(int argc, char* argv[]) noexcept {
             PrintUsage();
             fprintf(stderr, "Error: This option requires a file path. (%s)\n", opt_str);
             return 1;
-        }
-        switch (opt_int) {
-            case OPT_UNKNOWN:
-                {
-                    PrintUsage();
-                    fprintf(stderr, "Error: Unknown option detected. (%s)\n", opt_str);
-                    return 1;
-                }
-                break;
-            case OPT_JSON:
-                i++;
-                json_path_cstr = args[i].data();
-                break;
-            case OPT_EXE:
-                i++;
-                new_exe_path = args[i];
-                break;
-            case OPT_FORCE:
-                force = true;
-                break;
-            default:
-                break;
+        } else if (opt_int == OPT_UNKNOWN) {
+            PrintUsage();
+            fprintf(stderr, "Error: Unknown option detected. (%s)\n", opt_str);
+            return 1;
+        } else if (opt_int == OPT_JSON) {
+            i++;
+            json_path_cstr = args[i].data();
+        } else if (opt_int == OPT_EXE) {
+            i++;
+            new_exe_path = args[i];
+        } else if (opt_int == OPT_FORCE) {
+            force = true;
         }
     }
 
@@ -299,22 +293,14 @@ int main(int argc, char* argv[]) noexcept {
     rapidjson::Document json(rapidjson::kObjectType);
     noex::string err;
 
-    switch (cmd_int) {
-        case CMD_MERGE:
-            err = Merge(exe_path, json_path, new_exe_path, force);
-            break;
-        case CMD_SPLIT:
-            err = Split(exe_path, json_path, new_exe_path, force);
-            break;
-        case CMD_VERSION:
-            PrintFmt("%s\n", tuw_constants::VERSION);
-            break;
-        case CMD_HELP:
-            PrintUsage();
-            break;
-        default:
-            break;
-    }
+    if (cmd_int == CMD_MERGE)
+        err = Merge(exe_path, json_path, new_exe_path, force);
+    else if (cmd_int == CMD_SPLIT)
+        err = Split(exe_path, json_path, new_exe_path, force);
+    else if (cmd_int == CMD_VERSION)
+        PrintFmt("%s\n", tuw_constants::VERSION);
+    else if (cmd_int == CMD_HELP)
+        PrintUsage();
 
     if (!err.empty()) {
         fprintf(stderr, "Error: %s\n", err.c_str());

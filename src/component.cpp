@@ -28,7 +28,7 @@ Component::Component(const rapidjson::Value& j) noexcept {
     m_label = j["label"].GetString();
     m_id = json_utils::GetString(j, "id", "");
     if (m_id.empty()) {
-        uint32_t hash = Fnv1Hash32(j["label"].GetString());
+        uint32_t hash = Fnv1Hash32(m_label);
         m_id = noex::string("_") + hash;
     }
     m_add_quotes = json_utils::GetBool(j, "add_quotes", false);
@@ -99,45 +99,28 @@ Component* NewComp(uiBox* box, const rapidjson::Value& j) noexcept {
     return comp;
 }
 
+using NewCompFunc = Component*(*)(uiBox*, const rapidjson::Value&);
+
 Component* Component::PutComponent(uiBox* box, const rapidjson::Value& j) noexcept {
+    static const NewCompFunc new_funcs[COMP_MAX - COMP_STATIC_TEXT] = {
+        &NewComp<StaticText>,
+        &NewComp<FilePicker>,
+        &NewComp<DirPicker>,
+        &NewComp<ComboBox>,
+        &NewComp<RadioButtons>,
+        &NewComp<CheckBox>,
+        &NewComp<CheckArray>,
+        &NewComp<TextBox>,
+        &NewComp<IntPicker>,
+        &NewComp<FloatPicker>
+    };
+
     Component* comp = nullptr;
     int type = j["type_int"].GetInt();
-    switch (type) {
-        case COMP_STATIC_TEXT:
-            comp = NewComp<StaticText>(box, j);
-            break;
-        case COMP_FILE:
-            comp = NewComp<FilePicker>(box, j);
-            break;
-        case COMP_FOLDER:
-            comp = NewComp<DirPicker>(box, j);
-            break;
-        case COMP_COMBO:
-            comp = NewComp<ComboBox>(box, j);
-            break;
-        case COMP_RADIO:
-            comp = NewComp<RadioButtons>(box, j);
-            break;
-        case COMP_CHECK:
-            comp = NewComp<CheckBox>(box, j);
-            break;
-        case COMP_CHECK_ARRAY:
-            comp = NewComp<CheckArray>(box, j);
-            break;
-        case COMP_TEXT:
-            comp = NewComp<TextBox>(box, j);
-            break;
-        case COMP_INT:
-            comp = NewComp<IntPicker>(box, j);
-            break;
-        case COMP_FLOAT:
-            comp = NewComp<FloatPicker>(box, j);
-            break;
-        default:
-            comp = NewComp<EmptyComponent>(box, j);
-            break;
-    }
-    comp->PutErrorWidget(box);
+    if (COMP_STATIC_TEXT <= type || type < COMP_MAX)
+        comp = new_funcs[type - COMP_STATIC_TEXT](box, j);
+    if (comp)
+        comp->PutErrorWidget(box);
     return comp;
 }
 
@@ -631,11 +614,10 @@ IntPicker::IntPicker(uiBox* box, const rapidjson::Value& j) noexcept
         max = x;
     }
     int inc = json_utils::GetInt(j, "inc", 1);
-    if (inc < 0) {
+    if (inc < 0)
         inc = -inc;
-    } else if (inc == 0) {
+    else if (inc == 0)
         inc = 1;
-    }
     int val = json_utils::GetInt(j, "default", min);
     bool wrap = json_utils::GetBool(j, "wrap", false);
     uiSpinbox* picker = uiNewSpinboxDoubleEx(
@@ -681,11 +663,10 @@ FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j) noexcept
         max = x;
     }
     double inc = json_utils::GetDouble(j, "inc", 1.0);
-    if (inc < 0) {
+    if (inc < 0)
         inc = -inc;
-    } else if (inc == 0) {
+    else if (inc == 0)
         inc = 1.0;
-    }
     int digits = json_utils::GetInt(j, "digits", 1);
     double val = json_utils::GetDouble(j, "default", min);
     bool wrap = json_utils::GetBool(j, "wrap", false);

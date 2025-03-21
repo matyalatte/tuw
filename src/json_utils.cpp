@@ -415,33 +415,33 @@ static void CompileCommand(JsonResult& result,
 int ComptypeToInt(const char* comptype) noexcept {
     if (strcmp(comptype, "static_text") == 0)
         return COMP_STATIC_TEXT;
-    else if (strcmp(comptype, "file") == 0)
+    if (strcmp(comptype, "file") == 0)
         return COMP_FILE;
-    else if (strcmp(comptype, "folder") == 0)
+    if (strcmp(comptype, "folder") == 0)
         return COMP_FOLDER;
-    else if (strcmp(comptype, "dir") == 0)
+    if (strcmp(comptype, "dir") == 0)
         return COMP_FOLDER;
-    else if (strcmp(comptype, "choice") == 0)
+    if (strcmp(comptype, "choice") == 0)
         return COMP_COMBO;
-    else if (strcmp(comptype, "combo") == 0)
+    if (strcmp(comptype, "combo") == 0)
         return COMP_COMBO;
-    else if (strcmp(comptype, "radio") == 0)
+    if (strcmp(comptype, "radio") == 0)
         return COMP_RADIO;
-    else if (strcmp(comptype, "check") == 0)
+    if (strcmp(comptype, "check") == 0)
         return COMP_CHECK;
-    else if (strcmp(comptype, "check_array") == 0)
+    if (strcmp(comptype, "check_array") == 0)
         return COMP_CHECK_ARRAY;
-    else if (strcmp(comptype, "checks") == 0)
+    if (strcmp(comptype, "checks") == 0)
         return COMP_CHECK_ARRAY;
-    else if (strcmp(comptype, "text") == 0)
+    if (strcmp(comptype, "text") == 0)
         return COMP_TEXT;
-    else if (strcmp(comptype, "text_box") == 0)
+    if (strcmp(comptype, "text_box") == 0)
         return COMP_TEXT;
-    else if (strcmp(comptype, "int") == 0)
+    if (strcmp(comptype, "int") == 0)
         return COMP_INT;
-    else if (strcmp(comptype, "integer") == 0)
+    if (strcmp(comptype, "integer") == 0)
         return COMP_INT;
-    else if (strcmp(comptype, "float") == 0)
+    if (strcmp(comptype, "float") == 0)
         return COMP_FLOAT;
     return COMP_UNKNOWN;
 }
