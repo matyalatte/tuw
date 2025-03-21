@@ -9,14 +9,13 @@
 #include <gtk/gtk.h>
 #endif
 
-noex::string GetDefaultJsonPath() noexcept {
-    noex::string def_name = "gui_definition.";
-    for (const char* ext : { "jsonc", "tuw" }) {
-        noex::string json_path = def_name + ext;
-        if (envuFileExists(json_path.c_str()))
-            return json_path;
-    }
-    return def_name + "json";
+#define DEFAULT_JSON_NAME "gui_definition"
+const char* GetDefaultJsonPath() noexcept {
+    if (envuFileExists(DEFAULT_JSON_NAME ".jsonc"))
+        return DEFAULT_JSON_NAME ".jsonc";
+    if (envuFileExists(DEFAULT_JSON_NAME ".tuw"))
+        return DEFAULT_JSON_NAME ".tuw";
+    return DEFAULT_JSON_NAME ".json";
 }
 
 // Main window
@@ -463,11 +462,15 @@ noex::string MainFrame::GetCommand() noexcept {
     for (size_t i = 0; i < cmd_ids.size(); i++) {
         int id = cmd_ids[i];
         if (id == CMD_ID_PERCENT) {
-            cmd += "%";
+            cmd.push_back('%');
         } else if (id == CMD_ID_CURRENT_DIR) {
-            cmd += envuStr(envuGetCwd());
+            char* cwd = envuGetCwd();
+            cmd += cwd;
+            envuFree(cwd);
         } else if (id == CMD_ID_HOME_DIR) {
-            cmd += envuStr(envuGetHome());
+            char* home = envuGetHome();
+            cmd += home;
+            envuFree(home);
         } else {
             cmd += comp_strings[id];
         }

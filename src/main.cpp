@@ -240,6 +240,7 @@ int main(int argc, char* argv[]) noexcept {
         return 1;
     }
 
+    const char* json_path_cstr = nullptr;
     noex::string json_path;
     noex::string new_exe_path;
     bool force = false;
@@ -262,7 +263,7 @@ int main(int argc, char* argv[]) noexcept {
                 break;
             case OPT_JSON:
                 i++;
-                json_path = args[i];
+                json_path_cstr = args[i].data();
                 break;
             case OPT_EXE:
                 i++;
@@ -276,17 +277,17 @@ int main(int argc, char* argv[]) noexcept {
         }
     }
 
-    if (json_path.empty()) {
+    if (!json_path_cstr || !*json_path_cstr) {
         if (cmd_int == CMD_MERGE)
-            json_path = GetDefaultJsonPath();
+            json_path_cstr = GetDefaultJsonPath();
         else
-            json_path = "new.json";
+            json_path_cstr = "new.json";
     }
 
     if (new_exe_path.empty())
         new_exe_path = exe_path + ".new";
 
-    json_path = envuStr(envuGetFullPath(json_path.c_str()));
+    json_path = envuStr(envuGetFullPath(json_path_cstr));
     new_exe_path = envuStr(envuGetFullPath(new_exe_path.c_str()));
 
     if (json_path == exe_path || new_exe_path == exe_path) {
