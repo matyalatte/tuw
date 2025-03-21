@@ -59,6 +59,18 @@ class MainFrame {
             const char* title = "Error") noexcept {
         ShowErrorDialogWithLog(func, msg.c_str(), title);
     }
+    inline void Log(const char* func, const char* msg) noexcept {
+        PrintFmt("[%s] %s\n", func, msg);
+    }
+    inline void Log(const char* func, const char* label, const char* msg) noexcept {
+        PrintFmt("[%s] %s: %s\n", func, label, msg);
+    }
+    inline void Log(const char* func, const noex::string&msg) {
+        Log(func, msg.c_str());
+    }
+    inline void Log(const char* func, const char* label, const noex::string&msg) {
+        Log(func, label, msg.c_str());
+    }
 
  public:
     explicit MainFrame(const rapidjson::Document& definition = EMPTY_DOCUMENT,
