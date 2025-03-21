@@ -20,7 +20,7 @@ if [[ "$build_type" == "Release" ]]; then
 fi
 
 pushd $(dirname "$0")/..
-    meson setup build/${build_type} ${preset} -Dmacosx_universal=true ${options} || exit 1
+    meson setup build/${build_type} ${preset} -Dmacosx_universal=true -Dbuild_test=false ${options} || exit 1
     cd build/${build_type}
     meson compile -v || exit 1
 

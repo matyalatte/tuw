@@ -74,8 +74,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test with docker
         run: |
-          docker build -t tuw_test -f docker/${{ matrix.os }}.dockerfile ./
-          docker run --rm --init -i tuw_test xvfb-run ./test.sh
+          docker build --build-arg TEST=true -t tuw_test -f docker/${{ matrix.os }}.dockerfile ./
 
   build_tests_windows_arm64:
     runs-on: windows-2022

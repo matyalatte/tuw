@@ -14,19 +14,24 @@
 #    sudo apt install -y qemu-user-static binfmt-support
 #    docker buildx build --platform linux/arm64 -t tuw_ubuntu -f docker/ubuntu.dockerfile ./
 #
-#   -You can run tests on the container.
-#    docker build -t tuw_ubuntu -f docker/ubuntu.dockerfile ./
-#    docker run --rm --init -i tuw_ubuntu xvfb-run ./test.sh
+#   -You can run test.sh with build-arg
+#    docker build --build-arg TEST=true -t tuw_ubuntu -f docker/ubuntu.dockerfile ./
 
 # Base image
 FROM ubuntu:20.04
+
+# Run test.sh when true
+ARG TEST=false
 
 # Install packages
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
             ca-certificates build-essential \
-            libgtk-3-dev git python3-pip xvfb && \
+            libgtk-3-dev git python3-pip && \
+    if [ "$TEST" = "true" ]; then \
+        apt-get install -y --no-install-recommends dbus-x11 xdg-utils xvfb firefox; \
+    fi && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -37,5 +42,11 @@ RUN pip3 install meson==1.3.1 ninja==1.11.1
 COPY . /Tuw
 
 # Build
+ENV XDG_CURRENT_DESKTOP=GNOME
 WORKDIR /Tuw/shell_scripts
-RUN ./build.sh
+RUN if [ "$TEST" = "true" ]; then \
+        gio mime x-scheme-handler/https firefox.desktop && \
+        xvfb-run ./test.sh; \
+    else \
+        ./build.sh; \
+    fi

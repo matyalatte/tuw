@@ -24,7 +24,7 @@ elif [[ "$build_type" == "Release" ]]; then
 fi
 
 pushd $(dirname "$0")/..
-    meson setup build/${build_type} ${preset} ${options} || exit 1
+    meson setup build/${build_type} ${preset} ${options} -Dbuild_test=false || exit 1
     cd build/${build_type}
     meson compile -v || exit 1
 
