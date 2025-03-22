@@ -140,11 +140,17 @@ StringComponentBase::StringComponentBase(
     uiBoxAppend(box, uiControl(text), 0);
 }
 
+static rapidjson::Value
+CreateConfigValue(rapidjson::Document& config, const noex::string& id) noexcept {
+    if (config.HasMember(id.c_str()))
+        config.RemoveMember(id.c_str());
+    rapidjson::Value n(id.c_str(), config.GetAllocator());
+    return n;
+}
+
 void StringComponentBase::GetConfig(rapidjson::Document& config) noexcept {
-    if (config.HasMember(m_id.c_str()))
-        config.RemoveMember(m_id.c_str());
-    rapidjson::Value n(m_id.c_str(), config.GetAllocator());
     rapidjson::Value val(GetRawString().c_str(), config.GetAllocator());
+    rapidjson::Value n = CreateConfigValue(config, m_id);
     config.AddMember(n, val, config.GetAllocator());
 }
 
@@ -433,10 +439,8 @@ void ComboBox::SetConfig(const rapidjson::Value& config) noexcept {
 }
 
 void ComboBox::GetConfig(rapidjson::Document& config) noexcept {
-    if (config.HasMember(m_id.c_str()))
-        config.RemoveMember(m_id.c_str());
     int sel = uiComboboxSelected(static_cast<uiCombobox*>(m_widget));
-    rapidjson::Value n(m_id.c_str(), config.GetAllocator());
+    rapidjson::Value n = CreateConfigValue(config, m_id);
     config.AddMember(n, sel, config.GetAllocator());
 }
 
@@ -473,10 +477,8 @@ void RadioButtons::SetConfig(const rapidjson::Value& config) noexcept {
 }
 
 void RadioButtons::GetConfig(rapidjson::Document& config) noexcept {
-    if (config.HasMember(m_id.c_str()))
-        config.RemoveMember(m_id.c_str());
     int sel = uiRadioButtonsSelected(static_cast<uiRadioButtons*>(m_widget));
-    rapidjson::Value n(m_id.c_str(), config.GetAllocator());
+    rapidjson::Value n = CreateConfigValue(config, m_id);
     config.AddMember(n, sel, config.GetAllocator());
 }
 
@@ -506,10 +508,8 @@ void CheckBox::SetConfig(const rapidjson::Value& config) noexcept {
 }
 
 void CheckBox::GetConfig(rapidjson::Document& config) noexcept {
-    if (config.HasMember(m_id.c_str()))
-        config.RemoveMember(m_id.c_str());
     bool checked = uiCheckboxChecked(static_cast<uiCheckbox*>(m_widget));
-    rapidjson::Value n(m_id.c_str(), config.GetAllocator());
+    rapidjson::Value n = CreateConfigValue(config, m_id);
     config.AddMember(n, checked, config.GetAllocator());
 }
 
@@ -555,16 +555,13 @@ void CheckArray::SetConfig(const rapidjson::Value& config) noexcept {
 }
 
 void CheckArray::GetConfig(rapidjson::Document& config) noexcept {
-    if (config.HasMember(m_id.c_str()))
-        config.RemoveMember(m_id.c_str());
-
     rapidjson::Value ints;
     ints.SetArray();
     for (uiCheckbox* check : m_checks) {
         ints.PushBack(static_cast<bool>(uiCheckboxChecked(check)),
                       config.GetAllocator());
     }
-    rapidjson::Value n(m_id.c_str(), config.GetAllocator());
+    rapidjson::Value n = CreateConfigValue(config, m_id);
     config.AddMember(n, ints, config.GetAllocator());
 }
 
@@ -633,10 +630,8 @@ noex::string IntPicker::GetRawString() noexcept {
 }
 
 void IntPicker::GetConfig(rapidjson::Document& config) noexcept {
-    if (config.HasMember(m_id.c_str()))
-        config.RemoveMember(m_id.c_str());
-    rapidjson::Value n(m_id.c_str(), config.GetAllocator());
     int val = uiSpinboxValue(static_cast<uiSpinbox*>(m_widget));
+    rapidjson::Value n = CreateConfigValue(config, m_id);
     config.AddMember(n, val, config.GetAllocator());
 }
 
@@ -678,10 +673,8 @@ noex::string FloatPicker::GetRawString() noexcept {
 }
 
 void FloatPicker::GetConfig(rapidjson::Document& config) noexcept {
-    if (config.HasMember(m_id.c_str()))
-        config.RemoveMember(m_id.c_str());
-    rapidjson::Value n(m_id.c_str(), config.GetAllocator());
     double val = uiSpinboxValueDouble(static_cast<uiSpinbox*>(m_widget));
+    rapidjson::Value n = CreateConfigValue(config, m_id);
     config.AddMember(n, val, config.GetAllocator());
 }
 
