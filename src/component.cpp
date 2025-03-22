@@ -411,9 +411,7 @@ ComboBox::ComboBox(uiBox* box, const rapidjson::Value& j) noexcept
         const char* value = json_utils::GetString(i, "value", label);
         values.emplace_back(value);
     }
-    uiBox* hbox = uiNewHorizontalBox();
-    uiBoxAppend(hbox, uiControl(combo), 0);
-    uiBoxAppend(box, uiControl(hbox), 0);
+    uiBoxAppend(box, uiControl(combo), 0);
     uiComboboxSetSelected(combo, json_utils::GetInt(j, "default", 0) % j["items"].Size());
 
     SetValues(values);
@@ -453,9 +451,7 @@ RadioButtons::RadioButtons(uiBox* box, const rapidjson::Value& j) noexcept
         const char* value = json_utils::GetString(i, "value", label);
         values.emplace_back(value);
     }
-    uiBox* hbox = uiNewHorizontalBox();
-    uiBoxAppend(hbox, uiControl(radio), 0);
-    uiBoxAppend(box, uiControl(hbox), 0);
+    uiBoxAppend(box, uiControl(radio), 0);
     uiRadioButtonsSetSelected(radio, json_utils::GetInt(j, "default", 0) % j["items"].Size());
 
     SetValues(values);
@@ -598,9 +594,7 @@ void TextBox::SetConfig(const rapidjson::Value& config) noexcept {
 }
 
 static void initSpinbox(uiSpinbox* picker, uiBox* box, const rapidjson::Value& j) noexcept {
-    uiBox* hbox = uiNewHorizontalBox();
-    uiBoxAppend(hbox, uiControl(picker), 0);
-    uiBoxAppend(box, uiControl(hbox), 0);
+    uiBoxAppend(box, uiControl(picker), 0);
     SetTooltip(uiControl(picker), j);
 }
 
