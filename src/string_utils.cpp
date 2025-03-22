@@ -85,15 +85,9 @@ noex::string ANSItoUTF8(const noex::string& str) noexcept {
 void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_list va;
     va_start(va, fmt);
-
-    va_list va2;
-    va_copy(va2, va);
-    size_t n = _vscprintf(fmt, va2);
-    va_end(va2);
-    n++;
-
+    size_t n = _vscprintf(fmt, va);
     noex::string buf = noex::string(n);
-    vsprintf_s(buf.data(), buf.size(), fmt, va);
+    vsprintf_s(buf.data(), buf.size() + 1, fmt, va);
     va_end(va);
 
     noex::wstring wbuf = UTF8toUTF16(buf.c_str());
@@ -203,10 +197,10 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_start(va, fmt);
     va_list va2;
     va_copy(va2, va);
-    size_t size = vsnprintf(NULL, 0, fmt, va2);
+    size_t n = vsnprintf(NULL, 0, fmt, va2);
     va_end(va2);
-    noex::string buf = noex::string(size + 1);
-    vsnprintf(buf.data(), buf.size(), fmt, va);
+    noex::string buf = noex::string(n);
+    vsnprintf(buf.data(), buf.size() + 1, fmt, va);
     g_logger.Log(buf.c_str());
     fprintf(out, "%s", buf.c_str());
     va_end(va);
