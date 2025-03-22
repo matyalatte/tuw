@@ -57,13 +57,6 @@ static bool CopyBinary(FILE* reader, FILE* writer, uint32_t size) noexcept {
     return true;
 }
 
-static void ReadMagic(FILE* io, char* magic) noexcept {
-    magic[4] = '\0';
-    if (fread(magic, 1, 4, io) != 4)
-        memset(magic, 0, sizeof(char) * 4);
-    return;
-}
-
 static uint32_t Length(FILE* io) noexcept {
     uint32_t cur = ftell(io);
     fseek(io, 0, SEEK_END);
@@ -72,7 +65,8 @@ static uint32_t Length(FILE* io) noexcept {
     return len;
 }
 
-static const uint32_t EXE_SIZE_MAX = 20000000;  // Allowed size of exe
+constexpr uint32_t EXE_SIZE_MAX = 20000000;  // Allowed size of exe
+constexpr uint32_t JSON_MAGIC = 0x4A534F4E; // 'J', 'S', 'O', 'N'
 
 noex::string ExeContainer::Read(const noex::string& exe_path) noexcept {
     if (noex::get_error_no() != noex::OK) {
@@ -89,10 +83,9 @@ noex::string ExeContainer::Read(const noex::string& exe_path) noexcept {
     fseek(file_io, 0, SEEK_END);
     uint32_t end_off = ftell(file_io);
     fseek(file_io, -4, SEEK_CUR);
-    char magic[5];
-    ReadMagic(file_io, magic);
+    uint32_t magic = ReadUint32(file_io);
 
-    if (strcmp(magic, "JSON") != 0) {
+    if (magic != JSON_MAGIC) {
         // Json data not found
         m_exe_size = end_off;
         fclose(file_io);
@@ -109,8 +102,8 @@ noex::string ExeContainer::Read(const noex::string& exe_path) noexcept {
     fseek(file_io, m_exe_size, SEEK_SET);
 
     // Read a header for json data
-    ReadMagic(file_io, magic);
-    if (strcmp(magic, "JSON") != 0) {
+    magic = ReadUint32(file_io);
+    if (magic != JSON_MAGIC) {
         fclose(file_io);
         return noex::string("Invalid magic. (") + magic + ")";
     }
@@ -178,9 +171,8 @@ noex::string ExeContainer::Write(const noex::string& exe_path) noexcept {
 
     uint32_t pos = ftell(old_io);
     if (pos != Length(old_io)) {
-        char magic[5];
-        ReadMagic(old_io, magic);
-        if (strcmp(magic, "JSON") != 0) {
+        uint32_t magic = ReadUint32(old_io);
+        if (magic != JSON_MAGIC) {
             fclose(old_io);
             fclose(new_io);
             return noex::string("Invalid magic. (") + magic + ")";
@@ -194,12 +186,12 @@ noex::string ExeContainer::Write(const noex::string& exe_path) noexcept {
     }
 
     // Write json data
-    fwrite("JSON", 1, 4, new_io);
+    WriteUint32(new_io, JSON_MAGIC);
     WriteUint32(new_io, json_size);
     WriteUint32(new_io, Fnv1Hash32(json_str));
     WriteStr(new_io, json_str);
     WriteUint32(new_io, m_exe_size - ftell(new_io) - 8);
-    fwrite("JSON", 1, 4, new_io);
+    WriteUint32(new_io, JSON_MAGIC);
     fclose(new_io);
     return "";
 }
