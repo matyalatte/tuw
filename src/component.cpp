@@ -44,8 +44,8 @@ noex::string Component::GetString() noexcept {
     if (m_optional && str.empty())
         return "";
     if (m_add_quotes)
-        str = "\"" + str + "\"";
-    return m_prefix + str + m_suffix;
+        str = noex::concat_cstr("\"", str.c_str(), "\"");
+    return noex::concat_cstr(m_prefix.c_str(), str.c_str(), m_suffix.c_str());
 }
 
 bool Component::Validate(bool* redraw_flag) noexcept {

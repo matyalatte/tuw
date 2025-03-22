@@ -357,6 +357,42 @@ TEST(StringTest, EraseError) {
     expect_tuwstr("testfoobar", str);
 }
 
+TEST(StringTest, ConcatCstrTwo) {
+    noex::string str;
+    str = noex::concat_cstr("foo", "bar");
+    expect_tuwstr("foobar", str);
+    str = noex::concat_cstr("", "bar");
+    expect_tuwstr("bar", str);
+    str = noex::concat_cstr("foo", "");
+    expect_tuwstr("foo", str);
+    char* null = nullptr;
+    str = noex::concat_cstr(null, "bar");
+    expect_tuwstr("bar", str);
+    str = noex::concat_cstr("foo", null);
+    expect_tuwstr("foo", str);
+    EXPECT_EQ(noex::OK, noex::get_error_no());
+}
+
+TEST(StringTest, ConcatCstrThree) {
+    noex::string str;
+    str = noex::concat_cstr("test", "foo", "bar");
+    expect_tuwstr("testfoobar", str);
+    str = noex::concat_cstr("", "foo", "bar");
+    expect_tuwstr("foobar", str);
+    str = noex::concat_cstr("test", "", "bar");
+    expect_tuwstr("testbar", str);
+    str = noex::concat_cstr("test", "foo", "");
+    expect_tuwstr("testfoo", str);
+    char* null = nullptr;
+    str = noex::concat_cstr(null, "foo", "bar");
+    expect_tuwstr("foobar", str);
+    str = noex::concat_cstr("test", null, "bar");
+    expect_tuwstr("testbar", str);
+    str = noex::concat_cstr("test", "foo", null);
+    expect_tuwstr("testfoo", str);
+    EXPECT_EQ(noex::OK, noex::get_error_no());
+}
+
 // Test noex::wstring
 void expect_nullwstr(const noex::wstring& str) {
     EXPECT_TRUE(str.empty());

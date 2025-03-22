@@ -126,8 +126,8 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
     }
 
     if (ignore_external_json) {
-        noex::string msg = "Warning: Using embedded JSON. " +
-                            json_path + " was ignored.\n";
+        noex::string msg = noex::concat_cstr("Warning: Using embedded JSON. ",
+                            json_path.c_str(), " was ignored.\n");
         Log("LoadDefinition", msg);
         ShowSuccessDialog(msg, "Warning");
     }
@@ -269,10 +269,11 @@ noex::string MainFrame::OpenURLBase(int id) noexcept {
             noex::string scheme = url.substr(0, pos);
             // scheme should be http or https
             if (scheme == "file") {
-                return "Use 'file' type for a path, not 'url' type. (" + url + ")";
+                return noex::concat_cstr(
+                    "Use 'file' type for a path, not 'url' type. (", url.c_str(), ")");
             } else if (scheme != "https" && scheme != "http") {
-                return "Unsupported scheme detected. "
-                        "It should be http or https. (" + scheme + ")";
+                return noex::concat_cstr("Unsupported scheme detected. "
+                        "It should be http or https. (", scheme.c_str(), ")");
             }
         } else {
             url = "https://" + url;
@@ -284,7 +285,7 @@ noex::string MainFrame::OpenURLBase(int id) noexcept {
         url = envuStr(url_cstr);
 
         if (!exists)
-            return "File does not exist. (" + url + ")";
+            return noex::concat_cstr("File does not exist. (", url.c_str(), ")");
     }
 
     Log("OpenURL", url);
@@ -313,8 +314,8 @@ noex::string MainFrame::OpenURLBase(int id) noexcept {
         } else {
             ExecuteResult result = LaunchDefaultApp(url);
             if (result.exit_code != 0) {
-                return noex::string("Failed to open a ") +
-                        type + " by an unexpected error.";
+                return noex::concat_cstr("Failed to open a ",
+                        type, " by an unexpected error.");
             }
         }
     }
