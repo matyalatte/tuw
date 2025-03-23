@@ -195,6 +195,15 @@ TEST_F(MainFrameTest, LoadSaveConfigUTF) {
     TestConfig(test_json, JSON_CONFIG_UTF);
 }
 
+TEST_F(MainFrameTest, CrossPlatform) {
+    rapidjson::Document test_json;
+    GetTestJson(test_json, JSON_CROSS_PLATFORM);
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
+    main_frame = new MainFrame(test_json, dummy_config);
+    main_frame->UpdatePanel(1);
+}
+
 class OpenURLTest : public MainFrameTest {
  protected:
     rapidjson::Document definition;

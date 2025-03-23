@@ -4,6 +4,22 @@
 #include "rapidjson/document.h"
 #include "string_utils.h"
 
+enum ComponentType: int {
+    COMP_UNKNOWN = 0,
+    COMP_EMPTY,
+    COMP_STATIC_TEXT,
+    COMP_FILE,
+    COMP_FOLDER,
+    COMP_COMBO,
+    COMP_RADIO,
+    COMP_CHECK,
+    COMP_CHECK_ARRAY,
+    COMP_TEXT,
+    COMP_INT,
+    COMP_FLOAT,
+    COMP_MAX
+};
+
 enum CmdPredefinedIds: int {
     CMD_ID_PERCENT = -1,
     CMD_ID_CURRENT_DIR = -2,

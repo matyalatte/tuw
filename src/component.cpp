@@ -4,22 +4,6 @@
 #include "string_utils.h"
 #include "tuw_constants.h"
 
-enum ComponentType: int {
-    COMP_UNKNOWN = 0,
-    COMP_EMPTY,
-    COMP_STATIC_TEXT,
-    COMP_FILE,
-    COMP_FOLDER,
-    COMP_COMBO,
-    COMP_RADIO,
-    COMP_CHECK,
-    COMP_CHECK_ARRAY,
-    COMP_TEXT,
-    COMP_INT,
-    COMP_FLOAT,
-    COMP_MAX
-};
-
 // Base class for GUI components (file picker, combo box, etc.)
 Component::Component(const rapidjson::Value& j) noexcept {
     m_widget = nullptr;
@@ -102,7 +86,9 @@ Component* NewComp(uiBox* box, const rapidjson::Value& j) noexcept {
 using NewCompFunc = Component*(*)(uiBox*, const rapidjson::Value&);
 
 Component* Component::PutComponent(uiBox* box, const rapidjson::Value& j) noexcept {
-    static const NewCompFunc new_funcs[COMP_MAX - COMP_STATIC_TEXT] = {
+    // Note: We need EmptyComponent for components which should be ignored.
+    static const NewCompFunc new_funcs[COMP_MAX - COMP_EMPTY] = {
+        &NewComp<EmptyComponent>,
         &NewComp<StaticText>,
         &NewComp<FilePicker>,
         &NewComp<DirPicker>,
@@ -115,10 +101,12 @@ Component* Component::PutComponent(uiBox* box, const rapidjson::Value& j) noexce
         &NewComp<FloatPicker>
     };
 
-    Component* comp = nullptr;
     int type = j["type_int"].GetInt();
-    if (COMP_STATIC_TEXT <= type || type < COMP_MAX)
-        comp = new_funcs[type - COMP_STATIC_TEXT](box, j);
+    if (type < COMP_EMPTY || COMP_MAX <= type)
+        return nullptr;
+
+    Component* comp = nullptr;
+    comp = new_funcs[type - COMP_EMPTY](box, j);
     if (comp)
         comp->PutErrorWidget(box);
     return comp;
