@@ -45,10 +45,10 @@ enum ComponentType: int {
 constexpr auto JSONC_FLAGS =
     rapidjson::kParseCommentsFlag | rapidjson::kParseTrailingCommasFlag;
 
-JsonResult LoadJson(const noex::string& file, rapidjson::Document& json) noexcept {
+noex::string LoadJson(const noex::string& file, rapidjson::Document& json) noexcept {
     FILE* fp = FileOpen(file.c_str(), "rb");
     if (!fp)
-        return { false, "Failed to open " + file };
+        return "Failed to open " + file;
 
     char readBuffer[JSON_SIZE_MAX];
     rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
@@ -57,28 +57,27 @@ JsonResult LoadJson(const noex::string& file, rapidjson::Document& json) noexcep
     fclose(fp);
 
     if (!ok) {
-        noex::string msg = noex::string("Failed to parse JSON: ") +
-                        rapidjson::GetParseError_En(ok.Code()) +
-                        " (offset: " + ok.Offset() + ")";
-        return { false, msg };
+        return noex::concat_cstr("Failed to parse JSON: ",
+                rapidjson::GetParseError_En(ok.Code()),
+                " (offset: ") + ok.Offset() + ")";
     }
     if (!json.IsObject())
         json.SetObject();
 
-    return JSON_RESULT_OK;
+    return "";
 }
 
-JsonResult SaveJson(rapidjson::Document& json, const noex::string& file) noexcept {
+noex::string SaveJson(rapidjson::Document& json, const noex::string& file) noexcept {
     FILE* fp = FileOpen(file.c_str(), "wb");
     if (!fp)
-        return { false, "Failed to open " + file + "." };
+        return noex::concat_cstr("Failed to open ", file.c_str(), ".");
 
     char writeBuffer[JSON_SIZE_MAX];
     rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
     rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);
     json.Accept(writer);
     fclose(fp);
-    return JSON_RESULT_OK;
+    return "";
 }
 
 noex::string JsonToString(rapidjson::Document& json) noexcept {
@@ -115,9 +114,9 @@ double GetDouble(const rapidjson::Value& json, const char* key, double def) noex
 static noex::string GetLabel(const char* label, const char* key) noexcept {
     noex::string msg;
     if (*label != '\0') {
-        msg = noex::string("['") + label + "']";
+        msg = noex::concat_cstr("['", label, "']");
     }
-    msg += noex::string("['") + key + "']";
+    msg += noex::concat_cstr("['", key, "']");
     return msg;
 }
 
@@ -170,7 +169,7 @@ static void CheckJsonType(JsonResult& result, const rapidjson::Value& j, const c
     }
     if (!valid) {
         result.ok = false;
-        result.msg = GetLabel(label, key) + " should be " + type_name + ".";
+        result.msg = GetLabel(label, key) + noex::concat_cstr(" should be ", type_name, ".");
     }
 }
 
@@ -233,7 +232,7 @@ static void CheckJsonArrayType(JsonResult& result, rapidjson::Value& j, const ch
     }
     if (!valid) {
         result.ok = false;
-        result.msg = GetLabel(label, key) + " should be " + type_name + ".";
+        result.msg = GetLabel(label, key) + noex::concat_cstr(" should be ", type_name, ".");
     }
 }
 
@@ -300,9 +299,9 @@ static void CheckIndexDuplication(
         for (size_t j = i + 1; j < size; j++) {
             if (str == component_ids[j]) {
                 result.ok = false;
-                result.msg = "[components][id]"
-                                " should not be duplicated in a gui definition. (" +
-                                str + ")";
+                result.msg = noex::concat_cstr("[components][id]"
+                                " should not be duplicated in a gui definition. (",
+                                str.c_str(), ")");
                 return;
             }
         }
@@ -345,7 +344,7 @@ static void CompileCommand(JsonResult& result,
         int j;
         if (id == CMD_TOKEN_PERCENT) {
             j = CMD_ID_PERCENT;
-            cmd_str += "%";
+            cmd_str.push_back('%');
         } else if (id == CMD_TOKEN_CURRENT_DIR) {
             j = CMD_ID_CURRENT_DIR;
             cmd_str += id;
@@ -371,7 +370,7 @@ static void CompileCommand(JsonResult& result,
         if (j >= comp_size)
             cmd_str += "__comp???__";
         else if (j >= 0)
-            cmd_str += noex::string("__comp") + j + "__";
+            cmd_str += noex::concat_cstr("__comp", noex::to_string(j).c_str(), "__");
     }
     if (cmd_ids.size() < splitted_cmd.size())
         cmd_str += splitted_cmd.back();
@@ -389,8 +388,8 @@ static void CompileCommand(JsonResult& result,
             }
         if (!found) {
             result.ok = false;
-            result.msg = noex::string("[\"components\"][") + j +
-                            "] is unused in the command; " + cmd_str;
+            result.msg = noex::concat_cstr("[\"components\"][", noex::to_string(j).c_str(),
+                            "] is unused in the command; ") + cmd_str;
             if (!comp_ids[j].empty())
                 result.msg = "The ID of " + result.msg;
             return;
@@ -415,33 +414,33 @@ static void CompileCommand(JsonResult& result,
 int ComptypeToInt(const char* comptype) noexcept {
     if (strcmp(comptype, "static_text") == 0)
         return COMP_STATIC_TEXT;
-    else if (strcmp(comptype, "file") == 0)
+    if (strcmp(comptype, "file") == 0)
         return COMP_FILE;
-    else if (strcmp(comptype, "folder") == 0)
+    if (strcmp(comptype, "folder") == 0)
         return COMP_FOLDER;
-    else if (strcmp(comptype, "dir") == 0)
+    if (strcmp(comptype, "dir") == 0)
         return COMP_FOLDER;
-    else if (strcmp(comptype, "choice") == 0)
+    if (strcmp(comptype, "choice") == 0)
         return COMP_COMBO;
-    else if (strcmp(comptype, "combo") == 0)
+    if (strcmp(comptype, "combo") == 0)
         return COMP_COMBO;
-    else if (strcmp(comptype, "radio") == 0)
+    if (strcmp(comptype, "radio") == 0)
         return COMP_RADIO;
-    else if (strcmp(comptype, "check") == 0)
+    if (strcmp(comptype, "check") == 0)
         return COMP_CHECK;
-    else if (strcmp(comptype, "check_array") == 0)
+    if (strcmp(comptype, "check_array") == 0)
         return COMP_CHECK_ARRAY;
-    else if (strcmp(comptype, "checks") == 0)
+    if (strcmp(comptype, "checks") == 0)
         return COMP_CHECK_ARRAY;
-    else if (strcmp(comptype, "text") == 0)
+    if (strcmp(comptype, "text") == 0)
         return COMP_TEXT;
-    else if (strcmp(comptype, "text_box") == 0)
+    if (strcmp(comptype, "text_box") == 0)
         return COMP_TEXT;
-    else if (strcmp(comptype, "int") == 0)
+    if (strcmp(comptype, "int") == 0)
         return COMP_INT;
-    else if (strcmp(comptype, "integer") == 0)
+    if (strcmp(comptype, "integer") == 0)
         return COMP_INT;
-    else if (strcmp(comptype, "float") == 0)
+    if (strcmp(comptype, "float") == 0)
         return COMP_FLOAT;
     return COMP_UNKNOWN;
 }
@@ -666,7 +665,7 @@ static int VersionStringToInt(JsonResult& result, const char* string) noexcept {
     for (const noex::string& str : version_strings) {
         if (str.length() == 0 || str.length() > 2) {
             result.ok = false;
-            result.msg = noex::string("Can NOT convert '") + string + "' to int.";
+            result.msg = noex::concat_cstr("Can NOT convert '", string, "' to int.");
             return 0;
         }
         if (str.length() == 1) {
@@ -702,7 +701,7 @@ void CheckVersion(JsonResult& result, rapidjson::Document& definition) noexcept 
         int required_int = VersionStringToInt(result, required);
         if (tuw_constants::VERSION_INT < required_int) {
             result.ok = false;
-            result.msg = noex::string("Version ") + required + " is required.";
+            result.msg = noex::concat_cstr("Version ", required, " is required.");
         }
     }
 }
@@ -745,7 +744,7 @@ void CheckHelpURLs(JsonResult& result, rapidjson::Document& definition) noexcept
             CheckJsonType(result, h, "path", JsonType::STRING);
         } else {
             result.ok = false;
-            result.msg = noex::string("Unsupported help type: ") + type;
+            result.msg = noex::concat_cstr("Unsupported help type: ", type);
             return;
         }
     }

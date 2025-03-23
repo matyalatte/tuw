@@ -144,4 +144,9 @@ inline wstring to_wstring(numT num) {
     return wstring::to_string(num);
 }
 
+template <typename charT>
+basic_string<charT> concat_cstr(const charT* str1, const charT* str2) noexcept;
+template <typename charT>
+basic_string<charT> concat_cstr(const charT* str1, const charT* str2, const charT* str3) noexcept;
+
 }  // namespace noex

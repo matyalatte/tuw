@@ -16,8 +16,9 @@ class ExeContainer {
         m_json.SetObject();
     }
 
-    json_utils::JsonResult Read(const noex::string& exe_path) noexcept;
-    json_utils::JsonResult Write(const noex::string& exe_path) noexcept;
+    // Returns an empty string if succeed. An error message otherwise.
+    noex::string Read(const noex::string& exe_path) noexcept;
+    noex::string Write(const noex::string& exe_path) noexcept;
 
     bool HasJson() noexcept {
         return m_json.IsObject() && !m_json.ObjectEmpty();

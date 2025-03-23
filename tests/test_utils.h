@@ -19,9 +19,16 @@ constexpr char JSON_BROKEN[] = "./json/broken.json";
 constexpr char JSON_CONFIG_ASCII[] = "./json/config_ascii.json";
 constexpr char JSON_CONFIG_UTF[] = "./json/config_utf.json";
 constexpr char JSON_RELAXED[] = "./json/relaxed.jsonc";
+constexpr char JSON_CROSS_PLATFORM[] = "./json/platform.json";
 
 inline void GetTestJson(rapidjson::Document& json) {
-    json_utils::JsonResult result = json_utils::LoadJson(JSON_ALL_KEYS, json);
-    EXPECT_TRUE(result.ok);
+    noex::string err = json_utils::LoadJson(JSON_ALL_KEYS, json);
+    EXPECT_TRUE(err.empty());
+    EXPECT_FALSE(json.ObjectEmpty());
+}
+
+inline void GetTestJson(rapidjson::Document& json, const char* file) {
+    noex::string err = json_utils::LoadJson(file, json);
+    EXPECT_TRUE(err.empty());
     EXPECT_FALSE(json.ObjectEmpty());
 }

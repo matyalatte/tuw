@@ -10,9 +10,11 @@ void Validator::Initialize(const rapidjson::Value& j) noexcept {
     m_wildcard = json_utils::GetString(j, "wildcard", "");
     m_wildcard_error = json_utils::GetString(j, "wildcard_error", "");
     m_not_empty = json_utils::GetBool(j, "not_empty", false);
-    m_not_empty_error = json_utils::GetString(j, "not_empty_error", "");
+    m_not_empty_error = json_utils::GetString(
+        j, "not_empty_error", "Empty string is NOT allowed.");
     m_exist = json_utils::GetBool(j, "exist", false);
-    m_exist_error = json_utils::GetString(j, "exist_error", "");
+    m_exist_error = json_utils::GetString(
+        j, "exist_error", "Path does NOT exist.");
     m_error_msg = "";
 }
 
@@ -35,10 +37,7 @@ static int IsUnsupportedPattern(const char *pattern) noexcept {
 
 bool Validator::Validate(const noex::string& str) noexcept {
     if (m_not_empty && str.empty()) {
-        if (m_not_empty_error.empty())
-            m_error_msg = "Empty string is NOT allowed.";
-        else
-            m_error_msg = m_not_empty_error;
+        m_error_msg = m_not_empty_error;
         return false;
     }
     if (!m_wildcard.empty()) {
@@ -69,10 +68,7 @@ bool Validator::Validate(const noex::string& str) noexcept {
         }
     }
     if (m_exist && !envuPathExists(str.c_str())) {
-        if (m_exist_error.empty())
-            m_error_msg = "Path does NOT exist.";
-        else
-            m_error_msg = m_exist_error;
+        m_error_msg = m_exist_error;
         return false;
     }
     m_error_msg = "";

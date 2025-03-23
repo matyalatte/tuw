@@ -4,6 +4,22 @@
 #include "rapidjson/document.h"
 #include "string_utils.h"
 
+enum ComponentType: int {
+    COMP_UNKNOWN = 0,
+    COMP_EMPTY,
+    COMP_STATIC_TEXT,
+    COMP_FILE,
+    COMP_FOLDER,
+    COMP_COMBO,
+    COMP_RADIO,
+    COMP_CHECK,
+    COMP_CHECK_ARRAY,
+    COMP_TEXT,
+    COMP_INT,
+    COMP_FLOAT,
+    COMP_MAX
+};
+
 enum CmdPredefinedIds: int {
     CMD_ID_PERCENT = -1,
     CMD_ID_CURRENT_DIR = -2,
@@ -32,8 +48,10 @@ struct JsonResult {
 // Max binary size for JSON files.
 #define JSON_SIZE_MAX 128 * 1024
 
-JsonResult LoadJson(const noex::string& file, rapidjson::Document& json) noexcept;
-JsonResult SaveJson(rapidjson::Document& json, const noex::string& file) noexcept;
+// Returns an empty string if succeed. An error message otherwise.
+noex::string LoadJson(const noex::string& file, rapidjson::Document& json) noexcept;
+noex::string SaveJson(rapidjson::Document& json, const noex::string& file) noexcept;
+
 noex::string JsonToString(rapidjson::Document& json) noexcept;
 
 const char* GetString(const rapidjson::Value& json, const char* key, const char* def) noexcept;

@@ -32,13 +32,13 @@ class MainFrameTest : public ::testing::Test {
 
     void TestConfig(rapidjson::Document& test_json, noex::string config) {
         rapidjson::Document test_config;
-        json_utils::JsonResult result = json_utils::LoadJson(config, test_config);
-        EXPECT_TRUE(result.ok);
+        noex::string err = json_utils::LoadJson(config, test_config);
+        EXPECT_TRUE(err.empty());
         main_frame = new MainFrame(test_json, test_config);
         main_frame->SaveConfig();
         rapidjson::Document saved_config;
-        result = json_utils::LoadJson("gui_config.json", saved_config);
-        EXPECT_TRUE(result.ok);
+        err = json_utils::LoadJson("gui_config.json", saved_config);
+        EXPECT_TRUE(err.empty());
         EXPECT_EQ(test_config, saved_config);
     }
 };
@@ -195,6 +195,15 @@ TEST_F(MainFrameTest, LoadSaveConfigUTF) {
     TestConfig(test_json, JSON_CONFIG_UTF);
 }
 
+TEST_F(MainFrameTest, CrossPlatform) {
+    rapidjson::Document test_json;
+    GetTestJson(test_json, JSON_CROSS_PLATFORM);
+    rapidjson::Document dummy_config;
+    GetDummyConfig(dummy_config);
+    main_frame = new MainFrame(test_json, dummy_config);
+    main_frame->UpdatePanel(1);
+}
+
 class OpenURLTest : public MainFrameTest {
  protected:
     rapidjson::Document definition;
@@ -217,7 +226,7 @@ class OpenURLTest : public MainFrameTest {
 #if USE_BROWSER
 TEST_F(OpenURLTest, OpenUrl) {
     main_frame = new MainFrame(definition, config);
-    noex::string msg = main_frame->OpenURL(0);
+    noex::string msg = main_frame->OpenURLBase(0);
     EXPECT_STREQ(msg.c_str(), "");
 }
 #endif  // USE_BROWSER
@@ -225,7 +234,7 @@ TEST_F(OpenURLTest, OpenUrl) {
 TEST_F(OpenURLTest, OpenUrlWithFilePath) {
     ReplaceURL("file:///test.txt");
     main_frame = new MainFrame(definition, config);
-    noex::string msg = main_frame->OpenURL(0);
+    noex::string msg = main_frame->OpenURLBase(0);
     const char* expected =
         "Use 'file' type for a path, not 'url' type. (file:///test.txt)";
     EXPECT_STREQ(msg.c_str(), expected);
@@ -234,7 +243,7 @@ TEST_F(OpenURLTest, OpenUrlWithFilePath) {
 TEST_F(OpenURLTest, OpenUrlWithFtps) {
     ReplaceURL("ftps://example.com");
     main_frame = new MainFrame(definition, config);
-    noex::string msg = main_frame->OpenURL(0);
+    noex::string msg = main_frame->OpenURLBase(0);
     const char* expected =
         "Unsupported scheme detected. "
         "It should be http or https. (ftps)";
@@ -244,7 +253,7 @@ TEST_F(OpenURLTest, OpenUrlWithFtps) {
 TEST_F(OpenURLTest, OpenUrlWithSpace) {
     ReplaceURL("https://example .com");
     main_frame = new MainFrame(definition, config);
-    noex::string msg = main_frame->OpenURL(0);
+    noex::string msg = main_frame->OpenURLBase(0);
     const char* expected =
         "URL should NOT contains ' ', ';', '|', '&', '\\r', nor '\\n'.\n"
         "URL: https://example .com";

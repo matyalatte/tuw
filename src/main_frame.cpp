@@ -9,14 +9,13 @@
 #include <gtk/gtk.h>
 #endif
 
-noex::string GetDefaultJsonPath() noexcept {
-    noex::string def_name = "gui_definition.";
-    for (const char* ext : { "jsonc", "tuw" }) {
-        noex::string json_path = def_name + ext;
-        if (envuFileExists(json_path.c_str()))
-            return json_path;
-    }
-    return def_name + "json";
+#define DEFAULT_JSON_NAME "gui_definition"
+const char* GetDefaultJsonPath() noexcept {
+    if (envuFileExists(DEFAULT_JSON_NAME ".jsonc"))
+        return DEFAULT_JSON_NAME ".jsonc";
+    if (envuFileExists(DEFAULT_JSON_NAME ".tuw"))
+        return DEFAULT_JSON_NAME ".tuw";
+    return DEFAULT_JSON_NAME ".json";
 }
 
 // Main window
@@ -33,7 +32,6 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
 
     m_definition.CopyFrom(definition, m_definition.GetAllocator());
     m_config.CopyFrom(config, m_config.GetAllocator());
-    bool ignore_external_json = false;
 
     noex::string workdir;
     if (json_path.empty()) {
@@ -51,7 +49,7 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
         int ret = envuSetCwd(workdir.c_str());
         if (ret != 0) {
             // Failed to set CWD
-            PrintFmt("[LoadDefinition] Failed to set a path as CWD. (%s)\n", workdir.c_str());
+            Log("LoadDefinition", "Failed to set a path as CWD", workdir);
         }
     }
 
@@ -60,50 +58,54 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
         json_path = GetDefaultJsonPath();
     }
 
+    bool ignore_external_json = false;
     bool exists_external_json = envuFileExists(json_path.c_str());
+    bool loaded = m_definition.IsObject() && !m_definition.ObjectEmpty();
+    noex::string err;
 
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    if (!m_definition.IsObject() || m_definition.ObjectEmpty()) {
+    if (!loaded) {
         ExeContainer exe;
 
-        result = exe.Read(exe_path);
-        if (result.ok) {
-            if (exe.HasJson()) {
-                PrintFmt("[LoadDefinition] Found JSON in the executable.\n");
-                exe.GetJson(m_definition);
-                ignore_external_json = exists_external_json;
-            } else {
-                PrintFmt("[LoadDefinition] Embedded JSON not found.\n");
-                result = { false, "" };
-            }
+        err = exe.Read(exe_path);
+        if (err.empty() && exe.HasJson()) {
+            Log("LoadDefinition", "Found JSON in the executable.");
+            exe.GetJson(m_definition);
+            ignore_external_json = exists_external_json;
+            loaded = true;
         } else {
-            PrintFmt("[LoadDefinition] ERROR: %s\n", result.msg.c_str());
-        }
+            if (err.empty())
+                Log("LoadDefinition", "Embedded JSON not found.");
+            else
+                Log("LoadDefinition", "Error", err);
 
-        if (!result.ok) {
             if (exists_external_json) {
-                PrintFmt("[LoadDefinition] Loaded %s\n", json_path.c_str());
-                result = json_utils::LoadJson(json_path, m_definition);
-                if (!result.ok)
+                Log("LoadDefinition", "Load", json_path);
+                err = json_utils::LoadJson(json_path, m_definition);
+                if (err.empty())
+                    loaded = true;
+                else
                     m_definition.SetObject();
             } else {
-                result = { false, json_path + " not found." };
+                err = json_path + " not found.";
             }
         }
     }
 
     if (!config.IsObject() || config.ObjectEmpty()) {
-        json_utils::JsonResult cfg_result =
+        noex::string cfg_err =
             json_utils::LoadJson("gui_config.json", m_config);
-        if (!cfg_result.ok) {
+        if (!cfg_err.empty()) {
             m_config.SetObject();
         }
     }
 
-    if (result.ok)
-        result = CheckDefinition(m_definition);
+    if (loaded) {
+        json_utils::JsonResult result = CheckDefinition(m_definition);
+        loaded = result.ok;
+        err = result.msg;
+    }
 
-    if (!result.ok)
+    if (!loaded)
         json_utils::GetDefaultDefinition(m_definition);
 
     unsigned definition_id = json_utils::GetInt(m_config, "_mode", 0);
@@ -119,19 +121,19 @@ void MainFrame::Initialize(const rapidjson::Document& definition,
     {
         // Show CWD
         char* cwd = envuGetCwd();
-        PrintFmt("[LoadDefinition] CWD: %s\n", cwd);
+        Log("LoadDefinition", "CWD", cwd);
         envuFree(cwd);
     }
 
     if (ignore_external_json) {
-        noex::string msg = "WARNING: Using embedded JSON. " +
-                            json_path + " was ignored.\n";
-        PrintFmt("[LoadDefinition] %s", msg.c_str());
+        noex::string msg = noex::concat_cstr("Warning: Using embedded JSON. ",
+                            json_path.c_str(), " was ignored.\n");
+        Log("LoadDefinition", msg);
         ShowSuccessDialog(msg, "Warning");
     }
 
-    if (!result.ok)
-        JsonLoadFailed(result.msg);
+    if (!loaded)
+        ShowErrorDialogWithLog("LoadDefinition", err);
 
     UpdatePanel(definition_id);
     Fit();
@@ -254,32 +256,24 @@ static bool IsValidURL(const noex::string &url) noexcept {
     return true;
 }
 
-noex::string MainFrame::OpenURL(int id) noexcept {
+noex::string MainFrame::OpenURLBase(int id) noexcept {
     rapidjson::Value& help = m_definition["help"].GetArray()[id];
     const char* type = help["type"].GetString();
     noex::string url;
-    const char* tag = "";
 
     if (strcmp(type, "url") == 0) {
         url = help["url"].GetString();
-        tag = "[OpenURL] ";
 
         size_t pos = url.find("://");
         if (pos != noex::string::npos) {
             noex::string scheme = url.substr(0, pos);
             // scheme should be http or https
             if (scheme == "file") {
-                noex::string msg = "Use 'file' type for a path, not 'url' type. (" +
-                                url + ")";
-                PrintFmt("%sError: %s\n", tag, msg.c_str());
-                ShowErrorDialog(msg);
-                return msg;
+                return noex::concat_cstr(
+                    "Use 'file' type for a path, not 'url' type. (", url.c_str(), ")");
             } else if (scheme != "https" && scheme != "http") {
-                noex::string msg = "Unsupported scheme detected. "
-                                "It should be http or https. (" + scheme + ")";
-                PrintFmt("%sError: %s\n", tag, msg.c_str());
-                ShowErrorDialog(msg);
-                return msg;
+                return noex::concat_cstr("Unsupported scheme detected. "
+                        "It should be http or https. (", scheme.c_str(), ")");
             }
         } else {
             url = "https://" + url;
@@ -289,59 +283,49 @@ noex::string MainFrame::OpenURL(int id) noexcept {
         char *url_cstr = envuGetRealPath(help["path"].GetString());
         int exists = envuFileExists(url_cstr);
         url = envuStr(url_cstr);
-        tag = "[OpenFile] ";
 
-        if (!exists) {
-            noex::string msg = "File does not exist. (" + url + ")";
-            PrintFmt("%sError: %s\n", tag, msg.c_str());
-            ShowErrorDialog(msg);
-            return msg;
-        }
+        if (!exists)
+            return noex::concat_cstr("File does not exist. (", url.c_str(), ")");
     }
 
-    PrintFmt("%s%s\n", tag, url.c_str());
+    Log("OpenURL", url);
 
     if (strcmp(type, "file") == 0) {
         url = "file:" + url;
     }
 
     if (!IsValidURL(url)) {
-        noex::string msg = "URL should NOT contains ' ', ';', '|', '&', '\\r', nor '\\n'.\n"
-                          "URL: " + url;
-        PrintFmt("%sError: %s\n", tag, msg.c_str());
-        ShowErrorDialog(msg.c_str());
-        return msg;
+        return "URL should NOT contains ' ', ';', '|', '&', '\\r', nor '\\n'.\n"
+                "URL: " + url;
     }
 
     if (IsSafeMode()) {
         noex::string msg = "The URL was not opened because the safe mode is enabled.\n"
-                           "You can disable it from the menu bar (Debug > Safe Mode.)\n"
-                           "\n"
-                           "URL: " + url;
+                            "You can disable it from the menu bar (Debug > Safe Mode.)\n"
+                            "\n"
+                            "URL: " + url;
         ShowSuccessDialog(msg, "Safe Mode");
-        return msg;
     } else {
         if (noex::get_error_no() != noex::OK) {
             // Reject the URL as it might have an unexpected value.
-            const char* msg =
-                "The URL was not opened "
-                "because a fatal error has occurred while editing strings or vectors. "
-                "Please reboot the application.";
-            PrintFmt("%sError: %s\n", tag, msg);
-            ShowErrorDialog(msg);
-            return msg;
+            return "The URL was not opened "
+                    "because a fatal error has occurred while editing strings or vectors. "
+                    "Please reboot the application.";
         } else {
             ExecuteResult result = LaunchDefaultApp(url);
             if (result.exit_code != 0) {
-                noex::string msg = noex::string("Failed to open a ") +
-                                   type + " by an unexpected error.";
-                PrintFmt("%sError: %s\n", tag, msg.c_str());
-                ShowErrorDialog(msg.c_str());
-                return msg;
+                return noex::concat_cstr("Failed to open a ",
+                        type, " by an unexpected error.");
             }
         }
     }
     return "";
+}
+
+void MainFrame::OpenURL(int id) noexcept {
+    noex::string err = OpenURLBase(id);
+    if (!err.empty())
+        ShowErrorDialogWithLog("OpenURL", err);
 }
 
 static void OnClicked(uiButton *sender, void *data) noexcept {
@@ -359,10 +343,10 @@ void MainFrame::UpdatePanel(unsigned definition_id) noexcept {
     rapidjson::Value& sub_definition = m_definition["gui"][m_definition_id];
     if (m_definition["gui"].Size() > 1) {
         const char* label = sub_definition["label"].GetString();
-        PrintFmt("[UpdatePanel] Label: %s\n", label);
+        Log("UpdatePanel", "Label", label);
     }
     const char* cmd_str = sub_definition["command_str"].GetString();
-    PrintFmt("[UpdatePanel] Command: %s\n", cmd_str);
+    Log("UpdatePanel", "Command", cmd_str);
     const char* window_name = json_utils::GetString(sub_definition,
                                                     "window_name", tuw_constants::TOOL_NAME);
     uiWindowSetTitle(m_mainwin, window_name);
@@ -440,7 +424,7 @@ bool MainFrame::Validate() noexcept {
             if (validate)
                 val_first_err = val_err;
             validate = false;
-            PrintFmt("[RunCommand] Error: %s\n", val_err.c_str());
+            Log("RunCommand", "Error", val_err);
         }
     }
 
@@ -479,11 +463,15 @@ noex::string MainFrame::GetCommand() noexcept {
     for (size_t i = 0; i < cmd_ids.size(); i++) {
         int id = cmd_ids[i];
         if (id == CMD_ID_PERCENT) {
-            cmd += "%";
+            cmd.push_back('%');
         } else if (id == CMD_ID_CURRENT_DIR) {
-            cmd += envuStr(envuGetCwd());
+            char* cwd = envuGetCwd();
+            cmd += cwd;
+            envuFree(cwd);
         } else if (id == CMD_ID_HOME_DIR) {
-            cmd += envuStr(envuGetHome());
+            char* home = envuGetHome();
+            cmd += home;
+            envuFree(home);
         } else {
             cmd += comp_strings[id];
         }
@@ -496,7 +484,7 @@ noex::string MainFrame::GetCommand() noexcept {
 
 void MainFrame::RunCommand() noexcept {
     noex::string cmd = GetCommand();
-    PrintFmt("[RunCommand] Command: %s\n", cmd.c_str());
+    Log("RunCommad", "Command", cmd);
 
     if (IsSafeMode()) {
         noex::string msg = "The command was not executed because the safe mode is enabled.\n"
@@ -539,14 +527,12 @@ void MainFrame::RunCommand() noexcept {
     if (noex::get_error_no() != noex::OK) {
         const char* msg = "Fatal error has occurred while editing strings or vectors. "
                           "Please reboot the application.";
-        PrintFmt("[RunCommand] Error: %s\n", msg);
-        ShowErrorDialog(msg);
+        ShowErrorDialogWithLog("RunCommand", msg);
         return;
     }
 
     if (!result.err_msg.empty()) {
-        PrintFmt("[RunCommand] Error: %s\n", result.err_msg.c_str());
-        ShowErrorDialog(result.err_msg);
+        ShowErrorDialogWithLog("RunCommand", result.err_msg);
         return;
     }
 
@@ -556,13 +542,12 @@ void MainFrame::RunCommand() noexcept {
             err_msg = result.last_line;
         else
             err_msg = noex::string("Invalid exit code (") + result.exit_code + ")";
-        PrintFmt("[RunCommand] Error: %s\n", err_msg.c_str());
-        ShowErrorDialog(err_msg);
+        ShowErrorDialogWithLog("RunCommand", err_msg);
         return;
     }
 
     if (!show_success_dialog) {
-        PrintFmt("[RunCommand] Done\n");
+        Log("RunCommand", "Done");
         return;
     }
 
@@ -594,11 +579,6 @@ json_utils::JsonResult MainFrame::CheckDefinition(rapidjson::Document& definitio
     return result;
 }
 
-void MainFrame::JsonLoadFailed(const noex::string& msg) noexcept {
-    PrintFmt("[LoadDefinition] Error: %s\n", msg.c_str());
-    ShowErrorDialog(msg);
-}
-
 void MainFrame::UpdateConfig() noexcept {
     for (Component *c : m_components)
         c->GetConfig(m_config);
@@ -609,12 +589,11 @@ void MainFrame::UpdateConfig() noexcept {
 
 void MainFrame::SaveConfig() noexcept {
     UpdateConfig();
-    json_utils::JsonResult result = json_utils::SaveJson(m_config, "gui_config.json");
-    if (result.ok) {
-        PrintFmt("[SaveConfig] Saved gui_config.json\n");
-    } else {
-        PrintFmt("[SaveConfig] Error: %s\n", result.msg.c_str());
-    }
+    noex::string err = json_utils::SaveJson(m_config, "gui_config.json");
+    if (err.empty())
+        Log("SaveConfig", "Saved gui_config.json");
+    else
+        Log("SaveConfig", "Error", err);
 }
 
 static bool g_no_dialog = false;
@@ -627,6 +606,12 @@ void MainFrame::ShowSuccessDialog(const char* msg, const char* title) noexcept {
 void MainFrame::ShowErrorDialog(const char* msg, const char* title) noexcept {
     if (g_no_dialog) return;
     uiMsgBoxError(m_mainwin, title, msg);
+}
+
+void MainFrame::ShowErrorDialogWithLog(
+        const char* func, const char* msg, const char* title) noexcept {
+    Log(func, "Error", msg);
+    ShowErrorDialog(msg, title);
 }
 
 void MainFrameDisableDialog() noexcept {

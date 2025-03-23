@@ -67,3 +67,4 @@ Not about the JSON format, but they might help you.
 -   [Unicode Characters](./tips/unicode): Tuw supports UTF-8!
 -   [Safe Mode](./tips/safe_mode): You can check commands without executing them.
 -   [JSON with Comments](./tips/comments): Tuw supports C-style comments in JSON files.
+-   [ANSI Codes](./tips/ansicode): Tuw supports many of the ANSI escape sequences.
