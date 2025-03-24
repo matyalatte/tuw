@@ -40,8 +40,7 @@ subprojects/gtk_ansi_parser
 *.new
 *.zip
 
-Tuw
-Tuw.exe
+Tuw*
 SimpleCommandRunner
 *.tar.*
 

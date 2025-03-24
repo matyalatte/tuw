@@ -13,6 +13,7 @@ project('Tuw', ['c', 'cpp'],
         'cpp_winlibs=',                 # likewise as with c_winlibs
     ],)
 
+tuw_languages = ['c', 'cpp']
 tuw_sources = []
 tuw_manifest = []
 tuw_link_args = []
@@ -65,10 +66,10 @@ if tuw_OS == 'windows'
     endif
 elif tuw_OS == 'darwin'
     add_languages('objc', required: true)
-    languages = ['c', 'cpp', 'objc']
+    tuw_languages += ['objc']
     macosx_version_min = '-mmacosx-version-min=' + get_option('macosx_version_min')
-    add_global_arguments(macosx_version_min, language: languages)
-    add_global_link_arguments(macosx_version_min, language: languages)
+    add_global_arguments(macosx_version_min, language: tuw_languages)
+    add_global_link_arguments(macosx_version_min, language: tuw_languages)
 
     if get_option('macosx_universal')
         # Check if SDKs support universal binaries or not.
@@ -79,8 +80,8 @@ elif tuw_OS == 'darwin'
             name : 'universal binary test',
             args: arch)
         if result.compiled()
-            add_global_arguments(arch, language: languages)
-            add_global_link_arguments(arch, language: languages)
+            add_global_arguments(arch, language: tuw_languages)
+            add_global_link_arguments(arch, language: tuw_languages)
         else
             warning('Universal build is disabled since your SDKs do not support it.')
         endif
@@ -90,9 +91,6 @@ elif tuw_OS == 'darwin'
         warning('This project has NOT been tested with your compiler. (' + tuw_compiler + ')')
     endif
 else
-    gtkansi_dep = dependency('gtk_ansi_parser', fallback : ['gtk_ansi_parser', 'gtkansi_dep'])
-    tuw_dependencies += [gtkansi_dep]
-
     tuw_link_args += ['-no-pie']
     tuw_cpp_args += ['-D__TUW_UNIX__']
     if tuw_compiler != 'gcc'
@@ -110,7 +108,12 @@ if tuw_OS != 'windows'
     endif
     if tuw_is_release and tuw_OS != 'sunos'
         # Note: solaris requires gld (not ld) to use --gc-sections
-        tuw_cpp_args += ['-ffunction-sections', '-fdata-sections']
+        strip_options = [
+            '-fno-asynchronous-unwind-tables',
+            '-ffunction-sections',
+            '-fdata-sections',
+        ]
+        add_global_arguments(strip_options, language: tuw_languages)
         if tuw_compiler == 'gcc'
             tuw_link_args += ['-Wl,--gc-sections']
         elif tuw_compiler.startswith('clang') and tuw_OS == 'darwin'
@@ -126,6 +129,10 @@ env_utils_dep = dependency('env_utils', fallback : ['env_utils', 'env_utils_dep'
 tiny_str_match_dep = dependency('tiny_str_match', fallback : ['tiny_str_match', 'tiny_str_match_dep'])
 
 tuw_dependencies += [libui_dep, rapidjson_dep, subprocess_dep, env_utils_dep, tiny_str_match_dep]
+if tuw_OS != 'windows' and tuw_OS != 'darwin'
+    gtkansi_dep = dependency('gtk_ansi_parser', fallback : ['gtk_ansi_parser', 'gtkansi_dep'])
+    tuw_dependencies += [gtkansi_dep]
+endif
 
 tuw_sources += [
     'src/main_frame.cpp',
