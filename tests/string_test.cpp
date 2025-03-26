@@ -336,10 +336,10 @@ TEST(StringTest, IterForNull) {
 
 // Test erase()
 TEST(StringTest, Erase) {
-    noex::string str = "testfoobar";
-    expect_tuwstr("testfoobar", str);
+    noex::string str = "testfoobar!!!";
+    expect_tuwstr("testfoobar!!!", str);
     str.erase(4, 3);
-    expect_tuwstr("testbar", str);
+    expect_tuwstr("testbar!!!", str);
     str.erase(4, noex::string::npos);
     expect_tuwstr("test", str);
     EXPECT_EQ(noex::OK, noex::get_error_no());

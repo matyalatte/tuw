@@ -45,19 +45,19 @@ class RingStrBuffer {
             return;
 
         if (size >= Size) {
-            memcpy(m_buffer, buf + size - Size, Size);
+            memcpy(m_buffer, buf + (size - Size) * sizeof(char), Size * sizeof(char));
             m_tail = 0;
             m_is_full = true;
             return;
         }
 
         if (m_tail + size >= Size) {
-            size_t first_chunk_size = Size - m_tail;
-            memcpy(m_buffer + m_tail, buf, first_chunk_size);
-            memcpy(m_buffer, buf + first_chunk_size, size - first_chunk_size);
+            size_t first_chunk_size = (Size - m_tail) * sizeof(char);
+            memcpy(m_buffer + m_tail * sizeof(char), buf, first_chunk_size);
+            memcpy(m_buffer, buf + first_chunk_size, size * sizeof(char) - first_chunk_size);
             m_is_full = true;
         } else {
-            memcpy(m_buffer + m_tail, buf, size);
+            memcpy(m_buffer + m_tail * sizeof(char), buf, size * sizeof(char));
         }
         m_tail = (m_tail + size) % Size;
     }
@@ -67,10 +67,11 @@ class RingStrBuffer {
         if (!m_is_full || m_tail == 0)
             return;
         char buf[Size];
-        size_t first_chunk_size = Size - m_tail;
-        memcpy(buf, m_buffer, m_tail);
-        memcpy(m_buffer, m_buffer + m_tail, first_chunk_size);
-        memcpy(m_buffer + first_chunk_size, buf, m_tail);
+        size_t first_chunk_size = (Size - m_tail) * sizeof(char);
+        size_t second_chunk_size = m_tail * sizeof(char);
+        memcpy(buf, m_buffer, second_chunk_size);
+        memmove(m_buffer, m_buffer + second_chunk_size, first_chunk_size);
+        memcpy(m_buffer + first_chunk_size, buf, second_chunk_size);
         m_tail = 0;
     }
 
