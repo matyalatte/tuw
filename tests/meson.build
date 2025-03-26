@@ -11,6 +11,7 @@ test_sources = [
     'string_test.cpp',
     'vector_test.cpp',
     'process_utils.cpp',
+    'ring_buffer_test.cpp',
 ]
 
 # build tests
