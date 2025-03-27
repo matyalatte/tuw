@@ -154,7 +154,7 @@ void basic_string<charT>::append(const charT* str, size_t size) noexcept {
     if (!m_str || !str)
         return;
 
-    memcpy(m_str + m_size, str, size * sizeof(charT));
+    memcpy(m_str + m_size * sizeof(charT), str, size * sizeof(charT));
     m_str[new_size] = 0;
     m_size = new_size;
 }
@@ -297,7 +297,9 @@ void basic_string<charT>::erase(size_t pos, size_t n) noexcept {
         set_error_no(STR_BOUNDARY_ERROR);
         return;
     }
-    memcpy(m_str + pos, m_str + pos + n, m_size - pos - n);
+    memmove(m_str + pos * sizeof(charT),
+            m_str + (pos + n) * sizeof(charT),
+            (m_size - pos - n) * sizeof(charT));
     m_size -= n;
     m_str[m_size] = 0;
 }

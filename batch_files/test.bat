@@ -56,7 +56,7 @@ if %ERRORLEVEL% NEQ 0 (
 
     REM Test and get coverage report from tests.
     set MODULES=--modules %cd%\build\%BUILD_TYPE%%~2-Test\
-    set SOURCES=--sources %cd%\src
+    set SOURCES=--sources %cd%\src --sources %cd%\include
     set EXPORT_TYPE=--export_type html:%cd%\coverage-report
     set WORKDIR=--working_dir %cd%
     OpenCppCoverage --cover_children %WORKDIR% %EXPORT_TYPE% %MODULES% %SOURCES% -- meson test -v -C build\%BUILD_TYPE%%~2-Test

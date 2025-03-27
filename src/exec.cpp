@@ -18,6 +18,15 @@ enum READ_IO_TYPE : int {
 #define BUF_SIZE 65536
 #define LAST_CHARS_MAX_LEN 2048
 
+void ReplaceFirstCharsWithDots(noex::string* str) noexcept {
+    if (str->length() < 3)
+        return;
+    char* buf = str->data();
+    buf[0] = '.';
+    buf[1] = '.';
+    buf[2] = '.';
+}
+
 class RedirectContext {
  private:
 #ifdef _WIN32
@@ -28,18 +37,7 @@ class RedirectContext {
 #endif
     int m_io_type;
     char m_buf[BUF_SIZE + 1];
-    noex::string m_last_chars;  // Stores the last characters
-
-    noex::string TruncateStr(noex::string* str) noexcept {
-        if (str->size() < LAST_CHARS_MAX_LEN)
-            return *str;
-        char* buf = str->data();
-        char* new_buf = buf + str->size() - LAST_CHARS_MAX_LEN;
-        *new_buf = '.';
-        *(new_buf + 1) = '.';
-        *(new_buf + 2) = '.';
-        return new_buf;
-    }
+    RingStrBuffer<LAST_CHARS_MAX_LEN> m_last_chars;
 
  public:
     explicit RedirectContext(int read_io_type, int use_utf8_on_windows) noexcept :
@@ -74,17 +72,7 @@ class RedirectContext {
                 break;
 
             // Store last characters
-            // TODO: Use a ring buffer to remove string.erase()
-            // Note: We use LAST_CHARS_MAX_LEN * 2 to avoid shifting memory
-            //       with string.erase()
-            if (m_last_chars.length() + read_size <= LAST_CHARS_MAX_LEN * 2) {
-                m_last_chars += m_buf;
-            } else if (read_size >= LAST_CHARS_MAX_LEN) {
-                m_last_chars = m_buf + read_size - LAST_CHARS_MAX_LEN;
-            } else {
-                m_last_chars.erase(0, m_last_chars.length() + read_size - LAST_CHARS_MAX_LEN);
-                m_last_chars += m_buf;
-            }
+            m_last_chars.PushBack(m_buf, read_size);
 
             // Redirect to console
         #ifdef _WIN32
@@ -107,13 +95,13 @@ class RedirectContext {
     }
 
     noex::string GetLastChars() noexcept {
-        return TruncateStr(&m_last_chars);
+        noex::string str = m_last_chars.ToString();
+        ReplaceFirstCharsWithDots(&str);
+        return str;
     }
 
     noex::string GetLine() noexcept {
-        noex::string last_line = GetLastLine(m_last_chars);
-        last_line = TruncateStr(&last_line);
-        return last_line;
+        return GetLastLine(GetLastChars());
     }
 };
 
