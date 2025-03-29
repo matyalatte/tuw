@@ -639,7 +639,7 @@ FloatPicker::FloatPicker(uiBox* box, const rapidjson::Value& j) noexcept
         min = max;
         max = x;
     }
-    double inc = json_utils::GetDouble(j, "inc", 1.0);
+    double inc = json_utils::GetDouble(j, "inc", 0.1);
     if (inc < 0)
         inc = -inc;
     else if (inc == 0)
