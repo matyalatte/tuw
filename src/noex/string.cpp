@@ -199,10 +199,11 @@ inline int snprintf_wrap(wchar_t* buf, size_t size, const char* fmt, \
 } \
 template <typename charT> \
 basic_string<charT> basic_string<charT>::to_string(num_type num) noexcept { \
-    charT buf[21]; /* assume that the max value of num has 20 digits (2^64). */ \
-    buf[20] = 0; \
-    int num_size = snprintf_wrap(buf, 21, "%" num_fmt, L"%" num_fmt, num); \
-    if (num_size <= 0 || num_size > 20) { \
+    /* assume that the max value of num has 24 characters (e.g. -1.7976931348623157e+308). */ \
+    charT buf[25]; \
+    buf[24] = 0; \
+    int num_size = snprintf_wrap(buf, 25, "%" num_fmt, L"%" num_fmt, num); \
+    if (num_size <= 0 || num_size > 24) { \
         set_error_no(STR_FORMAT_ERROR); \
         return basic_string<charT>(); \
     } \
@@ -217,6 +218,7 @@ basic_string<charT> basic_string<charT>::operator+(num_type num) const noexcept 
 DEFINE_TO_STRING(int, "d")
 DEFINE_TO_STRING(size_t, "zu")
 DEFINE_TO_STRING(uint32_t, PRIu32)
+DEFINE_TO_STRING(double, "lf")
 
 inline bool streq(const char* str1, const char* str2) noexcept {
     return strcmp(str1, str2) == 0;

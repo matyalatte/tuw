@@ -30,13 +30,13 @@ class MainFrameTest : public ::testing::Test {
         EXPECT_EQ(noex::OK, noex::get_error_no());
     }
 
-    void TestConfig(rapidjson::Document& test_json, noex::string config) {
-        rapidjson::Document test_config;
+    void TestConfig(tuwjson::Value& test_json, noex::string config) {
+        tuwjson::Value test_config;
         noex::string err = json_utils::LoadJson(config, test_config);
         EXPECT_TRUE(err.empty());
         main_frame = new MainFrame(test_json, test_config);
         main_frame->SaveConfig();
-        rapidjson::Document saved_config;
+        tuwjson::Value saved_config;
         err = json_utils::LoadJson("gui_config.json", saved_config);
         EXPECT_TRUE(err.empty());
         EXPECT_EQ(test_config, saved_config);
@@ -45,36 +45,36 @@ class MainFrameTest : public ::testing::Test {
 
 TEST_F(MainFrameTest, MakeDefaultMainFrame) {
     main_frame = new MainFrame();
-    rapidjson::Document json1;
-    rapidjson::Document json2;
+    tuwjson::Value json1;
+    tuwjson::Value json2;
     json_utils::GetDefaultDefinition(json1);
     main_frame->GetDefinition(json2);
     EXPECT_EQ(json1, json2);
 }
 
-void GetDummyConfig(rapidjson::Document& dummy_config) {
+void GetDummyConfig(tuwjson::Value& dummy_config) {
     dummy_config.SetObject();
-    dummy_config.AddMember("test", 0, dummy_config.GetAllocator());
+    dummy_config["test"].SetInt(0);
 }
 
 TEST_F(MainFrameTest, InvalidDefinition) {
-    rapidjson::Document test_json;
+    tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][1]["components"][4]["default"].SetString("number");
-    rapidjson::Document dummy_config;
+    tuwjson::Value dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
     json_utils::GetDefaultDefinition(test_json);
-    rapidjson::Document actual_json;
+    tuwjson::Value actual_json;
     main_frame->GetDefinition(actual_json);
     EXPECT_EQ(test_json, actual_json);
 }
 
 TEST_F(MainFrameTest, InvalidHelp) {
-    rapidjson::Document test_json;
+    tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["help"][0]["url"].SetInt(1);
-    rapidjson::Document dummy_config;
+    tuwjson::Value dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
     main_frame->GetDefinition(test_json);
@@ -82,21 +82,21 @@ TEST_F(MainFrameTest, InvalidHelp) {
 }
 
 TEST_F(MainFrameTest, GetCommand1) {
-    rapidjson::Document test_json;
+    tuwjson::Value test_json;
     GetTestJson(test_json);
     json_utils::GetDefaultDefinition(test_json);
     test_json["gui"][0]["command"].SetString("command!");
-    rapidjson::Document dummy_config;
+    tuwjson::Value dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
     EXPECT_STREQ("command!", main_frame->GetCommand().c_str());
 }
 
 TEST_F(MainFrameTest, GetCommand2) {
-    rapidjson::Document test_json;
+    tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][0].Swap(test_json["gui"][1]);
-    rapidjson::Document dummy_config;
+    tuwjson::Value dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
     noex::string expected = "echo file: \"test.txt\" & echo folder: \"testdir\"";
@@ -107,9 +107,9 @@ TEST_F(MainFrameTest, GetCommand2) {
 }
 
 TEST_F(MainFrameTest, GetCommand3) {
-    rapidjson::Document test_json;
+    tuwjson::Value test_json;
     GetTestJson(test_json);
-    rapidjson::Document dummy_config;
+    tuwjson::Value dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
     noex::string expected = "echo file:  & echo folder:  & echo combo: value1 & echo radio: value1";
@@ -119,13 +119,13 @@ TEST_F(MainFrameTest, GetCommand3) {
 }
 
 TEST_F(MainFrameTest, RunCommandSuccess) {
-    rapidjson::Document test_json;
+    tuwjson::Value test_json;
     GetTestJson(test_json);
-    rapidjson::Document dummy_config;
+    tuwjson::Value dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
 
-    rapidjson::Document actual_json;
+    tuwjson::Value actual_json;
     main_frame->GetDefinition(actual_json);
     ASSERT_EQ(test_json["help"], actual_json["help"]);
 
@@ -136,11 +136,11 @@ TEST_F(MainFrameTest, RunCommandSuccess) {
 }
 
 TEST_F(MainFrameTest, RunCommandFail) {
-    rapidjson::Document test_json;
+    tuwjson::Value test_json;
     GetTestJson(test_json);
     json_utils::GetDefaultDefinition(test_json);
     test_json["gui"][0]["command"].SetString("I'll fail");
-    rapidjson::Document dummy_config;
+    tuwjson::Value dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
 
@@ -151,9 +151,9 @@ TEST_F(MainFrameTest, RunCommandFail) {
 }
 
 TEST_F(MainFrameTest, UpdateFrame) {
-    rapidjson::Document test_json;
+    tuwjson::Value test_json;
     GetTestJson(test_json);
-    rapidjson::Document dummy_config;
+    tuwjson::Value dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
     main_frame->UpdatePanel(1);
@@ -163,9 +163,9 @@ TEST_F(MainFrameTest, UpdateFrame) {
 }
 
 TEST_F(MainFrameTest, RunCommandShowLast) {
-    rapidjson::Document test_json;
+    tuwjson::Value test_json;
     GetTestJson(test_json);
-    rapidjson::Document dummy_config;
+    tuwjson::Value dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
     main_frame->UpdatePanel(2);
@@ -178,27 +178,27 @@ TEST_F(MainFrameTest, RunCommandShowLast) {
 }
 
 TEST_F(MainFrameTest, LoadSaveConfigAscii) {
-    rapidjson::Document test_json;
+    tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][0].Swap(test_json["gui"][1]);
     TestConfig(test_json, JSON_CONFIG_ASCII);
 }
 
 TEST_F(MainFrameTest, LoadSaveConfigUTF) {
-    rapidjson::Document test_json;
+    tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][0].Swap(test_json["gui"][1]);
     noex::string cmd = test_json["gui"][0]["command"].GetString();
     memcpy(cmd.data() + 12, "ファイル", 4);
-    test_json["gui"][0]["command"].SetString(rapidjson::StringRef(cmd.c_str()));
+    test_json["gui"][0]["command"].SetString(cmd);
     test_json["gui"][0]["components"][1]["id"].SetString("ファイル");
     TestConfig(test_json, JSON_CONFIG_UTF);
 }
 
 TEST_F(MainFrameTest, CrossPlatform) {
-    rapidjson::Document test_json;
+    tuwjson::Value test_json;
     GetTestJson(test_json, JSON_CROSS_PLATFORM);
-    rapidjson::Document dummy_config;
+    tuwjson::Value dummy_config;
     GetDummyConfig(dummy_config);
     main_frame = new MainFrame(test_json, dummy_config);
     main_frame->UpdatePanel(1);
@@ -206,8 +206,8 @@ TEST_F(MainFrameTest, CrossPlatform) {
 
 class OpenURLTest : public MainFrameTest {
  protected:
-    rapidjson::Document definition;
-    rapidjson::Document config;
+    tuwjson::Value definition;
+    tuwjson::Value config;
 
     void SetUp() override {
         MainFrameTest::SetUp();
@@ -216,10 +216,7 @@ class OpenURLTest : public MainFrameTest {
     }
 
     void ReplaceURL(const char* url) {
-        definition["help"][0].RemoveMember("url");
-        rapidjson::Value urlValue;
-        urlValue.SetString(url, definition.GetAllocator());
-        definition["help"][0].AddMember("url", urlValue, definition.GetAllocator());
+        definition["help"][0]["url"].SetString(url);
     }
 };
 

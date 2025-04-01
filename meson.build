@@ -142,6 +142,7 @@ tuw_sources += [
     'src/exec.cpp',
     'src/string_utils.cpp',
     'src/validator.cpp',
+    'src/json.cpp',
     'src/noex/string.cpp',
     'src/noex/vector.cpp',
 ]

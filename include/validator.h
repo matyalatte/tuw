@@ -1,5 +1,5 @@
 #pragma once
-#include "rapidjson/document.h"
+#include "json.h"
 
 #include "string_utils.h"
 
@@ -20,7 +20,7 @@ class Validator {
                   m_not_empty(false), m_exist(false),
                   m_error_msg("") {}
     ~Validator() {}
-    void Initialize(const rapidjson::Value& j) noexcept;
+    void Initialize(const tuwjson::Value& j) noexcept;
     bool Validate(const noex::string& str) noexcept;
     const noex::string& GetError() const noexcept { return m_error_msg; }
 };

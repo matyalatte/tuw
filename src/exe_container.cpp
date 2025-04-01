@@ -28,15 +28,15 @@ static void WriteUint32(FILE* io, const uint32_t& num) noexcept {
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define BUF_SIZE 1024
 
-static noex::string ReadStr(FILE* io, const uint32_t& size) noexcept {
+static noex::string ReadStr(FILE* io, uint32_t size) noexcept {
     noex::string str(size);
     if (fread(str.data(), 1, size, io) != size)
         return "";
     return str;
 }
 
-static void WriteStr(FILE* io, const noex::string& str) noexcept {
-    fwrite(str.data(), 1, str.size(), io);
+static void WriteStr(FILE* io, const char* str, uint32_t size) noexcept {
+    fwrite(str, 1, size, io);
 
     // Zero padding
     size_t padding = (8 - ftell(io) % 8) % 8;
@@ -131,13 +131,10 @@ noex::string ExeContainer::Read(const noex::string& exe_path) noexcept {
         return noex::concat_cstr(
             "Invalid JSON hash. (", noex::to_string(stored_hash).c_str(), ")");
 
-    rapidjson::ParseResult ok = m_json.Parse(json_str.c_str());
-    if (!ok) {
-        return noex::concat_cstr(
-            "Failed to parse JSON: ",
-            rapidjson::GetParseError_En(ok.Code()),
-            " (offset: ") + ok.Offset() + ")";
-    }
+    tuwjson::Parser parser;
+    parser.ParseJson(json_str, &m_json);
+    if (parser.HasError())
+        return noex::concat_cstr("Failed to parse JSON: ", parser.GetErrMsg());
 
     return "";
 }
@@ -149,11 +146,17 @@ noex::string ExeContainer::Write(const noex::string& exe_path) noexcept {
     }
 
     assert(!m_exe_path.empty());
-    noex::string json_str;
-    if (HasJson())
-        json_str = json_utils::JsonToString(m_json);
+    char json_buffer[JSON_SIZE_MAX];
+    uint32_t json_size = 0;
+    if (HasJson()) {
+        tuwjson::Writer writer;
+        char* end = writer.WriteJson(&m_json, json_buffer, JSON_SIZE_MAX);
+        if (end)
+            json_size = static_cast<uint32_t>(end - json_buffer);
+        else
+            return "Failed to convert JSON to string.";
+    }
 
-    uint32_t json_size = static_cast<uint32_t>(json_str.length());
     if (JSON_SIZE_MAX <= json_size)
         return noex::concat_cstr(
             "Unexpected json size. (",
@@ -199,8 +202,8 @@ noex::string ExeContainer::Write(const noex::string& exe_path) noexcept {
     // Write json data
     WriteUint32(new_io, JSON_MAGIC);
     WriteUint32(new_io, json_size);
-    WriteUint32(new_io, Fnv1Hash32(json_str));
-    WriteStr(new_io, json_str);
+    WriteUint32(new_io, Fnv1Hash32(json_buffer));
+    WriteStr(new_io, json_buffer, json_size);
     WriteUint32(new_io, m_exe_size - ftell(new_io) - 8);
     WriteUint32(new_io, JSON_MAGIC);
     fclose(new_io);

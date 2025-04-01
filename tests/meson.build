@@ -10,6 +10,7 @@ test_sources = [
     'validator_test.cpp',
     'string_test.cpp',
     'vector_test.cpp',
+    'json_test.cpp',
     'process_utils.cpp',
     'ring_buffer_test.cpp',
 ]
