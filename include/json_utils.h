@@ -35,6 +35,7 @@ FILE* FileOpen(const char* path, const char* mode) noexcept;
 #else
 #define FileOpen(path, mode) fopen(path, mode)
 #endif
+noex::string GetFileError(const noex::string& path) noexcept;
 
 namespace json_utils {
 
