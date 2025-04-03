@@ -6,7 +6,7 @@
 TEST(JsonCheckTest, LoadJsonFail) {
     rapidjson::Document test_json;
     noex::string err = json_utils::LoadJson("fake.json", test_json);
-    const char* expected = "Failed to open fake.json";
+    const char* expected = "No such file or directory: fake.json";
     EXPECT_STREQ(expected, err.c_str());
 }
 

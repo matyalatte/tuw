@@ -27,6 +27,8 @@ FILE* FileOpen(const char* path, const char* mode) noexcept {
 #endif
 
 noex::string GetFileError(const noex::string& path) noexcept {
+    if (errno == ENOENT)
+        return "No such file or directory: " + path;
     if (errno == EACCES)
         return "Permission denied: " + path;
     return "Failed to open " + path + " (Errno: " + noex::to_string(errno) + ")";
