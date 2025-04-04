@@ -24,6 +24,9 @@ You can use the defined ids as variable names in commands.
 
 ## Undefined IDs
 
+> [!warning]
+> Undifined ids are deprecated. Please define an id for each component.
+
 When you put an undefined id in `%*%`, it'll use one of the components that have no id.
 
 ```json
