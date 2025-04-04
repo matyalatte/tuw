@@ -240,7 +240,7 @@ int main(int argc, char* argv[]) noexcept {
     int cmd_int = CmdToInt(cmd_str);
     if (cmd_int == CMD_UNKNOWN) {
         PrintUsage();
-        fprintf(stderr, "Error: Unknown command detected. (%s)", cmd_str);
+        FprintFmt(stderr, "Error: Unknown command detected. (%s)", cmd_str);
         return 1;
     }
 
@@ -254,11 +254,11 @@ int main(int argc, char* argv[]) noexcept {
         int opt_int = OptToInt(opt_str);
         if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && args.size() <= i + 1) {
             PrintUsage();
-            fprintf(stderr, "Error: This option requires a file path. (%s)\n", opt_str);
+            FprintFmt(stderr, "Error: This option requires a file path. (%s)\n", opt_str);
             return 1;
         } else if (opt_int == OPT_UNKNOWN) {
             PrintUsage();
-            fprintf(stderr, "Error: Unknown option detected. (%s)\n", opt_str);
+            FprintFmt(stderr, "Error: Unknown option detected. (%s)\n", opt_str);
             return 1;
         } else if (opt_int == OPT_JSON) {
             i++;
@@ -303,7 +303,7 @@ int main(int argc, char* argv[]) noexcept {
         PrintUsage();
 
     if (!err.empty()) {
-        fprintf(stderr, "Error: %s\n", err.c_str());
+        FprintFmt(stderr, "Error: %s\n", err.c_str());
         return 1;
     }
     return 0;

@@ -96,7 +96,8 @@ class RedirectContext {
 
     noex::string GetLastChars() noexcept {
         noex::string str = m_last_chars.ToString();
-        ReplaceFirstCharsWithDots(&str);
+        if (m_last_chars.IsFull())
+            ReplaceFirstCharsWithDots(&str);
         return str;
     }
 

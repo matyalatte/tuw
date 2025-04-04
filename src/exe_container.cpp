@@ -77,7 +77,7 @@ noex::string ExeContainer::Read(const noex::string& exe_path) noexcept {
     m_exe_path = exe_path;
     FILE* file_io = FileOpen(exe_path.c_str(), "rb");
     if (!file_io)
-        return "Failed to open " + exe_path;
+        return GetFileError(exe_path);
 
     // Read the last 4 bytes
     fseek(file_io, 0, SEEK_END);
@@ -161,12 +161,12 @@ noex::string ExeContainer::Write(const noex::string& exe_path) noexcept {
 
     FILE* old_io = FileOpen(m_exe_path.c_str(), "rb");
     if (!old_io)
-        return "Failed to open " + m_exe_path;
+        return GetFileError(m_exe_path);
 
     FILE* new_io = FileOpen(exe_path.c_str(), "wb");
     if (!new_io) {
         fclose(old_io);
-        return "Failed to open " + exe_path;
+        return GetFileError(exe_path);
     }
     m_exe_path = exe_path;
 

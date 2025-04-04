@@ -1,4 +1,6 @@
 #include "json_utils.h"
+
+#include <errno.h>
 #include <cstdio>
 #include <cassert>
 
@@ -19,9 +21,18 @@ FILE* FileOpen(const char* path, const char* mode) noexcept {
     noex::wstring wmode = UTF8toUTF16(mode);
     if (wpath.empty() || wmode.empty())
         return nullptr;
+    errno = 0;
     return _wfopen(wpath.c_str(), wmode.c_str());
 }
 #endif
+
+noex::string GetFileError(const noex::string& path) noexcept {
+    if (errno == ENOENT)
+        return "No such file or directory: " + path;
+    if (errno == EACCES)
+        return "Permission denied: " + path;
+    return "Failed to open " + path + " (Errno: " + noex::to_string(errno) + ")";
+}
 
 namespace json_utils {
 
@@ -48,7 +59,7 @@ constexpr auto JSONC_FLAGS =
 noex::string LoadJson(const noex::string& file, rapidjson::Document& json) noexcept {
     FILE* fp = FileOpen(file.c_str(), "rb");
     if (!fp)
-        return "Failed to open " + file;
+        return GetFileError(file);
 
     char readBuffer[JSON_SIZE_MAX];
     rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
@@ -70,7 +81,7 @@ noex::string LoadJson(const noex::string& file, rapidjson::Document& json) noexc
 noex::string SaveJson(rapidjson::Document& json, const noex::string& file) noexcept {
     FILE* fp = FileOpen(file.c_str(), "wb");
     if (!fp)
-        return noex::concat_cstr("Failed to open ", file.c_str(), ".");
+        return GetFileError(file);
 
     char writeBuffer[JSON_SIZE_MAX];
     rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
