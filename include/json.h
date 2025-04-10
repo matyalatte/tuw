@@ -167,7 +167,7 @@ class Value {
         return m_type == JSON_TYPE_STRING;
     }
     void SetString() noexcept;
-    void SetString(char* val) noexcept {
+    void SetString(const char* val) noexcept {
         SetString();
         if (u.m_string)
             *u.m_string = val;
