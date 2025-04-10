@@ -460,7 +460,7 @@ bool Parser::ValidateUTF8(const char* str) noexcept {
     size_t multibyte_seq = 0;
     bool valid = true;
     while (*ptr) {
-        char c = *ptr;
+        uint8_t c = static_cast<uint8_t>(*ptr);
         if (multibyte_seq <= 0) {
             if (c <= ASCII_MAX) {
             } else if (c < TWO_BYTE_MIN) {
@@ -579,7 +579,7 @@ void Writer::WriteBytes(const char* bytes, size_t size) noexcept {
 }
 
 void Writer::WriteIndent() noexcept {
-    for (int i = 0; i < m_depth; i++)
+    for (size_t i = 0; i < m_depth; i++)
         WriteBytes(m_indent_ptr, m_indent_size);
 }
 

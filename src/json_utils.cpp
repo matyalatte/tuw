@@ -4,12 +4,7 @@
 #include <cstdio>
 #include <cassert>
 
-#include "rapidjson/filereadstream.h"
-#include "rapidjson/filewritestream.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/error/en.h"
-
+#include "json.h"
 #include "tuw_constants.h"
 #include "string_utils.h"
 #include "noex/vector.hpp"

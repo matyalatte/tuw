@@ -1,10 +1,7 @@
 #include "exe_container.h"
 #include <cassert>
 
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/error/en.h"
-
+#include "json.h"
 #include "string_utils.h"
 
 static uint32_t ReadUint32(FILE* io) noexcept {
