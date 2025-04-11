@@ -33,12 +33,12 @@ class MainFrameTest : public ::testing::Test {
     void TestConfig(tuwjson::Value& test_json, noex::string config) {
         tuwjson::Value test_config;
         noex::string err = json_utils::LoadJson(config, test_config);
-        EXPECT_TRUE(err.empty());
+        EXPECT_TRUE(err.empty()) << ("err: " + err).c_str();
         main_frame = new MainFrame(test_json, test_config);
         main_frame->SaveConfig();
         tuwjson::Value saved_config;
         err = json_utils::LoadJson("gui_config.json", saved_config);
-        EXPECT_TRUE(err.empty());
+        EXPECT_TRUE(err.empty()) << ("err: " + err).c_str();
         EXPECT_EQ(test_config, saved_config);
     }
 };

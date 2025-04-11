@@ -137,7 +137,7 @@ static void CheckJsonType(JsonResult& result, const tuwjson::Value& j, const cha
     if (!j.HasMember(key)) {
         if (optional) return;
         result.ok = false;
-        result.msg = GetLabel(label, key) + " not found.";
+        result.msg = GetLabel(label, key) + " not found." + j.GetLineColumnStr();
         return;
     }
     bool valid = false;
@@ -171,7 +171,9 @@ static void CheckJsonType(JsonResult& result, const tuwjson::Value& j, const cha
     }
     if (!valid) {
         result.ok = false;
-        result.msg = GetLabel(label, key) + noex::concat_cstr(" should be ", type_name, ".");
+        result.msg = GetLabel(label, key)
+            + noex::concat_cstr(" should be ", type_name, ".")
+            + v.GetLineColumnStr();
     }
 }
 
@@ -209,7 +211,7 @@ static void CheckJsonArrayType(JsonResult& result, tuwjson::Value& j, const char
     if (!j.HasMember(key)) {
         if (optional) return;
         result.ok = false;
-        result.msg = GetLabel(label, key) + " not found.";
+        result.msg = GetLabel(label, key) + " not found." + j.GetLineColumnStr();
         return;
     }
     bool valid = false;
@@ -230,7 +232,9 @@ static void CheckJsonArrayType(JsonResult& result, tuwjson::Value& j, const char
     }
     if (!valid) {
         result.ok = false;
-        result.msg = GetLabel(label, key) + noex::concat_cstr(" should be ", type_name, ".");
+        result.msg = GetLabel(label, key) +
+            noex::concat_cstr(" should be ", type_name, ".") +
+            j[key].GetLineColumnStr();
     }
 }
 
@@ -553,7 +557,8 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
                     if (c.HasMember("digits") && c["digits"].GetInt() < 0) {
                         result.ok = false;
                         result.msg = GetLabel(label, "digits")
-                                        + " should be a non-negative integer.";
+                                        + " should be a non-negative integer."
+                                        + c["digits"].GetLineColumnStr();
                     }
                 }
                 CheckJsonType(result, c, "default", jtype, label, OPTIONAL);
@@ -564,7 +569,8 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
                 break;
             case COMP_UNKNOWN:
                 result.ok = false;
-                result.msg = noex::string("Unknown component type: ") + type_str;
+                result.msg = noex::string("Unknown component type: ")
+                    + type_str + c["type"].GetLineColumnStr();
                 break;
         }
         if (!result.ok) return;
@@ -572,7 +578,8 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
         if (c.HasMember("validator")) {
             if (type == COMP_STATIC_TEXT) {
                 result.ok = false;
-                result.msg = "Static text does not support validator.";
+                result.msg = "Static text does not support validator."
+                    + c["validator"].GetLineColumnStr();
                 return;
             }
             CheckJsonType(result, c, "validator", JsonType::JSON, label);
@@ -611,11 +618,13 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
             if (id[0] == '\0') {
                 result.ok = false;
                 result.msg = GetLabel(label, "id")
-                                + " should NOT be an empty string.";
+                                + " should NOT be an empty string."
+                                + c["id"].GetLineColumnStr();
             } else if (id[0] == '_') {
                 result.ok = false;
                 result.msg = GetLabel(label, "id")
-                                + " should NOT start with '_'.";
+                                + " should NOT start with '_'."
+                                + c["id"].GetLineColumnStr();
             }
         }
         if (!result.ok) return;
@@ -700,7 +709,8 @@ void CheckDefinition(JsonResult& result, tuwjson::Value& definition) noexcept {
     if (!result.ok) return;
     if (definition["gui"].Size() == 0) {
         result.ok = false;
-        result.msg = "The size of [\"gui\"] should NOT be zero.";
+        result.msg = "The size of [\"gui\"] should NOT be zero."
+            + definition["gui"].GetLineColumnStr();;
     }
 
     int i = 0;
@@ -726,7 +736,8 @@ void CheckHelpURLs(JsonResult& result, tuwjson::Value& definition) noexcept {
             CheckJsonType(result, h, "path", JsonType::STRING);
         } else {
             result.ok = false;
-            result.msg = noex::concat_cstr("Unsupported help type: ", type);
+            result.msg = noex::concat_cstr("Unsupported help type: ", type)
+                + h["type"].GetLineColumnStr();;
             return;
         }
     }

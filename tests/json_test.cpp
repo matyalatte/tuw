@@ -58,6 +58,20 @@ TEST_F(JsonTest, ParseString) {
     EXPECT_STREQ(root.GetString(), "abcdefg");
 }
 
+TEST_F(JsonTest, ParseStringEscape) {
+    tuwjson::Error err = parser.ParseJson("  \"\\\"\\\\\\/\\b\\f\\n\\r\\t\"  ", &root);
+    EXPECT_EQ(err, tuwjson::JSON_OK);
+    EXPECT_TRUE(root.IsString());
+    EXPECT_STREQ(root.GetString(), "\"\\/\b\f\n\r\t");
+}
+
+TEST_F(JsonTest, ParseStringUTF) {
+    tuwjson::Error err = parser.ParseJson("  \"\xc2\x80\xe0\x80\xbf\xf0\x80\xbf\xa0\"  ", &root);
+    EXPECT_EQ(err, tuwjson::JSON_OK);
+    EXPECT_TRUE(root.IsString());
+    EXPECT_STREQ(root.GetString(), "\xc2\x80\xe0\x80\xbf\xf0\x80\xbf\xa0");
+}
+
 TEST_F(JsonTest, ParseArray) {
     tuwjson::Error err = parser.ParseJson("  [\"abcdefg\", 1,true,]  ", &root);
     EXPECT_EQ(err, tuwjson::JSON_OK);
@@ -98,9 +112,145 @@ class ParseFailTest : public ::testing::TestWithParam<ParseFailCase> {
 
 const ParseFailCase parse_fail_cases[] = {
     {
-        "{\"a\": [{\"key\": true]}",
+        "{\r\n\"a\": NaN\r\n}",
+        tuwjson::JSON_ERR_UNKNOWN_LITERAL,
+        "unknown literal detected (line: 2, column: 6)"
+    },
+    {
+        "1.a",
+        tuwjson::JSON_ERR_UNKNOWN_LITERAL,
+        "unknown literal detected (line: 1, column: 1)"
+    },
+    {
+        "{\"\xc2\xbe" "abc\xbf" "\": true}",
+        tuwjson::JSON_ERR_INVALID_UTF,
+        "invalid UTF8 character detected (line: 1, column: 8)"
+    },
+    {
+        "\xc2\x32}",
+        tuwjson::JSON_ERR_INVALID_UTF,
+        "invalid UTF8 character detected (line: 1, column: 2)"
+    },
+    {
+        "\xf5\xbe\xbe\xbe",
+        tuwjson::JSON_ERR_INVALID_UTF,
+        "invalid UTF8 character detected (line: 1, column: 1)"
+    },
+    {
+        "1111111111111111111111111",
+        tuwjson::JSON_ERR_INVALID_INT,
+        "failed to parse an integer (line: 1, column: 1)"
+    },
+    {
+        "1.9123749837249827349e-10938903810",
+        tuwjson::JSON_ERR_INVALID_DOUBLE,
+        "failed to parse a double number (line: 1, column: 1)"
+    },
+    {
+        "[\ntrue,\n,false]",
+        tuwjson::JSON_ERR_INVALID_COMMA,
+        "there is a comma in the wrong position (line: 3, column: 1)"
+    },
+    {
+        "{\"\ba\": true}",
+        tuwjson::JSON_ERR_CONTROL_CHAR,
+        "there is a control character in a string (line: 1, column: 3)"
+    },
+    {
+        "\"\\\ta\"",
+        tuwjson::JSON_ERR_CONTROL_CHAR,
+        "there is a control character in a string (line: 1, column: 3)"
+    },
+    {
+        "\"\\a\"",
+        tuwjson::JSON_ERR_INVALID_ESCAPE,
+        "invalid escaped character: \\a (line: 1, column: 3)"
+    },
+    {
+        "\"\\u0034\"",
+        tuwjson::JSON_ERR_UNICODE_ESCAPE,
+        "unicode escape (\\uXXXX) is not supported. "
+        "use UTF-8 characters instead (line: 1, column: 3)"
+    },
+    {
+        "\"abcd",
+        tuwjson::JSON_ERR_UNCLOSED_STR,
+        "string is not closed with '\"' (line: 1, column: 5)"
+    },
+    {
+        "\"abc\nd\"",
+        tuwjson::JSON_ERR_UNCLOSED_STR,
+        "string is not closed with '\"' (line: 1, column: 4)"
+    },
+    {
+        "[\ntrue, false /* \n]",
+        tuwjson::JSON_ERR_UNCLOSED_COMMENT,
+        "multiline comment is not closed (line: 3, column: 2)"
+    },
+    {
+        "[\ntrue, /* false\n]",
+        tuwjson::JSON_ERR_UNCLOSED_COMMENT,
+        "multiline comment is not closed (line: 3, column: 2)"
+    },
+    {
+        "[\ntrue /* , false\n]",
+        tuwjson::JSON_ERR_UNCLOSED_COMMENT,
+        "multiline comment is not closed (line: 3, column: 2)"
+    },
+    {
+        "{\n\"key\": \"val\" /* \n}",
+        tuwjson::JSON_ERR_UNCLOSED_COMMENT,
+        "multiline comment is not closed (line: 3, column: 2)"
+    },
+    {
+        "{\n\"key\": /* \"val\" \n}",
+        tuwjson::JSON_ERR_UNCLOSED_COMMENT,
+        "multiline comment is not closed (line: 3, column: 2)"
+    },
+    {
+        "{\n\"key\"/* : \"val\" \n}",
+        tuwjson::JSON_ERR_UNCLOSED_COMMENT,
+        "multiline comment is not closed (line: 3, column: 2)"
+    },
+    {
+        "{\n/* \"key\": \"val\" \n}",
+        tuwjson::JSON_ERR_UNCLOSED_COMMENT,
+        "multiline comment is not closed (line: 3, column: 2)"
+    },
+    {
+        "[true, false",
+        tuwjson::JSON_ERR_UNCLOSED_ARRAY,
+        "comma ',' or closing bracket ']' is missing (line: 1, column: 13)"
+    },
+    {
+        "[true, false false]",
+        tuwjson::JSON_ERR_UNCLOSED_ARRAY,
+        "comma ',' or closing bracket ']' is missing (line: 1, column: 14)"
+    },
+    {
+        "{\"a\":true",
         tuwjson::JSON_ERR_UNCLOSED_OBJECT,
-        "comma ',' or closing brace '}' is missing (line: 1, offset: 19)"
+        "comma ',' or closing brace '}' is missing (line: 1, column: 10)"
+    },
+    {
+        "{\"a\":true \"b\":true}",
+        tuwjson::JSON_ERR_UNCLOSED_OBJECT,
+        "comma ',' or closing brace '}' is missing (line: 1, column: 11)"
+    },
+    {
+        "{\"a\", true}",
+        tuwjson::JSON_ERR_EXPECTED_COLON,
+        "colon ':' is missing (line: 1, column: 5)"
+    },
+    {
+        "{1: true}",
+        tuwjson::JSON_ERR_INVALID_KEY,
+        "string key is missing (line: 1, column: 2)"
+    },
+    {
+        "{\n\"a\": true,\n\"a\": false}",
+        tuwjson::JSON_ERR_DUPLICATED_KEY,
+        "there is a duplicated key (line: 3, column: 1)"
     },
 };
 

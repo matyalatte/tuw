@@ -54,6 +54,8 @@ typedef noex::vector<Value> Array;
 class Value {
  private:
     Type m_type;
+    size_t m_line_count;
+    size_t m_column;
     union {
         Object* m_object;
         Array* m_array;
@@ -64,13 +66,18 @@ class Value {
     } u;
 
  public:
-    Value() noexcept : m_type(JSON_TYPE_NULL) {}
-    Value(Value&& val) noexcept : m_type(val.m_type), u(val.u) {
+    Value() noexcept :
+        m_type(JSON_TYPE_NULL), m_line_count(0), m_column(0) {}
+    Value(Value&& val) noexcept :
+        m_type(val.m_type), m_line_count(val.m_line_count),
+        m_column(val.m_column), u(val.u) {
         val.m_type = JSON_TYPE_NULL;
     }
     Value& MoveFrom(Value& val) noexcept {
         FreeValue();
         m_type = val.m_type;
+        m_line_count = val.m_line_count;
+        m_column = val.m_column;
         u = val.u;
         val.m_type = JSON_TYPE_NULL;
         return *this;
@@ -85,6 +92,19 @@ class Value {
     Type GetType() const noexcept {
         return m_type;
     }
+
+    bool HasOffset() const noexcept {
+        return m_line_count > 0;
+    }
+    void GetLineColumn(size_t* line_count, size_t* column) const noexcept {
+        *line_count = m_line_count;
+        *column = m_column;
+    }
+    void SetLineColumn(size_t line_count, size_t column) noexcept {
+        m_line_count = line_count;
+        m_column = column;
+    }
+    noex::string GetLineColumnStr() const noexcept;
 
     void FreeValue() noexcept;
     void CopyFrom(const Value& val) noexcept;
@@ -249,6 +269,7 @@ enum Error : int {
     JSON_ERR_INVALID_INT,  // Failed to parse an integer.
     JSON_ERR_INVALID_DOUBLE,  // Failed to parse a double.
     JSON_ERR_INVALID_COMMA,  // There is a comma in the wrong position.
+    JSON_ERR_CONTROL_CHAR,  // There is a control character in a string.
     JSON_ERR_INVALID_ESCAPE,  // Invalid escaped character. \c
     JSON_ERR_UNICODE_ESCAPE,  // Unicode escape is not supported. \uxxxx
     JSON_ERR_UNCLOSED_STR,  // " is missing.
@@ -276,7 +297,7 @@ class Parser {
     void Consume() noexcept {
         if (Peek() == '\n') {
             m_line_count++;
-            m_line_ptr = m_ptr;
+            m_line_ptr = m_ptr + 1;
         }
         m_ptr++;
     }
@@ -308,7 +329,7 @@ class Parser {
             Consume();
     }
 
-    void SkipToValue() noexcept;
+    bool SkipToValue() noexcept;
     Type PeekValueType() const noexcept;
     noex::string ParseString() noexcept;
     int ParseInt() noexcept;

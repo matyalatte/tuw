@@ -15,7 +15,7 @@ TEST(JsonCheckTest, LoadJsonFail2) {
     noex::string err = json_utils::LoadJson(JSON_BROKEN, test_json);
     const char* expected =
         "Failed to parse JSON: comma ',' or closing brace '}' is missing"
-        " (line: 7, offset: 5)";
+        " (line: 7, column: 5)";
     EXPECT_STREQ(expected, err.c_str());
 }
 
@@ -94,28 +94,28 @@ TEST(JsonCheckTest, checkGUIFail2) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][0]["components"][6].ReplaceKey("items", "notitems");
-    CheckGUIError(test_json, "['options']['items'] not found.");
+    CheckGUIError(test_json, "['options']['items'] not found. (line: 60, column: 17)");
 }
 
 TEST(JsonCheckTest, checkGUIFail3) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"].SetInt(1);
-    CheckGUIError(test_json, "['gui'] should be an array of json objects.");
+    CheckGUIError(test_json, "['gui'] should be an array of json objects. (line: 4, column: 12)");
 }
 
 TEST(JsonCheckTest, checkGUIFail4) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][0]["components"][0]["label"].SetInt(1);
-    CheckGUIError(test_json, "['components']['label'] should be a string.");
+    CheckGUIError(test_json, "['components']['label'] should be a string. (line: 11, column: 30)");
 }
 
 TEST(JsonCheckTest, checkGUIFail5) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][2]["show_last_line"].SetString("test");
-    CheckGUIError(test_json, "['show_last_line'] should be a boolean.");
+    CheckGUIError(test_json, "['show_last_line'] should be a boolean. (line: 267, column: 31)");
 }
 
 TEST(JsonCheckTest, checkGUIFail6) {
@@ -167,14 +167,14 @@ TEST(JsonCheckTest, checkHelpFail) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["help"][0].ReplaceKey("label", "notlabel");
-    CheckHelpError(test_json, "['label'] not found.");
+    CheckHelpError(test_json, "['label'] not found. (line: 280, column: 9)");
 }
 
 TEST(JsonCheckTest, checkHelpFail2) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["help"][0]["label"].SetInt(3);
-    CheckHelpError(test_json, "['label'] should be a string.");
+    CheckHelpError(test_json, "['label'] should be a string. (line: 282, column: 22)");
 }
 
 TEST(JsonCheckTest, checkVersionSuccess) {

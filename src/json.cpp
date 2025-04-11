@@ -43,6 +43,17 @@ bool Value::operator==(const Value& val) const noexcept {
     return true;
 }
 
+static noex::string LineColumnToStr(size_t line_count, size_t column) noexcept {
+    if (line_count <= 0)
+        return "";
+    return " (line: " + noex::to_string(line_count) +
+            ", column: " + noex::to_string(column) + ")";
+}
+
+noex::string Value::GetLineColumnStr() const noexcept {
+    return LineColumnToStr(m_line_count, m_column);
+}
+
 void Value::FreeValue() noexcept {
     if (m_type == JSON_TYPE_OBJECT && u.m_object) {
         noex::del_ref(u.m_object);
@@ -55,6 +66,8 @@ void Value::FreeValue() noexcept {
 
 void Value::CopyFrom(const Value& val) noexcept {
     Type type = val.m_type;
+    m_line_count = val.m_line_count;
+    m_column = val.m_column;
     if (type == JSON_TYPE_OBJECT) {
         SetObject();
         for (const Item& item : *val.u.m_object) {
@@ -179,7 +192,7 @@ void Value::SetString() noexcept {
 }
 
 // Parser
-void Parser::SkipToValue() noexcept {
+bool Parser::SkipToValue() noexcept {
     while (true) {
         SkipSpaces();
         if (Peek() == '/' && Peek(1) == '/') {
@@ -190,15 +203,17 @@ void Parser::SkipToValue() noexcept {
             while (Peek() && !(Peek() == '*' && Peek(1) == '/')) {
                 Consume();
             }
-            if (Peek()) {
+            if (Peek() == '*' && Peek(1) == '/') {
                 ConsumeNonSpace(2);
             } else {
                 m_err = JSON_ERR_UNCLOSED_COMMENT;
+                return false;
             }
         } else {
             break;
         }
     }
+    return true;
 }
 
 Type Parser::PeekValueType() const noexcept {
@@ -240,6 +255,9 @@ Type Parser::PeekValueType() const noexcept {
     return JSON_TYPE_UNKNOWN;
 }
 
+#define CONTROL_CHAR_MAX 0x1F  // control characters 0x00 ~ 0x1F
+#define is_control_char(c) (static_cast<uint8_t>(c) <= CONTROL_CHAR_MAX)
+
 noex::string Parser::ParseString() noexcept {
     const char* s = m_ptr + 1;
     size_t len = 0;
@@ -252,6 +270,7 @@ noex::string Parser::ParseString() noexcept {
     }
     if (!*s || *s == '\n') {
         m_err = JSON_ERR_UNCLOSED_STR;
+        m_ptr = s - 1;
         return "";
     }
     noex::string buf(len);
@@ -278,13 +297,18 @@ noex::string Parser::ParseString() noexcept {
                 *cstr = '\r';
             } else if (c == 't') {
                 *cstr = '\t';
-            } else if (c == 'u') {
-                m_err = JSON_ERR_UNICODE_ESCAPE;
-                return "";
             } else {
-                m_err = JSON_ERR_INVALID_ESCAPE;
+                if (c == 'u')
+                    m_err = JSON_ERR_UNICODE_ESCAPE;
+                else if (is_control_char(c))
+                    m_err = JSON_ERR_CONTROL_CHAR;
+                else
+                    m_err = JSON_ERR_INVALID_ESCAPE;
                 return "";
             }
+        } else if (is_control_char(c)) {
+            m_err = JSON_ERR_CONTROL_CHAR;
+            return "";
         } else {
             *cstr = c;
         }
@@ -322,7 +346,8 @@ double Parser::ParseDouble() noexcept {
 void Parser::ParseArray(Array* array) noexcept {
     bool comma_exists = true;
     while (true) {
-        SkipToValue();
+        if (!SkipToValue())
+            return;
         if (!Peek()) {
             m_err = JSON_ERR_UNCLOSED_ARRAY;
             return;
@@ -342,7 +367,8 @@ void Parser::ParseArray(Array* array) noexcept {
             m_err = JSON_ERR_ALLOC;
         if (HasError())
             return;
-        SkipToValue();
+        if (!SkipToValue())
+            return;
         comma_exists = Peek() == ',';
         if (comma_exists)
             ConsumeNonSpace();
@@ -352,7 +378,8 @@ void Parser::ParseArray(Array* array) noexcept {
 void Parser::ParseObject(Object* object) noexcept {
     bool comma_exists = true;
     while (true) {
-        SkipToValue();
+        if (!SkipToValue())
+            return;
         if (!Peek()) {
             m_err = JSON_ERR_UNCLOSED_OBJECT;
             return;
@@ -370,14 +397,17 @@ void Parser::ParseObject(Object* object) noexcept {
             return;
         }
         Item item;
+        const char* str_ptr = m_ptr;
         item.key = ParseString();
         if (HasError())
             return;
         if (object_has_member(object, item.key.c_str())) {
+            m_ptr = str_ptr;
             m_err = JSON_ERR_DUPLICATED_KEY;
             return;
         }
-        SkipToValue();
+        if (!SkipToValue())
+            return;
         if (Peek() != ':') {
             m_err = JSON_ERR_EXPECTED_COLON;
             return;
@@ -390,7 +420,8 @@ void Parser::ParseObject(Object* object) noexcept {
             m_err = JSON_ERR_ALLOC;
         if (HasError())
             return;
-        SkipToValue();
+        if (!SkipToValue())
+            return;
         comma_exists = Peek() == ',';
         if (comma_exists)
             ConsumeNonSpace();
@@ -400,10 +431,11 @@ void Parser::ParseObject(Object* object) noexcept {
 void Parser::ParseValue(Value* value) noexcept {
     if (!value)
         return;
-    SkipToValue();
-    if (HasError())
+    if (!SkipToValue())
         return;
     Type type = PeekValueType();
+    value->SetLineColumn(
+        m_line_count, static_cast<size_t>(m_ptr - m_line_ptr) + 1);
     if (type == JSON_TYPE_OBJECT) {
         ConsumeNonSpace();
         value->SetObject();
@@ -512,17 +544,19 @@ static const char* get_def_err_msg(Error err) noexcept {
     if (err == JSON_ERR_INVALID_UTF)
         return "invalid UTF8 character detected";
     if (err == JSON_ERR_INVALID_INT)
-        return "failed to parse a double number";
-    if (err == JSON_ERR_INVALID_DOUBLE)
         return "failed to parse an integer";
+    if (err == JSON_ERR_INVALID_DOUBLE)
+        return "failed to parse a double number";
     if (err == JSON_ERR_INVALID_COMMA)
         return "there is a comma in the wrong position";
+    if (err == JSON_ERR_CONTROL_CHAR)
+        return "there is a control character in a string";
     if (err == JSON_ERR_INVALID_ESCAPE)
         return "invalid escaped character: \\";
     if (err == JSON_ERR_UNICODE_ESCAPE)
         return "unicode escape (\\uXXXX) is not supported. use UTF-8 characters instead";
     if (err == JSON_ERR_UNCLOSED_STR)
-        return "quotation mark '\"' is missing";
+        return "string is not closed with '\"'";
     if (err == JSON_ERR_UNCLOSED_COMMENT)
         return "multiline comment is not closed";
     if (err == JSON_ERR_UNCLOSED_ARRAY)
@@ -548,9 +582,8 @@ const char* Parser::GetErrMsg() noexcept {
     if (m_err == JSON_ERR_INVALID_ESCAPE)
         m_err_msg.push_back(*m_ptr);
 
-    size_t offSet = static_cast<size_t>(m_ptr - m_line_ptr);
-    m_err_msg += " (line: " + noex::to_string(m_line_count) +
-                    ", offset: " + noex::to_string(offSet) + ")";
+    size_t column = static_cast<size_t>(m_ptr - m_line_ptr) + 1;
+    m_err_msg += LineColumnToStr(m_line_count, column);
     return m_err_msg.c_str();
 }
 
