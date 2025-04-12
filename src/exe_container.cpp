@@ -151,7 +151,7 @@ noex::string ExeContainer::Write(const noex::string& exe_path) noexcept {
         if (end)
             json_size = static_cast<uint32_t>(end - json_buffer);
         else
-            return "Failed to convert JSON to string.";
+            return writer.GetErrMsg();
     }
 
     if (JSON_SIZE_MAX <= json_size)

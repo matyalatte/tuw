@@ -434,8 +434,7 @@ void Parser::ParseValue(Value* value) noexcept {
     if (!SkipToValue())
         return;
     Type type = PeekValueType();
-    value->SetLineColumn(
-        m_line_count, static_cast<size_t>(m_ptr - m_line_ptr) + 1);
+    value->SetLineColumn(m_line_count, GetColumn());
     if (type == JSON_TYPE_OBJECT) {
         ConsumeNonSpace();
         value->SetObject();
@@ -539,6 +538,8 @@ Error Parser::ParseJson(const char* json, Value* root) noexcept {
 }
 
 static const char* get_def_err_msg(Error err) noexcept {
+    if (err == JSON_ERR_ALLOC)
+        return "Memory allocation error.";
     if (err == JSON_ERR_UNKNOWN_LITERAL)
         return "unknown literal detected";
     if (err == JSON_ERR_INVALID_UTF)
@@ -569,21 +570,27 @@ static const char* get_def_err_msg(Error err) noexcept {
         return "string key is missing";
     if (err == JSON_ERR_DUPLICATED_KEY)
         return "there is a duplicated key";
+    if (err == JSON_ERR_SMALL_BUFFER)
+        return "JSON writer requires a larger buffer";
+    if (err == JSON_ERR_NUMBER_FORMAT)
+        return "failed to convert a number to string";
+    if (err == JSON_ERR_UNEXPECTED)
+        return "unexpected error has occurred";
     return "";
 }
 
 const char* Parser::GetErrMsg() noexcept {
-    if (m_err == JSON_OK || m_err >= JSON_ERR_MAX)
-        return "";
-    if (m_err == JSON_ERR_ALLOC)
-        return "Memory allocation error.";
+    const char* msg = get_def_err_msg(m_err);
+    if (m_err == JSON_OK ||
+        m_err == JSON_ERR_ALLOC ||
+        m_err >= JSON_ERR_PARSER_MAX)
+        return msg;
 
-    m_err_msg = get_def_err_msg(m_err);
+    m_err_msg = msg;
     if (m_err == JSON_ERR_INVALID_ESCAPE)
         m_err_msg.push_back(*m_ptr);
 
-    size_t column = static_cast<size_t>(m_ptr - m_line_ptr) + 1;
-    m_err_msg += LineColumnToStr(m_line_count, column);
+    m_err_msg += LineColumnToStr(m_line_count, GetColumn());
     return m_err_msg.c_str();
 }
 
@@ -722,9 +729,24 @@ char* Writer::WriteJson(const Value* root, char* buf, size_t buf_size) noexcept 
     m_buf_size = buf_size;
     WriteValue(root);
     WriteLinefeed();
-    if (m_buf)
+    if (m_buf) {
         *m_buf = '\0';
+    } else {
+        noex::ErrorNo err = noex::get_error_no();
+        if (err == noex::OK)
+            m_err = JSON_ERR_SMALL_BUFFER;
+        else if (err == noex::STR_ALLOCATION_ERROR)
+            m_err = JSON_ERR_ALLOC;
+        else if (err == noex::STR_FORMAT_ERROR)
+            m_err = JSON_ERR_NUMBER_FORMAT;
+        else
+            m_err = JSON_ERR_UNEXPECTED;
+    }
     return m_buf;
+}
+
+const char* Writer::GetErrMsg() noexcept {
+    return get_def_err_msg(m_err);
 }
 
 }  // namespace tuwjson

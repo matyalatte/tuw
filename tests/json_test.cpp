@@ -1,6 +1,6 @@
 #include "test_utils.h"
 
-class JsonTest : public ::testing::Test {
+class JsonParseTest : public ::testing::Test {
  protected:
     tuwjson::Value root;
     tuwjson::Parser parser;
@@ -8,34 +8,33 @@ class JsonTest : public ::testing::Test {
 
 static double eps = 0.00001;
 
-// Test tuwjson::string()
-TEST_F(JsonTest, ParseEmpty) {
+TEST_F(JsonParseTest, ParseEmpty) {
     tuwjson::Error err = parser.ParseJson("  ", &root);
     EXPECT_EQ(err, tuwjson::JSON_OK);
     EXPECT_TRUE(root.IsNull());
 }
 
-TEST_F(JsonTest, ParseNull) {
+TEST_F(JsonParseTest, ParseNull) {
     tuwjson::Error err = parser.ParseJson("  null  ", &root);
     EXPECT_EQ(err, tuwjson::JSON_OK);
     EXPECT_TRUE(root.IsNull());
 }
 
-TEST_F(JsonTest, ParseTrue) {
+TEST_F(JsonParseTest, ParseTrue) {
     tuwjson::Error err = parser.ParseJson("  true  ", &root);
     EXPECT_EQ(err, tuwjson::JSON_OK);
     EXPECT_TRUE(root.IsBool());
     EXPECT_TRUE(root.GetBool());
 }
 
-TEST_F(JsonTest, ParseFalse) {
+TEST_F(JsonParseTest, ParseFalse) {
     tuwjson::Error err = parser.ParseJson("  false  ", &root);
     EXPECT_EQ(err, tuwjson::JSON_OK);
     EXPECT_TRUE(root.IsBool());
     EXPECT_FALSE(root.GetBool());
 }
 
-TEST_F(JsonTest, ParseInt) {
+TEST_F(JsonParseTest, ParseInt) {
     tuwjson::Error err = parser.ParseJson("  123  ", &root);
     EXPECT_EQ(err, tuwjson::JSON_OK);
     EXPECT_TRUE(root.IsInt());
@@ -44,35 +43,35 @@ TEST_F(JsonTest, ParseInt) {
     EXPECT_NEAR(root.GetDouble(), 123.0, eps);
 }
 
-TEST_F(JsonTest, ParseFloat) {
+TEST_F(JsonParseTest, ParseDouble) {
     tuwjson::Error err = parser.ParseJson("  -12.3e-1  ", &root);
     EXPECT_EQ(err, tuwjson::JSON_OK);
     EXPECT_TRUE(root.IsDouble());
     EXPECT_NEAR(root.GetDouble(), -1.23, eps);
 }
 
-TEST_F(JsonTest, ParseString) {
+TEST_F(JsonParseTest, ParseString) {
     tuwjson::Error err = parser.ParseJson("  \"abcdefg\"  ", &root);
     EXPECT_EQ(err, tuwjson::JSON_OK);
     EXPECT_TRUE(root.IsString());
     EXPECT_STREQ(root.GetString(), "abcdefg");
 }
 
-TEST_F(JsonTest, ParseStringEscape) {
+TEST_F(JsonParseTest, ParseStringEscape) {
     tuwjson::Error err = parser.ParseJson("  \"\\\"\\\\\\/\\b\\f\\n\\r\\t\"  ", &root);
     EXPECT_EQ(err, tuwjson::JSON_OK);
     EXPECT_TRUE(root.IsString());
     EXPECT_STREQ(root.GetString(), "\"\\/\b\f\n\r\t");
 }
 
-TEST_F(JsonTest, ParseStringUTF) {
+TEST_F(JsonParseTest, ParseStringUTF) {
     tuwjson::Error err = parser.ParseJson("  \"\xc2\x80\xe0\x80\xbf\xf0\x80\xbf\xa0\"  ", &root);
     EXPECT_EQ(err, tuwjson::JSON_OK);
     EXPECT_TRUE(root.IsString());
     EXPECT_STREQ(root.GetString(), "\xc2\x80\xe0\x80\xbf\xf0\x80\xbf\xa0");
 }
 
-TEST_F(JsonTest, ParseArray) {
+TEST_F(JsonParseTest, ParseArray) {
     tuwjson::Error err = parser.ParseJson("  [\"abcdefg\", 1,true,]  ", &root);
     EXPECT_EQ(err, tuwjson::JSON_OK);
     EXPECT_TRUE(root.IsArray());
@@ -86,7 +85,7 @@ TEST_F(JsonTest, ParseArray) {
     EXPECT_TRUE(root[2].GetBool());
 }
 
-TEST_F(JsonTest, ParseObject) {
+TEST_F(JsonParseTest, ParseObject) {
     tuwjson::Error err = parser.ParseJson(" { \"key\" : \"val\",\"key2\":2.3} ", &root);
     EXPECT_EQ(err, tuwjson::JSON_OK);
     EXPECT_TRUE(root.IsObject());
@@ -96,6 +95,39 @@ TEST_F(JsonTest, ParseObject) {
     EXPECT_STREQ(root["key"].GetString(), "val");
     EXPECT_TRUE(root["key2"].IsDouble());
     EXPECT_NEAR(root["key2"].GetDouble(), 2.3, eps);
+}
+
+TEST_F(JsonParseTest, ParseLargeObject) {
+    tuwjson::Error err = parser.ParseJson(
+        "{\r\n"
+        "// comment\n"
+        "    \"key\" : \"val\", // comment\r\n"
+        "    \"key2\": 2.3, \r\n"
+        "    \"ary\": [\n"
+        "        true, false, -10001, \"str\", null,\n"
+        "    ], /* comment\n"
+        "hoo bar */ }\n",
+        &root);
+    EXPECT_EQ(err, tuwjson::JSON_OK);
+    EXPECT_TRUE(root.IsObject());
+    EXPECT_FALSE(root.IsEmpty());
+    EXPECT_EQ(root.Size(), 3);
+    EXPECT_TRUE(root["key"].IsString());
+    EXPECT_STREQ(root["key"].GetString(), "val");
+    EXPECT_TRUE(root["key2"].IsDouble());
+    EXPECT_NEAR(root["key2"].GetDouble(), 2.3, eps);
+    tuwjson::Value& ary = root["ary"];
+    EXPECT_TRUE(ary.IsArray());
+    EXPECT_EQ(ary.Size(), 5);
+    EXPECT_TRUE(ary[0].IsBool());
+    EXPECT_TRUE(ary[0].GetBool());
+    EXPECT_TRUE(ary[1].IsBool());
+    EXPECT_FALSE(ary[1].GetBool());
+    EXPECT_TRUE(ary[2].IsInt());
+    EXPECT_EQ(ary[2].GetInt(), -10001);
+    EXPECT_TRUE(ary[3].IsString());
+    EXPECT_STREQ(ary[3].GetString(), "str");
+    EXPECT_TRUE(ary[4].IsNull());
 }
 
 struct ParseFailCase {
@@ -268,4 +300,185 @@ TEST_P(ParseFailTest, ParseFail) {
         "  json: " << json_str.c_str();
     EXPECT_STREQ(parser.GetErrMsg(), test_case.err_msg) <<
         "  json: " << json_str.c_str();
+}
+
+class JsonWriteTest : public ::testing::Test {
+ protected:
+    tuwjson::Value root;
+    tuwjson::Writer writer;
+};
+
+TEST_F(JsonWriteTest, WriteEmpty) {
+    char buffer[10];
+    char* end = writer.WriteJson(&root, buffer, 10);
+    EXPECT_EQ(end, buffer + 4);
+    EXPECT_STREQ(buffer, "null");
+}
+
+TEST_F(JsonWriteTest, WriteNull) {
+    root.SetNull();
+    char buffer[10];
+    char* end = writer.WriteJson(&root, buffer, 10);
+    EXPECT_EQ(end, buffer + 4);
+    EXPECT_STREQ(buffer, "null");
+}
+
+TEST_F(JsonWriteTest, WriteTrue) {
+    root.SetBool(true);
+    char buffer[10];
+    char* end = writer.WriteJson(&root, buffer, 10);
+    EXPECT_EQ(end, buffer + 4);
+    EXPECT_STREQ(buffer, "true");
+}
+
+TEST_F(JsonWriteTest, WriteFalse) {
+    root.SetBool(false);
+    char buffer[10];
+    char* end = writer.WriteJson(&root, buffer, 10);
+    EXPECT_EQ(end, buffer + 5);
+    EXPECT_STREQ(buffer, "false");
+}
+
+TEST_F(JsonWriteTest, WriteInt) {
+    root.SetInt(-929192);
+    char buffer[10];
+    char* end = writer.WriteJson(&root, buffer, 10);
+    EXPECT_EQ(end, buffer + 7);
+    EXPECT_STREQ(buffer, "-929192");
+}
+
+TEST_F(JsonWriteTest, WriteDouble) {
+    root.SetDouble(-10.233);
+    char buffer[30];
+    char* end = writer.WriteJson(&root, buffer, 30);
+    EXPECT_TRUE(end >= buffer + 6);
+    buffer[6] = '\0';
+    EXPECT_STREQ(buffer, "-10.23");
+}
+
+TEST_F(JsonWriteTest, WriteString) {
+    root.SetString("abcdefg");
+    char buffer[10];
+    char* end = writer.WriteJson(&root, buffer, 10);
+    EXPECT_EQ(end, buffer + 9);
+    EXPECT_STREQ(buffer, "\"abcdefg\"");
+}
+
+TEST_F(JsonWriteTest, WriteEscape) {
+    root.SetString("\"\\/\b\f\n\r\t");
+    char buffer[20];
+    char* end = writer.WriteJson(&root, buffer, 20);
+    EXPECT_EQ(end, buffer + 17);
+    EXPECT_STREQ(buffer, "\"\\\"\\\\/\\b\\f\\n\\r\\t\"");
+}
+
+TEST_F(JsonWriteTest, WriteStringUTF) {
+    root.SetString("\xc2\x80\xe0\x80\xbf\xf0\x80\xbf\xa0");
+    char buffer[20];
+    char* end = writer.WriteJson(&root, buffer, 20);
+    EXPECT_EQ(end, buffer + 11);
+    EXPECT_STREQ(buffer, "\"\xc2\x80\xe0\x80\xbf\xf0\x80\xbf\xa0\"");
+}
+
+TEST_F(JsonWriteTest, WriteArray) {
+    root.SetArray();
+    tuwjson::Value v;
+    v.SetBool(true);
+    root.MoveAndPush(v);
+    v.SetInt(-10);
+    root.MoveAndPush(v);
+    v.SetString("abc");
+    root.MoveAndPush(v);
+    char buffer[20];
+    char* end = writer.WriteJson(&root, buffer, 20);
+    EXPECT_EQ(end, buffer + 16);
+    EXPECT_STREQ(buffer, "[true,-10,\"abc\"]");
+}
+
+TEST_F(JsonWriteTest, WriteArrayWithIndent) {
+    root.SetArray();
+    tuwjson::Value v;
+    v.SetBool(true);
+    root.MoveAndPush(v);
+    v.SetInt(-10);
+    root.MoveAndPush(v);
+    v.SetString("abc");
+    root.MoveAndPush(v);
+    char buffer[30];
+    writer.Init("  ", 2, true);
+    char* end = writer.WriteJson(&root, buffer, 30);
+    EXPECT_EQ(end, buffer + 27);
+    EXPECT_STREQ(buffer,
+        "[\n"
+        "  true,\n"
+        "  -10,\n"
+        "  \"abc\"\n"
+        "]\n");
+}
+
+TEST_F(JsonWriteTest, WriteObject) {
+    root.SetObject();
+    root["a"].SetString("abc");
+    root["b"].SetBool(true);
+    root["key"].SetInt(3);
+    char buffer[40];
+    char* end = writer.WriteJson(&root, buffer, 40);
+    EXPECT_EQ(end, buffer + 31);
+    EXPECT_STREQ(buffer, "{\"a\": \"abc\",\"b\": true,\"key\": 3}");
+}
+
+TEST_F(JsonWriteTest, WriteObjectWithIndent) {
+    root.SetObject();
+    root["a"].SetString("abc");
+    root["b"].SetBool(true);
+    root["key"].SetInt(3);
+    char buffer[50];
+    writer.Init("    ", 4, true);
+    char* end = writer.WriteJson(&root, buffer, 50);
+    EXPECT_EQ(end, buffer + 48);
+    EXPECT_STREQ(buffer,
+        "{\n"
+        "    \"a\": \"abc\",\n"
+        "    \"b\": true,\n"
+        "    \"key\": 3\n"
+        "}\n");
+}
+
+TEST_F(JsonWriteTest, WriteLargeObject) {
+    root.SetObject();
+    root["a"].SetString("abc");
+    root["b"].SetBool(true);
+    root["key"].SetArray();
+    tuwjson::Value& ary = root["key"];
+    tuwjson::Value v;
+    v.SetInt(1);
+    ary.MoveAndPush(v);
+    v.SetObject();
+    ary.MoveAndPush(v);
+    tuwjson::Value& obj = ary[1];
+    obj["foo"].SetNull();
+    char buffer[100];
+    writer.Init("  ", 2, true);
+    char* end = writer.WriteJson(&root, buffer, 100);
+    EXPECT_EQ(end, buffer + 83);
+    EXPECT_STREQ(buffer,
+        "{\n"
+        "  \"a\": \"abc\",\n"
+        "  \"b\": true,\n"
+        "  \"key\": [\n"
+        "    1,\n"
+        "    {\n"
+        "      \"foo\": null\n"
+        "    }\n"
+        "  ]\n"
+        "}\n");
+}
+
+TEST_F(JsonWriteTest, WriteFailSmallBuffer) {
+    char buffer[2];
+    char* end = writer.WriteJson(&root, buffer, 2);
+    char* null = nullptr;
+    EXPECT_EQ(end, null);
+    EXPECT_TRUE(writer.HasError());
+    EXPECT_STREQ(writer.GetErrMsg(), "JSON writer requires a larger buffer");
 }

@@ -84,7 +84,7 @@ noex::string SaveJson(tuwjson::Value& json, const noex::string& file) noexcept {
     fclose(fp);
 
     if (!end)
-        return "Failed to write JSON: " + file;
+        return writer.GetErrMsg();
     return "";
 }
 

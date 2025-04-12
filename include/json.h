@@ -279,6 +279,10 @@ enum Error : int {
     JSON_ERR_INVALID_KEY,  // String key is missing.
     JSON_ERR_DUPLICATED_KEY,  // There is a duplicated key.
     JSON_ERR_UNCLOSED_OBJECT,  // , or } is missing.
+    JSON_ERR_PARSER_MAX,
+    JSON_ERR_SMALL_BUFFER,  // Writer wants larger buffer.
+    JSON_ERR_NUMBER_FORMAT,  // Failed to convert number to string.
+    JSON_ERR_UNEXPECTED,  // Unexpected error.
     JSON_ERR_MAX,
 };
 
@@ -286,7 +290,7 @@ class Parser {
  private:
     const char* m_ptr;
     const char* m_line_ptr;
-    int m_line_count;
+    size_t m_line_count;
     Error m_err;
     noex::string m_err_msg;
 
@@ -338,6 +342,9 @@ class Parser {
     void ParseObject(Object* object) noexcept;
     void ParseValue(Value* value) noexcept;
     bool ValidateUTF8(const char* str) noexcept;
+    inline size_t GetColumn() const noexcept {
+        return static_cast<size_t>(m_ptr - m_line_ptr) + 1;
+    }
 
  public:
     Parser() noexcept {
@@ -381,6 +388,8 @@ class Writer {
     char* m_buf;
     size_t m_buf_size;
 
+    Error m_err;
+
     void WriteChar(char c) noexcept;
     void WriteBytes(const char* bytes, size_t size) noexcept;
     void WriteIndent() noexcept;
@@ -405,9 +414,23 @@ class Writer {
         m_depth = 0;
         m_buf = nullptr;
         m_buf_size = 0;
+        m_err = JSON_OK;
     }
 
+    // returns a pointer to null terminator when succeed. returns null when failed.
     char* WriteJson(const Value* root, char* buf, size_t buf_size) noexcept;
+
+    inline bool HasError() const noexcept {
+        return m_err != JSON_OK;
+    }
+    inline void SetError(Error error) noexcept {
+        assert(m_err == JSON_OK);
+        m_err = error;
+    }
+    inline Error GetError() const noexcept {
+        return m_err;
+    }
+    const char* GetErrMsg() noexcept;
 };
 
 }  // namespace tuwjson
