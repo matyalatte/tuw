@@ -87,35 +87,35 @@ TEST(JsonCheckTest, checkGUIFail) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json.ReplaceKey("gui", "g");
-    CheckGUIError(test_json, "['components'] not found.");
+    CheckGUIError(test_json, "gui definition requires \"components\"");
 }
 
 TEST(JsonCheckTest, checkGUIFail2) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][0]["components"][6].ReplaceKey("items", "notitems");
-    CheckGUIError(test_json, "['options']['items'] not found. (line: 60, column: 17)");
+    CheckGUIError(test_json, "check array requires \"items\" (line: 60, column: 17)");
 }
 
 TEST(JsonCheckTest, checkGUIFail3) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"].SetInt(1);
-    CheckGUIError(test_json, "['gui'] should be an array of json objects. (line: 4, column: 12)");
+    CheckGUIError(test_json, "\"gui\" should be an array of json objects (line: 4, column: 12)");
 }
 
 TEST(JsonCheckTest, checkGUIFail4) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][0]["components"][0]["label"].SetInt(1);
-    CheckGUIError(test_json, "['components']['label'] should be a string. (line: 11, column: 30)");
+    CheckGUIError(test_json, "\"label\" should be a string (line: 11, column: 30)");
 }
 
 TEST(JsonCheckTest, checkGUIFail5) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][2]["show_last_line"].SetString("test");
-    CheckGUIError(test_json, "['show_last_line'] should be a boolean. (line: 267, column: 31)");
+    CheckGUIError(test_json, "\"show_last_line\" should be a boolean (line: 267, column: 31)");
 }
 
 TEST(JsonCheckTest, checkGUIFail6) {
@@ -134,7 +134,7 @@ TEST(JsonCheckTest, checkGUIFail7) {
     GetTestJson(test_json);
     test_json["gui"][0]["components"][1]["id"].SetString("aaa");
     CheckGUIError(test_json,
-        "The ID of [\"components\"][1] is unused in the command;"
+        "component id \"aaa\" (line: 15, column: 27) is unused in the command;"
         " echo file: __comp???__ & echo folder: __comp2__ & echo combo: __comp3__"
         " & echo radio: __comp4__ & echo check: __comp5__ & echo check_array: __comp6__"
         " & echo textbox: __comp7__ & echo int: __comp8__ & echo float: __comp9__");
@@ -145,7 +145,7 @@ TEST(JsonCheckTest, checkGUIFailRelaxed) {
     noex::string err = json_utils::LoadJson(JSON_RELAXED, test_json);
     EXPECT_TRUE(err.empty());
     test_json["exit_success"].SetString("a");
-    CheckGUIError(test_json, "['exit_success'] should be an int.");
+    CheckGUIError(test_json, "\"exit_success\" should be an int");
 }
 
 TEST(JsonCheckTest, checkHelpSuccess) {
@@ -167,14 +167,14 @@ TEST(JsonCheckTest, checkHelpFail) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["help"][0].ReplaceKey("label", "notlabel");
-    CheckHelpError(test_json, "['label'] not found. (line: 280, column: 9)");
+    CheckHelpError(test_json, "help document requires \"label\" (line: 280, column: 9)");
 }
 
 TEST(JsonCheckTest, checkHelpFail2) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["help"][0]["label"].SetInt(3);
-    CheckHelpError(test_json, "['label'] should be a string. (line: 282, column: 22)");
+    CheckHelpError(test_json, "\"label\" should be a string (line: 282, column: 22)");
 }
 
 TEST(JsonCheckTest, checkVersionSuccess) {

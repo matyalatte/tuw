@@ -300,7 +300,7 @@ noex::string MainFrame::OpenURLBase(int id) noexcept {
     }
 
     if (IsSafeMode()) {
-        noex::string msg = "The URL was not opened because the safe mode is enabled.\n"
+        noex::string msg = "The URL was not opened since the safe mode is enabled.\n"
                             "You can disable it from the menu bar (Debug > Safe Mode.)\n"
                             "\n"
                             "URL: " + url;
@@ -309,8 +309,8 @@ noex::string MainFrame::OpenURLBase(int id) noexcept {
         if (noex::get_error_no() != noex::OK) {
             // Reject the URL as it might have an unexpected value.
             return "The URL was not opened "
-                    "because a fatal error has occurred while editing strings or vectors. "
-                    "Please reboot the application.";
+                    "since a fatal error has occurred while editing strings or vectors. "
+                    "Please reboot the GUI application.";
         } else {
             ExecuteResult result = LaunchDefaultApp(url);
             if (result.exit_code != 0) {
@@ -494,7 +494,7 @@ void MainFrame::RunCommand() noexcept {
     Log("RunCommad", "Command", cmd);
 
     if (IsSafeMode()) {
-        noex::string msg = "The command was not executed because the safe mode is enabled.\n"
+        noex::string msg = "The command was not executed since the safe mode is enabled.\n"
                           "You can disable it from the menu bar (Debug > Safe Mode.)\n"
                           "\n"
                           "Command: " + cmd;
@@ -532,8 +532,9 @@ void MainFrame::RunCommand() noexcept {
     bool show_success_dialog = json_utils::GetBool(sub_definition, "show_success_dialog", true);
 
     if (noex::get_error_no() != noex::OK) {
-        const char* msg = "Fatal error has occurred while editing strings or vectors. "
-                          "Please reboot the application.";
+        const char* msg = "The command was not executed "
+            "since a fatal error has occurred while editing strings or vectors. "
+            "Please reboot the GUI application.";
         ShowErrorDialogWithLog("RunCommand", msg);
         return;
     }
