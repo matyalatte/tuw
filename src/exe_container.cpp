@@ -72,7 +72,7 @@ noex::string ExeContainer::Read(const noex::string& exe_path) noexcept {
     }
 
     m_exe_path = exe_path;
-    FILE* file_io = FileOpen(exe_path.c_str(), "rb");
+    FILE* file_io = FileOpen(exe_path.c_str(), FILE_MODE_READ);
     if (!file_io)
         return GetFileError(exe_path);
 
@@ -159,11 +159,11 @@ noex::string ExeContainer::Write(const noex::string& exe_path) noexcept {
             "Unexpected json size. (",
             noex::to_string(json_size).c_str(), ")");
 
-    FILE* old_io = FileOpen(m_exe_path.c_str(), "rb");
+    FILE* old_io = FileOpen(m_exe_path.c_str(), FILE_MODE_READ);
     if (!old_io)
         return GetFileError(m_exe_path);
 
-    FILE* new_io = FileOpen(exe_path.c_str(), "wb");
+    FILE* new_io = FileOpen(exe_path.c_str(), FILE_MODE_WRITE);
     if (!new_io) {
         fclose(old_io);
         return GetFileError(exe_path);

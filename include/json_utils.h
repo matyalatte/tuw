@@ -31,8 +31,12 @@ constexpr char CMD_TOKEN_CURRENT_DIR[] = "__CWD__";
 constexpr char CMD_TOKEN_HOME_DIR[] = "__HOME__";
 
 #ifdef _WIN32
-FILE* FileOpen(const char* path, const char* mode) noexcept;
+constexpr wchar_t FILE_MODE_READ[] = L"rb";
+constexpr wchar_t FILE_MODE_WRITE[] = L"wb";
+FILE* FileOpen(const char* path, const wchar_t* mode) noexcept;
 #else
+constexpr char FILE_MODE_READ[] = "rb";
+constexpr char FILE_MODE_WRITE[] = "wb";
 #define FileOpen(path, mode) fopen(path, mode)
 #endif
 noex::string GetFileError(const noex::string& path) noexcept;
