@@ -274,27 +274,6 @@ SplitString(const char* str, const char delimiter) noexcept {
     return tokens;
 }
 
-static void CheckIndexDuplication(
-        JsonResult& result, const noex::vector<noex::string>& component_ids) noexcept {
-    size_t size = component_ids.size();
-    if (size == 0)
-        return;
-    for (size_t i = 0; i < size - 1; i++) {
-        const noex::string& str = component_ids[i];
-        if (str.empty())
-            continue;
-        for (size_t j = i + 1; j < size; j++) {
-            if (str == component_ids[j]) {
-                result.ok = false;
-                result.msg = noex::concat_cstr(
-                    "Component IDs should not be duplicated in a gui definition. (",
-                    str.c_str(), ")");
-                return;
-            }
-        }
-    }
-}
-
 // split command by "%" symbol, and calculate which component should be inserted there.
 static void CompileCommand(JsonResult& result,
                             tuwjson::Value& sub_definition,
@@ -629,6 +608,16 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
                 result.msg = "\"id\" should NOT start with '_'."
                             + linecol;
             }
+            if (!ignore) {
+                for (const noex::string& str : comp_ids) {
+                    if (id == str) {
+                        result.ok = false;
+                        result.msg =
+                            noex::concat_cstr("Found a duplicated id: \"", id, "\"")
+                            + linecol;
+                    }
+                }
+            }
         }
         if (!result.ok) return;
 
@@ -639,8 +628,6 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
             comp_ids.emplace_back(id);
         }
     }
-    CheckIndexDuplication(result, comp_ids);
-    if (!result.ok) return;
 
     // Overwrite ["command"] with ["command_'os'"] if exists.
     const char* command_os_key = "command_" TUW_CONSTANTS_OS;
