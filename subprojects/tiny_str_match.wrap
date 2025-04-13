@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/matyalatte/tiny-str-match.git
-revision = b0d341188c3461d9b0ce302757b8bef8a0f79c17
+revision = 62bcb1659d4ffde539316203e5e6ee8bda8caed1
 depth = 1
 
 [provide]
