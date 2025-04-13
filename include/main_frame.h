@@ -22,6 +22,7 @@ const char* GetDefaultJsonPath() noexcept;
 class MainFrame {
  private:
     tuwjson::Value m_definition;
+    tuwjson::Value* m_gui_json;
     size_t m_definition_id;
     tuwjson::Value m_config;
     uiWindow* m_mainwin;

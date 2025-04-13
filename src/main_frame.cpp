@@ -109,7 +109,8 @@ void MainFrame::Initialize(const tuwjson::Value& definition,
         json_utils::GetDefaultDefinition(m_definition);
 
     unsigned definition_id = json_utils::GetInt(m_config, "_mode", 0);
-    if (definition_id >= m_definition["gui"].Size())
+    m_gui_json = &m_definition["gui"];
+    if (definition_id >= m_gui_json->Size())
         definition_id = 0;
 
     CreateMenu();
@@ -207,21 +208,21 @@ void MainFrame::CreateMenu() noexcept {
 
     // Note: We should reserve the buffer to prevent realloc,
     //       or MenuData* pointers can be broken after using push_back()
-    size_t menu_item_count = m_definition["gui"].Size();
+    size_t menu_item_count = m_gui_json->Size();
     if (m_definition.HasMember("help"))
         menu_item_count += m_definition["help"].Size();
     m_menu_data_vec.reserve(menu_item_count);
 
 #ifdef __APPLE__
     // No need the menu for the quit item on macOS.
-    if (m_definition["gui"].Size() > 1) {
+    if (m_gui_json->Size() > 1) {
         menu = uiNewMenu("Menu");
 #else
     menu = uiNewMenu("Menu");
-    if (m_definition["gui"].Size() > 1) {
+    if (m_gui_json->Size() > 1) {
 #endif  // __APPLE__
         int i = 0;
-        for (const tuwjson::Value& j : m_definition["gui"]) {
+        for (const tuwjson::Value& j : *m_gui_json) {
             item = uiMenuAppendItem(menu, j["label"].GetString());
             m_menu_data_vec.push_back({ this, i });
             MenuData* m = &m_menu_data_vec.back();
@@ -340,8 +341,8 @@ static void OnClicked(uiButton *sender, void *data) noexcept {
 
 void MainFrame::UpdatePanel(size_t definition_id) noexcept {
     m_definition_id = definition_id;
-    tuwjson::Value& sub_definition = m_definition["gui"][m_definition_id];
-    if (m_definition["gui"].Size() > 1) {
+    tuwjson::Value& sub_definition = m_gui_json->At(m_definition_id);
+    if (m_gui_json->Size() > 1) {
         const char* label = sub_definition["label"].GetString();
         Log("UpdatePanel", "Label", label);
     }
@@ -366,8 +367,9 @@ void MainFrame::UpdatePanel(size_t definition_id) noexcept {
 
     // Put new components
     Component* new_comp = nullptr;
-    if (sub_definition["components"].Size() > 0) {
-        for (tuwjson::Value& c : sub_definition["components"]) {
+    tuwjson::Value& comp_json = sub_definition["components"];
+    if (comp_json.Size() > 0) {
+        for (tuwjson::Value& c : comp_json) {
             uiBox* priv_box = uiNewVerticalBox();
             uiBoxSetSpacing(priv_box, tuw_constants::BOX_SUB_SPACE);
             new_comp = Component::PutComponent(priv_box, c);
@@ -444,7 +446,7 @@ bool MainFrame::Validate() noexcept {
 // Make command string
 noex::string MainFrame::GetCommand() noexcept {
     noex::vector<noex::string> cmd_ary;
-    tuwjson::Value& sub_definition = m_definition["gui"][m_definition_id];
+    tuwjson::Value& sub_definition = m_gui_json->At(m_definition_id);
     for (tuwjson::Value& c : sub_definition["command_splitted"])
         cmd_ary.emplace_back(c.GetString());
     noex::vector<int> cmd_ids;
@@ -502,7 +504,7 @@ void MainFrame::RunCommand() noexcept {
 #elif defined(__TUW_UNIX__)
     uiUnixWaitEvents();
 #endif
-    tuwjson::Value& sub_definition = m_definition["gui"][m_definition_id];
+    tuwjson::Value& sub_definition = m_gui_json->At(m_definition_id);
 
     const char* codepage = json_utils::GetString(sub_definition, "codepage", "");
     bool use_utf8_on_windows = strcmp(codepage, "utf8") == 0 || strcmp(codepage, "utf-8") == 0;
