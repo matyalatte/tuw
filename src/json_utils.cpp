@@ -618,6 +618,9 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
                     }
                 }
             }
+        } else {
+            uint32_t hash = Fnv1Hash32(c["label"].GetString());
+            c["id"].SetString("_" + noex::to_string(hash));
         }
         if (!result.ok) return;
 
