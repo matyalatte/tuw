@@ -368,13 +368,6 @@ void MainFrame::UpdatePanel(size_t definition_id) noexcept {
     Component* new_comp = nullptr;
     if (sub_definition["components"].Size() > 0) {
         for (tuwjson::Value& c : sub_definition["components"]) {
-            if (c["type_int"].GetInt() != COMP_STATIC_TEXT && !c.HasMember("id")) {
-                PrintFmt(
-                    "[UpdatePanel] DeprecationWarning: "
-                    "\"id\" is missing in [\"components\"][%d]. "
-                    "Support for components without \"id\" will be removed in a future version.\n",
-                    m_components.size());
-            }
             uiBox* priv_box = uiNewVerticalBox();
             uiBoxSetSpacing(priv_box, tuw_constants::BOX_SUB_SPACE);
             new_comp = Component::PutComponent(priv_box, c);

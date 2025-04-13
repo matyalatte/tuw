@@ -495,13 +495,22 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
     for (tuwjson::Value& c : sub_definition["components"]) {
         // check if type and label exist
         CheckJsonType(result, c, "label", JsonType::STRING, "component", REQUIRED);
+        CheckJsonType(result, c, "type", JsonType::STRING, "component", REQUIRED);
         if (!result.ok) return;
 
         // convert ["type"] from string to enum.
-        CheckJsonType(result, c, "type", JsonType::STRING, "component", REQUIRED);
-        if (!result.ok) return;
         const char* type_str = c["type"].GetString();
         int type = ComptypeToInt(type_str);
+
+        // TODO: throw an error for missing ids.
+        if (type != COMP_STATIC_TEXT && !c.HasMember("id")) {
+            PrintFmt(
+                "[CheckDefinition] DeprecationWarning: "
+                "\"id\" is missing in [\"components\"][%d]%s."
+                " Support for components without \"id\" will be removed in a future version.\n",
+                comp_ids.size(), c.GetLineColumnStr().c_str());
+        }
+
         c["type_int"].SetInt(type);
         CorrectKey(c, "item", "items");
         CorrectKey(c, "item_array", "items");
