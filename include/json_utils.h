@@ -1,7 +1,7 @@
 // Functions related to json.
 
 #pragma once
-#include "rapidjson/document.h"
+#include "json.h"
 #include "string_utils.h"
 
 enum ComponentType: int {
@@ -50,22 +50,19 @@ struct JsonResult {
 #define JSON_SIZE_MAX 128 * 1024
 
 // Returns an empty string if succeed. An error message otherwise.
-noex::string LoadJson(const noex::string& file, rapidjson::Document& json) noexcept;
-noex::string SaveJson(rapidjson::Document& json, const noex::string& file) noexcept;
+noex::string LoadJson(const noex::string& file, tuwjson::Value& json) noexcept;
+noex::string SaveJson(tuwjson::Value& json, const noex::string& file) noexcept;
 
-noex::string JsonToString(rapidjson::Document& json) noexcept;
+const char* GetString(const tuwjson::Value& json, const char* key, const char* def) noexcept;
+bool GetBool(const tuwjson::Value& json, const char* key, bool def) noexcept;
+int GetInt(const tuwjson::Value& json, const char* key, int def) noexcept;
+double GetDouble(const tuwjson::Value& json, const char* key, double def) noexcept;
 
-const char* GetString(const rapidjson::Value& json, const char* key, const char* def) noexcept;
-bool GetBool(const rapidjson::Value& json, const char* key, bool def) noexcept;
-int GetInt(const rapidjson::Value& json, const char* key, int def) noexcept;
-double GetDouble(const rapidjson::Value& json, const char* key, double def) noexcept;
-
-void GetDefaultDefinition(rapidjson::Document& definition) noexcept;
-void CheckVersion(JsonResult& result, rapidjson::Document& definition) noexcept;
-void CheckDefinition(JsonResult& result, rapidjson::Document& definition) noexcept;
-void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
-                        int index,
-                        rapidjson::Document::AllocatorType& alloc) noexcept;
-void CheckHelpURLs(JsonResult& result, rapidjson::Document& definition) noexcept;
+void GetDefaultDefinition(tuwjson::Value& definition) noexcept;
+void CheckVersion(JsonResult& result, tuwjson::Value& definition) noexcept;
+void CheckDefinition(JsonResult& result, tuwjson::Value& definition) noexcept;
+void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
+                        int index) noexcept;
+void CheckHelpURLs(JsonResult& result, tuwjson::Value& definition) noexcept;
 
 }  // namespace json_utils

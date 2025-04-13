@@ -4,7 +4,7 @@
 #include "env_utils.h"
 #include "string_utils.h"
 
-void Validator::Initialize(const rapidjson::Value& j) noexcept {
+void Validator::Initialize(const tuwjson::Value& j) noexcept {
     m_regex = json_utils::GetString(j, "regex", "");
     m_regex_error = json_utils::GetString(j, "regex_error", "");
     m_wildcard = json_utils::GetString(j, "wildcard", "");

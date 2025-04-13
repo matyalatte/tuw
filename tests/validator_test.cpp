@@ -4,8 +4,9 @@
 #include "test_utils.h"
 
 Validator GetValidator(const char* config_str) {
-    rapidjson::Document config(rapidjson::kObjectType);
-    config.Parse(config_str);
+    tuwjson::Value config;
+    tuwjson::Parser parser;
+    parser.ParseJson(config_str, &config);
     Validator validator;
     validator.Initialize(config);
     return validator;

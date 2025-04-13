@@ -65,7 +65,7 @@ class non_trivial_vector {
 
         // Move or copy existing elements to the new memory
         for (size_t i = 0; i < m_size; ++i) {
-            new (data + i) T(std::move(m_data[i]));
+            new (data + i) T(static_cast<T&&>(m_data[i]));
             m_data[i].~T();
         }
 
@@ -155,6 +155,13 @@ class non_trivial_vector {
         return at(m_size - 1);
     }
 
+    void pop_back() noexcept {
+        if (empty())
+            return;
+        back().~T();
+        m_size--;
+    }
+
     void push_back(const T& val) noexcept {
         reserve(m_size + 1);
         if (m_capacity < m_size + 1) return;
@@ -190,7 +197,7 @@ class non_trivial_vector {
 
         // Move or copy existing elements to the new memory
         for (size_t i = 0; i < m_size; ++i) {
-            new (data + i) T(std::move(m_data[i]));
+            new (data + i) T(static_cast<T&&>(m_data[i]));
             m_data[i].~T();
         }
 
@@ -235,6 +242,12 @@ class trivial_vector_base {
     }
 
     void shrink_to_fit() noexcept;
+
+    void pop_back() noexcept {
+        if (empty())
+            return;
+        m_size--;
+    }
 };
 
 // base class for trivial classes

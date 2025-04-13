@@ -37,9 +37,12 @@ noex::string envuStr(char *cstr) noexcept {
 static const uint32_t FNV_OFFSET_BASIS_32 = 2166136261U;
 static const uint32_t FNV_PRIME_32 = 16777619U;
 
-uint32_t Fnv1Hash32(const noex::string& str) noexcept {
+uint32_t Fnv1Hash32(const char* str) noexcept {
     uint32_t hash = FNV_OFFSET_BASIS_32;
-    for (const char c : str) hash = (FNV_PRIME_32 * hash) ^ c;
+    while (*str) {
+        hash = (FNV_PRIME_32 * hash) ^ *str;
+        str++;
+    }
     return hash;
 }
 

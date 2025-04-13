@@ -5,7 +5,7 @@
 
 TEST(JsonEmbeddingTest, Embed) {
     {
-        rapidjson::Document test_json;
+        tuwjson::Value test_json;
         test_json.SetObject();
         GetTestJson(test_json);
         ExeContainer exe;
@@ -16,10 +16,10 @@ TEST(JsonEmbeddingTest, Embed) {
         EXPECT_STREQ("", result.c_str());
     }
     {
-        rapidjson::Document test_json;
+        tuwjson::Value test_json;
         test_json.SetObject();
         GetTestJson(test_json);
-        rapidjson::Document embedded_json;
+        tuwjson::Value embedded_json;
         embedded_json.SetObject();
         ExeContainer exe;
         noex::string result = exe.Read("embedded.json");

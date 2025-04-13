@@ -50,12 +50,12 @@ bool AskOverwrite(const char *path) noexcept {
 
 noex::string Merge(const noex::string& exe_path, const noex::string& json_path,
                     const noex::string& new_path, const bool force) noexcept {
-    rapidjson::Document json;
+    tuwjson::Value json;
     noex::string err;
     err = json_utils::LoadJson(json_path, json);
     if (!err.empty()) return err;
 
-    if (!json.IsObject() || json.ObjectEmpty()) {
+    if (!json.IsObject() || json.IsEmpty()) {
         PrintFmt("JSON file loaded but it has no data.\n");
         return "";
     }
@@ -92,7 +92,7 @@ noex::string Split(const noex::string& exe_path, const noex::string& json_path,
         return "";
     }
     PrintFmt("Extracting JSON data from the executable...\n");
-    rapidjson::Document json;
+    tuwjson::Value json;
     exe.GetJson(json);
     exe.RemoveJson();
     if (!force && (!AskOverwrite(new_path.c_str()) || !AskOverwrite(json_path.c_str()))) {
@@ -290,7 +290,6 @@ int main(int argc, char* argv[]) noexcept {
         return 1;
     }
 
-    rapidjson::Document json(rapidjson::kObjectType);
     noex::string err;
 
     if (cmd_int == CMD_MERGE)

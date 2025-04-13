@@ -9,7 +9,10 @@ noex::string GetLastLine(const noex::string& str) noexcept;
 // Convert allocated string with env_utils.h into noex::string
 noex::string envuStr(char *cstr) noexcept;
 
-uint32_t Fnv1Hash32(const noex::string& str) noexcept;
+uint32_t Fnv1Hash32(const char* str) noexcept;
+inline uint32_t Fnv1Hash32(const noex::string& str) noexcept {
+    return Fnv1Hash32(str.c_str());
+}
 
 #ifdef _WIN32
 noex::string ANSItoUTF8(const noex::string& str) noexcept;

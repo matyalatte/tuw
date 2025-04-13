@@ -4,12 +4,7 @@
 #include <cstdio>
 #include <cassert>
 
-#include "rapidjson/filereadstream.h"
-#include "rapidjson/filewritestream.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/error/en.h"
-
+#include "json.h"
 #include "tuw_constants.h"
 #include "string_utils.h"
 #include "noex/vector.hpp"
@@ -52,83 +47,69 @@ enum ComponentType: int {
     COMP_MAX
 };
 
-// JSON parser allows c style comments and trailing commas.
-constexpr auto JSONC_FLAGS =
-    rapidjson::kParseCommentsFlag | rapidjson::kParseTrailingCommasFlag;
-
-noex::string LoadJson(const noex::string& file, rapidjson::Document& json) noexcept {
+noex::string LoadJson(const noex::string& file, tuwjson::Value& json) noexcept {
     FILE* fp = FileOpen(file.c_str(), "rb");
     if (!fp)
         return GetFileError(file);
 
-    char readBuffer[JSON_SIZE_MAX];
-    rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-
-    rapidjson::ParseResult ok = json.ParseStream<JSONC_FLAGS>(is);
+    char buffer[JSON_SIZE_MAX];
+    size_t size = fread(buffer, sizeof(char), JSON_SIZE_MAX - 1, fp);
     fclose(fp);
+    if (size > 0)
+        buffer[size] = 0;
+    else
+        buffer[0] = 0;
 
-    if (!ok) {
-        return noex::concat_cstr("Failed to parse JSON: ",
-                rapidjson::GetParseError_En(ok.Code()),
-                " (offset: ") + ok.Offset() + ")";
-    }
+    tuwjson::Parser parser;
+    parser.ParseJson(buffer, &json);
+    if (parser.HasError())
+        return noex::concat_cstr("Failed to parse JSON: ", parser.GetErrMsg());
     if (!json.IsObject())
         json.SetObject();
 
     return "";
 }
 
-noex::string SaveJson(rapidjson::Document& json, const noex::string& file) noexcept {
+noex::string SaveJson(tuwjson::Value& json, const noex::string& file) noexcept {
     FILE* fp = FileOpen(file.c_str(), "wb");
     if (!fp)
         return GetFileError(file);
 
-    char writeBuffer[JSON_SIZE_MAX];
-    rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
-    rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);
-    json.Accept(writer);
+    char buffer[JSON_SIZE_MAX];
+    tuwjson::Writer writer("    ", 4, true);
+    char* end = writer.WriteJson(&json, buffer, JSON_SIZE_MAX);
+    if (end)
+        fwrite(buffer, sizeof(char), end - buffer, fp);
+
     fclose(fp);
+
+    if (!end)
+        return writer.GetErrMsg();
     return "";
 }
 
-noex::string JsonToString(rapidjson::Document& json) noexcept {
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    json.Accept(writer);
-    return buffer.GetString();
-}
-
-const char* GetString(const rapidjson::Value& json, const char* key, const char* def) noexcept {
+const char* GetString(const tuwjson::Value& json, const char* key, const char* def) noexcept {
     if (json.HasMember(key))
         return json[key].GetString();
     return def;
 }
 
-bool GetBool(const rapidjson::Value& json, const char* key, bool def) noexcept {
+bool GetBool(const tuwjson::Value& json, const char* key, bool def) noexcept {
     if (json.HasMember(key))
         return json[key].GetBool();
     return def;
 }
 
-int GetInt(const rapidjson::Value& json, const char* key, int def) noexcept {
+int GetInt(const tuwjson::Value& json, const char* key, int def) noexcept {
     if (json.HasMember(key))
         return json[key].GetInt();
     return def;
 }
 
-double GetDouble(const rapidjson::Value& json, const char* key, double def) noexcept {
+double GetDouble(const tuwjson::Value& json, const char* key, double def) noexcept {
     if (json.HasMember(key))
         return json[key].GetDouble();
     return def;
-}
-
-static noex::string GetLabel(const char* label, const char* key) noexcept {
-    noex::string msg;
-    if (*label != '\0') {
-        msg = noex::concat_cstr("['", label, "']");
-    }
-    msg += noex::concat_cstr("['", key, "']");
-    return msg;
 }
 
 enum class JsonType {
@@ -140,37 +121,38 @@ enum class JsonType {
     MAX
 };
 
-static const bool OPTIONAL = true;
+static const bool REQUIRED = false;
 
-static void CheckJsonType(JsonResult& result, const rapidjson::Value& j, const char* key,
-        const JsonType& type, const char* label = "", const bool& optional = false) noexcept {
+static void CheckJsonType(JsonResult& result, const tuwjson::Value& j, const char* key,
+        const JsonType& type, const char* name = "", const bool& optional = true) noexcept {
     if (!j.HasMember(key)) {
         if (optional) return;
         result.ok = false;
-        result.msg = GetLabel(label, key) + " not found.";
+        result.msg = noex::concat_cstr(name, " requires \"", key) + "\"" + j.GetLineColumnStr();
         return;
     }
     bool valid = false;
     const char* type_name = nullptr;
+    const tuwjson::Value& v = j[key];
     switch (type) {
     case JsonType::BOOLEAN:
-        valid = j[key].IsBool();
+        valid = v.IsBool();
         type_name = "a boolean";
         break;
     case JsonType::INTEGER:
-        valid = j[key].IsInt();
+        valid = v.IsInt();
         type_name = "an int";
         break;
     case JsonType::FLOAT:
-        valid = j[key].IsDouble() || j[key].IsInt();
+        valid = v.IsDouble();
         type_name = "a float";
         break;
     case JsonType::STRING:
-        valid = j[key].IsString();
+        valid = v.IsString();
         type_name = "a string";
         break;
     case JsonType::JSON:
-        valid = j[key].IsObject();
+        valid = v.IsObject();
         type_name = "a json object";
         break;
     default:
@@ -180,60 +162,57 @@ static void CheckJsonType(JsonResult& result, const rapidjson::Value& j, const c
     }
     if (!valid) {
         result.ok = false;
-        result.msg = GetLabel(label, key) + noex::concat_cstr(" should be ", type_name, ".");
+        result.msg = noex::concat_cstr("\"", key, "\" should be ") + type_name
+            + v.GetLineColumnStr();
     }
 }
 
-static bool IsJsonArray(rapidjson::Value& j, const char* key,
-                        rapidjson::Document::AllocatorType& alloc) noexcept {
-    if (!j[key].IsArray()) {
-        if (!j[key].IsObject())
+static bool IsJsonArray(tuwjson::Value& j, const char* key) noexcept {
+    tuwjson::Value& val = j[key];
+    if (!val.IsArray()) {
+        if (!val.IsObject())
             return false;
-        rapidjson::Value array(rapidjson::kArrayType);
-        array.PushBack(j[key].Move(), alloc);
-        j[key] = array;
+        val.ConvertToArray();
     }
-    for (const rapidjson::Value& el : j[key].GetArray()) {
+    for (const tuwjson::Value& el : val) {
         if (!el.IsObject())
             return false;
     }
     return true;
 }
 
-static bool IsStringArray(rapidjson::Value& j, const char* key,
-                            rapidjson::Document::AllocatorType& alloc) noexcept {
-    if (!j[key].IsArray()) {
-        if (!j[key].IsString())
+static bool IsStringArray(tuwjson::Value& j, const char* key) noexcept {
+    tuwjson::Value& val = j[key];
+    if (!val.IsArray()) {
+        if (!val.IsString())
             return false;
-        rapidjson::Value array(rapidjson::kArrayType);
-        array.PushBack(j[key].Move(), alloc);
-        j[key] = array;
+        val.ConvertToArray();
     }
-    for (const rapidjson::Value& el : j[key].GetArray()) {
+    for (const tuwjson::Value& el : val) {
         if (!el.IsString())
             return false;
     }
     return true;
 }
 
-static void CheckJsonArrayType(JsonResult& result, rapidjson::Value& j, const char* key,
-        const JsonType& type, rapidjson::Document::AllocatorType& alloc,
-        const char* label = "", const bool& optional = false) noexcept {
+static void CheckJsonArrayType(JsonResult& result, tuwjson::Value& j, const char* key,
+        const JsonType& type,
+        const char* name = "", const bool& optional = true) noexcept {
     if (!j.HasMember(key)) {
         if (optional) return;
         result.ok = false;
-        result.msg = GetLabel(label, key) + " not found.";
+        result.msg = noex::concat_cstr(name, " requires \"", key) + "\"" + j.GetLineColumnStr();
         return;
     }
     bool valid = false;
     const char* type_name = nullptr;
     switch (type) {
     case JsonType::STRING:
-        valid = IsStringArray(j, key, alloc);
+        valid = IsStringArray(j, key);
         type_name = "an array of strings";
         break;
     case JsonType::JSON:
-        valid = IsJsonArray(j, key, alloc);
+        valid = IsJsonArray(j, key);
         type_name = "an array of json objects";
         break;
     default:
@@ -243,12 +222,13 @@ static void CheckJsonArrayType(JsonResult& result, rapidjson::Value& j, const ch
     }
     if (!valid) {
         result.ok = false;
-        result.msg = GetLabel(label, key) + noex::concat_cstr(" should be ", type_name, ".");
+        result.msg = noex::concat_cstr("\"", key, "\" should be ") + type_name
+            + j[key].GetLineColumnStr();
     }
 }
 
 // get default definition of gui
-void GetDefaultDefinition(rapidjson::Document& definition) noexcept {
+void GetDefaultDefinition(tuwjson::Value& definition) noexcept {
     static const char* def_str = "{"
 #ifdef _WIN32
         "\"command\":\"dir\","
@@ -259,8 +239,9 @@ void GetDefaultDefinition(rapidjson::Document& definition) noexcept {
 #endif
         "\"components\":[]"
         "}";
-    rapidjson::ParseResult ok = definition.Parse(def_str);
-    assert(ok);
+    tuwjson::Parser parser;
+    tuwjson::Error ok = parser.ParseJson(def_str, &definition);
+    assert(ok == tuwjson::JSON_OK);
     (void) ok;  // GCC says it's unused even if you use it for assertion.
     JsonResult result = JSON_RESULT_OK;
     CheckDefinition(result, definition);
@@ -268,14 +249,10 @@ void GetDefaultDefinition(rapidjson::Document& definition) noexcept {
 }
 
 static void CorrectKey(
-        rapidjson::Value& j,
-        const char* false_key, const char* true_key,
-        rapidjson::Document::AllocatorType& alloc) noexcept {
-    if (!j.HasMember(true_key) && j.HasMember(false_key)) {
-        rapidjson::Value n(true_key, alloc);
-        j.AddMember(n, j[false_key], alloc);
-        j.RemoveMember(false_key);
-    }
+        tuwjson::Value& j,
+        const char* false_key, const char* true_key) noexcept {
+    if (!j.HasMember(true_key) && j.HasMember(false_key))
+        j.ReplaceKey(false_key, true_key);
 }
 
 static noex::vector<noex::string>
@@ -310,9 +287,9 @@ static void CheckIndexDuplication(
         for (size_t j = i + 1; j < size; j++) {
             if (str == component_ids[j]) {
                 result.ok = false;
-                result.msg = noex::concat_cstr("[components][id]"
-                                " should not be duplicated in a gui definition. (",
-                                str.c_str(), ")");
+                result.msg = noex::concat_cstr(
+                    "Component IDs should not be duplicated in a gui definition. (",
+                    str.c_str(), ")");
                 return;
             }
         }
@@ -321,15 +298,14 @@ static void CheckIndexDuplication(
 
 // split command by "%" symbol, and calculate which component should be inserted there.
 static void CompileCommand(JsonResult& result,
-                            rapidjson::Value& sub_definition,
-                            const noex::vector<noex::string>& comp_ids,
-                            rapidjson::Document::AllocatorType& alloc) noexcept {
+                            tuwjson::Value& sub_definition,
+                            const noex::vector<noex::string>& comp_ids) noexcept {
     noex::vector<noex::string> cmd = SplitString(sub_definition["command"].GetString(), '%');
     noex::vector<noex::string> cmd_ids;
     noex::vector<noex::string> splitted_cmd;
-    if (sub_definition.HasMember("command_splitted"))
-        sub_definition.RemoveMember("command_splitted");
-    rapidjson::Value splitted_cmd_json(rapidjson::kArrayType);
+
+    tuwjson::Value splitted_cmd_json;
+    splitted_cmd_json.SetArray();
 
     bool store_ids = false;
     for (const noex::string& token : cmd) {
@@ -337,15 +313,17 @@ static void CompileCommand(JsonResult& result,
             cmd_ids.emplace_back(token);
         } else {
             splitted_cmd.emplace_back(token);
-            rapidjson::Value n(token.c_str(), alloc);
-            splitted_cmd_json.PushBack(n, alloc);
+            tuwjson::Value n;
+            n.SetString(token);
+            splitted_cmd_json.MoveAndPush(n);
         }
         store_ids = !store_ids;
     }
-    sub_definition.AddMember("command_splitted", splitted_cmd_json, alloc);
+    sub_definition["command_splitted"].MoveFrom(splitted_cmd_json);
 
-    rapidjson::Value& components = sub_definition["components"];;
-    rapidjson::Value cmd_int_ids(rapidjson::kArrayType);
+    tuwjson::Value& components = sub_definition["components"];;
+    tuwjson::Value cmd_int_ids;
+    cmd_int_ids.SetArray();
     noex::string cmd_str;
     int comp_size = static_cast<int>(comp_ids.size());
     int non_id_comp = 0;
@@ -367,17 +345,20 @@ static void CompileCommand(JsonResult& result,
                 if (id == comp_ids[j]) break;
             if (j == comp_size) {
                 while (non_id_comp < comp_size
-                    && (components[non_id_comp]["type_int"] == COMP_STATIC_TEXT
+                    && (components[non_id_comp]["type_int"].GetInt() == COMP_STATIC_TEXT
                         || !comp_ids[non_id_comp].empty()
-                        || components[non_id_comp]["type_int"] == COMP_EMPTY)) {
+                        || components[non_id_comp]["type_int"].GetInt() == COMP_EMPTY)) {
                     non_id_comp++;
                 }
                 j = non_id_comp;
                 non_id_comp++;
             }
         }
-        if (j < comp_size)
-            cmd_int_ids.PushBack(j, alloc);
+        if (j < comp_size) {
+            tuwjson::Value n;
+            n.SetInt(j);
+            cmd_int_ids.MoveAndPush(n);
+        }
         if (j >= comp_size)
             cmd_str += "__comp???__";
         else if (j >= 0)
@@ -388,21 +369,27 @@ static void CompileCommand(JsonResult& result,
 
     // Check if the command requires more arguments or ignores some arguments.
     for (int j = 0; j < comp_size; j++) {
-        int type_int = components[j]["type_int"].GetInt();
+        tuwjson::Value& v = components[j];
+        int type_int = v["type_int"].GetInt();
         if (type_int == COMP_STATIC_TEXT || type_int == COMP_EMPTY)
             continue;
         bool found = false;
-        for (rapidjson::Value& id : cmd_int_ids.GetArray())
+        for (tuwjson::Value& id : cmd_int_ids)
             if (id.GetInt() == j) {
                 found = true;
                 break;
             }
         if (!found) {
             result.ok = false;
-            result.msg = noex::concat_cstr("[\"components\"][", noex::to_string(j).c_str(),
-                            "] is unused in the command; ") + cmd_str;
-            if (!comp_ids[j].empty())
-                result.msg = "The ID of " + result.msg;
+
+            if (comp_ids[j].empty() || !v.HasMember("id")) {
+                result.msg = noex::concat_cstr("[\"components\"][", noex::to_string(j).c_str(), "]")
+                    + v.GetLineColumnStr() + " is unused in the command; " + cmd_str;
+            } else {
+                tuwjson::Value& vid = v["id"];
+                result.msg = noex::concat_cstr("component id \"", vid.GetString(), "\"")
+                    + vid.GetLineColumnStr() + " is unused in the command; " + cmd_str;
+            }
             return;
         }
     }
@@ -412,13 +399,10 @@ static void CompileCommand(JsonResult& result,
             "The command requires more components for arguments; " + cmd_str;
         return;
     }
-    if (sub_definition.HasMember("command_str"))
-        sub_definition.RemoveMember("command_str");
-    rapidjson::Value v(cmd_str.c_str(), alloc);
-    sub_definition.AddMember("command_str", v, alloc);
-    if (sub_definition.HasMember("command_ids"))
-        sub_definition.RemoveMember("command_ids");
-    sub_definition.AddMember("command_ids", cmd_int_ids, alloc);
+    tuwjson::Value v;
+    v.SetString(cmd_str);
+    sub_definition["command_str"].MoveFrom(v);
+    sub_definition["command_ids"].MoveFrom(cmd_int_ids);
 }
 
 // don't use map. it will make exe larger.
@@ -456,42 +440,39 @@ int ComptypeToInt(const char* comptype) noexcept {
     return COMP_UNKNOWN;
 }
 
-void CheckValidator(JsonResult& result, rapidjson::Value& validator,
-                    const char* label) noexcept {
-    CheckJsonType(result, validator, "regex", JsonType::STRING, label, OPTIONAL);
-    CheckJsonType(result, validator, "regex_error", JsonType::STRING, label, OPTIONAL);
-    CheckJsonType(result, validator, "wildcard", JsonType::STRING, label, OPTIONAL);
-    CheckJsonType(result, validator, "wildcard_error", JsonType::STRING, label, OPTIONAL);
-    CheckJsonType(result, validator, "exist", JsonType::BOOLEAN, label, OPTIONAL);
-    CheckJsonType(result, validator, "exist_error", JsonType::STRING, label, OPTIONAL);
-    CheckJsonType(result, validator, "not_empty", JsonType::BOOLEAN, label, OPTIONAL);
-    CheckJsonType(result, validator, "not_empty_error", JsonType::STRING, label, OPTIONAL);
+void CheckValidator(JsonResult& result, tuwjson::Value& validator) noexcept {
+    CheckJsonType(result, validator, "regex", JsonType::STRING);
+    CheckJsonType(result, validator, "regex_error", JsonType::STRING);
+    CheckJsonType(result, validator, "wildcard", JsonType::STRING);
+    CheckJsonType(result, validator, "wildcard_error", JsonType::STRING);
+    CheckJsonType(result, validator, "exist", JsonType::BOOLEAN);
+    CheckJsonType(result, validator, "exist_error", JsonType::STRING);
+    CheckJsonType(result, validator, "not_empty", JsonType::BOOLEAN);
+    CheckJsonType(result, validator, "not_empty_error", JsonType::STRING);
 }
 
 // validate one of definitions (["gui"][i]) and store parsed info
-void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
-                        int index,
-                        rapidjson::Document::AllocatorType& alloc) noexcept {
-    CorrectKey(sub_definition, "window_title", "window_name", alloc);
-    CorrectKey(sub_definition, "title", "window_name", alloc);
-    CheckJsonType(result, sub_definition, "window_name", JsonType::STRING, "", OPTIONAL);
+void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
+                        int index) noexcept {
+    CorrectKey(sub_definition, "window_title", "window_name");
+    CorrectKey(sub_definition, "title", "window_name");
+    CheckJsonType(result, sub_definition, "window_name", JsonType::STRING);
 
     if (!sub_definition.HasMember("label")) {
         noex::string default_label = noex::string("GUI ") + index;
         const char* label = GetString(sub_definition, "window_name", default_label.c_str());
-        rapidjson::Value n(label, alloc);
-        sub_definition.AddMember("label", n, alloc);
+        sub_definition["label"].SetString(label);
     }
-    CheckJsonType(result, sub_definition, "label", JsonType::STRING);
+    CheckJsonType(result, sub_definition, "label", JsonType::STRING, "gui definition", REQUIRED);
 
-    CheckJsonType(result, sub_definition, "button", JsonType::STRING, "", OPTIONAL);
+    CheckJsonType(result, sub_definition, "button", JsonType::STRING);
 
-    CheckJsonType(result, sub_definition, "check_exit_code", JsonType::BOOLEAN, "", OPTIONAL);
-    CheckJsonType(result, sub_definition, "exit_success", JsonType::INTEGER, "", OPTIONAL);
-    CheckJsonType(result, sub_definition, "show_last_line", JsonType::BOOLEAN, "", OPTIONAL);
+    CheckJsonType(result, sub_definition, "check_exit_code", JsonType::BOOLEAN);
+    CheckJsonType(result, sub_definition, "exit_success", JsonType::INTEGER);
+    CheckJsonType(result, sub_definition, "show_last_line", JsonType::BOOLEAN);
     CheckJsonType(result, sub_definition,
-                    "show_success_dialog", JsonType::BOOLEAN, "", OPTIONAL);
-    CheckJsonType(result, sub_definition, "codepage", JsonType::STRING, "", OPTIONAL);
+                    "show_success_dialog", JsonType::BOOLEAN);
+    CheckJsonType(result, sub_definition, "codepage", JsonType::STRING);
     if (sub_definition.HasMember("codepage")) {
         const char* codepage = sub_definition["codepage"].GetString();
         if (strcmp(codepage, "utf8") != 0 && strcmp(codepage, "utf-8") != 0 &&
@@ -502,62 +483,70 @@ void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
         }
     }
 
-    CorrectKey(sub_definition, "component", "components", alloc);
-    CorrectKey(sub_definition, "component_array", "components", alloc);
-    CheckJsonArrayType(result, sub_definition, "components", JsonType::JSON, alloc);
+    CorrectKey(sub_definition, "component", "components");
+    CorrectKey(sub_definition, "component_array", "components");
+    CheckJsonArrayType(result, sub_definition, "components",
+        JsonType::JSON, "gui definition", REQUIRED);
 
     if (!result.ok) return;
 
     // check components
     noex::vector<noex::string> comp_ids;
-    for (rapidjson::Value& c : sub_definition["components"].GetArray()) {
+    for (tuwjson::Value& c : sub_definition["components"]) {
         // check if type and label exist
-        CheckJsonType(result, c, "label", JsonType::STRING, "components");
+        CheckJsonType(result, c, "label", JsonType::STRING, "component", REQUIRED);
+        CheckJsonType(result, c, "type", JsonType::STRING, "component", REQUIRED);
         if (!result.ok) return;
-        const char* label = c["label"].GetString();
 
         // convert ["type"] from string to enum.
-        CheckJsonType(result, c, "type", JsonType::STRING, label);
-        if (!result.ok) return;
         const char* type_str = c["type"].GetString();
         int type = ComptypeToInt(type_str);
-        if (c.HasMember("type_int"))
-            c.RemoveMember("type_int");
-        c.AddMember("type_int", type, alloc);
-        CorrectKey(c, "item", "items", alloc);
-        CorrectKey(c, "item_array", "items", alloc);
+
+        // TODO: throw an error for missing ids.
+        if (type != COMP_STATIC_TEXT && !c.HasMember("id")) {
+            PrintFmt(
+                "[CheckDefinition] DeprecationWarning: "
+                "\"id\" is missing in [\"components\"][%d]%s."
+                " Support for components without \"id\" will be removed in a future version.\n",
+                comp_ids.size(), c.GetLineColumnStr().c_str());
+        }
+
+        c["type_int"].SetInt(type);
+        CorrectKey(c, "item", "items");
+        CorrectKey(c, "item_array", "items");
         switch (type) {
             case COMP_FILE:
-                CheckJsonType(result, c, "extension", JsonType::STRING, label, OPTIONAL);
+                CheckJsonType(result, c, "extension", JsonType::STRING);
                 /* Falls through. */
             case COMP_FOLDER:
-                CheckJsonType(result, c, "button", JsonType::STRING, label, OPTIONAL);
+                CheckJsonType(result, c, "button", JsonType::STRING);
                 /* Falls through. */
             case COMP_TEXT:
-                CheckJsonType(result, c, "default", JsonType::STRING, label, OPTIONAL);
+                CheckJsonType(result, c, "default", JsonType::STRING);
                 break;
             case COMP_COMBO:
             case COMP_RADIO:
-                CheckJsonArrayType(result, c, "items", JsonType::JSON, alloc, label);
+                CheckJsonArrayType(result, c, "items",
+                    JsonType::JSON, "radio type component", REQUIRED);
                 if (!result.ok) return;
-                for (rapidjson::Value& i : c["items"].GetArray()) {
-                    CheckJsonType(result, i, "label", JsonType::STRING, "items");
-                    CheckJsonType(result, i, "value", JsonType::STRING, "items", OPTIONAL);
+                for (tuwjson::Value& i : c["items"]) {
+                    CheckJsonType(result, i, "label", JsonType::STRING, "radio item", REQUIRED);
+                    CheckJsonType(result, i, "value", JsonType::STRING);
                 }
-                CheckJsonType(result, c, "default", JsonType::INTEGER, label, OPTIONAL);
+                CheckJsonType(result, c, "default", JsonType::INTEGER);
                 break;
             case COMP_CHECK:
-                CheckJsonType(result, c, "value", JsonType::STRING, label, OPTIONAL);
-                CheckJsonType(result, c, "default", JsonType::BOOLEAN, label, OPTIONAL);
+                CheckJsonType(result, c, "value", JsonType::STRING);
+                CheckJsonType(result, c, "default", JsonType::BOOLEAN);
                 break;
             case COMP_CHECK_ARRAY:
-                CheckJsonArrayType(result, c, "items", JsonType::JSON, alloc, label);
+                CheckJsonArrayType(result, c, "items", JsonType::JSON, "check array", REQUIRED);
                 if (!result.ok) return;
-                for (rapidjson::Value& i : c["items"].GetArray()) {
-                    CheckJsonType(result, i, "label", JsonType::STRING, "items");
-                    CheckJsonType(result, i, "value", JsonType::STRING, "items", OPTIONAL);
-                    CheckJsonType(result, i, "default", JsonType::BOOLEAN, "items", OPTIONAL);
-                    CheckJsonType(result, i, "tooltip", JsonType::STRING, "items", OPTIONAL);
+                for (tuwjson::Value& i : c["items"]) {
+                    CheckJsonType(result, i, "label", JsonType::STRING, "check box", REQUIRED);
+                    CheckJsonType(result, i, "value", JsonType::STRING);
+                    CheckJsonType(result, i, "default", JsonType::BOOLEAN);
+                    CheckJsonType(result, i, "tooltip", JsonType::STRING);
                 }
                 break;
             case COMP_INT:
@@ -567,23 +556,24 @@ void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
                     jtype = JsonType::INTEGER;
                 } else {
                     jtype = JsonType::FLOAT;
-                    CheckJsonType(result, c, "digits", JsonType::INTEGER, label, OPTIONAL);
+                    CheckJsonType(result, c, "digits", JsonType::INTEGER);
                     if (!result.ok) return;
                     if (c.HasMember("digits") && c["digits"].GetInt() < 0) {
                         result.ok = false;
-                        result.msg = GetLabel(label, "digits")
-                                        + " should be a non-negative integer.";
+                        result.msg = "\"digits\" should be a non-negative integer."
+                                    + c["digits"].GetLineColumnStr();
                     }
                 }
-                CheckJsonType(result, c, "default", jtype, label, OPTIONAL);
-                CheckJsonType(result, c, "min", jtype, label, OPTIONAL);
-                CheckJsonType(result, c, "max", jtype, label, OPTIONAL);
-                CheckJsonType(result, c, "inc", jtype, label, OPTIONAL);
-                CheckJsonType(result, c, "wrap", JsonType::BOOLEAN, label, OPTIONAL);
+                CheckJsonType(result, c, "default", jtype);
+                CheckJsonType(result, c, "min", jtype);
+                CheckJsonType(result, c, "max", jtype);
+                CheckJsonType(result, c, "inc", jtype);
+                CheckJsonType(result, c, "wrap", JsonType::BOOLEAN);
                 break;
             case COMP_UNKNOWN:
                 result.ok = false;
-                result.msg = noex::string("Unknown component type: ") + type_str;
+                result.msg = noex::string("Unknown component type: ")
+                    + type_str + c["type"].GetLineColumnStr();
                 break;
         }
         if (!result.ok) return;
@@ -591,33 +581,34 @@ void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
         if (c.HasMember("validator")) {
             if (type == COMP_STATIC_TEXT) {
                 result.ok = false;
-                result.msg = "Static text does not support validator.";
+                result.msg = "Static text does not support validator."
+                    + c["validator"].GetLineColumnStr();
                 return;
             }
-            CheckJsonType(result, c, "validator", JsonType::JSON, label);
-            CheckValidator(result, c["validator"], label);
+            CheckJsonType(result, c, "validator", JsonType::JSON);
+            CheckValidator(result, c["validator"]);
             if (!result.ok) return;
         }
 
-        CorrectKey(c, "add_quote", "add_quotes", alloc);
-        CheckJsonType(result, c, "add_quotes", JsonType::BOOLEAN, label, OPTIONAL);
-        CorrectKey(c, "empty_message", "placeholder", alloc);
-        CheckJsonType(result, c, "placeholder", JsonType::STRING, label, OPTIONAL);
-        CheckJsonType(result, c, "id", JsonType::STRING, label, OPTIONAL);
-        CheckJsonType(result, c, "tooltip", JsonType::STRING, label, OPTIONAL);
+        CorrectKey(c, "add_quote", "add_quotes");
+        CheckJsonType(result, c, "add_quotes", JsonType::BOOLEAN);
+        CorrectKey(c, "empty_message", "placeholder");
+        CheckJsonType(result, c, "placeholder", JsonType::STRING);
+        CheckJsonType(result, c, "id", JsonType::STRING);
+        CheckJsonType(result, c, "tooltip", JsonType::STRING);
 
-        CheckJsonType(result, c, "optional", JsonType::BOOLEAN, label, OPTIONAL);
-        CheckJsonType(result, c, "prefix", JsonType::STRING, label, OPTIONAL);
-        CheckJsonType(result, c, "suffix", JsonType::STRING, label, OPTIONAL);
+        CheckJsonType(result, c, "optional", JsonType::BOOLEAN);
+        CheckJsonType(result, c, "prefix", JsonType::STRING);
+        CheckJsonType(result, c, "suffix", JsonType::STRING);
 
         bool ignore = false;
-        CorrectKey(c, "platform", "platforms", alloc);
-        CorrectKey(c, "platform_array", "platforms", alloc);
-        CheckJsonArrayType(result, c, "platforms", JsonType::STRING, alloc, label, OPTIONAL);
+        CorrectKey(c, "platform", "platforms");
+        CorrectKey(c, "platform_array", "platforms");
+        CheckJsonArrayType(result, c, "platforms", JsonType::STRING);
         if (!result.ok) return;
         if (c.HasMember("platforms")) {
             ignore = true;
-            for (rapidjson::Value& v : c["platforms"].GetArray()) {
+            for (tuwjson::Value& v : c["platforms"]) {
                 if (strcmp(v.GetString(), TUW_CONSTANTS_OS) == 0) {
                     ignore = false;
                     break;
@@ -629,12 +620,12 @@ void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
         if (c.HasMember("id")) {
             if (id[0] == '\0') {
                 result.ok = false;
-                result.msg = GetLabel(label, "id")
-                                + " should NOT be an empty string.";
+                result.msg = "\"id\" should NOT be an empty string."
+                            + c["id"].GetLineColumnStr();
             } else if (id[0] == '_') {
                 result.ok = false;
-                result.msg = GetLabel(label, "id")
-                                + " should NOT start with '_'.";
+                result.msg = "\"id\" should NOT start with '_'."
+                            + c["id"].GetLineColumnStr();
             }
         }
         if (!result.ok) return;
@@ -655,16 +646,13 @@ void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
         CheckJsonType(result, sub_definition, command_os_key, JsonType::STRING);
         if (!result.ok) return;
         const char* command_os = sub_definition[command_os_key].GetString();
-        if (sub_definition.HasMember("command"))
-            sub_definition.RemoveMember("command");
-        rapidjson::Value v(command_os, alloc);
-        sub_definition.AddMember("command", v, alloc);
+        sub_definition["command"].SetString(command_os);
     }
 
     // check sub_definition["command"] and convert it to more useful format.
-    CheckJsonType(result, sub_definition, "command", JsonType::STRING);
+    CheckJsonType(result, sub_definition, "command", JsonType::STRING, "gui definition", REQUIRED);
     if (!result.ok) return;
-    CompileCommand(result, sub_definition, comp_ids, alloc);
+    CompileCommand(result, sub_definition, comp_ids);
 }
 
 // vX.Y.Z -> 10000*X + 100 * Y + Z
@@ -692,19 +680,15 @@ static int VersionStringToInt(JsonResult& result, const char* string) noexcept {
     return version_int;
 }
 
-void CheckVersion(JsonResult& result, rapidjson::Document& definition) noexcept {
-    CorrectKey(definition, "recommended_version", "recommended", definition.GetAllocator());
+void CheckVersion(JsonResult& result, tuwjson::Value& definition) noexcept {
+    CorrectKey(definition, "recommended_version", "recommended");
     if (definition.HasMember("recommended")) {
         CheckJsonType(result, definition, "recommended", JsonType::STRING);
         if (!result.ok) return;
         int recom_int = VersionStringToInt(result, definition["recommended"].GetString());
-        if (definition.HasMember("not_recommended")) definition.RemoveMember("not_recommended");
-        definition.AddMember("not_recommended",
-                                tuw_constants::VERSION_INT != recom_int,
-                                definition.GetAllocator());
+        definition["not_recommended"].SetBool(tuw_constants::VERSION_INT != recom_int);
     }
-    CorrectKey(definition, "minimum_required_version",
-                "minimum_required", definition.GetAllocator());
+    CorrectKey(definition, "minimum_required_version", "minimum_required");
     if (definition.HasMember("minimum_required")) {
         CheckJsonType(result, definition, "minimum_required", JsonType::STRING);
         if (!result.ok) return;
@@ -717,45 +701,44 @@ void CheckVersion(JsonResult& result, rapidjson::Document& definition) noexcept 
     }
 }
 
-void CheckDefinition(JsonResult& result, rapidjson::Document& definition) noexcept {
-    rapidjson::Document::AllocatorType& alloc = definition.GetAllocator();
+void CheckDefinition(JsonResult& result, tuwjson::Value& definition) noexcept {
     if (!definition.HasMember("gui")) {
         // definition["gui"] = definition
-        rapidjson::Value n(rapidjson::kObjectType);
-        n.CopyFrom(definition, alloc);
-        definition.AddMember("gui", n, alloc);
+        definition.ConvertToObject("gui");
     }
-    CheckJsonArrayType(result, definition, "gui", JsonType::JSON, alloc);
+    CheckJsonArrayType(result, definition, "gui", JsonType::JSON);
     if (!result.ok) return;
     if (definition["gui"].Size() == 0) {
         result.ok = false;
-        result.msg = "The size of [\"gui\"] should NOT be zero.";
+        result.msg = "The size of [\"gui\"] should NOT be zero."
+            + definition["gui"].GetLineColumnStr();;
     }
 
     int i = 0;
-    for (rapidjson::Value& sub_d : definition["gui"].GetArray()) {
+    for (tuwjson::Value& sub_d : definition["gui"]) {
         if (!result.ok) return;
-        CheckSubDefinition(result, sub_d, i, alloc);
+        CheckSubDefinition(result, sub_d, i);
         i++;
     }
 }
 
-void CheckHelpURLs(JsonResult& result, rapidjson::Document& definition) noexcept {
+void CheckHelpURLs(JsonResult& result, tuwjson::Value& definition) noexcept {
     if (!definition.HasMember("help")) return;
-    CheckJsonArrayType(result, definition, "help", JsonType::JSON, definition.GetAllocator());
+    CheckJsonArrayType(result, definition, "help", JsonType::JSON);
     if (!result.ok) return;
-    for (const rapidjson::Value& h : definition["help"].GetArray()) {
-        CheckJsonType(result, h, "type", JsonType::STRING);
-        CheckJsonType(result, h, "label", JsonType::STRING);
+    for (const tuwjson::Value& h : definition["help"]) {
+        CheckJsonType(result, h, "type", JsonType::STRING, "help document", REQUIRED);
+        CheckJsonType(result, h, "label", JsonType::STRING, "help document", REQUIRED);
         if (!result.ok) return;
         const char* type = h["type"].GetString();
         if (strcmp(type, "url") == 0) {
-            CheckJsonType(result, h, "url", JsonType::STRING);
+            CheckJsonType(result, h, "url", JsonType::STRING, "URL type document", REQUIRED);
         } else if (strcmp(type, "file") == 0) {
-            CheckJsonType(result, h, "path", JsonType::STRING);
+            CheckJsonType(result, h, "path", JsonType::STRING, "file type document", REQUIRED);
         } else {
             result.ok = false;
-            result.msg = noex::concat_cstr("Unsupported help type: ", type);
+            result.msg = noex::concat_cstr("Unsupported help type: ", type)
+                + h["type"].GetLineColumnStr();;
             return;
         }
     }
