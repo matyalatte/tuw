@@ -187,22 +187,23 @@ void MainFrame::CreateFrame() noexcept {
     uiWindowSetMargined(m_mainwin, 1);
 }
 
+MainFrame* g_main_frame = nullptr;
+
 static void OnUpdatePanel(uiMenuItem *item, uiWindow *w, void *data) noexcept {
-    MenuData* menu_data = static_cast<MenuData*>(data);
-    menu_data->main_frame->UpdatePanel(static_cast<size_t>(menu_data->menu_id));
-    menu_data->main_frame->Fit();
+    g_main_frame->UpdatePanel(reinterpret_cast<size_t>(data));
+    g_main_frame->Fit();
     UNUSED(item);
     UNUSED(w);
 }
 
 static void OnOpenURL(uiMenuItem *item, uiWindow *w, void *data) noexcept {
-    MenuData* menu_data = static_cast<MenuData*>(data);
-    menu_data->main_frame->OpenURL(menu_data->menu_id);
+    g_main_frame->OpenURL(reinterpret_cast<size_t>(data));
     UNUSED(item);
     UNUSED(w);
 }
 
 void MainFrame::CreateMenu() noexcept {
+    g_main_frame = this;
     uiMenuItem* item;
     uiMenu* menu = NULL;
 
@@ -211,7 +212,6 @@ void MainFrame::CreateMenu() noexcept {
     size_t menu_item_count = m_gui_json->Size();
     if (m_definition.HasMember("help"))
         menu_item_count += m_definition["help"].Size();
-    m_menu_data_vec.reserve(menu_item_count);
 
 #ifdef __APPLE__
     // No need the menu for the quit item on macOS.
@@ -221,12 +221,10 @@ void MainFrame::CreateMenu() noexcept {
     menu = uiNewMenu("Menu");
     if (m_gui_json->Size() > 1) {
 #endif  // __APPLE__
-        int i = 0;
+        size_t i = 0;
         for (const tuwjson::Value& j : *m_gui_json) {
             item = uiMenuAppendItem(menu, j["label"].GetString());
-            m_menu_data_vec.push_back({ this, i });
-            MenuData* m = &m_menu_data_vec.back();
-            uiMenuItemOnClicked(item, OnUpdatePanel, m);
+            uiMenuItemOnClicked(item, OnUpdatePanel, reinterpret_cast<void*>(i));
             i++;
         }
     }
@@ -236,12 +234,10 @@ void MainFrame::CreateMenu() noexcept {
     if (m_definition.HasMember("help") && m_definition["help"].Size() > 0) {
         menu = uiNewMenu("Help");
 
-        int i = 0;
+        size_t i = 0;
         for (const tuwjson::Value& j : m_definition["help"]) {
             item = uiMenuAppendItem(menu, j["label"].GetString());
-            m_menu_data_vec.push_back({ this, i });
-            MenuData* m = &m_menu_data_vec.back();
-            uiMenuItemOnClicked(item, OnOpenURL, m);
+            uiMenuItemOnClicked(item, OnOpenURL, reinterpret_cast<void*>(i));
             i++;
         }
     }
@@ -257,7 +253,7 @@ static bool IsValidURL(const noex::string &url) noexcept {
     return true;
 }
 
-noex::string MainFrame::OpenURLBase(int id) noexcept {
+noex::string MainFrame::OpenURLBase(size_t id) noexcept {
     tuwjson::Value& help = m_definition["help"][id];
     const char* type = help["type"].GetString();
     noex::string url;
@@ -323,7 +319,7 @@ noex::string MainFrame::OpenURLBase(int id) noexcept {
     return "";
 }
 
-void MainFrame::OpenURL(int id) noexcept {
+void MainFrame::OpenURL(size_t id) noexcept {
     noex::string err = OpenURLBase(id);
     if (!err.empty())
         ShowErrorDialogWithLog("OpenURL", err);

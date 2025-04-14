@@ -207,49 +207,22 @@ void FilePicker::SetConfig(const tuwjson::Value& config) noexcept {
     setConfigForTextBox(config, m_id, m_widget);
 }
 
-class Filter {
- private:
-    const char* name;
-    noex::vector<const char*> patterns;
-
- public:
-    Filter() noexcept : name(nullptr), patterns() {}
-
-    Filter(const Filter& filter) :
-        name(filter.name), patterns(filter.patterns) {}
-
-    Filter& operator=(const Filter& filter) {
-        if (this == &filter) return *this;
-        name = filter.name;
-        patterns = filter.patterns;
-        return *this;
-    }
-
-    void SetName(const char* n) noexcept {
-        name = n;
-    }
-
-    void AddPattern(const char* pattern) noexcept {
-        patterns.emplace_back(pattern);
-    }
-
-    uiFileDialogParamsFilter ToLibuiFilter() const noexcept {
-        return {
-            name,
-            patterns.size(),
-            &patterns[0]
-        };
-    }
-};
-
 class FilterList {
  private:
     noex::string filter_buf_str;
-    noex::vector<Filter> filters;
+    noex::vector<const char*> patterns;
     noex::vector<uiFileDialogParamsFilter> ui_filters;
 
  public:
-    FilterList() noexcept: filter_buf_str(), filters(), ui_filters() {}
+    FilterList() noexcept: filter_buf_str(), patterns(), ui_filters() {}
+
+    inline void AddFilter(const char* name, size_t first_id) noexcept {
+        ui_filters.push_back({
+            name,
+            patterns.size() - first_id,
+            &patterns[first_id]
+        });
+    }
 
     void MakeFilters(const noex::string& ext) noexcept {
         filter_buf_str = ext;
@@ -259,23 +232,25 @@ class FilterList {
         size_t i = 0;
         size_t start = 0;
         bool is_reading_pattern = false;
-        Filter filter = Filter();
+        const char* name = nullptr;
+        size_t first_pattern_id = 0;
 
         for (const char c : ext) {
             if (c == '|') {
                 filter_buf[i] = 0;
                 if (is_reading_pattern) {
-                    filter.AddPattern(&filter_buf[start]);
-                    AddFilter(filter);
-                    filter = Filter();
+                    patterns.emplace_back(&filter_buf[start]);
+                    AddFilter(name, first_pattern_id);
+                    name = nullptr;
+                    first_pattern_id = patterns.size();
                 } else {
-                    filter.SetName(&filter_buf[start]);
+                    name = &filter_buf[start];
                 }
                 is_reading_pattern = !is_reading_pattern;
                 start = i + 1;
             } else if (is_reading_pattern && (c == ';')) {
                 filter_buf[i] = 0;
-                filter.AddPattern(&filter_buf[start]);
+                patterns.emplace_back(&filter_buf[start]);
                 start = i + 1;
             } else {
                 // filter_buf[i] = c;
@@ -284,29 +259,15 @@ class FilterList {
         }
         filter_buf[i] = 0;
         if (is_reading_pattern) {
-            filter.AddPattern(&filter_buf[start]);
-            AddFilter(filter);
-        }
-
-        ui_filters.reserve(filters.size());
-        if (ui_filters.capacity() != filters.size()) {
-            // Failed to reserve the buffer.
-            filters.clear();
-            return;
-        }
-        for (size_t j = 0; j < filters.size(); j++) {
-            ui_filters.push_back(filters[j].ToLibuiFilter());
+            patterns.emplace_back(&filter_buf[start]);
+            AddFilter(name, first_pattern_id);
         }
     }
 
     ~FilterList() noexcept {}
 
-    void AddFilter(const Filter& f) noexcept {
-        filters.push_back(f);
-    }
-
     size_t GetSize() const noexcept {
-        return filters.size();
+        return ui_filters.size();
     }
 
     uiFileDialogParamsFilter* ToLibuiFilterList() const noexcept {
