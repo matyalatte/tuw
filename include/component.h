@@ -29,7 +29,7 @@ class Component {
     virtual ~Component() noexcept {}
     virtual noex::string GetRawString() noexcept { return "";}
     noex::string GetString() noexcept;
-    const noex::string& GetID() const noexcept { return m_id; }
+    const char* GetID() const noexcept { return m_id; }
 
     virtual void SetConfig(const tuwjson::Value& config) noexcept { UNUSED(config); }
     virtual void GetConfig(tuwjson::Value& config) noexcept { UNUSED(config); }
@@ -61,9 +61,29 @@ class StringComponentBase : public Component {
     void GetConfig(tuwjson::Value& config) noexcept override;
 };
 
+class FilterList {
+ private:
+    noex::string filter_buf_str;
+    noex::vector<const char*> patterns;
+    noex::vector<uiFileDialogParamsFilter> ui_filters;
+
+ public:
+    FilterList() noexcept: filter_buf_str(), patterns(), ui_filters() {}
+
+    void MakeFilters(const char* ext) noexcept;
+
+    size_t GetSize() const noexcept {
+        return ui_filters.size();
+    }
+
+    uiFileDialogParamsFilter* ToLibuiFilterList() const noexcept {
+        return ui_filters.data();
+    }
+};
+
 class FilePicker : public StringComponentBase {
  private:
-    noex::string m_ext;
+    const char* m_ext;
 
  public:
     noex::string GetRawString() noexcept override;

@@ -207,73 +207,63 @@ void FilePicker::SetConfig(const tuwjson::Value& config) noexcept {
     setConfigForTextBox(config, m_id, m_widget);
 }
 
-class FilterList {
- private:
-    noex::string filter_buf_str;
-    noex::vector<const char*> patterns;
-    noex::vector<uiFileDialogParamsFilter> ui_filters;
+void FilterList::MakeFilters(const char* ext) noexcept {
+    filter_buf_str = ext;
+    char* filter_buf = filter_buf_str.data();
+    if (!filter_buf) return;
 
- public:
-    FilterList() noexcept: filter_buf_str(), patterns(), ui_filters() {}
+    bool is_reading_pattern = false;
+    const char* name = nullptr;
+    size_t first_pattern_id = 0;
 
-    inline void AddFilter(const char* name, size_t first_id) noexcept {
+    const char* p = ext;
+    char* buf = filter_buf;
+    const char* next_str = filter_buf;
+    while (*p) {
+        char c = *p;
+        if (c == '|') {
+            *buf = 0;
+            if (is_reading_pattern) {
+                patterns.emplace_back(next_str);
+                ui_filters.push_back({
+                    name,
+                    patterns.size() - first_pattern_id,
+                    nullptr  // We set pointers later since they can be reallocated.
+                });
+                first_pattern_id = patterns.size();
+            } else {
+                name = next_str;
+            }
+            is_reading_pattern = !is_reading_pattern;
+            next_str = buf + 1;
+        } else if (is_reading_pattern && (c == ';')) {
+            *buf = 0;
+            patterns.emplace_back(next_str);
+            next_str = buf + 1;
+        } else {
+            // *buf = c;
+        }
+        buf++;
+        p++;
+    }
+    *buf = 0;
+    if (is_reading_pattern) {
+        patterns.emplace_back(next_str);
         ui_filters.push_back({
             name,
-            patterns.size() - first_id,
-            &patterns[first_id]
+            patterns.size() - first_pattern_id,
+            nullptr
         });
     }
 
-    void MakeFilters(const noex::string& ext) noexcept {
-        filter_buf_str = ext;
-        char* filter_buf = filter_buf_str.data();
-        if (!filter_buf) return;
-
-        size_t i = 0;
-        size_t start = 0;
-        bool is_reading_pattern = false;
-        const char* name = nullptr;
-        size_t first_pattern_id = 0;
-
-        for (const char c : ext) {
-            if (c == '|') {
-                filter_buf[i] = 0;
-                if (is_reading_pattern) {
-                    patterns.emplace_back(&filter_buf[start]);
-                    AddFilter(name, first_pattern_id);
-                    name = nullptr;
-                    first_pattern_id = patterns.size();
-                } else {
-                    name = &filter_buf[start];
-                }
-                is_reading_pattern = !is_reading_pattern;
-                start = i + 1;
-            } else if (is_reading_pattern && (c == ';')) {
-                filter_buf[i] = 0;
-                patterns.emplace_back(&filter_buf[start]);
-                start = i + 1;
-            } else {
-                // filter_buf[i] = c;
-            }
-            i++;
-        }
-        filter_buf[i] = 0;
-        if (is_reading_pattern) {
-            patterns.emplace_back(&filter_buf[start]);
-            AddFilter(name, first_pattern_id);
-        }
+    // Set string pointers here since patterns.emplace_back() can reallocate them.
+    const char** ptr = patterns.data();
+    for (uiFileDialogParamsFilter& filter : ui_filters) {
+        size_t count = filter.patternCount;
+        filter.patterns = ptr;
+        ptr += count;
     }
-
-    ~FilterList() noexcept {}
-
-    size_t GetSize() const noexcept {
-        return ui_filters.size();
-    }
-
-    uiFileDialogParamsFilter* ToLibuiFilterList() const noexcept {
-        return ui_filters.data();
-    }
-};
+}
 
 void FilePicker::OpenFile() noexcept {
     uiEntry *entry = static_cast<uiEntry*>(m_widget);
