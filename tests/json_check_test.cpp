@@ -140,6 +140,15 @@ TEST(JsonCheckTest, checkGUIFail7) {
         " & echo textbox: __comp7__ & echo int: __comp8__ & echo float: __comp9__");
 }
 
+TEST(JsonCheckTest, checkGUIFail8) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    test_json["gui"][0]["components"][0]["id"].SetString("aaa");
+    test_json["gui"][0]["components"][1]["id"].SetString("aaa");
+    CheckGUIError(test_json,
+        "Found a duplicated id: \"aaa\" (line: 15, column: 27)");
+}
+
 TEST(JsonCheckTest, checkGUIFailRelaxed) {
     tuwjson::Value test_json;
     noex::string err = json_utils::LoadJson(JSON_RELAXED, test_json);

@@ -8,11 +8,6 @@
 
 class MainFrame;
 
-struct MenuData {
-    MainFrame* main_frame;
-    int menu_id;
-};
-
 #define EMPTY_JSON tuwjson::Value()
 
 // Get "gui_definition.*"
@@ -22,6 +17,7 @@ const char* GetDefaultJsonPath() noexcept;
 class MainFrame {
  private:
     tuwjson::Value m_definition;
+    tuwjson::Value* m_gui_json;
     size_t m_definition_id;
     tuwjson::Value m_config;
     uiWindow* m_mainwin;
@@ -33,7 +29,6 @@ class MainFrame {
     uiGrid* m_grid;
     uiButton* m_run_button;
     uiMenuItem* m_menu_item;
-    noex::vector<MenuData> m_menu_data_vec;
 
     void CreateFrame() noexcept;
     void CreateMenu() noexcept;
@@ -88,8 +83,8 @@ class MainFrame {
                     noex::string json_path) noexcept;
 
     void UpdatePanel(size_t definition_id) noexcept;
-    noex::string OpenURLBase(int id) noexcept;
-    void OpenURL(int id) noexcept;
+    noex::string OpenURLBase(size_t id) noexcept;
+    void OpenURL(size_t id) noexcept;
     bool Validate() noexcept;
     noex::string GetCommand() noexcept;
     void RunCommand() noexcept;

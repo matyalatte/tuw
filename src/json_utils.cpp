@@ -10,14 +10,13 @@
 #include "noex/vector.hpp"
 
 #ifdef _WIN32
-FILE* FileOpen(const char* path, const char* mode) noexcept {
+FILE* FileOpen(const char* path, const wchar_t* mode) noexcept {
     // Use wfopen as fopen might not use utf-8.
     noex::wstring wpath = UTF8toUTF16(path);
-    noex::wstring wmode = UTF8toUTF16(mode);
-    if (wpath.empty() || wmode.empty())
+    if (wpath.empty())
         return nullptr;
     errno = 0;
-    return _wfopen(wpath.c_str(), wmode.c_str());
+    return _wfopen(wpath.c_str(), mode);
 }
 #endif
 
@@ -48,7 +47,7 @@ enum ComponentType: int {
 };
 
 noex::string LoadJson(const noex::string& file, tuwjson::Value& json) noexcept {
-    FILE* fp = FileOpen(file.c_str(), "rb");
+    FILE* fp = FileOpen(file.c_str(), FILE_MODE_READ);
     if (!fp)
         return GetFileError(file);
 
@@ -71,7 +70,7 @@ noex::string LoadJson(const noex::string& file, tuwjson::Value& json) noexcept {
 }
 
 noex::string SaveJson(tuwjson::Value& json, const noex::string& file) noexcept {
-    FILE* fp = FileOpen(file.c_str(), "wb");
+    FILE* fp = FileOpen(file.c_str(), FILE_MODE_WRITE);
     if (!fp)
         return GetFileError(file);
 
@@ -275,27 +274,6 @@ SplitString(const char* str, const char delimiter) noexcept {
     return tokens;
 }
 
-static void CheckIndexDuplication(
-        JsonResult& result, const noex::vector<noex::string>& component_ids) noexcept {
-    size_t size = component_ids.size();
-    if (size == 0)
-        return;
-    for (size_t i = 0; i < size - 1; i++) {
-        const noex::string& str = component_ids[i];
-        if (str.empty())
-            continue;
-        for (size_t j = i + 1; j < size; j++) {
-            if (str == component_ids[j]) {
-                result.ok = false;
-                result.msg = noex::concat_cstr(
-                    "Component IDs should not be duplicated in a gui definition. (",
-                    str.c_str(), ")");
-                return;
-            }
-        }
-    }
-}
-
 // split command by "%" symbol, and calculate which component should be inserted there.
 static void CompileCommand(JsonResult& result,
                             tuwjson::Value& sub_definition,
@@ -344,10 +322,12 @@ static void CompileCommand(JsonResult& result,
             for (j = 0; j < comp_size; j++)
                 if (id == comp_ids[j]) break;
             if (j == comp_size) {
-                while (non_id_comp < comp_size
-                    && (components[non_id_comp]["type_int"].GetInt() == COMP_STATIC_TEXT
-                        || !comp_ids[non_id_comp].empty()
-                        || components[non_id_comp]["type_int"].GetInt() == COMP_EMPTY)) {
+                while (non_id_comp < comp_size) {
+                    int type_int = components[non_id_comp]["type_int"].GetInt();
+                    if (type_int != COMP_STATIC_TEXT
+                            && type_int != COMP_EMPTY
+                            && comp_ids[non_id_comp].empty())
+                        break;
                     non_id_comp++;
                 }
                 j = non_id_comp;
@@ -618,15 +598,29 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
 
         const char* id = GetString(c, "id", "");
         if (c.HasMember("id")) {
+            noex::string linecol = c["id"].GetLineColumnStr();
             if (id[0] == '\0') {
                 result.ok = false;
                 result.msg = "\"id\" should NOT be an empty string."
-                            + c["id"].GetLineColumnStr();
+                            + linecol;
             } else if (id[0] == '_') {
                 result.ok = false;
                 result.msg = "\"id\" should NOT start with '_'."
-                            + c["id"].GetLineColumnStr();
+                            + linecol;
             }
+            if (!ignore) {
+                for (const noex::string& str : comp_ids) {
+                    if (id == str) {
+                        result.ok = false;
+                        result.msg =
+                            noex::concat_cstr("Found a duplicated id: \"", id, "\"")
+                            + linecol;
+                    }
+                }
+            }
+        } else {
+            uint32_t hash = Fnv1Hash32(c["label"].GetString());
+            c["id"].SetString("_" + noex::to_string(hash));
         }
         if (!result.ok) return;
 
@@ -637,8 +631,6 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
             comp_ids.emplace_back(id);
         }
     }
-    CheckIndexDuplication(result, comp_ids);
-    if (!result.ok) return;
 
     // Overwrite ["command"] with ["command_'os'"] if exists.
     const char* command_os_key = "command_" TUW_CONSTANTS_OS;
@@ -708,14 +700,15 @@ void CheckDefinition(JsonResult& result, tuwjson::Value& definition) noexcept {
     }
     CheckJsonArrayType(result, definition, "gui", JsonType::JSON);
     if (!result.ok) return;
-    if (definition["gui"].Size() == 0) {
+    tuwjson::Value& gui_json = definition["gui"];
+    if (gui_json.Size() == 0) {
         result.ok = false;
         result.msg = "The size of [\"gui\"] should NOT be zero."
-            + definition["gui"].GetLineColumnStr();;
+            + gui_json.GetLineColumnStr();;
     }
 
     int i = 0;
-    for (tuwjson::Value& sub_d : definition["gui"]) {
+    for (tuwjson::Value& sub_d : gui_json) {
         if (!result.ok) return;
         CheckSubDefinition(result, sub_d, i);
         i++;
@@ -730,7 +723,8 @@ void CheckHelpURLs(JsonResult& result, tuwjson::Value& definition) noexcept {
         CheckJsonType(result, h, "type", JsonType::STRING, "help document", REQUIRED);
         CheckJsonType(result, h, "label", JsonType::STRING, "help document", REQUIRED);
         if (!result.ok) return;
-        const char* type = h["type"].GetString();
+        tuwjson::Value& help_type = h["type"];
+        const char* type = help_type.GetString();
         if (strcmp(type, "url") == 0) {
             CheckJsonType(result, h, "url", JsonType::STRING, "URL type document", REQUIRED);
         } else if (strcmp(type, "file") == 0) {
@@ -738,7 +732,7 @@ void CheckHelpURLs(JsonResult& result, tuwjson::Value& definition) noexcept {
         } else {
             result.ok = false;
             result.msg = noex::concat_cstr("Unsupported help type: ", type)
-                + h["type"].GetLineColumnStr();;
+                + help_type.GetLineColumnStr();;
             return;
         }
     }

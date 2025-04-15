@@ -256,3 +256,23 @@ TEST_F(OpenURLTest, OpenUrlWithSpace) {
         "URL: https://example .com";
     EXPECT_STREQ(msg.c_str(), expected);
 }
+
+TEST(FilterListTest, EmptyFilter) {
+    FilterList list;
+    list.MakeFilters("");
+    EXPECT_EQ(list.GetSize(), 0);
+}
+
+TEST(FilterListTest, MultipleFilters) {
+    FilterList list;
+    list.MakeFilters("BMP and GIF files (*.bmp;*.gif)|*.bmp;*.gif|PNG files (*.png)|*.png");
+    EXPECT_EQ(list.GetSize(), 2);
+    uiFileDialogParamsFilter* filters = list.ToLibuiFilterList();
+    EXPECT_STREQ(filters[0].name, "BMP and GIF files (*.bmp;*.gif)");
+    EXPECT_EQ(filters[0].patternCount, 2);
+    EXPECT_STREQ(filters[0].patterns[0], "*.bmp");
+    EXPECT_STREQ(filters[0].patterns[1], "*.gif");
+    EXPECT_STREQ(filters[1].name, "PNG files (*.png)");
+    EXPECT_EQ(filters[1].patternCount, 1);
+    EXPECT_STREQ(filters[1].patterns[0], "*.png");
+}

@@ -11,10 +11,6 @@ Component::Component(const tuwjson::Value& j) noexcept {
     m_is_wide = false;
     m_label = j["label"].GetString();
     m_id = json_utils::GetString(j, "id", "");
-    if (m_id.empty()) {
-        uint32_t hash = Fnv1Hash32(m_label);
-        m_id = noex::string("_") + hash;
-    }
     m_add_quotes = json_utils::GetBool(j, "add_quotes", false);
     if (j.HasMember("validator"))
         m_validator.Initialize(j["validator"]);
@@ -29,7 +25,7 @@ noex::string Component::GetString() noexcept {
         return "";
     if (m_add_quotes)
         str = noex::concat_cstr("\"", str.c_str(), "\"");
-    return noex::concat_cstr(m_prefix.c_str(), str.c_str(), m_suffix.c_str());
+    return noex::concat_cstr(m_prefix, str.c_str(), m_suffix);
 }
 
 bool Component::Validate(bool* redraw_flag) noexcept {
@@ -115,7 +111,7 @@ Component* Component::PutComponent(uiBox* box, const tuwjson::Value& j) noexcept
 // Static Text
 StaticText::StaticText(uiBox* box, const tuwjson::Value& j) noexcept
     : Component(j) {
-    uiLabel* text = uiNewLabel(m_label.c_str());
+    uiLabel* text = uiNewLabel(m_label);
     uiBoxAppend(box, uiControl(text), 0);
 }
 
@@ -124,7 +120,7 @@ StringComponentBase::StringComponentBase(
     uiBox* box, const tuwjson::Value& j) noexcept
     : Component(j) {
     m_has_string = false;
-    uiLabel* text = uiNewLabel(m_label.c_str());
+    uiLabel* text = uiNewLabel(m_label);
     uiBoxAppend(box, uiControl(text), 0);
 }
 
@@ -199,8 +195,8 @@ noex::string FilePicker::GetRawString() noexcept {
 }
 
 static void setConfigForTextBox(const tuwjson::Value& config,
-                                const noex::string& id, void *widget) noexcept {
-    const char* str = json_utils::GetString(config, id.c_str(), nullptr);
+                                const char* id, void *widget) noexcept {
+    const char* str = json_utils::GetString(config, id, nullptr);
     if (str) {
         uiEntry* entry = static_cast<uiEntry*>(widget);
         uiEntrySetText(entry, str);
@@ -211,112 +207,63 @@ void FilePicker::SetConfig(const tuwjson::Value& config) noexcept {
     setConfigForTextBox(config, m_id, m_widget);
 }
 
-class Filter {
- private:
-    const char* name;
-    noex::vector<const char*> patterns;
+void FilterList::MakeFilters(const char* ext) noexcept {
+    filter_buf_str = ext;
+    char* filter_buf = filter_buf_str.data();
+    if (!filter_buf) return;
 
- public:
-    Filter() noexcept : name(nullptr), patterns() {}
+    bool is_reading_pattern = false;
+    const char* name = nullptr;
+    size_t first_pattern_id = 0;
 
-    Filter(const Filter& filter) :
-        name(filter.name), patterns(filter.patterns) {}
-
-    Filter& operator=(const Filter& filter) {
-        if (this == &filter) return *this;
-        name = filter.name;
-        patterns = filter.patterns;
-        return *this;
-    }
-
-    void SetName(const char* n) noexcept {
-        name = n;
-    }
-
-    void AddPattern(const char* pattern) noexcept {
-        patterns.emplace_back(pattern);
-    }
-
-    uiFileDialogParamsFilter ToLibuiFilter() const noexcept {
-        return {
-            name,
-            patterns.size(),
-            &patterns[0]
-        };
-    }
-};
-
-class FilterList {
- private:
-    noex::string filter_buf_str;
-    noex::vector<Filter> filters;
-    noex::vector<uiFileDialogParamsFilter> ui_filters;
-
- public:
-    FilterList() noexcept: filter_buf_str(), filters(), ui_filters() {}
-
-    void MakeFilters(const noex::string& ext) noexcept {
-        filter_buf_str = ext;
-        char* filter_buf = filter_buf_str.data();
-        if (!filter_buf) return;
-
-        size_t i = 0;
-        size_t start = 0;
-        bool is_reading_pattern = false;
-        Filter filter = Filter();
-
-        for (const char c : ext) {
-            if (c == '|') {
-                filter_buf[i] = 0;
-                if (is_reading_pattern) {
-                    filter.AddPattern(&filter_buf[start]);
-                    AddFilter(filter);
-                    filter = Filter();
-                } else {
-                    filter.SetName(&filter_buf[start]);
-                }
-                is_reading_pattern = !is_reading_pattern;
-                start = i + 1;
-            } else if (is_reading_pattern && (c == ';')) {
-                filter_buf[i] = 0;
-                filter.AddPattern(&filter_buf[start]);
-                start = i + 1;
+    const char* p = ext;
+    char* buf = filter_buf;
+    const char* next_str = filter_buf;
+    while (*p) {
+        char c = *p;
+        if (c == '|') {
+            *buf = 0;
+            if (is_reading_pattern) {
+                patterns.emplace_back(next_str);
+                ui_filters.push_back({
+                    name,
+                    patterns.size() - first_pattern_id,
+                    nullptr  // We set pointers later since they can be reallocated.
+                });
+                first_pattern_id = patterns.size();
             } else {
-                // filter_buf[i] = c;
+                name = next_str;
             }
-            i++;
+            is_reading_pattern = !is_reading_pattern;
+            next_str = buf + 1;
+        } else if (is_reading_pattern && (c == ';')) {
+            *buf = 0;
+            patterns.emplace_back(next_str);
+            next_str = buf + 1;
+        } else {
+            // *buf = c;
         }
-        filter_buf[i] = 0;
-        if (is_reading_pattern) {
-            filter.AddPattern(&filter_buf[start]);
-            AddFilter(filter);
-        }
-
-        ui_filters.reserve(filters.size());
-        if (ui_filters.capacity() != filters.size()) {
-            // Failed to reserve the buffer.
-            filters.clear();
-            return;
-        }
-        for (size_t j = 0; j < filters.size(); j++) {
-            ui_filters.push_back(filters[j].ToLibuiFilter());
-        }
+        buf++;
+        p++;
+    }
+    *buf = 0;
+    if (is_reading_pattern) {
+        patterns.emplace_back(next_str);
+        ui_filters.push_back({
+            name,
+            patterns.size() - first_pattern_id,
+            nullptr
+        });
     }
 
-    ~FilterList() noexcept {}
-
-    void AddFilter(const Filter& f) noexcept {
-        filters.push_back(f);
+    // Set string pointers here since patterns.emplace_back() can reallocate them.
+    const char** ptr = patterns.data();
+    for (uiFileDialogParamsFilter& filter : ui_filters) {
+        size_t count = filter.patternCount;
+        filter.patterns = ptr;
+        ptr += count;
     }
-
-    size_t GetSize() const noexcept {
-        return filters.size();
-    }
-
-    uiFileDialogParamsFilter* ToLibuiFilterList() const noexcept {
-        return ui_filters.data();
-    }
-};
+}
 
 void FilePicker::OpenFile() noexcept {
     uiEntry *entry = static_cast<uiEntry*>(m_widget);
@@ -386,19 +333,17 @@ void DirPicker::OpenFolder() noexcept {
 
 // ComboBox
 ComboBox::ComboBox(uiBox* box, const tuwjson::Value& j) noexcept
-    : StringComponentBase(box, j) {
+    : StringComponentBase(box, j), m_values() {
     uiCombobox* combo = uiNewCombobox();
-    noex::vector<noex::string> values;
     for (const tuwjson::Value& i : j["items"]) {
         const char* label = i["label"].GetString();
         uiComboboxAppend(combo, label);
         const char* value = json_utils::GetString(i, "value", label);
-        values.emplace_back(value);
+        m_values.push_back(value);
     }
     uiBoxAppend(box, uiControl(combo), 0);
     uiComboboxSetSelected(combo, json_utils::GetInt(j, "default", 0) % j["items"].Size());
 
-    SetValues(values);
     SetTooltip(uiControl(combo), j);
     m_widget = combo;
 }
@@ -423,19 +368,17 @@ void ComboBox::GetConfig(tuwjson::Value& config) noexcept {
 
 // RadioButtons
 RadioButtons::RadioButtons(uiBox* box, const tuwjson::Value& j) noexcept
-    : StringComponentBase(box, j) {
+    : StringComponentBase(box, j), m_values() {
     uiRadioButtons* radio = uiNewRadioButtons();
-    noex::vector<noex::string> values;
     for (const tuwjson::Value& i : j["items"]) {
         const char* label = i["label"].GetString();
         uiRadioButtonsAppend(radio, label);
         const char* value = json_utils::GetString(i, "value", label);
-        values.emplace_back(value);
+        m_values.push_back(value);
     }
     uiBoxAppend(box, uiControl(radio), 0);
     uiRadioButtonsSetSelected(radio, json_utils::GetInt(j, "default", 0) % j["items"].Size());
 
-    SetValues(values);
     SetTooltip(uiControl(radio), j);
     m_widget = radio;
 }
@@ -462,11 +405,11 @@ void RadioButtons::GetConfig(tuwjson::Value& config) noexcept {
 CheckBox::CheckBox(uiBox* box, const tuwjson::Value& j) noexcept
     : Component(j) {
     m_has_string = true;
-    uiCheckbox* check = uiNewCheckbox(m_label.c_str());
+    uiCheckbox* check = uiNewCheckbox(m_label);
     uiCheckboxSetChecked(check, json_utils::GetBool(j, "default", false));
     uiBoxAppend(box, uiControl(check), 0);
 
-    m_value = json_utils::GetString(j, "value", m_label.c_str());
+    m_value = json_utils::GetString(j, "value", m_label);
 
     SetTooltip(uiControl(check), j);
     m_widget = check;
@@ -491,7 +434,6 @@ void CheckBox::GetConfig(tuwjson::Value& config) noexcept {
 // CheckArray
 CheckArray::CheckArray(uiBox* box, const tuwjson::Value& j) noexcept
     : StringComponentBase(box, j) {
-    noex::vector<noex::string> values;
     uiBox* check_array_box = uiNewVerticalBox();
     uiBoxSetSpacing(check_array_box, tuw_constants::BOX_CHECKS_SPACE);
     size_t id = 0;
@@ -503,11 +445,10 @@ CheckArray::CheckArray(uiBox* box, const tuwjson::Value& j) noexcept
         SetTooltip(uiControl(check), i);
         m_checks.push_back(check);
         const char* value = json_utils::GetString(i, "value", label);
-        values.emplace_back(value);
+        m_values.push_back(value);
         id++;
     }
     uiBoxAppend(box, uiControl(check_array_box), 0);
-    SetValues(values);
 }
 
 noex::string CheckArray::GetRawString() noexcept {

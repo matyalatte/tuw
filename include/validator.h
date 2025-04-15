@@ -5,18 +5,18 @@
 
 class Validator {
  private:
-    noex::string m_regex;
-    noex::string m_wildcard;
+    const char* m_regex;
+    const char* m_wildcard;
     bool m_not_empty;
     bool m_exist;
-    noex::string m_regex_error;
-    noex::string m_wildcard_error;
-    noex::string m_not_empty_error;
-    noex::string m_exist_error;
+    const char* m_regex_error;
+    const char* m_wildcard_error;
+    const char* m_not_empty_error;
+    const char* m_exist_error;
     noex::string m_error_msg;
 
  public:
-    Validator() : m_regex(""), m_wildcard(""),
+    Validator() : m_regex(nullptr), m_wildcard(nullptr),
                   m_not_empty(false), m_exist(false),
                   m_error_msg("") {}
     ~Validator() {}

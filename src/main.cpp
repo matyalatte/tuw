@@ -12,17 +12,21 @@
 #include "string_utils.h"
 #include "tuw_constants.h"
 
+#ifdef _WIN32
+#include "windows/uipriv_windows.hpp"
+#endif
+
 int main_app(const char* json_path = nullptr) noexcept {
 #ifdef _WIN32
     // Enable ANSI escape sequences on the console window.
     EnableCSI();
 #endif
 
-    uiInitOptions options;
+    uiInitOptions ui_options;
     const char *err;
 
-    memset(&options, 0, sizeof (uiInitOptions));
-    err = uiInit(&options);
+    memset(&ui_options, 0, sizeof (uiInitOptions));
+    err = uiInit(&ui_options);
     if (err != NULL) {
         fprintf(stderr, "error initializing libui: %s", err);
         uiFreeInitError(err);
@@ -206,12 +210,23 @@ int OptToInt(const char* opt) noexcept {
 }
 
 #ifdef _WIN32
+void FreeArgs(noex::vector<char*>& args) noexcept {
+    for (char* arg : args) {
+        if (arg)
+            uiprivFree(arg);
+    }
+}
+#else
+#define FreeArgs(args) (void)0
+#endif
+
+#ifdef _WIN32
 int wmain(int argc, wchar_t* argv[]) noexcept {
     setlocale(LC_CTYPE, "");
 #else
 int main(int argc, char* argv[]) noexcept {
 #endif  // _WIN32
-    noex::vector<noex::string> args;
+    noex::vector<char*> args;
     for (int i = 0; i < argc; i++) {
 #ifdef __APPLE__
         // Note: When you run Tuw as a macOS application,
@@ -221,7 +236,7 @@ int main(int argc, char* argv[]) noexcept {
             continue;  // Ignore the PSN
 #endif  // __APPLE__
 #ifdef _WIN32
-        args.emplace_back(UTF16toUTF8(argv[i]));
+        args.emplace_back(toUTF8(argv[i]));
 #else
         args.emplace_back(argv[i]);
 #endif  // _WIN32
@@ -230,17 +245,25 @@ int main(int argc, char* argv[]) noexcept {
     noex::string exe_path = envuStr(envuGetExecutablePath());
 
     // Launch GUI if no args.
-    if (args.size() <= 1) return main_app();
+    if (args.size() <= 1) {
+        FreeArgs(args);
+        return main_app();
+    }
 
     // Launch GUI with a JSON path.
-    if (args[1].contains('.')) return main_app(args[1].c_str());
+    if (noex::string(args[1]).contains('.')) {
+        int ret = main_app(args[1]);
+        FreeArgs(args);
+        return ret;
+    }
 
     // Run as a CLI tool
-    const char* cmd_str = args[1].c_str();
+    const char* cmd_str = args[1];
     int cmd_int = CmdToInt(cmd_str);
     if (cmd_int == CMD_UNKNOWN) {
         PrintUsage();
         FprintFmt(stderr, "Error: Unknown command detected. (%s)", cmd_str);
+        FreeArgs(args);
         return 1;
     }
 
@@ -250,19 +273,21 @@ int main(int argc, char* argv[]) noexcept {
     bool force = false;
 
     for (size_t i = 2; i < args.size(); i++) {
-        const char* opt_str = args[i].c_str();
+        const char* opt_str = args[i];
         int opt_int = OptToInt(opt_str);
         if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && args.size() <= i + 1) {
             PrintUsage();
             FprintFmt(stderr, "Error: This option requires a file path. (%s)\n", opt_str);
+            FreeArgs(args);
             return 1;
         } else if (opt_int == OPT_UNKNOWN) {
             PrintUsage();
             FprintFmt(stderr, "Error: Unknown option detected. (%s)\n", opt_str);
+            FreeArgs(args);
             return 1;
         } else if (opt_int == OPT_JSON) {
             i++;
-            json_path_cstr = args[i].data();
+            json_path_cstr = args[i];
         } else if (opt_int == OPT_EXE) {
             i++;
             new_exe_path = args[i];
@@ -287,6 +312,7 @@ int main(int argc, char* argv[]) noexcept {
     if (json_path == exe_path || new_exe_path == exe_path) {
         PrintUsage();
         fprintf(stderr, "Error: Can NOT overwrite the executable itself.\n");
+        FreeArgs(args);
         return 1;
     }
 
@@ -303,7 +329,9 @@ int main(int argc, char* argv[]) noexcept {
 
     if (!err.empty()) {
         FprintFmt(stderr, "Error: %s\n", err.c_str());
+        FreeArgs(args);
         return 1;
     }
+    FreeArgs(args);
     return 0;
 }

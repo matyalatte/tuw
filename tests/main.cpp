@@ -36,6 +36,7 @@ int main(int argc, char* argv[]) {
 #ifdef USE_BROWSER
     ::testing::Environment* const foo_env =
         ::testing::AddGlobalTestEnvironment(new BrowserCloser);
+    (void) foo_env;
 #endif
     return RUN_ALL_TESTS();
 }

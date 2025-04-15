@@ -11,15 +11,15 @@
 class Component {
  protected:
     void* m_widget;
-    noex::string m_label;
-    noex::string m_id;
+    const char* m_label;
+    const char* m_id;
     bool m_has_string;
     bool m_is_wide;
     Validator m_validator;
     uiLabel* m_error_widget;
     bool m_optional;
-    noex::string m_prefix;
-    noex::string m_suffix;
+    const char* m_prefix;
+    const char* m_suffix;
 
  private:
     bool m_add_quotes;
@@ -29,7 +29,7 @@ class Component {
     virtual ~Component() noexcept {}
     virtual noex::string GetRawString() noexcept { return "";}
     noex::string GetString() noexcept;
-    const noex::string& GetID() const noexcept { return m_id; }
+    const char* GetID() const noexcept { return m_id; }
 
     virtual void SetConfig(const tuwjson::Value& config) noexcept { UNUSED(config); }
     virtual void GetConfig(tuwjson::Value& config) noexcept { UNUSED(config); }
@@ -42,17 +42,6 @@ class Component {
     void PutErrorWidget(uiBox* box) noexcept;
 
     static Component* PutComponent(uiBox* box, const tuwjson::Value& j) noexcept;
-};
-
-// containers for Combo and CheckArray
-class MultipleValuesContainer {
- protected:
-    noex::vector<noex::string> m_values;
-
- public:
-    void SetValues(noex::vector<noex::string> values) noexcept {
-        m_values = values;
-    }
 };
 
 class EmptyComponent : public Component {
@@ -72,9 +61,30 @@ class StringComponentBase : public Component {
     void GetConfig(tuwjson::Value& config) noexcept override;
 };
 
+class FilterList {
+ private:
+    noex::string filter_buf_str;
+    noex::vector<const char*> patterns;
+    noex::vector<uiFileDialogParamsFilter> ui_filters;
+
+ public:
+    FilterList() noexcept: filter_buf_str(), patterns(), ui_filters() {}
+
+    void MakeFilters(const char* ext) noexcept;
+
+    size_t GetSize() const noexcept {
+        return ui_filters.size();
+    }
+
+    uiFileDialogParamsFilter* ToLibuiFilterList() const noexcept {
+        return ui_filters.data();
+    }
+};
+
 class FilePicker : public StringComponentBase {
  private:
-    noex::string m_ext;
+    const char* m_ext;
+
  public:
     noex::string GetRawString() noexcept override;
     FilePicker(uiBox* box, const tuwjson::Value& j) noexcept;
@@ -90,7 +100,10 @@ class DirPicker : public StringComponentBase {
     void OpenFolder() noexcept;
 };
 
-class ComboBox : public StringComponentBase, MultipleValuesContainer {
+class ComboBox : public StringComponentBase {
+ private:
+    noex::vector<const char*> m_values;
+
  public:
     noex::string GetRawString() noexcept override;
     ComboBox(uiBox* box, const tuwjson::Value& j) noexcept;
@@ -98,7 +111,10 @@ class ComboBox : public StringComponentBase, MultipleValuesContainer {
     void SetConfig(const tuwjson::Value& config) noexcept override;
 };
 
-class RadioButtons : public StringComponentBase, MultipleValuesContainer {
+class RadioButtons : public StringComponentBase {
+ private:
+    noex::vector<const char*> m_values;
+
  public:
     noex::string GetRawString() noexcept override;
     RadioButtons(uiBox* box, const tuwjson::Value& j) noexcept;
@@ -108,7 +124,8 @@ class RadioButtons : public StringComponentBase, MultipleValuesContainer {
 
 class CheckBox : public Component {
  private:
-    noex::string m_value;
+    const char* m_value;
+
  public:
     noex::string GetRawString() noexcept override;
     CheckBox(uiBox* box, const tuwjson::Value& j) noexcept;
@@ -116,9 +133,11 @@ class CheckBox : public Component {
     void SetConfig(const tuwjson::Value& config) noexcept override;
 };
 
-class CheckArray : public StringComponentBase, MultipleValuesContainer {
+class CheckArray : public StringComponentBase {
  private:
+    noex::vector<const char*> m_values;
     noex::vector<uiCheckbox*> m_checks;
+
  public:
     noex::string GetRawString() noexcept override;
     CheckArray(uiBox* box, const tuwjson::Value& j) noexcept;

@@ -5,10 +5,10 @@
 #include "string_utils.h"
 
 void Validator::Initialize(const tuwjson::Value& j) noexcept {
-    m_regex = json_utils::GetString(j, "regex", "");
-    m_regex_error = json_utils::GetString(j, "regex_error", "");
-    m_wildcard = json_utils::GetString(j, "wildcard", "");
-    m_wildcard_error = json_utils::GetString(j, "wildcard_error", "");
+    m_regex = json_utils::GetString(j, "regex", nullptr);
+    m_regex_error = json_utils::GetString(j, "regex_error", nullptr);
+    m_wildcard = json_utils::GetString(j, "wildcard", nullptr);
+    m_wildcard_error = json_utils::GetString(j, "wildcard_error", nullptr);
     m_not_empty = json_utils::GetBool(j, "not_empty", false);
     m_not_empty_error = json_utils::GetString(
         j, "not_empty_error", "Empty string is NOT allowed.");
@@ -40,30 +40,30 @@ bool Validator::Validate(const noex::string& str) noexcept {
         m_error_msg = m_not_empty_error;
         return false;
     }
-    if (!m_wildcard.empty()) {
-        if (tsm_wildcard_match(m_wildcard.c_str(), str.c_str()) != TSM_OK) {
-            if (m_wildcard_error.empty())
-                m_error_msg = "Wildcard match failed for pattern: " + m_wildcard;
-            else
+    if (m_wildcard) {
+        if (tsm_wildcard_match(m_wildcard, str.c_str()) != TSM_OK) {
+            if (m_wildcard_error)
                 m_error_msg = m_wildcard_error;
+            else
+                m_error_msg = noex::concat_cstr("Wildcard match failed for pattern: ", m_wildcard);
             return false;
         }
     }
-    if (!m_regex.empty()) {
-        if (IsUnsupportedPattern(m_regex.c_str())) {
+    if (m_regex) {
+        if (IsUnsupportedPattern(m_regex)) {
             m_error_msg = "Regex compile error: () operators are not supported.";
             return false;
         }
-        int res = tsm_regex_match(m_regex.c_str(), str.c_str());
-        if (res != TSM_OK && !m_regex_error.empty()) {
+        int res = tsm_regex_match(m_regex, str.c_str());
+        if (res != TSM_OK && m_regex_error) {
             m_error_msg = m_regex_error;
             return false;
         }
         if (res == TSM_FAIL) {
-            m_error_msg = "Regex match failed for pattern: " + m_regex;
+            m_error_msg = noex::concat_cstr("Regex match failed for pattern: ", m_regex);
             return false;
         } else if (res == TSM_SYNTAX_ERROR) {
-            m_error_msg = "Failed to parse regex pattern: " + m_regex;
+            m_error_msg = noex::concat_cstr("Failed to parse regex pattern: ", m_regex);
             return false;
         }
     }
