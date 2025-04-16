@@ -16,9 +16,9 @@
 [![donate](https://img.shields.io/static/v1?label=donate&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/matyalatte)  
 [Examples](../examples/README.md) | [Build Instructions](./Building.md) | [FAQ](./FAQ.md)
 
-## Only 300KB for a portable GUI
+## Only 200KB for a portable GUI
 
-Tuw provides a very simple GUI for your scripts.  
+Tuw provides a simple GUI, like a web form, for your scripts.  
 All you need is a JSON file and a tiny executable.  
 **No need for compilers, browsers, or huge executables!**  
 
@@ -43,7 +43,7 @@ You can download executables from [the release page](https://github.com/matyalat
 
 -   `Tuw-*-Windows-*.zip` is for Windows (7 or later.)  
 -   `Tuw-*-Windows10-*.zip` requires Windows 10 or later, but it's much smaller than the standard version.  
--   `Tuw-*-macOS.tar.xz` is for macOS (10.9 or later.)  
+-   `Tuw-*-macOS-*.tar.xz` is for macOS (10.9 or later.)  
 -   `Tuw-*-Linux-*.tar.xz` is for Linux (with GTK3.14, GLIBC2.28, and GLIBCXX3.4, or later versions of the libraries.)  
 
 > [!Note]
@@ -95,7 +95,6 @@ Files in this repository are available under the [MIT license](../license.txt).
 | Project | About | License |
 | -- | -- | -- |
 | [libui-ng](https://github.com/libui-ng/libui-ng) | GUI framework | [MIT](http://opensource.org/licenses/MIT) |
-| [RapidJSON](https://github.com/Tencent/rapidjson) | JSON parser | [MIT](http://opensource.org/licenses/MIT) |
 | [subprocess.h](https://github.com/sheredom/subprocess.h) | Command processor | [Unlicense](https://github.com/sheredom/subprocess.h/blob/master/LICENSE) |
 | [c-env-utils](https://github.com/matyalatte/c-env-utils) | Utilities for environment info | [MIT](http://opensource.org/licenses/MIT) |
 | [tiny-str-match](https://github.com/matyalatte/tiny-str-match) | String validator | [MIT](http://opensource.org/licenses/MIT) |
