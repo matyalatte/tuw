@@ -10,8 +10,8 @@ constexpr char LOGO[] =
     "       CLI tools\n";
 constexpr char TOOL_NAME[] = "Tuw";
 constexpr char AUTHOR[] = "matyalatte";
-constexpr char VERSION[] = "0.9.2";
-constexpr int VERSION_INT = 902;
+constexpr char VERSION[] = "0.10.0";
+constexpr int VERSION_INT = 1000;
 
 #ifdef _WIN32
 #define TUW_CONSTANTS_OS "win"
