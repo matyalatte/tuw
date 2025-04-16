@@ -40,16 +40,10 @@ bool Component::Validate(bool* redraw_flag) noexcept {
     bool updated = old_validate != validate;
     *redraw_flag |= updated;
 
-    if (updated) {
-       if (validate) {
-            uiControlHide(c);
-        } else {
-            uiControlShow(c);
-            uiLabelSetText(m_error_widget,
-                           GetValidationError().c_str());
-        }
-    } else if (!validate) {
+    if (updated == validate) {
         uiControlHide(c);
+    }
+    if (!validate) {
         uiControlShow(c);
         uiLabelSetText(m_error_widget,
                        GetValidationError().c_str());
