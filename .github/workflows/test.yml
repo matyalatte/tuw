@@ -32,6 +32,8 @@ jobs:
             buildtype: Release
           - os: windows-2022
             buildtype: Debug
+          - os: windows-11-arm
+            buildtype: Release
           - os: macos-14
             buildtype: Release
     runs-on: ${{ matrix.os }}
@@ -81,55 +83,3 @@ jobs:
       - name: Test with docker
         run: |
           docker build --build-arg TEST=true -t tuw_test -f docker/${{ matrix.os }}.dockerfile ./
-
-  build_tests_windows_arm64:
-    runs-on: windows-2022
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      - name: Install Meson
-        run: pip install meson
-
-      - name: Prepare MSVC
-        uses: bus1/cabuild/action/msdevshell@v1
-        with:
-          architecture: x64
-
-      - name: build tests
-        run: |
-          cd batch_files
-          ./test_arm.bat
-
-      - name: copy test files to ./workspace
-        run: |
-          mkdir workspace
-          cp build/ReleaseARM-Test/tests/unit_test.exe workspace
-          mkdir workspace/json
-          cp build/ReleaseARM-Test/tests/json/*.json* workspace/json
-        shell: bash
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: tests-windows-arm64
-          path: workspace
-
-  run_tests_windows_arm64:
-    runs-on: ubuntu-latest
-    needs: [lint, build_tests_windows_arm64]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: tests-windows-arm64
-          path: workspace
-
-      - name: Run tests with wine-arm64
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qemu-user-static xvfb
-          docker run --rm --init -i -v $(pwd)/workspace/:/workspace docker.io/linaro/wine-arm64 xvfb-run wine-arm64 cmd.exe /c '/workspace/unit_test.exe'
