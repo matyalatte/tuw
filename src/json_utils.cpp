@@ -117,6 +117,9 @@ enum class JsonType {
     FLOAT,
     STRING,
     JSON,
+    ARRAY,
+    STRING_ARRAY,
+    JSON_ARRAY,
     MAX
 };
 
@@ -132,7 +135,9 @@ static void CheckJsonType(JsonResult& result, const tuwjson::Value& j, const cha
     }
     bool valid = false;
     const char* type_name = nullptr;
-    const tuwjson::Value& v = j[key];
+    tuwjson::Value& v = j[key];
+    if (type > JsonType::ARRAY && !v.IsArray())
+        v.ConvertToArray();
     switch (type) {
     case JsonType::BOOLEAN:
         valid = v.IsBool();
@@ -154,6 +159,26 @@ static void CheckJsonType(JsonResult& result, const tuwjson::Value& j, const cha
         valid = v.IsObject();
         type_name = "a json object";
         break;
+    case JsonType::STRING_ARRAY:
+        valid = true;
+        type_name = "an array of strings";
+        for (const tuwjson::Value& el : v) {
+            if (!el.IsString()) {
+                valid = false;
+                break;
+            }
+        }
+        break;
+    case JsonType::JSON_ARRAY:
+        valid = true;
+        type_name = "an array of json objects";
+        for (const tuwjson::Value& el : v) {
+            if (!el.IsObject()) {
+                valid = false;
+                break;
+            }
+        }
+        break;
     default:
         assert(false);
         type_name = "";
@@ -163,66 +188,6 @@ static void CheckJsonType(JsonResult& result, const tuwjson::Value& j, const cha
         result.ok = false;
         result.msg = noex::concat_cstr("\"", key, "\" should be ") + type_name
             + v.GetLineColumnStr();
-    }
-}
-
-static bool IsJsonArray(tuwjson::Value& j, const char* key) noexcept {
-    tuwjson::Value& val = j[key];
-    if (!val.IsArray()) {
-        if (!val.IsObject())
-            return false;
-        val.ConvertToArray();
-    }
-    for (const tuwjson::Value& el : val) {
-        if (!el.IsObject())
-            return false;
-    }
-    return true;
-}
-
-static bool IsStringArray(tuwjson::Value& j, const char* key) noexcept {
-    tuwjson::Value& val = j[key];
-    if (!val.IsArray()) {
-        if (!val.IsString())
-            return false;
-        val.ConvertToArray();
-    }
-    for (const tuwjson::Value& el : val) {
-        if (!el.IsString())
-            return false;
-    }
-    return true;
-}
-
-static void CheckJsonArrayType(JsonResult& result, tuwjson::Value& j, const char* key,
-        const JsonType& type,
-        const char* name = "", const bool& optional = true) noexcept {
-    if (!j.HasMember(key)) {
-        if (optional) return;
-        result.ok = false;
-        result.msg = noex::concat_cstr(name, " requires \"", key) + "\"" + j.GetLineColumnStr();
-        return;
-    }
-    bool valid = false;
-    const char* type_name = nullptr;
-    switch (type) {
-    case JsonType::STRING:
-        valid = IsStringArray(j, key);
-        type_name = "an array of strings";
-        break;
-    case JsonType::JSON:
-        valid = IsJsonArray(j, key);
-        type_name = "an array of json objects";
-        break;
-    default:
-        assert(false);
-        type_name = "";
-        break;
-    }
-    if (!valid) {
-        result.ok = false;
-        result.msg = noex::concat_cstr("\"", key, "\" should be ") + type_name
-            + j[key].GetLineColumnStr();
     }
 }
 
@@ -465,8 +430,8 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
 
     CorrectKey(sub_definition, "component", "components");
     CorrectKey(sub_definition, "component_array", "components");
-    CheckJsonArrayType(result, sub_definition, "components",
-        JsonType::JSON, "gui definition", REQUIRED);
+    CheckJsonType(result, sub_definition, "components",
+        JsonType::JSON_ARRAY, "gui definition", REQUIRED);
 
     if (!result.ok) return;
 
@@ -506,8 +471,8 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
                 break;
             case COMP_COMBO:
             case COMP_RADIO:
-                CheckJsonArrayType(result, c, "items",
-                    JsonType::JSON, "radio type component", REQUIRED);
+                CheckJsonType(result, c, "items",
+                    JsonType::JSON_ARRAY, "radio type component", REQUIRED);
                 if (!result.ok) return;
                 for (tuwjson::Value& i : c["items"]) {
                     CheckJsonType(result, i, "label", JsonType::STRING, "radio item", REQUIRED);
@@ -520,7 +485,7 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
                 CheckJsonType(result, c, "default", JsonType::BOOLEAN);
                 break;
             case COMP_CHECK_ARRAY:
-                CheckJsonArrayType(result, c, "items", JsonType::JSON, "check array", REQUIRED);
+                CheckJsonType(result, c, "items", JsonType::JSON_ARRAY, "check array", REQUIRED);
                 if (!result.ok) return;
                 for (tuwjson::Value& i : c["items"]) {
                     CheckJsonType(result, i, "label", JsonType::STRING, "check box", REQUIRED);
@@ -584,7 +549,7 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
         bool ignore = false;
         CorrectKey(c, "platform", "platforms");
         CorrectKey(c, "platform_array", "platforms");
-        CheckJsonArrayType(result, c, "platforms", JsonType::STRING);
+        CheckJsonType(result, c, "platforms", JsonType::STRING_ARRAY);
         if (!result.ok) return;
         if (c.HasMember("platforms")) {
             ignore = true;
@@ -698,7 +663,7 @@ void CheckDefinition(JsonResult& result, tuwjson::Value& definition) noexcept {
         // definition["gui"] = definition
         definition.ConvertToObject("gui");
     }
-    CheckJsonArrayType(result, definition, "gui", JsonType::JSON);
+    CheckJsonType(result, definition, "gui", JsonType::JSON_ARRAY);
     if (!result.ok) return;
     tuwjson::Value& gui_json = definition["gui"];
     if (gui_json.Size() == 0) {
@@ -717,7 +682,7 @@ void CheckDefinition(JsonResult& result, tuwjson::Value& definition) noexcept {
 
 void CheckHelpURLs(JsonResult& result, tuwjson::Value& definition) noexcept {
     if (!definition.HasMember("help")) return;
-    CheckJsonArrayType(result, definition, "help", JsonType::JSON);
+    CheckJsonType(result, definition, "help", JsonType::JSON_ARRAY);
     if (!result.ok) return;
     for (const tuwjson::Value& h : definition["help"]) {
         CheckJsonType(result, h, "type", JsonType::STRING, "help document", REQUIRED);
