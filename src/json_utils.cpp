@@ -299,7 +299,7 @@ static void CompileCommand(JsonResult& result,
     }
     sub_definition["command_splitted"].MoveFrom(splitted_cmd_json);
 
-    tuwjson::Value& components = sub_definition["components"];;
+    tuwjson::Value& components = sub_definition["components"];
     tuwjson::Value cmd_int_ids;
     cmd_int_ids.SetArray();
     noex::string cmd_str;
@@ -486,7 +486,7 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
         if (type != COMP_STATIC_TEXT && !c.HasMember("id")) {
             PrintFmt(
                 "[CheckDefinition] DeprecationWarning: "
-                "\"id\" is missing in [\"components\"][%d]%s."
+                "\"id\" is missing in [\"components\"][%zu]%s."
                 " Support for components without \"id\" will be removed in a future version.\n",
                 comp_ids.size(), c.GetLineColumnStr().c_str());
         }
@@ -704,7 +704,7 @@ void CheckDefinition(JsonResult& result, tuwjson::Value& definition) noexcept {
     if (gui_json.Size() == 0) {
         result.ok = false;
         result.msg = "The size of [\"gui\"] should NOT be zero."
-            + gui_json.GetLineColumnStr();;
+            + gui_json.GetLineColumnStr();
     }
 
     int i = 0;
@@ -732,7 +732,7 @@ void CheckHelpURLs(JsonResult& result, tuwjson::Value& definition) noexcept {
         } else {
             result.ok = false;
             result.msg = noex::concat_cstr("Unsupported help type: ", type)
-                + help_type.GetLineColumnStr();;
+                + help_type.GetLineColumnStr();
             return;
         }
     }
