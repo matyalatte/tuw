@@ -441,25 +441,13 @@ bool MainFrame::Validate() noexcept {
 
 // Make command string
 noex::string MainFrame::GetCommand() noexcept {
-    noex::vector<noex::string> cmd_ary;
     tuwjson::Value& sub_definition = m_gui_json->At(m_definition_id);
-    for (tuwjson::Value& c : sub_definition["command_splitted"])
-        cmd_ary.emplace_back(c.GetString());
-    noex::vector<int> cmd_ids;
-    for (tuwjson::Value& c : sub_definition["command_ids"])
-        cmd_ids.emplace_back(c.GetInt());
+    tuwjson::Value& cmd_ary = sub_definition["command_splitted"];
+    tuwjson::Value& cmd_ids = sub_definition["command_ids"];
 
-    noex::vector<noex::string> comp_strings;
-    for (Component* comp : m_components) {
-        comp_strings.emplace_back(comp->GetString());
-    }
-
-    if (noex::get_error_no() != noex::OK)
-        return "";
-
-    noex::string cmd = cmd_ary[0];
-    for (size_t i = 0; i < cmd_ids.size(); i++) {
-        int id = cmd_ids[i];
+    noex::string cmd = cmd_ary[0].GetString();
+    for (size_t i = 0; i < cmd_ids.Size(); i++) {
+        int id = cmd_ids[i].GetInt();
         if (id == CMD_ID_PERCENT) {
             cmd.push_back('%');
         } else if (id == CMD_ID_CURRENT_DIR) {
@@ -471,10 +459,10 @@ noex::string MainFrame::GetCommand() noexcept {
             cmd += home;
             envuFree(home);
         } else {
-            cmd += comp_strings[id];
+            cmd += m_components[id]->GetString();
         }
-        if (i + 1 < cmd_ary.size()) {
-            cmd += cmd_ary[i + 1];
+        if (i + 1 < cmd_ary.Size()) {
+            cmd += cmd_ary[i + 1].GetString();
         }
     }
     return cmd;
