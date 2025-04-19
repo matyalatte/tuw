@@ -1,5 +1,5 @@
 #pragma once
-#include "rapidjson/document.h"
+#include "json.h"
 #include "json_utils.h"
 #include "string_utils.h"
 
@@ -7,7 +7,7 @@ class ExeContainer {
  private:
     noex::string m_exe_path;
     uint32_t m_exe_size;
-    rapidjson::Document m_json;
+    tuwjson::Value m_json;
 
  public:
     ExeContainer(): m_exe_path(""),
@@ -16,23 +16,24 @@ class ExeContainer {
         m_json.SetObject();
     }
 
-    json_utils::JsonResult Read(const noex::string& exe_path) noexcept;
-    json_utils::JsonResult Write(const noex::string& exe_path) noexcept;
+    // Returns an empty string if succeed. An error message otherwise.
+    noex::string Read(const noex::string& exe_path) noexcept;
+    noex::string Write(const noex::string& exe_path) noexcept;
 
     bool HasJson() noexcept {
-        return m_json.IsObject() && !m_json.ObjectEmpty();
+        return m_json.IsObject() && !m_json.IsEmpty();
     }
 
-    void GetJson(rapidjson::Document& json) noexcept {
-        json.CopyFrom(m_json, json.GetAllocator());
+    void GetJson(tuwjson::Value& json) noexcept {
+        json.CopyFrom(m_json);
     }
 
-    void SetJson(rapidjson::Document& json) noexcept {
-        m_json.CopyFrom(json, m_json.GetAllocator());
+    void SetJson(tuwjson::Value& json) noexcept {
+        m_json.CopyFrom(json);
     }
 
     void RemoveJson() noexcept {
-        rapidjson::Document doc;
+        tuwjson::Value doc;
         doc.SetObject();
         SetJson(doc);
     }

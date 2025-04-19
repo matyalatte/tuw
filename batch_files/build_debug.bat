@@ -1,3 +1,5 @@
 REM Build with debug mode.
 
-build.bat Debug
+@pushd %~dp0
+call build.bat Debug
+popd

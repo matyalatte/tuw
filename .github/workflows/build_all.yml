@@ -52,30 +52,35 @@ jobs:
           - os: windows-2022
             exe_ext: .exe
             zip_ext: zip
-            arch: ""
+            ucrt: ""
             arch_suffix: -x64
-          - os: windows-2022
+          - os: windows-11-arm
             exe_ext: .exe
             zip_ext: zip
-            arch: ARM
+            ucrt: ""
             arch_suffix: -arm64
           - os: windows-2022
             exe_ext: .exe
             zip_ext: zip
-            arch: UCRT
+            ucrt: UCRT
             arch_suffix: 10-x64
+          - os: windows-11-arm
+            exe_ext: .exe
+            zip_ext: zip
+            ucrt: UCRT
+            arch_suffix: 10-arm64
           - os: macos-14
             exe_ext: ""
             zip_ext: tar.xz
-            arch: ""
+            ucrt: ""
             arch_suffix: "-arm64"
           - os: macos-14
             exe_ext: ""
             zip_ext: tar.xz
-            arch: ""
+            ucrt: ""
             arch_suffix: "-universal"
 
-    name: build-${{ matrix.os }}${{ matrix.arch_suffix }}
+    name: build (${{ matrix.os }}, ${{ matrix.arch_suffix }})
     runs-on: ${{ matrix.os }}
     needs: setup
     steps:
@@ -100,24 +105,24 @@ jobs:
 
       - name: Build exe for Windows
         if: runner.os == 'Windows'
-        run: batch_files/build.bat Release ${{ matrix.arch }}
+        run: batch_files/build.bat Release ${{ matrix.ucrt }}
 
       - name: Build exe for Unix
         if: (runner.os != 'Windows') && (matrix.arch_suffix != '-universal')
-        run: bash shell_scripts/build.sh Release
+        run: ./shell_scripts/build.sh Release
 
       - name: Build universal binary for Unix
         if: (runner.os != 'Windows') && (matrix.arch_suffix == '-universal')
-        run: bash shell_scripts/build_universal.sh Release
+        run: ./shell_scripts/build_universal.sh Release
 
       - name: Show info about exe
-        run: bash shell_scripts/exe_info.sh build/Release${{ matrix.arch }}/${{ env.TOOL_NAME }}${{ matrix.exe_ext }}
+        run: ./shell_scripts/exe_info.sh build/Release${{ matrix.ucrt }}/${{ env.TOOL_NAME }}${{ matrix.exe_ext }}
         shell: bash
 
       - name: Copy files
         run: |
           mkdir -p archive/${{ env.TOOL_NAME }}
-          cp build/Release${{ matrix.arch }}/${{ env.TOOL_NAME }}${{ matrix.exe_ext }} archive/${{ env.TOOL_NAME }}
+          cp build/Release${{ matrix.ucrt }}/${{ env.TOOL_NAME }}${{ matrix.exe_ext }} archive/${{ env.TOOL_NAME }}
           cp examples/other_features/help/gui_definition.json archive/${{ env.TOOL_NAME }}
           cp docs/changelog.txt archive/${{ env.TOOL_NAME }}
           cp license.txt archive/${{ env.TOOL_NAME }}
@@ -142,7 +147,7 @@ jobs:
           gh release upload ${{ needs.setup.outputs.tag }} archive/${{ env.TOOL_NAME }}-${{ needs.setup.outputs.tag }}-${{ runner.os }}${{ matrix.arch_suffix }}.${{ matrix.zip_ext }}
 
   build-ubuntu:
-    name: build-ubuntu-${{ matrix.arch }}
+    name: build (${{ matrix.host }})
     strategy:
       fail-fast: false
       matrix:
@@ -174,7 +179,9 @@ jobs:
         shell: bash
 
       - name: Show info about exe
-        run: bash shell_scripts/exe_info.sh ${{ env.TOOL_NAME }}
+        run: |
+          ./shell_scripts/exe_info.sh ${{ env.TOOL_NAME }}
+          ./shell_scripts/check_glibc_compatibility.sh ${{ env.TOOL_NAME }}
         shell: bash
 
       - name: Archive release for Unix

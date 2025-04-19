@@ -18,21 +18,21 @@ You can install meson and ninja via apt. (`sudo apt install meson ninja`)
 
 ## Build
 
-Run `bash shell_scripts/build.sh`.  
+Run `./shell_scripts/build.sh`.  
 The executable will be generated in `build/Release/`.  
 
 ## Debug
 
-If you want a debug build, run `bash shell_scripts/build.sh Debug` on the terminal.  
+If you want a debug build, run `./shell_scripts/build.sh Debug` on the terminal.  
 
 ## Test
 
-To build tests, type `bash shell_scripts/test.sh` or `bash shell_scripts/test.sh Debug` on the terminal.
+To build tests, type `./shell_scripts/test.sh` or `./shell_scripts/test.sh Debug` on the terminal.
 
 ## Coverage
 
 If you use GCC, you can get coverage reports.  
-Install lcov with `sudo apt install lcov` and run `bash shell_scripts/coverage.sh` or `bash shell_scripts/coverage.sh Debug` on the terminal.  
+Install lcov with `sudo apt install lcov` and run `./shell_scripts/coverage.sh` or `./shell_scripts/coverage.sh Debug` on the terminal.  
 It'll generate html files in `./Tuw/coverage-report/`.
 
 ## GLIBC Dependencies
@@ -40,7 +40,7 @@ It'll generate html files in `./Tuw/coverage-report/`.
 If you have built the binary with GLIBC, you can use `check_glibc_compatibility.sh` to see the required versions of GLIBC and GLIBCXX.  
 
 ```console
-$ bash shell_scripts/check_libc_compatibility.sh build/Release/Tuw
+$ ./shell_scripts/check_libc_compatibility.sh build/Release/Tuw
 Required GLIBC versions
 2.2.5
 2.3

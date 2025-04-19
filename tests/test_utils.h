@@ -10,6 +10,7 @@
 #include "validator.h"
 #include "env_utils.h"
 #include "noex/vector.hpp"
+#include "json.h"
 
 // you need to copy it from examples/all_keys to the json folder
 constexpr char JSON_ALL_KEYS[] = "./json/gui_definition.json";
@@ -19,9 +20,16 @@ constexpr char JSON_BROKEN[] = "./json/broken.json";
 constexpr char JSON_CONFIG_ASCII[] = "./json/config_ascii.json";
 constexpr char JSON_CONFIG_UTF[] = "./json/config_utf.json";
 constexpr char JSON_RELAXED[] = "./json/relaxed.jsonc";
+constexpr char JSON_CROSS_PLATFORM[] = "./json/platform.json";
 
-inline void GetTestJson(rapidjson::Document& json) {
-    json_utils::JsonResult result = json_utils::LoadJson(JSON_ALL_KEYS, json);
-    EXPECT_TRUE(result.ok);
-    EXPECT_FALSE(json.ObjectEmpty());
+inline void GetTestJson(tuwjson::Value& json) {
+    noex::string err = json_utils::LoadJson(JSON_ALL_KEYS, json);
+    EXPECT_TRUE(err.empty());
+    EXPECT_FALSE(json.IsEmpty());
+}
+
+inline void GetTestJson(tuwjson::Value& json, const char* file) {
+    noex::string err = json_utils::LoadJson(file, json);
+    EXPECT_TRUE(err.empty());
+    EXPECT_FALSE(json.IsEmpty());
 }

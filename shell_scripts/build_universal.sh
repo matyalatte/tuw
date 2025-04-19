@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Build an universal binary for macOS.
 # Tuw will be generated in ../build/${build_type}
 
-# You can specify build type as an argument like "bash build_universal.sh Debug"
+# You can specify build type as an argument like "./build_universal.sh Debug"
 if [ "$1" = "Debug" ]; then
     build_type="Debug"
     preset="--native-file presets/debug.ini"
@@ -20,7 +20,7 @@ if [[ "$build_type" == "Release" ]]; then
 fi
 
 pushd $(dirname "$0")/..
-    meson setup build/${build_type} ${preset} -Dmacosx_universal=true ${options} || exit 1
+    meson setup build/${build_type} ${preset} -Dmacosx_universal=true -Dbuild_test=false ${options} || exit 1
     cd build/${build_type}
     meson compile -v || exit 1
 

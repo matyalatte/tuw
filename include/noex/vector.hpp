@@ -48,7 +48,7 @@ class non_trivial_vector {
     }
     non_trivial_vector(non_trivial_vector&& vec) noexcept :
             m_data(nullptr), m_size(0), m_capacity(0) {
-        *this = vec;
+        *this = static_cast<non_trivial_vector&&>(vec);
     }
 
     ~non_trivial_vector() noexcept { clear(); }
@@ -65,7 +65,7 @@ class non_trivial_vector {
 
         // Move or copy existing elements to the new memory
         for (size_t i = 0; i < m_size; ++i) {
-            new (data + i) T(std::move(m_data[i]));
+            new (data + i) T(static_cast<T&&>(m_data[i]));
             m_data[i].~T();
         }
 
@@ -125,7 +125,7 @@ class non_trivial_vector {
         reserve(vec.m_capacity);
         if (m_capacity != vec.m_size) return *this;
         for (size_t i = 0; i < vec.m_size; ++i) {
-            new (m_data + i) T(std::move(vec.m_data[i]));
+            new (m_data + i) T(static_cast<T&&>(vec.m_data[i]));
         }
         m_size = vec.m_size;
         vec.clear();
@@ -155,6 +155,13 @@ class non_trivial_vector {
         return at(m_size - 1);
     }
 
+    void pop_back() noexcept {
+        if (empty())
+            return;
+        back().~T();
+        m_size--;
+    }
+
     void push_back(const T& val) noexcept {
         reserve(m_size + 1);
         if (m_capacity < m_size + 1) return;
@@ -165,7 +172,7 @@ class non_trivial_vector {
     void push_back(T&& val) noexcept {
         reserve(m_size + 1);
         if (m_capacity < m_size + 1) return;
-        new (m_data + m_size) T(std::move(val));
+        new (m_data + m_size) T(static_cast<T&&>(val));
         m_size++;
     }
 
@@ -190,7 +197,7 @@ class non_trivial_vector {
 
         // Move or copy existing elements to the new memory
         for (size_t i = 0; i < m_size; ++i) {
-            new (data + i) T(std::move(m_data[i]));
+            new (data + i) T(static_cast<T&&>(m_data[i]));
             m_data[i].~T();
         }
 
@@ -235,6 +242,12 @@ class trivial_vector_base {
     }
 
     void shrink_to_fit() noexcept;
+
+    void pop_back() noexcept {
+        if (empty())
+            return;
+        m_size--;
+    }
 };
 
 // base class for trivial classes
@@ -249,7 +262,7 @@ class trivial_vector : public trivial_vector_base {
     trivial_vector(const trivial_vector& vec) noexcept :
         trivial_vector_base(vec) {}
     trivial_vector(trivial_vector&& vec) noexcept :
-        trivial_vector_base(vec) {}
+        trivial_vector_base(static_cast<trivial_vector&&>(vec)) {}
 
     trivial_vector& operator=(const trivial_vector& vec) noexcept {
         assign(vec);
@@ -257,7 +270,7 @@ class trivial_vector : public trivial_vector_base {
     }
 
     trivial_vector& operator=(trivial_vector&& vec) noexcept {
-        assign(vec);
+        assign(static_cast<trivial_vector&&>(vec));
         return *this;
     }
 

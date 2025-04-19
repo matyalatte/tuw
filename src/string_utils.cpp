@@ -37,9 +37,12 @@ noex::string envuStr(char *cstr) noexcept {
 static const uint32_t FNV_OFFSET_BASIS_32 = 2166136261U;
 static const uint32_t FNV_PRIME_32 = 16777619U;
 
-uint32_t Fnv1Hash32(const noex::string& str) noexcept {
+uint32_t Fnv1Hash32(const char* str) noexcept {
     uint32_t hash = FNV_OFFSET_BASIS_32;
-    for (const char c : str) hash = (FNV_PRIME_32 * hash) ^ c;
+    while (*str) {
+        hash = (FNV_PRIME_32 * hash) ^ *str;
+        str++;
+    }
     return hash;
 }
 
@@ -85,15 +88,9 @@ noex::string ANSItoUTF8(const noex::string& str) noexcept {
 void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_list va;
     va_start(va, fmt);
-
-    va_list va2;
-    va_copy(va2, va);
-    size_t n = _vscprintf(fmt, va2);
-    va_end(va2);
-    n++;
-
+    size_t n = _vscprintf(fmt, va);
     noex::string buf = noex::string(n);
-    vsprintf_s(buf.data(), buf.size(), fmt, va);
+    vsprintf_s(buf.data(), buf.size() + 1, fmt, va);
     va_end(va);
 
     noex::wstring wbuf = UTF8toUTF16(buf.c_str());
@@ -203,10 +200,10 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_start(va, fmt);
     va_list va2;
     va_copy(va2, va);
-    size_t size = vsnprintf(NULL, 0, fmt, va2);
+    size_t n = vsnprintf(NULL, 0, fmt, va2);
     va_end(va2);
-    noex::string buf = noex::string(size + 1);
-    vsnprintf(buf.data(), buf.size(), fmt, va);
+    noex::string buf = noex::string(n);
+    vsnprintf(buf.data(), buf.size() + 1, fmt, va);
     g_logger.Log(buf.c_str());
     fprintf(out, "%s", buf.c_str());
     va_end(va);

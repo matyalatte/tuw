@@ -16,9 +16,11 @@
 
 *.bat
 !batch_files/*.bat
+!examples/tips/ansicode/ansicode.bat
 
 *.sh
 !shell_scripts/*.sh
+!examples/tips/ansicode/ansicode.sh
 
 *.ps1
 !examples/**/*.ps1
@@ -38,8 +40,7 @@ subprojects/gtk_ansi_parser
 *.new
 *.zip
 
-Tuw
-Tuw.exe
+Tuw*
 SimpleCommandRunner
 *.tar.*
 
@@ -73,6 +74,7 @@ out
 # python
 python
 *.py
+!tests/*.py
 *.pyd
 *.dll
 *.cat

@@ -4,18 +4,18 @@ REM You can also get coverage report if OpenCppCoverage is installed.
 
 if /I "%~1"=="Debug" (
     set BUILD_TYPE=Debug
-    set PRESET=--native-file presets\debug.ini --native-file presets\test.ini
+    set PRESET=--native-file presets\debug.ini
 ) else (
     set BUILD_TYPE=Release
-    set PRESET=--native-file presets\release.ini --native-file presets\test.ini
+    set PRESET=--native-file presets\release.ini
 )
 echo Build type: %BUILD_TYPE%
 
 if /I "%~2"=="ARM" (
     if /I "%~1"=="Debug" (
-        set PRESET=--cross-file presets\windows_arm64.ini --cross-file presets\debug.ini --cross-file presets\test.ini
+        set PRESET=--cross-file presets\windows_arm64.ini --cross-file presets\debug.ini
     ) else (
-        set PRESET=--cross-file presets\windows_arm64.ini --cross-file presets\release.ini --cross-file presets\test.ini
+        set PRESET=--cross-file presets\windows_arm64.ini --cross-file presets\release.ini
     )
 )
 
@@ -55,8 +55,8 @@ if %ERRORLEVEL% NEQ 0 (
     if %GET_COVERAGE% equ 0 goto nocoverage
 
     REM Test and get coverage report from tests.
-    set MODULES=--modules %cd%\build\%BUILD_TYPE%%~2-Test\tests
-    set SOURCES=--sources %cd%\src
+    set MODULES=--modules %cd%\build\%BUILD_TYPE%%~2-Test\
+    set SOURCES=--sources %cd%\src --sources %cd%\include
     set EXPORT_TYPE=--export_type html:%cd%\coverage-report
     set WORKDIR=--working_dir %cd%
     OpenCppCoverage --cover_children %WORKDIR% %EXPORT_TYPE% %MODULES% %SOURCES% -- meson test -v -C build\%BUILD_TYPE%%~2-Test
@@ -72,5 +72,4 @@ if %ERRORLEVEL% NEQ 0 (
     :testend
 @popd
 
-pause
 if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%

@@ -12,8 +12,15 @@ foreach f : files
         copy: true)
 endforeach
 
-# copy an example file for testing
-configure_file(input : meson.project_source_root() +
-                       '/examples/all_keys/gui_definition.json',
-        output : 'gui_definition.json',
+# copy example files for testing
+examples = [
+    ['all_keys/gui_definition.json', 'gui_definition.json'],
+    ['other_features/help/gui_definition.json', 'help.json'],
+    ['other_features/cross_platform/gui_definition.json', 'platform.json'],
+]
+foreach e : examples
+    configure_file(
+        input : meson.project_source_root() + '/examples/' + e[0],
+        output : e[1],
         copy: true)
+endforeach

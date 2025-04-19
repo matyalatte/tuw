@@ -1,5 +1,5 @@
 #pragma once
-#include "rapidjson/document.h"
+#include "json.h"
 #include "component.h"
 #include "json_utils.h"
 #include "string_utils.h"
@@ -8,22 +8,18 @@
 
 class MainFrame;
 
-struct MenuData {
-    MainFrame* main_frame;
-    int menu_id;
-};
-
-#define EMPTY_DOCUMENT rapidjson::Document(rapidjson::kObjectType)
+#define EMPTY_JSON tuwjson::Value()
 
 // Get "gui_definition.*"
-noex::string GetDefaultJsonPath() noexcept;
+const char* GetDefaultJsonPath() noexcept;
 
 // Main window
 class MainFrame {
  private:
-    rapidjson::Document m_definition;
-    unsigned m_definition_id;
-    rapidjson::Document m_config;
+    tuwjson::Value m_definition;
+    tuwjson::Value* m_gui_json;
+    size_t m_definition_id;
+    tuwjson::Value m_config;
     uiWindow* m_mainwin;
 #ifdef __TUW_UNIX__
     uiWindow* m_logwin;
@@ -33,45 +29,66 @@ class MainFrame {
     uiGrid* m_grid;
     uiButton* m_run_button;
     uiMenuItem* m_menu_item;
-    noex::vector<MenuData> m_menu_data_vec;
 
     void CreateFrame() noexcept;
     void CreateMenu() noexcept;
-    json_utils::JsonResult CheckDefinition(rapidjson::Document& definition) noexcept;
+    json_utils::JsonResult CheckDefinition(tuwjson::Value& definition) noexcept;
     void UpdateConfig() noexcept;
     void ShowSuccessDialog(const char* msg, const char* title = "Success") noexcept;
     void ShowErrorDialog(const char* msg, const char* title = "Error") noexcept;
-    inline void ShowSuccessDialog(const noex::string& msg,
-                                  const noex::string& title = "Success") noexcept {
-        ShowSuccessDialog(msg.c_str(), title.c_str());
+    void ShowErrorDialogWithLog(
+        const char* func, const char* msg, const char* title = "Error") noexcept;
+    inline void ShowSuccessDialog(
+            const noex::string& msg,
+            const char* title = "Success") noexcept {
+        ShowSuccessDialog(msg.c_str(), title);
     }
-    inline void ShowErrorDialog(const noex::string& msg,
-                                const noex::string& title = "Error") noexcept {
-        ShowErrorDialog(msg.c_str(), title.c_str());
+    inline void ShowErrorDialog(
+            const noex::string& msg,
+            const char* title = "Error") noexcept {
+        ShowErrorDialog(msg.c_str(), title);
     }
-    void JsonLoadFailed(const noex::string& msg) noexcept;
+    inline void ShowErrorDialogWithLog(
+            const char* func,
+            const noex::string& msg,
+            const char* title = "Error") noexcept {
+        ShowErrorDialogWithLog(func, msg.c_str(), title);
+    }
+    inline void Log(const char* func, const char* msg) noexcept {
+        PrintFmt("[%s] %s\n", func, msg);
+    }
+    inline void Log(const char* func, const char* label, const char* msg) noexcept {
+        PrintFmt("[%s] %s: %s\n", func, label, msg);
+    }
+    inline void Log(const char* func, const noex::string&msg) {
+        Log(func, msg.c_str());
+    }
+    inline void Log(const char* func, const char* label, const noex::string&msg) {
+        Log(func, label, msg.c_str());
+    }
 
  public:
-    explicit MainFrame(const rapidjson::Document& definition = EMPTY_DOCUMENT,
-                       const rapidjson::Document& config = EMPTY_DOCUMENT,
+    explicit MainFrame(const tuwjson::Value& definition = EMPTY_JSON,
+                       const tuwjson::Value& config = EMPTY_JSON,
                        const char* json_path = nullptr) noexcept {
         Initialize(definition, config, json_path);
     }
 
     explicit MainFrame(const char* json_path) noexcept {
-        Initialize(EMPTY_DOCUMENT, EMPTY_DOCUMENT, json_path);
+        Initialize(EMPTY_JSON, EMPTY_JSON, json_path);
     }
 
-    void Initialize(const rapidjson::Document& definition,
-                    const rapidjson::Document& config,
+    void Initialize(const tuwjson::Value& definition,
+                    const tuwjson::Value& config,
                     noex::string json_path) noexcept;
 
-    void UpdatePanel(unsigned definition_id) noexcept;
-    void OpenURL(int id) noexcept;
+    void UpdatePanel(size_t definition_id) noexcept;
+    noex::string OpenURLBase(size_t id) noexcept;
+    void OpenURL(size_t id) noexcept;
     bool Validate() noexcept;
     noex::string GetCommand() noexcept;
     void RunCommand() noexcept;
-    void GetDefinition(rapidjson::Document& json) noexcept;
+    void GetDefinition(tuwjson::Value& json) noexcept;
     void SaveConfig() noexcept;
     void Fit(bool keep_width = false) noexcept;
     void Close() noexcept {

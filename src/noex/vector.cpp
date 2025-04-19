@@ -45,7 +45,7 @@ trivial_vector_base::trivial_vector_base(const trivial_vector_base& vec) noexcep
 trivial_vector_base::trivial_vector_base(trivial_vector_base&& vec) noexcept :
         m_data(nullptr), m_size(0), m_capacity(0),
         m_sizeof_type(vec.m_sizeof_type) {
-    assign(vec);
+    assign(static_cast<trivial_vector_base&&>(vec));
 }
 
 void trivial_vector_base::reserve(size_t capacity) noexcept {

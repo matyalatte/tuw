@@ -1,13 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Run tests.
 
-# You can specify build type as an argument like "bash test.sh Debug"
+# You can specify build type as an argument like "./test.sh Debug"
 if [ "$1" = "Debug" ]; then
     build_type="Debug"
-    preset="--native-file presets/debug.ini --native-file presets/test.ini"
+    preset="--native-file presets/debug.ini"
 else
     build_type="Release"
-    preset="--native-file presets/release.ini --native-file presets/test.ini -Dcpp_eh=none"
+    preset="--native-file presets/release.ini -Dcpp_eh=none"
 fi
 echo "Build type: ${build_type}"
 

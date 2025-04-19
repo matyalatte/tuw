@@ -154,7 +154,7 @@ void basic_string<charT>::append(const charT* str, size_t size) noexcept {
     if (!m_str || !str)
         return;
 
-    memcpy(m_str + m_size, str, size * sizeof(charT));
+    memcpy(m_str + m_size * sizeof(charT), str, size * sizeof(charT));
     m_str[new_size] = 0;
     m_size = new_size;
 }
@@ -199,10 +199,11 @@ inline int snprintf_wrap(wchar_t* buf, size_t size, const char* fmt, \
 } \
 template <typename charT> \
 basic_string<charT> basic_string<charT>::to_string(num_type num) noexcept { \
-    charT buf[21]; /* assume that the max value of num has 20 digits (2^64). */ \
-    buf[20] = 0; \
-    int num_size = snprintf_wrap(buf, 21, "%" num_fmt, L"%" num_fmt, num); \
-    if (num_size <= 0 || num_size > 20) { \
+    /* assume that the max value of num has 24 characters (e.g. -1.7976931348623157e+308). */ \
+    charT buf[25]; \
+    buf[24] = 0; \
+    int num_size = snprintf_wrap(buf, 25, "%" num_fmt, L"%" num_fmt, num); \
+    if (num_size <= 0 || num_size > 24) { \
         set_error_no(STR_FORMAT_ERROR); \
         return basic_string<charT>(); \
     } \
@@ -217,6 +218,7 @@ basic_string<charT> basic_string<charT>::operator+(num_type num) const noexcept 
 DEFINE_TO_STRING(int, "d")
 DEFINE_TO_STRING(size_t, "zu")
 DEFINE_TO_STRING(uint32_t, PRIu32)
+DEFINE_TO_STRING(double, "lf")
 
 inline bool streq(const char* str1, const char* str2) noexcept {
     return strcmp(str1, str2) == 0;
@@ -297,7 +299,9 @@ void basic_string<charT>::erase(size_t pos, size_t n) noexcept {
         set_error_no(STR_BOUNDARY_ERROR);
         return;
     }
-    memcpy(m_str + pos, m_str + pos + n, m_size - pos - n);
+    memmove(m_str + pos * sizeof(charT),
+            m_str + (pos + n) * sizeof(charT),
+            (m_size - pos - n) * sizeof(charT));
     m_size -= n;
     m_str[m_size] = 0;
 }
@@ -311,18 +315,70 @@ const charT& basic_string<charT>::operator[](size_t id) const noexcept {
     return c_str()[id];
 }
 
+template class basic_string<char>;
+template class basic_string<wchar_t>;
+
 template <typename charT>
 basic_string<charT> operator+(const charT* str1, const basic_string<charT>& str2) noexcept {
-    basic_string<charT> new_str(str1);
-    new_str += str2;
-    return new_str;
+    return concat_cstr(str1, str2.c_str());
 }
 template
 basic_string<char> operator+(const char* str1, const basic_string<char>& str2) noexcept;
 template
 basic_string<wchar_t> operator+(const wchar_t* str1, const basic_string<wchar_t>& str2) noexcept;
 
-template class basic_string<char>;
-template class basic_string<wchar_t>;
+template <typename charT>
+basic_string<charT> concat_cstr(const charT* str1, const charT* str2) noexcept {
+    if (!str1)
+        str1 = reinterpret_cast<const charT*>(dummy);
+    if (!str2)
+        str2 = reinterpret_cast<const charT*>(dummy);
+    size_t len1 = get_strlen(str1);
+    size_t len2 = get_strlen(str2);
+    basic_string<charT> str(len1 + len2);
+    charT* data = str.data();
+    if (!data)
+        return str;
+    memcpy(data, str1, len1 * sizeof(charT));
+    data += len1 * sizeof(charT);
+    memcpy(data, str2, len2 * sizeof(charT));
+    return str;
+}
+
+template
+basic_string<char> concat_cstr(const char* str1, const char* str2) noexcept;
+template
+basic_string<wchar_t> concat_cstr(const wchar_t* str1, const wchar_t* str2) noexcept;
+
+template <typename charT>
+basic_string<charT> concat_cstr(const charT* str1, const charT* str2, const charT* str3) noexcept {
+    if (!str1)
+        str1 = reinterpret_cast<const charT*>(dummy);
+    if (!str2)
+        str2 = reinterpret_cast<const charT*>(dummy);
+    if (!str3)
+        str3 = reinterpret_cast<const charT*>(dummy);
+    size_t len1 = get_strlen(str1);
+    size_t len2 = get_strlen(str2);
+    size_t len3 = get_strlen(str3);
+    basic_string<charT> str(len1 + len2 + len3);
+    charT* data = str.data();
+    if (!data)
+        return str;
+    memcpy(data, str1, len1 * sizeof(charT));
+    data += len1 * sizeof(charT);
+    memcpy(data, str2, len2 * sizeof(charT));
+    data += len2 * sizeof(charT);
+    memcpy(data, str3, len3 * sizeof(charT));
+    return str;
+}
+
+template
+basic_string<char> concat_cstr(
+    const char* str1, const char* str2, const char* str3) noexcept;
+template
+basic_string<wchar_t> concat_cstr(
+    const wchar_t* str1, const wchar_t* str2, const wchar_t* str3) noexcept;
+
 
 }  // namespace noex

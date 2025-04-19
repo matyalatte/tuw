@@ -4,6 +4,7 @@ namespace noex {
 
 enum ErrorNo : int {
     OK = 0,
+    NEW_ALLOCATION_ERROR,  // Failed to call noex::new() oeperator.
     STR_ALLOCATION_ERROR,  // Failed to allocate memory for string.
     STR_BOUNDARY_ERROR,  // Accessed out-of-bounds with substr or [].
     STR_FORMAT_ERROR,  // Failed to convert a number to string.

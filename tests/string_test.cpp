@@ -334,6 +334,65 @@ TEST(StringTest, IterForNull) {
     EXPECT_EQ(&str.c_str()[0], str.end());
 }
 
+// Test erase()
+TEST(StringTest, Erase) {
+    noex::string str = "testfoobar!!!";
+    expect_tuwstr("testfoobar!!!", str);
+    str.erase(4, 3);
+    expect_tuwstr("testbar!!!", str);
+    str.erase(4, noex::string::npos);
+    expect_tuwstr("test", str);
+    EXPECT_EQ(noex::OK, noex::get_error_no());
+}
+
+TEST(StringTest, EraseError) {
+    noex::string str = "testfoobar";
+    expect_tuwstr("testfoobar", str);
+    str.erase(100, 0);
+    EXPECT_EQ(noex::STR_BOUNDARY_ERROR, noex::get_error_no());
+    noex::clear_error_no();
+    str.erase(0, 100);
+    EXPECT_EQ(noex::STR_BOUNDARY_ERROR, noex::get_error_no());
+    noex::clear_error_no();
+    expect_tuwstr("testfoobar", str);
+}
+
+TEST(StringTest, ConcatCstrTwo) {
+    noex::string str;
+    str = noex::concat_cstr("foo", "bar");
+    expect_tuwstr("foobar", str);
+    str = noex::concat_cstr("", "bar");
+    expect_tuwstr("bar", str);
+    str = noex::concat_cstr("foo", "");
+    expect_tuwstr("foo", str);
+    char* null = nullptr;
+    str = noex::concat_cstr(null, "bar");
+    expect_tuwstr("bar", str);
+    str = noex::concat_cstr("foo", null);
+    expect_tuwstr("foo", str);
+    EXPECT_EQ(noex::OK, noex::get_error_no());
+}
+
+TEST(StringTest, ConcatCstrThree) {
+    noex::string str;
+    str = noex::concat_cstr("test", "foo", "bar");
+    expect_tuwstr("testfoobar", str);
+    str = noex::concat_cstr("", "foo", "bar");
+    expect_tuwstr("foobar", str);
+    str = noex::concat_cstr("test", "", "bar");
+    expect_tuwstr("testbar", str);
+    str = noex::concat_cstr("test", "foo", "");
+    expect_tuwstr("testfoo", str);
+    char* null = nullptr;
+    str = noex::concat_cstr(null, "foo", "bar");
+    expect_tuwstr("foobar", str);
+    str = noex::concat_cstr("test", null, "bar");
+    expect_tuwstr("testbar", str);
+    str = noex::concat_cstr("test", "foo", null);
+    expect_tuwstr("testfoo", str);
+    EXPECT_EQ(noex::OK, noex::get_error_no());
+}
+
 // Test noex::wstring
 void expect_nullwstr(const noex::wstring& str) {
     EXPECT_TRUE(str.empty());
@@ -358,4 +417,14 @@ TEST(WstringTest, ConstructWithCstr) {
     noex::wstring str(L"test");
     EXPECT_FALSE(str.empty());
     expect_tuwwstr(L"test", str);
+}
+
+TEST(WstringTest, EqualToStr) {
+    noex::wstring str = L"test";
+    wchar_t* null = nullptr;
+    EXPECT_TRUE(str != null);
+    EXPECT_EQ(str, L"test");
+    EXPECT_EQ(str, noex::wstring(L"test"));
+    EXPECT_NE(str, L"task");
+    EXPECT_NE(str, noex::wstring(L"task"));
 }

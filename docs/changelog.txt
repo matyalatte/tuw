@@ -1,3 +1,17 @@
+ver 0.10.0
+- Improved JSON parser. (#108)
+  - Reduced binary size (about 16% for Windows10 build.)
+  - It now shows error messages with line and column of a JSON file.
+    e.g. "id" should be a string (line: 4, column: 5)
+  - Revised some error messages.
+- Tuw now shows a deprecation warning when a component has no id. (#107)
+- Fixed a Windows-specific issue where "merge" and "split" commands was not able to show UTF8 strings. (#108)
+- Fixed an issue where the default value of "inc" for float pickers was wrong. (#104)
+- Fixed an assertion error on debug build. (#100)
+- Removed unnecessary memory allocations and function calls. (#101, #103 and #110)
+- Removed asynchronous unwind tables from Linux-x64 build. (#102)
+- Added "windows10-arm64.zip" to the release packages. (#111)
+
 ver 0.9.2
 - Improved the performance of redirection (#91)
   (Fixed a Windows-specific issue where stdout redirection was unexpectedly slow.)

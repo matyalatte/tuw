@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo Dynamic lib dependencies:
 if [[ "$OSTYPE" == "darwin"* ]]; then

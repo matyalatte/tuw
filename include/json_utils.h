@@ -1,8 +1,24 @@
 // Functions related to json.
 
 #pragma once
-#include "rapidjson/document.h"
+#include "json.h"
 #include "string_utils.h"
+
+enum ComponentType: int {
+    COMP_UNKNOWN = 0,
+    COMP_EMPTY,
+    COMP_STATIC_TEXT,
+    COMP_FILE,
+    COMP_FOLDER,
+    COMP_COMBO,
+    COMP_RADIO,
+    COMP_CHECK,
+    COMP_CHECK_ARRAY,
+    COMP_TEXT,
+    COMP_INT,
+    COMP_FLOAT,
+    COMP_MAX
+};
 
 enum CmdPredefinedIds: int {
     CMD_ID_PERCENT = -1,
@@ -15,10 +31,15 @@ constexpr char CMD_TOKEN_CURRENT_DIR[] = "__CWD__";
 constexpr char CMD_TOKEN_HOME_DIR[] = "__HOME__";
 
 #ifdef _WIN32
-FILE* FileOpen(const char* path, const char* mode) noexcept;
+constexpr wchar_t FILE_MODE_READ[] = L"rb";
+constexpr wchar_t FILE_MODE_WRITE[] = L"wb";
+FILE* FileOpen(const char* path, const wchar_t* mode) noexcept;
 #else
+constexpr char FILE_MODE_READ[] = "rb";
+constexpr char FILE_MODE_WRITE[] = "wb";
 #define FileOpen(path, mode) fopen(path, mode)
 #endif
+noex::string GetFileError(const noex::string& path) noexcept;
 
 namespace json_utils {
 
@@ -32,21 +53,20 @@ struct JsonResult {
 // Max binary size for JSON files.
 #define JSON_SIZE_MAX 128 * 1024
 
-JsonResult LoadJson(const noex::string& file, rapidjson::Document& json) noexcept;
-JsonResult SaveJson(rapidjson::Document& json, const noex::string& file) noexcept;
-noex::string JsonToString(rapidjson::Document& json) noexcept;
+// Returns an empty string if succeed. An error message otherwise.
+noex::string LoadJson(const noex::string& file, tuwjson::Value& json) noexcept;
+noex::string SaveJson(tuwjson::Value& json, const noex::string& file) noexcept;
 
-const char* GetString(const rapidjson::Value& json, const char* key, const char* def) noexcept;
-bool GetBool(const rapidjson::Value& json, const char* key, bool def) noexcept;
-int GetInt(const rapidjson::Value& json, const char* key, int def) noexcept;
-double GetDouble(const rapidjson::Value& json, const char* key, double def) noexcept;
+const char* GetString(const tuwjson::Value& json, const char* key, const char* def) noexcept;
+bool GetBool(const tuwjson::Value& json, const char* key, bool def) noexcept;
+int GetInt(const tuwjson::Value& json, const char* key, int def) noexcept;
+double GetDouble(const tuwjson::Value& json, const char* key, double def) noexcept;
 
-void GetDefaultDefinition(rapidjson::Document& definition) noexcept;
-void CheckVersion(JsonResult& result, rapidjson::Document& definition) noexcept;
-void CheckDefinition(JsonResult& result, rapidjson::Document& definition) noexcept;
-void CheckSubDefinition(JsonResult& result, rapidjson::Value& sub_definition,
-                        int index,
-                        rapidjson::Document::AllocatorType& alloc) noexcept;
-void CheckHelpURLs(JsonResult& result, rapidjson::Document& definition) noexcept;
+void GetDefaultDefinition(tuwjson::Value& definition) noexcept;
+void CheckVersion(JsonResult& result, tuwjson::Value& definition) noexcept;
+void CheckDefinition(JsonResult& result, tuwjson::Value& definition) noexcept;
+void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
+                        int index) noexcept;
+void CheckHelpURLs(JsonResult& result, tuwjson::Value& definition) noexcept;
 
 }  // namespace json_utils

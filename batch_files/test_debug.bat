@@ -1,3 +1,5 @@
 REM Run tests for debug build.
 
-test.bat Debug
+@pushd %~dp0
+call test.bat Debug
+popd

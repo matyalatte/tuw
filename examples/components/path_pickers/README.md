@@ -37,7 +37,7 @@ Each component should be defined as a dictionary.
 
 -   `type` is the component type. `file` for a file picker, and `folder` for a directory picker.
 -   `label` is the string written above the text box of the picker.
--   `extension` is an option for file pickers. It specifies the wildcard for file extensions. Use the same syntax as for [wxWidget's wildcards](https://docs.wxwidgets.org/3.0/classwx_file_dialog.html).
+-   `extension` is an option for file pickers. It specifies the wildcard for file extensions. Use the same syntax as for [WinAPI's filter string](https://learn.microsoft.com/en-us/dotnet/api/microsoft.win32.filedialog.filter).
 -   `add_quotes` is an option for components. It adds quotes (`""`) to the input strings.
 
 ## Command

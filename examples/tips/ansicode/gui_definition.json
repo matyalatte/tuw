@@ -1,0 +1,8 @@
+{
+    "gui": {
+        "label": "ANSI escape sequences",
+        "command": "bash ansicode.sh",
+        "command_win": "ansicode.bat",
+        "components": []
+    }
+}
