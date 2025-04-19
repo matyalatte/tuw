@@ -210,8 +210,9 @@ void MainFrame::CreateMenu() noexcept {
     // Note: We should reserve the buffer to prevent realloc,
     //       or MenuData* pointers can be broken after using push_back()
     size_t menu_item_count = m_gui_json->Size();
-    if (m_definition.HasMember("help"))
-        menu_item_count += m_definition["help"].Size();
+    tuwjson::Value* help_json_ptr = m_definition.GetMemberPtr("help");
+    if (help_json_ptr)
+        menu_item_count += help_json_ptr->Size();
 
 #ifdef __APPLE__
     // No need the menu for the quit item on macOS.
@@ -231,11 +232,11 @@ void MainFrame::CreateMenu() noexcept {
     item = uiMenuAppendQuitItem(menu);
 
     // put help urls to menu bar
-    if (m_definition.HasMember("help") && m_definition["help"].Size() > 0) {
+    if (help_json_ptr && help_json_ptr->Size() > 0) {
         menu = uiNewMenu("Help");
 
         size_t i = 0;
-        for (const tuwjson::Value& j : m_definition["help"]) {
+        for (const tuwjson::Value& j : *help_json_ptr) {
             item = uiMenuAppendItem(menu, j["label"].GetString());
             uiMenuItemOnClicked(item, OnOpenURL, reinterpret_cast<void*>(i));
             i++;
@@ -552,10 +553,11 @@ json_utils::JsonResult MainFrame::CheckDefinition(tuwjson::Value& definition) no
     json_utils::CheckVersion(result, definition);
     if (!result.ok) return result;
 
-    if (definition.HasMember("recommended")) {
+    tuwjson::Value* ptr = definition.GetMemberPtr("recommended");
+    if (ptr) {
         if (definition["not_recommended"].GetBool()) {
             PrintFmt("[LoadDefinition] Warning: Version %s is recommended.\n",
-                        definition["recommended"].GetString());
+                        ptr->GetString());
         }
     }
 

@@ -127,7 +127,8 @@ static const bool REQUIRED = false;
 
 static void CheckJsonType(JsonResult& result, const tuwjson::Value& j, const char* key,
         const JsonType& type, const char* name = "", const bool& optional = true) noexcept {
-    if (!j.HasMember(key)) {
+    tuwjson::Value* ptr = j.GetMemberPtr(key);
+    if (!ptr) {
         if (optional) return;
         result.ok = false;
         result.msg = noex::concat_cstr(name, " requires \"", key) + "\"" + j.GetLineColumnStr();
@@ -135,34 +136,33 @@ static void CheckJsonType(JsonResult& result, const tuwjson::Value& j, const cha
     }
     bool valid = false;
     const char* type_name = nullptr;
-    tuwjson::Value& v = j[key];
-    if (type > JsonType::ARRAY && !v.IsArray())
-        v.ConvertToArray();
+    if (type > JsonType::ARRAY && !ptr->IsArray())
+        ptr->ConvertToArray();
     switch (type) {
     case JsonType::BOOLEAN:
-        valid = v.IsBool();
+        valid = ptr->IsBool();
         type_name = "a boolean";
         break;
     case JsonType::INTEGER:
-        valid = v.IsInt();
+        valid = ptr->IsInt();
         type_name = "an int";
         break;
     case JsonType::FLOAT:
-        valid = v.IsDouble();
+        valid = ptr->IsDouble();
         type_name = "a float";
         break;
     case JsonType::STRING:
-        valid = v.IsString();
+        valid = ptr->IsString();
         type_name = "a string";
         break;
     case JsonType::JSON:
-        valid = v.IsObject();
+        valid = ptr->IsObject();
         type_name = "a json object";
         break;
     case JsonType::STRING_ARRAY:
         valid = true;
         type_name = "an array of strings";
-        for (const tuwjson::Value& el : v) {
+        for (const tuwjson::Value& el : *ptr) {
             if (!el.IsString()) {
                 valid = false;
                 break;
@@ -172,7 +172,7 @@ static void CheckJsonType(JsonResult& result, const tuwjson::Value& j, const cha
     case JsonType::JSON_ARRAY:
         valid = true;
         type_name = "an array of json objects";
-        for (const tuwjson::Value& el : v) {
+        for (const tuwjson::Value& el : *ptr) {
             if (!el.IsObject()) {
                 valid = false;
                 break;
@@ -187,7 +187,7 @@ static void CheckJsonType(JsonResult& result, const tuwjson::Value& j, const cha
     if (!valid) {
         result.ok = false;
         result.msg = noex::concat_cstr("\"", key, "\" should be ") + type_name
-            + v.GetLineColumnStr();
+            + ptr->GetLineColumnStr();
     }
 }
 
@@ -503,10 +503,11 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
                     jtype = JsonType::FLOAT;
                     CheckJsonType(result, c, "digits", JsonType::INTEGER);
                     if (!result.ok) return;
-                    if (c.HasMember("digits") && c["digits"].GetInt() < 0) {
+                    tuwjson::Value* ptr = c.GetMemberPtr("digits");
+                    if (ptr && ptr->GetInt() < 0) {
                         result.ok = false;
                         result.msg = "\"digits\" should be a non-negative integer."
-                                    + c["digits"].GetLineColumnStr();
+                                    + ptr->GetLineColumnStr();
                     }
                 }
                 CheckJsonType(result, c, "default", jtype);

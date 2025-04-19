@@ -106,29 +106,28 @@ void Value::SetObject() noexcept {
     u.m_object = noex::new_ref<Object>();
 }
 
-static bool object_has_member(const Object* obj, const char* key) {
+static Value* get_object_ptr(const Object* obj, const char* key) {
     for (const Item& item : *obj) {
         if (item.key == key)
-            return true;
+            return item.val;
     }
-    return false;
+    return nullptr;
 }
 
-bool Value::HasMember(const char* key) const noexcept {
+static inline bool object_has_member(const Object* obj, const char* key) {
+    return get_object_ptr(obj, key) != nullptr;
+}
+
+Value* Value::GetMemberPtr(const char* key) const noexcept {
     assert(m_type == JSON_TYPE_OBJECT);
-    return object_has_member(u.m_object, key);
+    return get_object_ptr(u.m_object, key);
 }
 
 Value& Value::At(const char* key) const noexcept {
     assert(m_type == JSON_TYPE_OBJECT);
-    static Value dummy{};
-    for (Item& item : *u.m_object) {
-        if (item.key == key) {
-            if (item.val)
-                return *item.val;
-            break;
-        }
-    }
+    tuwjson::Value* ptr = get_object_ptr(u.m_object, key);
+    if (ptr)
+        return *ptr;
     Item item;
     item.key = key;
     u.m_object->push_back(static_cast<Item&&>(item));

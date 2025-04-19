@@ -12,8 +12,9 @@ Component::Component(const tuwjson::Value& j) noexcept {
     m_label = j["label"].GetString();
     m_id = json_utils::GetString(j, "id", "");
     m_add_quotes = json_utils::GetBool(j, "add_quotes", false);
-    if (j.HasMember("validator"))
-        m_validator.Initialize(j["validator"]);
+    tuwjson::Value* ptr = j.GetMemberPtr("validator");
+    if (ptr)
+        m_validator.Initialize(*ptr);
     m_optional = json_utils::GetBool(j, "optional", false);
     m_prefix = json_utils::GetString(j, "prefix", "");
     m_suffix = json_utils::GetString(j, "suffix", "");
@@ -140,8 +141,9 @@ static void onFilesDropped(uiEntry *e, int count, char** names, void *data) noex
 }
 
 static void SetTooltip(uiControl* c, const tuwjson::Value& j) {
-    if (j.HasMember("tooltip"))
-        uiControlSetTooltip(c, json_utils::GetString(j, "tooltip", ""));
+    tuwjson::Value* ptr = j.GetMemberPtr("tooltip");
+    if (ptr)
+        uiControlSetTooltip(c, ptr->GetString());
 }
 
 static uiEntry *putPathPicker(void* component, uiBox* box, const tuwjson::Value& j,
@@ -348,8 +350,9 @@ noex::string ComboBox::GetRawString() noexcept {
 }
 
 void ComboBox::SetConfig(const tuwjson::Value& config) noexcept {
-    if (config.HasMember(m_id) && config[m_id].IsInt()) {
-        int i = config[m_id].GetInt();
+    tuwjson::Value* ptr = config.GetMemberPtr(m_id);
+    if (ptr && ptr->IsInt()) {
+        int i = ptr->GetInt();
         if (i >= 0 && i < static_cast<int>(m_values.size()))
             uiComboboxSetSelected(static_cast<uiCombobox*>(m_widget), i);
     }
@@ -383,8 +386,9 @@ noex::string RadioButtons::GetRawString() noexcept {
 }
 
 void RadioButtons::SetConfig(const tuwjson::Value& config) noexcept {
-    if (config.HasMember(m_id) && config[m_id].IsInt()) {
-        int i = config[m_id].GetInt();
+    tuwjson::Value* ptr = config.GetMemberPtr(m_id);
+    if (ptr && ptr->IsInt()) {
+        int i = ptr->GetInt();
         if (i >= 0 && i < static_cast<int>(m_values.size()))
             uiRadioButtonsSetSelected(static_cast<uiRadioButtons*>(m_widget), i);
     }
@@ -416,8 +420,9 @@ noex::string CheckBox::GetRawString() noexcept {
 }
 
 void CheckBox::SetConfig(const tuwjson::Value& config) noexcept {
-    if (config.HasMember(m_id) && config[m_id].IsBool())
-        uiCheckboxSetChecked(static_cast<uiCheckbox*>(m_widget), config[m_id].GetBool());
+    tuwjson::Value* ptr = config.GetMemberPtr(m_id);
+    if (ptr && ptr->IsBool())
+        uiCheckboxSetChecked(static_cast<uiCheckbox*>(m_widget), ptr->GetBool());
 }
 
 void CheckBox::GetConfig(tuwjson::Value& config) noexcept {
@@ -456,9 +461,10 @@ noex::string CheckArray::GetRawString() noexcept {
 }
 
 void CheckArray::SetConfig(const tuwjson::Value& config) noexcept {
-    if (config.HasMember(m_id) && config[m_id].IsArray()) {
-        for (size_t i = 0; i < config[m_id].Size() && i < m_checks.size(); i++) {
-            tuwjson::Value& v = config[m_id][i];
+    tuwjson::Value* ptr = config.GetMemberPtr(m_id);
+    if (ptr && ptr->IsArray()) {
+        for (size_t i = 0; i < ptr->Size() && i < m_checks.size(); i++) {
+            tuwjson::Value& v = ptr->At(i);
             if (v.IsBool())
                 uiCheckboxSetChecked(m_checks[i], v.GetBool());
         }
@@ -546,8 +552,9 @@ void IntPicker::GetConfig(tuwjson::Value& config) noexcept {
 }
 
 void IntPicker::SetConfig(const tuwjson::Value& config) noexcept {
-    if (config.HasMember(m_id) && config[m_id].IsInt()) {
-        int val = config[m_id].GetInt();
+    tuwjson::Value* ptr = config.GetMemberPtr(m_id);
+    if (ptr && ptr->IsInt()) {
+        int val = ptr->GetInt();
         uiSpinboxSetValue(static_cast<uiSpinbox*>(m_widget), val);
     }
 }
@@ -588,8 +595,9 @@ void FloatPicker::GetConfig(tuwjson::Value& config) noexcept {
 }
 
 void FloatPicker::SetConfig(const tuwjson::Value& config) noexcept {
-    if (config.HasMember(m_id) && config[m_id].IsDouble()) {
-        double val = config[m_id].GetDouble();
+    tuwjson::Value* ptr = config.GetMemberPtr(m_id);
+    if (ptr && ptr->IsDouble()) {
+        double val = ptr->GetDouble();
         uiSpinboxSetValueDouble(static_cast<uiSpinbox*>(m_widget), val);
     }
 }
