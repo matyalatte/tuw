@@ -24,11 +24,38 @@ tuw_compiler = meson.get_compiler('c').get_id()
 tuw_is_release = get_option('buildtype').startswith('release') or (get_option('buildtype').startswith('custom') and not get_option('debug'))
 
 if tuw_OS == 'windows'
+    # Minify app.manifest
+    py = import('python').find_installation()
+    minify_script = '''
+import sys
+import re
+
+def minify_xml(input_file, output_file):
+    with open(input_file, "r", encoding="utf-8") as f:
+        xml_string = f.read()
+
+    xml_string = re.sub(r'    ', '', xml_string)
+    xml_string = re.sub(r'<!--.*-->', '', xml_string, flags=re.DOTALL)
+    xml_string = re.sub(r'>(\r\n)*<', '><', xml_string)
+    xml_string = re.sub(r'>\n*<', '><', xml_string)
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(xml_string)
+
+if __name__ == "__main__":
+    minify_xml(sys.argv[1], sys.argv[2])
+'''
+    configure_file(
+        input: 'src/app.manifest',
+        output: 'minified.manifest',
+        command: [py, '-c', minify_script, '@INPUT@', '@OUTPUT@']
+    )
     windows = import('windows')
     tuw_manifest += [
         windows.compile_resources('src/app.rc',
-        depend_files: ['src/app.manifest']),
+        depend_files: [meson.project_build_root() / 'minified.manifest']),
     ]
+
     if tuw_compiler == 'msvc'
         tuw_link_args = [
             '/LARGEADDRESSAWARE',
