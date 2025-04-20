@@ -25,7 +25,8 @@ noex::string GetFileError(const noex::string& path) noexcept {
         return "No such file or directory: " + path;
     if (errno == EACCES)
         return "Permission denied: " + path;
-    return "Failed to open " + path + " (Errno: " + noex::to_string(errno) + ")";
+    return "Failed to open " + path +
+        noex::concat_cstr(" (Errno: ", noex::to_string(errno).c_str(), ")");
 }
 
 namespace json_utils {
@@ -407,7 +408,7 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
     CheckJsonType(result, sub_definition, "window_name", JsonType::STRING);
 
     if (!sub_definition.HasMember("label")) {
-        noex::string default_label = noex::string("GUI ") + index;
+        noex::string default_label = "GUI " + noex::to_string(index);
         const char* label = GetString(sub_definition, "window_name", default_label.c_str());
         sub_definition["label"].SetString(label);
     }
@@ -426,7 +427,7 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
         if (strcmp(codepage, "utf8") != 0 && strcmp(codepage, "utf-8") != 0 &&
                 strcmp(codepage, "default") != 0) {
             result.ok = false;
-            result.msg = noex::string("Unknown codepage: ") + codepage;
+            result.msg = noex::concat_cstr("Unknown codepage: ", codepage);
             return;
         }
     }
@@ -523,8 +524,8 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
                 break;
             case COMP_UNKNOWN:
                 result.ok = false;
-                result.msg = noex::string("Unknown component type: ")
-                    + type_str + type_ptr->GetLineColumnStr();
+                result.msg = noex::concat_cstr("Unknown component type: ",
+                    type_str, type_ptr->GetLineColumnStr().c_str());
                 break;
         }
         if (!result.ok) return;
@@ -699,8 +700,8 @@ void CheckHelpURLs(JsonResult& result, tuwjson::Value& definition) noexcept {
             CheckJsonType(result, h, "path", JsonType::STRING, "file type document", REQUIRED);
         } else {
             result.ok = false;
-            result.msg = noex::concat_cstr("Unsupported help type: ", type)
-                + help_type_ptr->GetLineColumnStr();
+            result.msg = noex::concat_cstr("Unsupported help type: ", type,
+                help_type_ptr->GetLineColumnStr().c_str());
             return;
         }
     }
