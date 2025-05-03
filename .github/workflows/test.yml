@@ -7,9 +7,6 @@ on:
       - dev
   workflow_dispatch:
 
-env:
-  TOOL_NAME: Tuw
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -24,6 +21,7 @@ jobs:
           codespell -S subprojects
 
   test:
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -72,6 +70,7 @@ jobs:
           ./shell_scripts/test.sh ${{ matrix.buildtype }}
 
   test_linux:
+    timeout-minutes: 20
     needs: lint
     strategy:
       matrix:

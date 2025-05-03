@@ -17,7 +17,7 @@ The workflow is the same as Linux.
 On FreeBSD, you can get all the required tools with `pkg`.
 
 ```shell
-pkg install git bash pkgconf meson ninja
+pkg install git bash pkgconf meson ninja gtk3
 git clone https://github.com/matyalatte/tuw.git
 cd tuw
 ./shell_scripts/build.sh
@@ -29,7 +29,7 @@ cd tuw
 On OpenBSD, you can get all the required tools with `pkg_add`.
 
 ```shell
-pkg_add bash meson ninja
+pkg_add bash meson ninja gtk+3
 git clone https://github.com/matyalatte/tuw.git
 cd tuw
 ./shell_scripts/build.sh
@@ -41,7 +41,7 @@ cd tuw
 On NetBSD, you can get all the required tools with `pkgin`.
 
 ```shell
-pkgin in git mozilla-rootcerts-openssl bash pkgconf meson ninja
+pkgin in git mozilla-rootcerts-openssl bash pkgconf meson ninja gtk3+
 git clone https://github.com/matyalatte/tuw.git
 cd tuw
 ./shell_scripts/build.sh
