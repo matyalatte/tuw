@@ -21,7 +21,7 @@ tuw_cpp_args = []
 tuw_dependencies = []
 tuw_OS = host_machine.system()
 tuw_compiler = meson.get_compiler('c').get_id()
-tuw_is_release = get_option('buildtype').startswith('release') or (get_option('buildtype').startswith('custom') and not get_option('debug'))
+tuw_is_release = get_option('buildtype').startswith('release') or not get_option('debug')
 
 if tuw_OS == 'windows'
     # Minify app.manifest

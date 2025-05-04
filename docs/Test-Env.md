@@ -13,6 +13,8 @@ CI workflows are executed on the following platforms.
 | Ubuntu20.04 | arm64 | gcc | glibc |
 | Alpine3.16 | x64 | gcc | musl |
 | Alpine3.16 | arm64 | gcc | musl |
+| FreeBSD15.0 | x64 | clang |  |
+| OpenBSD7.7 | x64 | clang |  |
 
 ## Tested Environments
 

@@ -1,0 +1,24 @@
+name: test_macos
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  test_macos:
+    timeout-minutes: 20
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Meson
+        run: pip3 install meson==1.7.2 ninja
+
+      # xquartz has xvfb functions
+      - name: build and run tests
+        run: |
+          brew install --cask xquartz
+          ./shell_scripts/test.sh Release

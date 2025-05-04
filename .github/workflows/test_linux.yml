@@ -1,0 +1,19 @@
+name: test_linux
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  test_linux:
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        host: [ubuntu-latest, ubuntu-24.04-arm]
+        os: [ubuntu, alpine]
+    runs-on: ${{ matrix.host }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test with docker
+        run: |
+          docker build --build-arg TEST=true -t tuw_test -f docker/${{ matrix.os }}.dockerfile ./
