@@ -45,3 +45,25 @@ Each component should be defined as a dictionary.
 Tuw injects inputs of components into `command` when executing the command.
 You can specify where they should be injected with `%*%`.
 In the example, the file path will be injected at `%img%`, and the folder path will be at `%out%`.  
+
+## Save Dialog
+
+File pickers include a `use_save_dialog` option that allows users to select a new file through a save dialog.
+
+```json
+{
+    "gui": {
+        "window_name": "Save dialog sample",
+        "command": "echo test > %out%",
+        "components": [
+            {
+                "type": "file",
+                "id": "out",
+                "label": "Output file",
+                "add_quotes": true,
+                "use_save_dialog": true
+            }
+        ]
+    }
+}
+```

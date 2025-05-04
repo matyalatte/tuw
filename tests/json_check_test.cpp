@@ -115,7 +115,7 @@ TEST(JsonCheckTest, checkGUIFail5) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][2]["show_last_line"].SetString("test");
-    CheckGUIError(test_json, "\"show_last_line\" should be a boolean (line: 267, column: 31)");
+    CheckGUIError(test_json, "\"show_last_line\" should be a boolean (line: 268, column: 31)");
 }
 
 TEST(JsonCheckTest, checkGUIFail6) {
@@ -176,14 +176,14 @@ TEST(JsonCheckTest, checkHelpFail) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["help"][0].ReplaceKey("label", "notlabel");
-    CheckHelpError(test_json, "help document requires \"label\" (line: 280, column: 9)");
+    CheckHelpError(test_json, "help document requires \"label\" (line: 281, column: 9)");
 }
 
 TEST(JsonCheckTest, checkHelpFail2) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["help"][0]["label"].SetInt(3);
-    CheckHelpError(test_json, "\"label\" should be a string (line: 282, column: 22)");
+    CheckHelpError(test_json, "\"label\" should be a string (line: 283, column: 22)");
 }
 
 TEST(JsonCheckTest, checkVersionSuccess) {
