@@ -84,6 +84,7 @@ class FilterList {
 class FilePicker : public StringComponentBase {
  private:
     const char* m_ext;
+    bool m_use_save_dialog;
 
  public:
     noex::string GetRawString() noexcept override;

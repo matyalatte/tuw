@@ -180,6 +180,7 @@ FilePicker::FilePicker(uiBox* box, const tuwjson::Value& j) noexcept
     : StringComponentBase(box, j) {
     m_is_wide = true;
     m_ext = json_utils::GetString(j, "extension", "any files (*.*)|*.*");
+    m_use_save_dialog = json_utils::GetBool(j, "use_save_dialog", false);
     m_widget = putPathPicker(this, box, j, onOpenFileClicked);
 }
 
@@ -275,10 +276,13 @@ void FilePicker::OpenFile() noexcept {
     params.filterCount = filter_list.GetSize();
     params.filters = filter_list.ToLibuiFilterList();
 
-    filename = uiOpenFileWithParams(GetToplevel(uiControl(entry)), &params);
-    if (filename == NULL) {
+    uiWindow* top = GetToplevel(uiControl(entry));
+    if (m_use_save_dialog)
+        filename = uiSaveFileWithParams(top, &params);
+    else
+        filename = uiOpenFileWithParams(top, &params);
+    if (filename == NULL)
         return;
-    }
 
     uiEntrySetText(entry, filename);
     uiFreeText(filename);
