@@ -1,0 +1,38 @@
+name: test_windows
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  test_windows:
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            buildtype: Release
+          - os: windows-2022
+            buildtype: Debug
+          - os: windows-11-arm
+            buildtype: Release
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Meson
+        run: pip install meson
+
+      - name: Prepare MSVC
+        uses: bus1/cabuild/action/msdevshell@v1
+        with:
+          architecture: x64
+
+      - name: build and run tests
+        run: |
+          cd batch_files
+          ./test.bat ${{ matrix.buildtype }}

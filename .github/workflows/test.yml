@@ -20,65 +20,18 @@ jobs:
           cpplint --recursive --quiet .
           codespell -S subprojects
 
-  test:
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-2022
-            buildtype: Release
-          - os: windows-2022
-            buildtype: Debug
-          - os: windows-11-arm
-            buildtype: Release
-          - os: macos-14
-            buildtype: Release
-    runs-on: ${{ matrix.os }}
+  test_windows:
     needs: lint
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+    uses: ./.github/workflows/test_windows.yml
 
-      - name: Install Meson for Windows
-        if: runner.os == 'Windows'
-        run: pip install meson
-
-      - name: Install Meson for Unix
-        if: runner.os != 'Windows'
-        run: pip3 install meson ninja
-
-      - name: Prepare MSVC
-        if: runner.os == 'Windows'
-        uses: bus1/cabuild/action/msdevshell@v1
-        with:
-          architecture: x64
-
-      - name: build and run tests for Windows
-        if: runner.os == 'Windows'
-        run: |
-          cd batch_files
-          ./test.bat ${{ matrix.buildtype }}
-
-      # xquartz has xvfb functions
-      - name: build and run tests for mac
-        if: runner.os == 'macOS'
-        run: |
-          brew install --cask xquartz
-          ./shell_scripts/test.sh ${{ matrix.buildtype }}
+  test_macos:
+    needs: lint
+    uses: ./.github/workflows/test_macos.yml
 
   test_linux:
-    timeout-minutes: 20
     needs: lint
-    strategy:
-      matrix:
-        host: [ubuntu-latest, ubuntu-24.04-arm]
-        os: [ubuntu, alpine]
-    runs-on: ${{ matrix.host }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Test with docker
-        run: |
-          docker build --build-arg TEST=true -t tuw_test -f docker/${{ matrix.os }}.dockerfile ./
+    uses: ./.github/workflows/test_linux.yml
+
+  test_bsd:
+    needs: lint
+    uses: ./.github/workflows/test_bsd.yml

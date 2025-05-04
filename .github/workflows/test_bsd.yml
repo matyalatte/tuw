@@ -1,6 +1,7 @@
-name: bsd_test
+name: test_bsd
 
 on:
+  workflow_call:
   workflow_dispatch:
 
 jobs:
