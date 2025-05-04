@@ -15,7 +15,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install Meson
-        run: pip3 install meson ninja
+        run: pip3 install meson==1.7.2 ninja
 
       # xquartz has xvfb functions
       - name: build and run tests

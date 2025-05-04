@@ -92,11 +92,11 @@ jobs:
 
       - name: Install Meson for Windows
         if: runner.os == 'Windows'
-        run: pip install meson
+        run: pip install meson==1.7.2
 
       - name: Install Meson for Unix
         if: runner.os != 'Windows'
-        run: pip3 install meson ninja
+        run: pip3 install meson==1.7.2 ninja
 
       - name: Prepare MSVC for Windows
         if: runner.os == 'Windows'

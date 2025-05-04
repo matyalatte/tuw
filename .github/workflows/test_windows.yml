@@ -25,7 +25,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install Meson
-        run: pip install meson
+        run: pip install meson==1.7.2
 
       - name: Prepare MSVC
         uses: bus1/cabuild/action/msdevshell@v1
