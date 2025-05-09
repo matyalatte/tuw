@@ -260,3 +260,11 @@ TEST(JsonCheckTest, checkGUIFloatInc2) {
     CheckGUIError(test_json,
         "\"inc\" should be a positive number. (line: 253, column: 28)");
 }
+
+TEST(JsonCheckTest, checkGUIMinMax) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    test_json["gui"][1]["components"][9]["min"].SetDouble(2);
+    CheckGUIError(test_json,
+        "\"max\" should be greater than \"min\". (line: 251, column: 28)");
+}
