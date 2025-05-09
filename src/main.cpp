@@ -63,6 +63,15 @@ noex::string Merge(const noex::string& exe_path, const noex::string& json_path,
         PrintFmt("JSON file loaded but it has no data.\n");
         return "";
     }
+
+    // Check JSON format before embedding
+    tuwjson::Value tmp_json;
+    tmp_json.CopyFrom(json);
+    json_utils::JsonResult res = JSON_RESULT_OK;
+    json_utils::CheckDefinition(res, tmp_json);
+    if (!res.ok)
+        return res.msg;
+
     ExeContainer exe;
     err = exe.Read(exe_path);
     if (!err.empty()) return err;
