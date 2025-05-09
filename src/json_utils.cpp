@@ -468,6 +468,7 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
         switch (type) {
             case COMP_FILE:
                 CheckJsonType(result, c, "extension", JsonType::STRING);
+                CheckJsonType(result, c, "use_save_dialog", JsonType::BOOLEAN);
                 /* Falls through. */
             case COMP_FOLDER:
                 CheckJsonType(result, c, "button", JsonType::STRING);

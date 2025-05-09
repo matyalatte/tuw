@@ -105,6 +105,7 @@
                     "id": "file",
                     "extension": "png or jpg (*.png;*.jpg)|*.png;*.jpg",
                     "placeholder": "Drop a file here!",
+                    "use_save_dialog": false,
                     "button": "...",
                     "default": "test.txt",
                     "add_quotes": true,

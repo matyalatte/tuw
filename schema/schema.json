@@ -254,7 +254,8 @@
             "placeholder": { "type": "string" },
             "button": { "type": "string" },
             "default": { "type": "string" },
-            "tooltip": { "type": "string" }
+            "tooltip": { "type": "string" },
+            "use_save_dialog": { "type": "boolean" }
           }
         }
       },
