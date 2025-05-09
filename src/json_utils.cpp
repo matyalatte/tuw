@@ -520,7 +520,13 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
                 CheckJsonType(result, c, "default", jtype);
                 CheckJsonType(result, c, "min", jtype);
                 CheckJsonType(result, c, "max", jtype);
-                CheckJsonType(result, c, "inc", jtype);
+                json_ptr = CheckJsonType(result, c, "inc", jtype);
+                if (!result.ok) return;
+                if (json_ptr && json_ptr->GetDouble() <= 0) {
+                    result.ok = false;
+                    result.msg = "\"inc\" should be a positive number."
+                                + json_ptr->GetLineColumnStr();
+                }
                 CheckJsonType(result, c, "wrap", JsonType::BOOLEAN);
                 break;
             case COMP_UNKNOWN:

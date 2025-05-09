@@ -526,10 +526,6 @@ IntPicker::IntPicker(uiBox* box, const tuwjson::Value& j) noexcept
         max = x;
     }
     int inc = json_utils::GetInt(j, "inc", 1);
-    if (inc < 0)
-        inc = -inc;
-    else if (inc == 0)
-        inc = 1;
     int val = json_utils::GetInt(j, "default", min);
     bool wrap = json_utils::GetBool(j, "wrap", false);
     uiSpinbox* picker = uiNewSpinboxDoubleEx(
@@ -573,10 +569,6 @@ FloatPicker::FloatPicker(uiBox* box, const tuwjson::Value& j) noexcept
         max = x;
     }
     double inc = json_utils::GetDouble(j, "inc", 0.1);
-    if (inc < 0)
-        inc = -inc;
-    else if (inc == 0)
-        inc = 1.0;
     int digits = json_utils::GetInt(j, "digits", 1);
     double val = json_utils::GetDouble(j, "default", min);
     bool wrap = json_utils::GetBool(j, "wrap", false);

@@ -244,3 +244,19 @@ TEST(JsonCheckTest, checkVersionFail4) {
     EXPECT_FALSE(result.ok);
     EXPECT_STREQ("Can NOT convert 'foo' to int.", result.msg.c_str());
 }
+
+TEST(JsonCheckTest, checkGUIIntInc) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    test_json["gui"][1]["components"][8]["inc"].SetInt(-1);
+    CheckGUIError(test_json,
+        "\"inc\" should be a positive number. (line: 240, column: 28)");
+}
+
+TEST(JsonCheckTest, checkGUIFloatInc2) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    test_json["gui"][1]["components"][9]["inc"].SetDouble(-0.1);
+    CheckGUIError(test_json,
+        "\"inc\" should be a positive number. (line: 253, column: 28)");
+}
