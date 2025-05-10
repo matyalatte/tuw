@@ -465,6 +465,7 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
         c["type_int"].SetInt(type);
         CorrectKey(c, "item", "items");
         CorrectKey(c, "item_array", "items");
+        double min, max;
         switch (type) {
             case COMP_FILE:
                 CheckJsonType(result, c, "extension", JsonType::STRING);
@@ -518,9 +519,25 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
                     }
                 }
                 CheckJsonType(result, c, "default", jtype);
+                // Check min and max
                 CheckJsonType(result, c, "min", jtype);
-                CheckJsonType(result, c, "max", jtype);
-                CheckJsonType(result, c, "inc", jtype);
+                json_ptr = CheckJsonType(result, c, "max", jtype);
+                if (!result.ok) return;
+                min = json_utils::GetDouble(c, "min", 0);
+                max = json_utils::GetDouble(c, "max", 100.0);
+                if (min > max) {
+                    result.ok = false;
+                    result.msg = "\"max\" should be greater than \"min\"."
+                                + json_ptr->GetLineColumnStr();
+                }
+                // Check inc
+                json_ptr = CheckJsonType(result, c, "inc", jtype);
+                if (!result.ok) return;
+                if (json_ptr && json_ptr->GetDouble() <= 0) {
+                    result.ok = false;
+                    result.msg = "\"inc\" should be a positive number."
+                                + json_ptr->GetLineColumnStr();
+                }
                 CheckJsonType(result, c, "wrap", JsonType::BOOLEAN);
                 break;
             case COMP_UNKNOWN:
