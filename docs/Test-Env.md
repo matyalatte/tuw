@@ -39,5 +39,6 @@ The following platforms have been tested in the past. However, compatibility wit
 | FreeBSD14.2 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | OpenBSD7.4 | x64 | clang | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | NetBSD9.3 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| DragonFlyBSD6.4 | x64 | gcc | | :heavy_check_mark: | :question: | :question: |
 | Haiku R1/beta5 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :x: |
 | OpenIndiana 2024.04 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |

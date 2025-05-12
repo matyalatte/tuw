@@ -12,7 +12,7 @@ The workflow is the same as Linux.
 -   bash
 -   Shell scripts in [`./Tuw/shell_scripts`](../shell_scripts)
 
-## FreeBSD
+## FreeBSD (and BSD variants using pkg)
 
 On FreeBSD, you can get all the required tools with `pkg`.
 
