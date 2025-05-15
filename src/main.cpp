@@ -67,10 +67,10 @@ noex::string Merge(const noex::string& exe_path, const noex::string& json_path,
     // Check JSON format before embedding
     tuwjson::Value tmp_json;
     tmp_json.CopyFrom(json);
-    json_utils::JsonResult res = JSON_RESULT_OK;
-    json_utils::CheckDefinition(res, tmp_json);
-    if (!res.ok)
-        return res.msg;
+    noex::string err_msg;
+    json_utils::CheckDefinition(err_msg, tmp_json);
+    if (!err_msg.empty())
+        return err_msg;
 
     ExeContainer exe;
     err = exe.Read(exe_path);

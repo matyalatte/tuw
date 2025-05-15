@@ -100,9 +100,9 @@ void MainFrame::Initialize(const tuwjson::Value& definition,
     }
 
     if (loaded) {
-        json_utils::JsonResult result = CheckDefinition(m_definition);
-        loaded = result.ok;
-        err = result.msg;
+        noex::string err_msg = CheckDefinition(m_definition);
+        loaded = err_msg.empty();
+        err = err_msg;
     }
 
     if (!loaded)
@@ -548,10 +548,10 @@ void MainFrame::RunCommand() noexcept {
 }
 
 // read gui_definition.json
-json_utils::JsonResult MainFrame::CheckDefinition(tuwjson::Value& definition) noexcept {
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckVersion(result, definition);
-    if (!result.ok) return result;
+noex::string MainFrame::CheckDefinition(tuwjson::Value& definition) noexcept {
+    noex::string err_msg;
+    json_utils::CheckVersion(err_msg, definition);
+    if (!err_msg.empty()) return err_msg;
 
     tuwjson::Value* ptr = definition.GetMemberPtr("recommended");
     if (ptr) {
@@ -561,11 +561,11 @@ json_utils::JsonResult MainFrame::CheckDefinition(tuwjson::Value& definition) no
         }
     }
 
-    json_utils::CheckDefinition(result, definition);
-    if (!result.ok) return result;
+    json_utils::CheckDefinition(err_msg, definition);
+    if (!err_msg.empty()) return err_msg;
 
-    json_utils::CheckHelpURLs(result, definition);
-    return result;
+    json_utils::CheckHelpURLs(err_msg, definition);
+    return err_msg;
 }
 
 void MainFrame::UpdateConfig() noexcept {

@@ -43,13 +43,6 @@ noex::string GetFileError(const noex::string& path) noexcept;
 
 namespace json_utils {
 
-struct JsonResult {
-    bool ok;
-    noex::string msg;
-};
-
-#define JSON_RESULT_OK { true, "" }
-
 // Max binary size for JSON files.
 #define JSON_SIZE_MAX 128 * 1024
 
@@ -63,10 +56,10 @@ int GetInt(const tuwjson::Value& json, const char* key, int def) noexcept;
 double GetDouble(const tuwjson::Value& json, const char* key, double def) noexcept;
 
 void GetDefaultDefinition(tuwjson::Value& definition) noexcept;
-void CheckVersion(JsonResult& result, tuwjson::Value& definition) noexcept;
-void CheckDefinition(JsonResult& result, tuwjson::Value& definition) noexcept;
-void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
+void CheckVersion(noex::string& err_msg, tuwjson::Value& definition) noexcept;
+void CheckDefinition(noex::string& err_msg, tuwjson::Value& definition) noexcept;
+void CheckSubDefinition(noex::string& err_msg, tuwjson::Value& sub_definition,
                         int index) noexcept;
-void CheckHelpURLs(JsonResult& result, tuwjson::Value& definition) noexcept;
+void CheckHelpURLs(noex::string& err_msg, tuwjson::Value& definition) noexcept;
 
 }  // namespace json_utils
