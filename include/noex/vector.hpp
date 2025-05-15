@@ -79,7 +79,7 @@ class non_trivial_vector {
     size_t capacity() const noexcept { return m_capacity; }
 
     bool empty() const noexcept {
-        return m_data == nullptr || m_size == 0;
+        return m_size == 0;
     }
 
     // Returns a pointer to the actual buffer.
@@ -232,7 +232,7 @@ class trivial_vector_base {
     size_t capacity() const noexcept { return m_capacity; }
 
     bool empty() const noexcept {
-        return m_data == nullptr || m_size == 0;
+        return m_size == 0;
     }
 
     void clear() noexcept;
