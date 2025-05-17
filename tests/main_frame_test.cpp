@@ -118,6 +118,17 @@ TEST_F(MainFrameTest, GetCommand3) {
     EXPECT_STREQ(expected.c_str(), main_frame->GetCommand().c_str());
 }
 
+TEST_F(MainFrameTest, GetCommandEmpty) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    json_utils::GetDefaultDefinition(test_json);
+    test_json["gui"][0]["command"].SetString("");
+    tuwjson::Value dummy_config;
+    GetDummyConfig(dummy_config);
+    main_frame = new MainFrame(test_json, dummy_config);
+    EXPECT_STREQ("", main_frame->GetCommand().c_str());
+}
+
 TEST_F(MainFrameTest, RunCommandSuccess) {
     tuwjson::Value test_json;
     GetTestJson(test_json);

@@ -116,6 +116,9 @@ void DestroyProcess(subprocess_s &process,
 
 ExecuteResult Execute(const noex::string& cmd,
                       bool use_utf8_on_windows) noexcept {
+    if (cmd.empty())
+        return { 0, "", "" };
+
 #ifdef _WIN32
     noex::wstring wcmd = UTF8toUTF16(cmd.c_str());
 
