@@ -446,6 +446,9 @@ noex::string MainFrame::GetCommand() noexcept {
     tuwjson::Value& cmd_ary = sub_definition["command_splitted"];
     tuwjson::Value& cmd_ids = sub_definition["command_ids"];
 
+    if (cmd_ary.IsEmpty())
+        return "";
+
     noex::string cmd = cmd_ary[0].GetString();
     for (size_t i = 0; i < cmd_ids.Size(); i++) {
         int id = cmd_ids[i].GetInt();
