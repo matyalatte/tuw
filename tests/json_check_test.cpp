@@ -34,9 +34,9 @@ TEST(JsonCheckTest, LoadJsonSuccess) {
 TEST(JsonCheckTest, checkGUISuccess) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckDefinition(result, test_json);
-    EXPECT_TRUE(result.ok);
+    noex::string err_msg;
+    json_utils::CheckDefinition(err_msg, test_json);
+    EXPECT_TRUE(err_msg.empty());
 }
 
 TEST(JsonCheckTest, checkGUISuccess2) {
@@ -44,43 +44,43 @@ TEST(JsonCheckTest, checkGUISuccess2) {
     GetTestJson(test_json);
     tuwjson::Value& comp = test_json["gui"][0]["components"][6];
     comp.ReplaceKey("items", "item_array");
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckDefinition(result, test_json);
-    EXPECT_TRUE(result.ok);
+    noex::string err_msg;
+    json_utils::CheckDefinition(err_msg, test_json);
+    EXPECT_TRUE(err_msg.empty());
 }
 
 TEST(JsonCheckTest, checkGUISuccess3) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][0].Swap(test_json["gui"][1]);
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckDefinition(result, test_json);
-    EXPECT_TRUE(result.ok);
+    noex::string err_msg;
+    json_utils::CheckDefinition(err_msg, test_json);
+    EXPECT_TRUE(err_msg.empty());
 }
 
 TEST(JsonCheckTest, checkGUISuccess4) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["gui"][0].Swap(test_json["gui"][2]);
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckDefinition(result, test_json);
-    EXPECT_TRUE(result.ok);
+    noex::string err_msg;
+    json_utils::CheckDefinition(err_msg, test_json);
+    EXPECT_TRUE(err_msg.empty());
 }
 
 TEST(JsonCheckTest, checkGUISuccessRelaxed) {
     tuwjson::Value test_json;
     noex::string err = json_utils::LoadJson(JSON_RELAXED, test_json);
     EXPECT_TRUE(err.empty());
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckDefinition(result, test_json);
-    EXPECT_TRUE(result.ok);
+    noex::string err_msg;
+    json_utils::CheckDefinition(err_msg, test_json);
+    EXPECT_TRUE(err_msg.empty());
 }
 
 void CheckGUIError(tuwjson::Value& test_json, const char* expected) {
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckDefinition(result, test_json);
-    EXPECT_FALSE(result.ok);
-    EXPECT_STREQ(expected, result.msg.c_str());
+    noex::string err_msg;
+    json_utils::CheckDefinition(err_msg, test_json);
+    EXPECT_FALSE(err_msg.empty());
+    EXPECT_STREQ(expected, err_msg.c_str());
 }
 
 TEST(JsonCheckTest, checkGUIFail) {
@@ -160,16 +160,16 @@ TEST(JsonCheckTest, checkGUIFailRelaxed) {
 TEST(JsonCheckTest, checkHelpSuccess) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckHelpURLs(result, test_json);
-    EXPECT_TRUE(result.ok);
+    noex::string err_msg;
+    json_utils::CheckHelpURLs(err_msg, test_json);
+    EXPECT_TRUE(err_msg.empty());
 }
 
 void CheckHelpError(tuwjson::Value& test_json, const char* expected) {
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckHelpURLs(result, test_json);
-    EXPECT_FALSE(result.ok);
-    EXPECT_STREQ(expected, result.msg.c_str());
+    noex::string err_msg;
+    json_utils::CheckHelpURLs(err_msg, test_json);
+    EXPECT_FALSE(err_msg.empty());
+    EXPECT_STREQ(expected, err_msg.c_str());
 }
 
 TEST(JsonCheckTest, checkHelpFail) {
@@ -190,9 +190,9 @@ TEST(JsonCheckTest, checkVersionSuccess) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["recommended"].SetString(tuw_constants::VERSION);
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckVersion(result, test_json);
-    EXPECT_TRUE(result.ok);
+    noex::string err_msg;
+    json_utils::CheckVersion(err_msg, test_json);
+    EXPECT_TRUE(err_msg.empty());
     EXPECT_FALSE(test_json["not_recommended"].GetBool());
 }
 
@@ -200,9 +200,9 @@ TEST(JsonCheckTest, checkVersionFail) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["recommended"].SetString("0.2.3");
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckVersion(result, test_json);
-    EXPECT_TRUE(result.ok);
+    noex::string err_msg;
+    json_utils::CheckVersion(err_msg, test_json);
+    EXPECT_TRUE(err_msg.empty());
     EXPECT_TRUE(test_json["not_recommended"].GetBool());
 }
 
@@ -210,39 +210,39 @@ TEST(JsonCheckTest, checkVersionFail2) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["recommended"].SetString("foo");
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckVersion(result, test_json);
-    EXPECT_FALSE(result.ok);
-    EXPECT_STREQ("Can NOT convert 'foo' to int.", result.msg.c_str());
+    noex::string err_msg;
+    json_utils::CheckVersion(err_msg, test_json);
+    EXPECT_FALSE(err_msg.empty());
+    EXPECT_STREQ("Can NOT convert 'foo' to int.", err_msg.c_str());
 }
 
 TEST(JsonCheckTest, checkVersionSuccess2) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["minimum_required"].SetString(tuw_constants::VERSION);
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckVersion(result, test_json);
-    EXPECT_TRUE(result.ok);
+    noex::string err_msg;
+    json_utils::CheckVersion(err_msg, test_json);
+    EXPECT_TRUE(err_msg.empty());
 }
 
 TEST(JsonCheckTest, checkVersionFail3) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["minimum_required"].SetString("1.0.0");
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckVersion(result, test_json);
-    EXPECT_FALSE(result.ok);
-    EXPECT_STREQ("Version 1.0.0 is required.", result.msg.c_str());
+    noex::string err_msg;
+    json_utils::CheckVersion(err_msg, test_json);
+    EXPECT_FALSE(err_msg.empty());
+    EXPECT_STREQ("Version 1.0.0 is required.", err_msg.c_str());
 }
 
 TEST(JsonCheckTest, checkVersionFail4) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json["minimum_required"].SetString("foo");
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckVersion(result, test_json);
-    EXPECT_FALSE(result.ok);
-    EXPECT_STREQ("Can NOT convert 'foo' to int.", result.msg.c_str());
+    noex::string err_msg;
+    json_utils::CheckVersion(err_msg, test_json);
+    EXPECT_FALSE(err_msg.empty());
+    EXPECT_STREQ("Can NOT convert 'foo' to int.", err_msg.c_str());
 }
 
 TEST(JsonCheckTest, checkGUIIntInc) {

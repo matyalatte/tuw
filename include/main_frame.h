@@ -32,7 +32,7 @@ class MainFrame {
 
     void CreateFrame() noexcept;
     void CreateMenu() noexcept;
-    json_utils::JsonResult CheckDefinition(tuwjson::Value& definition) noexcept;
+    noex::string CheckDefinition(tuwjson::Value& definition) noexcept;
     void UpdateConfig() noexcept;
     void ShowSuccessDialog(const char* msg, const char* title = "Success") noexcept;
     void ShowErrorDialog(const char* msg, const char* title = "Error") noexcept;

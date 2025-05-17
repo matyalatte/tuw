@@ -38,7 +38,7 @@ class basic_string {
     inline size_t capacity() const noexcept { return m_capacity; }
 
     inline bool empty() const noexcept {
-        return !m_str || m_size == 0;
+        return m_size == 0;
     }
 
     // Returns an immutable C string. This can't be null.
