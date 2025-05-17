@@ -1,3 +1,13 @@
+ver 0.10.1
+- Added "use_save_dialog" to file picker options (#115)
+  (You can open a save dialog to select a new file.)
+- Tuw now validates JSON before embedding it into exe. (#116)
+- Added two JSON errors for number picker options. (#117)
+  ('inc should be a positive number' and 'max should be greater than min'.)
+- Fixed out-of-bounds error when executing an empty command. (#121)
+- Pull requests are now tested on FreeBSD and OpenBSD. (#114)
+- Optimized for binary size. (#113, #119)
+
 ver 0.10.0
 - Improved JSON parser. (#108)
   - Reduced binary size (about 16% for Windows10 build.)

@@ -124,7 +124,13 @@ class Value {
         assert(IsObject());
         return u.m_object;
     }
-    bool HasMember(const char* key) const noexcept;
+    Value* GetMemberPtr(const char* key) const noexcept;
+    inline Value* GetMemberPtr(const noex::string& key) const noexcept {
+        return GetMemberPtr(key.c_str());
+    }
+    inline bool HasMember(const char* key) const noexcept {
+        return GetMemberPtr(key) != nullptr;
+    }
     inline bool HasMember(const noex::string& key) const noexcept {
         return HasMember(key.c_str());
     }

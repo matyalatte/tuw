@@ -25,7 +25,8 @@ noex::string GetFileError(const noex::string& path) noexcept {
         return "No such file or directory: " + path;
     if (errno == EACCES)
         return "Permission denied: " + path;
-    return "Failed to open " + path + " (Errno: " + noex::to_string(errno) + ")";
+    return "Failed to open " + path +
+        noex::concat_cstr(" (Errno: ", noex::to_string(errno).c_str(), ")");
 }
 
 namespace json_utils {
@@ -117,102 +118,67 @@ enum class JsonType {
     FLOAT,
     STRING,
     JSON,
+    ARRAY,
+    STRING_ARRAY,
+    JSON_ARRAY,
     MAX
 };
 
 static const bool REQUIRED = false;
 
-static void CheckJsonType(JsonResult& result, const tuwjson::Value& j, const char* key,
+static tuwjson::Value* CheckJsonType(
+        noex::string& err_msg, const tuwjson::Value& j, const char* key,
         const JsonType& type, const char* name = "", const bool& optional = true) noexcept {
-    if (!j.HasMember(key)) {
-        if (optional) return;
-        result.ok = false;
-        result.msg = noex::concat_cstr(name, " requires \"", key) + "\"" + j.GetLineColumnStr();
-        return;
+    tuwjson::Value* ptr = j.GetMemberPtr(key);
+    if (!ptr) {
+        if (optional) return nullptr;
+        err_msg = noex::concat_cstr(name, " requires \"", key) + "\"" + j.GetLineColumnStr();
+        return nullptr;
     }
     bool valid = false;
     const char* type_name = nullptr;
-    const tuwjson::Value& v = j[key];
+    if (type > JsonType::ARRAY && !ptr->IsArray())
+        ptr->ConvertToArray();
     switch (type) {
     case JsonType::BOOLEAN:
-        valid = v.IsBool();
+        valid = ptr->IsBool();
         type_name = "a boolean";
         break;
     case JsonType::INTEGER:
-        valid = v.IsInt();
+        valid = ptr->IsInt();
         type_name = "an int";
         break;
     case JsonType::FLOAT:
-        valid = v.IsDouble();
+        valid = ptr->IsDouble();
         type_name = "a float";
         break;
     case JsonType::STRING:
-        valid = v.IsString();
+        valid = ptr->IsString();
         type_name = "a string";
         break;
     case JsonType::JSON:
-        valid = v.IsObject();
+        valid = ptr->IsObject();
         type_name = "a json object";
         break;
-    default:
-        assert(false);
-        type_name = "";
-        break;
-    }
-    if (!valid) {
-        result.ok = false;
-        result.msg = noex::concat_cstr("\"", key, "\" should be ") + type_name
-            + v.GetLineColumnStr();
-    }
-}
-
-static bool IsJsonArray(tuwjson::Value& j, const char* key) noexcept {
-    tuwjson::Value& val = j[key];
-    if (!val.IsArray()) {
-        if (!val.IsObject())
-            return false;
-        val.ConvertToArray();
-    }
-    for (const tuwjson::Value& el : val) {
-        if (!el.IsObject())
-            return false;
-    }
-    return true;
-}
-
-static bool IsStringArray(tuwjson::Value& j, const char* key) noexcept {
-    tuwjson::Value& val = j[key];
-    if (!val.IsArray()) {
-        if (!val.IsString())
-            return false;
-        val.ConvertToArray();
-    }
-    for (const tuwjson::Value& el : val) {
-        if (!el.IsString())
-            return false;
-    }
-    return true;
-}
-
-static void CheckJsonArrayType(JsonResult& result, tuwjson::Value& j, const char* key,
-        const JsonType& type,
-        const char* name = "", const bool& optional = true) noexcept {
-    if (!j.HasMember(key)) {
-        if (optional) return;
-        result.ok = false;
-        result.msg = noex::concat_cstr(name, " requires \"", key) + "\"" + j.GetLineColumnStr();
-        return;
-    }
-    bool valid = false;
-    const char* type_name = nullptr;
-    switch (type) {
-    case JsonType::STRING:
-        valid = IsStringArray(j, key);
+    case JsonType::STRING_ARRAY:
+        valid = true;
         type_name = "an array of strings";
+        for (const tuwjson::Value& el : *ptr) {
+            if (!el.IsString()) {
+                valid = false;
+                break;
+            }
+        }
         break;
-    case JsonType::JSON:
-        valid = IsJsonArray(j, key);
+    case JsonType::JSON_ARRAY:
+        valid = true;
         type_name = "an array of json objects";
+        for (const tuwjson::Value& el : *ptr) {
+            if (!el.IsObject()) {
+                valid = false;
+                break;
+            }
+        }
         break;
     default:
         assert(false);
@@ -220,10 +186,10 @@ static void CheckJsonArrayType(JsonResult& result, tuwjson::Value& j, const char
         break;
     }
     if (!valid) {
-        result.ok = false;
-        result.msg = noex::concat_cstr("\"", key, "\" should be ") + type_name
-            + j[key].GetLineColumnStr();
+        err_msg = noex::concat_cstr("\"", key, "\" should be ") + type_name
+            + ptr->GetLineColumnStr();
     }
+    return ptr;
 }
 
 // get default definition of gui
@@ -242,9 +208,9 @@ void GetDefaultDefinition(tuwjson::Value& definition) noexcept {
     tuwjson::Error ok = parser.ParseJson(def_str, &definition);
     assert(ok == tuwjson::JSON_OK);
     (void) ok;  // GCC says it's unused even if you use it for assertion.
-    JsonResult result = JSON_RESULT_OK;
-    CheckDefinition(result, definition);
-    assert(result.ok);
+    noex::string err_msg;
+    CheckDefinition(err_msg, definition);
+    assert(err_msg.empty());
 }
 
 static void CorrectKey(
@@ -254,31 +220,21 @@ static void CorrectKey(
         j.ReplaceKey(false_key, true_key);
 }
 
-static noex::vector<noex::string>
-SplitString(const char* str, const char delimiter) noexcept {
-    if (!str)
-        return {};
+static noex::string
+SubstrToChar(const char* str, const char delimiter) noexcept {
+    if (!str || !*str)
+        return "";
 
-    noex::vector<noex::string> tokens;
-
-    const char* start = str;
-    while (*start != '\0') {
-        const char* pos = strchr(start, delimiter);
-        if (!pos) {
-            tokens.emplace_back(start);
-            break;
-        }
-        tokens.emplace_back(start, pos - start);
-        start = pos + 1;
-    }
-    return tokens;
+    const char* pos = strchr(str, delimiter);
+    if (!pos)
+        return str;
+    return noex::string(str, pos - str);
 }
 
 // split command by "%" symbol, and calculate which component should be inserted there.
-static void CompileCommand(JsonResult& result,
+static void CompileCommand(noex::string& err_msg,
                             tuwjson::Value& sub_definition,
                             const noex::vector<noex::string>& comp_ids) noexcept {
-    noex::vector<noex::string> cmd = SplitString(sub_definition["command"].GetString(), '%');
     noex::vector<noex::string> cmd_ids;
     noex::vector<noex::string> splitted_cmd;
 
@@ -286,7 +242,9 @@ static void CompileCommand(JsonResult& result,
     splitted_cmd_json.SetArray();
 
     bool store_ids = false;
-    for (const noex::string& token : cmd) {
+    const char* cmd = sub_definition["command"].GetString();
+    while (*cmd != '\0') {
+        noex::string token = SubstrToChar(cmd, '%');
         if (store_ids) {
             cmd_ids.emplace_back(token);
         } else {
@@ -296,6 +254,9 @@ static void CompileCommand(JsonResult& result,
             splitted_cmd_json.MoveAndPush(n);
         }
         store_ids = !store_ids;
+        cmd += token.size();
+        if (*cmd != '\0')
+            cmd++;
     }
     sub_definition["command_splitted"].MoveFrom(splitted_cmd_json);
 
@@ -360,22 +321,19 @@ static void CompileCommand(JsonResult& result,
                 break;
             }
         if (!found) {
-            result.ok = false;
-
             if (comp_ids[j].empty() || !v.HasMember("id")) {
-                result.msg = noex::concat_cstr("[\"components\"][", noex::to_string(j).c_str(), "]")
+                err_msg = noex::concat_cstr("[\"components\"][", noex::to_string(j).c_str(), "]")
                     + v.GetLineColumnStr() + " is unused in the command; " + cmd_str;
             } else {
                 tuwjson::Value& vid = v["id"];
-                result.msg = noex::concat_cstr("component id \"", vid.GetString(), "\"")
+                err_msg = noex::concat_cstr("component id \"", vid.GetString(), "\"")
                     + vid.GetLineColumnStr() + " is unused in the command; " + cmd_str;
             }
             return;
         }
     }
     if (non_id_comp > comp_size) {
-        result.ok = false;
-        result.msg =
+        err_msg =
             "The command requires more components for arguments; " + cmd_str;
         return;
     }
@@ -420,66 +378,69 @@ int ComptypeToInt(const char* comptype) noexcept {
     return COMP_UNKNOWN;
 }
 
-void CheckValidator(JsonResult& result, tuwjson::Value& validator) noexcept {
-    CheckJsonType(result, validator, "regex", JsonType::STRING);
-    CheckJsonType(result, validator, "regex_error", JsonType::STRING);
-    CheckJsonType(result, validator, "wildcard", JsonType::STRING);
-    CheckJsonType(result, validator, "wildcard_error", JsonType::STRING);
-    CheckJsonType(result, validator, "exist", JsonType::BOOLEAN);
-    CheckJsonType(result, validator, "exist_error", JsonType::STRING);
-    CheckJsonType(result, validator, "not_empty", JsonType::BOOLEAN);
-    CheckJsonType(result, validator, "not_empty_error", JsonType::STRING);
+void CheckValidator(noex::string& err_msg, tuwjson::Value& validator) noexcept {
+    CheckJsonType(err_msg, validator, "regex", JsonType::STRING);
+    CheckJsonType(err_msg, validator, "regex_error", JsonType::STRING);
+    CheckJsonType(err_msg, validator, "wildcard", JsonType::STRING);
+    CheckJsonType(err_msg, validator, "wildcard_error", JsonType::STRING);
+    CheckJsonType(err_msg, validator, "exist", JsonType::BOOLEAN);
+    CheckJsonType(err_msg, validator, "exist_error", JsonType::STRING);
+    CheckJsonType(err_msg, validator, "not_empty", JsonType::BOOLEAN);
+    CheckJsonType(err_msg, validator, "not_empty_error", JsonType::STRING);
 }
 
 // validate one of definitions (["gui"][i]) and store parsed info
-void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
+void CheckSubDefinition(noex::string& err_msg, tuwjson::Value& sub_definition,
                         int index) noexcept {
+    tuwjson::Value* json_ptr = nullptr;
+
     CorrectKey(sub_definition, "window_title", "window_name");
     CorrectKey(sub_definition, "title", "window_name");
-    CheckJsonType(result, sub_definition, "window_name", JsonType::STRING);
+    CheckJsonType(err_msg, sub_definition, "window_name", JsonType::STRING);
 
     if (!sub_definition.HasMember("label")) {
-        noex::string default_label = noex::string("GUI ") + index;
+        noex::string default_label = "GUI " + noex::to_string(index);
         const char* label = GetString(sub_definition, "window_name", default_label.c_str());
         sub_definition["label"].SetString(label);
     }
-    CheckJsonType(result, sub_definition, "label", JsonType::STRING, "gui definition", REQUIRED);
+    CheckJsonType(err_msg, sub_definition, "label", JsonType::STRING, "gui definition", REQUIRED);
 
-    CheckJsonType(result, sub_definition, "button", JsonType::STRING);
+    CheckJsonType(err_msg, sub_definition, "button", JsonType::STRING);
 
-    CheckJsonType(result, sub_definition, "check_exit_code", JsonType::BOOLEAN);
-    CheckJsonType(result, sub_definition, "exit_success", JsonType::INTEGER);
-    CheckJsonType(result, sub_definition, "show_last_line", JsonType::BOOLEAN);
-    CheckJsonType(result, sub_definition,
+    CheckJsonType(err_msg, sub_definition, "check_exit_code", JsonType::BOOLEAN);
+    CheckJsonType(err_msg, sub_definition, "exit_success", JsonType::INTEGER);
+    CheckJsonType(err_msg, sub_definition, "show_last_line", JsonType::BOOLEAN);
+    CheckJsonType(err_msg, sub_definition,
                     "show_success_dialog", JsonType::BOOLEAN);
-    CheckJsonType(result, sub_definition, "codepage", JsonType::STRING);
-    if (sub_definition.HasMember("codepage")) {
-        const char* codepage = sub_definition["codepage"].GetString();
+    json_ptr = CheckJsonType(err_msg, sub_definition, "codepage", JsonType::STRING);
+    if (json_ptr) {
+        const char* codepage = json_ptr->GetString();
         if (strcmp(codepage, "utf8") != 0 && strcmp(codepage, "utf-8") != 0 &&
                 strcmp(codepage, "default") != 0) {
-            result.ok = false;
-            result.msg = noex::string("Unknown codepage: ") + codepage;
+            err_msg = noex::concat_cstr("Unknown codepage: ", codepage);
             return;
         }
     }
 
     CorrectKey(sub_definition, "component", "components");
     CorrectKey(sub_definition, "component_array", "components");
-    CheckJsonArrayType(result, sub_definition, "components",
-        JsonType::JSON, "gui definition", REQUIRED);
+    tuwjson::Value* comp_array_ptr =
+        CheckJsonType(err_msg, sub_definition, "components",
+            JsonType::JSON_ARRAY, "gui definition", REQUIRED);
 
-    if (!result.ok) return;
+    if (!err_msg.empty()) return;
 
     // check components
     noex::vector<noex::string> comp_ids;
-    for (tuwjson::Value& c : sub_definition["components"]) {
+    for (tuwjson::Value& c : *comp_array_ptr) {
         // check if type and label exist
-        CheckJsonType(result, c, "label", JsonType::STRING, "component", REQUIRED);
-        CheckJsonType(result, c, "type", JsonType::STRING, "component", REQUIRED);
-        if (!result.ok) return;
+        CheckJsonType(err_msg, c, "label", JsonType::STRING, "component", REQUIRED);
+        tuwjson::Value* type_ptr =
+            CheckJsonType(err_msg, c, "type", JsonType::STRING, "component", REQUIRED);
+        if (!err_msg.empty()) return;
 
         // convert ["type"] from string to enum.
-        const char* type_str = c["type"].GetString();
+        const char* type_str = type_ptr->GetString();
         int type = ComptypeToInt(type_str);
 
         // TODO: throw an error for missing ids.
@@ -494,39 +455,42 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
         c["type_int"].SetInt(type);
         CorrectKey(c, "item", "items");
         CorrectKey(c, "item_array", "items");
+        double min, max;
         switch (type) {
             case COMP_FILE:
-                CheckJsonType(result, c, "extension", JsonType::STRING);
+                CheckJsonType(err_msg, c, "extension", JsonType::STRING);
+                CheckJsonType(err_msg, c, "use_save_dialog", JsonType::BOOLEAN);
                 /* Falls through. */
             case COMP_FOLDER:
-                CheckJsonType(result, c, "button", JsonType::STRING);
+                CheckJsonType(err_msg, c, "button", JsonType::STRING);
                 /* Falls through. */
             case COMP_TEXT:
-                CheckJsonType(result, c, "default", JsonType::STRING);
+                CheckJsonType(err_msg, c, "default", JsonType::STRING);
                 break;
             case COMP_COMBO:
             case COMP_RADIO:
-                CheckJsonArrayType(result, c, "items",
-                    JsonType::JSON, "radio type component", REQUIRED);
-                if (!result.ok) return;
-                for (tuwjson::Value& i : c["items"]) {
-                    CheckJsonType(result, i, "label", JsonType::STRING, "radio item", REQUIRED);
-                    CheckJsonType(result, i, "value", JsonType::STRING);
+                json_ptr = CheckJsonType(err_msg, c, "items",
+                    JsonType::JSON_ARRAY, "radio type component", REQUIRED);
+                if (!err_msg.empty()) return;
+                for (tuwjson::Value& i : *json_ptr) {
+                    CheckJsonType(err_msg, i, "label", JsonType::STRING, "radio item", REQUIRED);
+                    CheckJsonType(err_msg, i, "value", JsonType::STRING);
                 }
-                CheckJsonType(result, c, "default", JsonType::INTEGER);
+                CheckJsonType(err_msg, c, "default", JsonType::INTEGER);
                 break;
             case COMP_CHECK:
-                CheckJsonType(result, c, "value", JsonType::STRING);
-                CheckJsonType(result, c, "default", JsonType::BOOLEAN);
+                CheckJsonType(err_msg, c, "value", JsonType::STRING);
+                CheckJsonType(err_msg, c, "default", JsonType::BOOLEAN);
                 break;
             case COMP_CHECK_ARRAY:
-                CheckJsonArrayType(result, c, "items", JsonType::JSON, "check array", REQUIRED);
-                if (!result.ok) return;
-                for (tuwjson::Value& i : c["items"]) {
-                    CheckJsonType(result, i, "label", JsonType::STRING, "check box", REQUIRED);
-                    CheckJsonType(result, i, "value", JsonType::STRING);
-                    CheckJsonType(result, i, "default", JsonType::BOOLEAN);
-                    CheckJsonType(result, i, "tooltip", JsonType::STRING);
+                json_ptr = CheckJsonType(err_msg, c, "items",
+                    JsonType::JSON_ARRAY, "check array", REQUIRED);
+                if (!err_msg.empty()) return;
+                for (tuwjson::Value& i : *json_ptr) {
+                    CheckJsonType(err_msg, i, "label", JsonType::STRING, "check box", REQUIRED);
+                    CheckJsonType(err_msg, i, "value", JsonType::STRING);
+                    CheckJsonType(err_msg, i, "default", JsonType::BOOLEAN);
+                    CheckJsonType(err_msg, i, "tooltip", JsonType::STRING);
                 }
                 break;
             case COMP_INT:
@@ -536,59 +500,70 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
                     jtype = JsonType::INTEGER;
                 } else {
                     jtype = JsonType::FLOAT;
-                    CheckJsonType(result, c, "digits", JsonType::INTEGER);
-                    if (!result.ok) return;
-                    if (c.HasMember("digits") && c["digits"].GetInt() < 0) {
-                        result.ok = false;
-                        result.msg = "\"digits\" should be a non-negative integer."
-                                    + c["digits"].GetLineColumnStr();
+                    json_ptr = CheckJsonType(err_msg, c, "digits", JsonType::INTEGER);
+                    if (!err_msg.empty()) return;
+                    if (json_ptr && json_ptr->GetInt() < 0) {
+                        err_msg = "\"digits\" should be a non-negative integer."
+                                    + json_ptr->GetLineColumnStr();
                     }
                 }
-                CheckJsonType(result, c, "default", jtype);
-                CheckJsonType(result, c, "min", jtype);
-                CheckJsonType(result, c, "max", jtype);
-                CheckJsonType(result, c, "inc", jtype);
-                CheckJsonType(result, c, "wrap", JsonType::BOOLEAN);
+                CheckJsonType(err_msg, c, "default", jtype);
+                // Check min and max
+                CheckJsonType(err_msg, c, "min", jtype);
+                json_ptr = CheckJsonType(err_msg, c, "max", jtype);
+                if (!err_msg.empty()) return;
+                min = json_utils::GetDouble(c, "min", 0);
+                max = json_utils::GetDouble(c, "max", 100.0);
+                if (min > max) {
+                    err_msg = "\"max\" should be greater than \"min\"."
+                                + json_ptr->GetLineColumnStr();
+                }
+                // Check inc
+                json_ptr = CheckJsonType(err_msg, c, "inc", jtype);
+                if (!err_msg.empty()) return;
+                if (json_ptr && json_ptr->GetDouble() <= 0) {
+                    err_msg = "\"inc\" should be a positive number."
+                                + json_ptr->GetLineColumnStr();
+                }
+                CheckJsonType(err_msg, c, "wrap", JsonType::BOOLEAN);
                 break;
             case COMP_UNKNOWN:
-                result.ok = false;
-                result.msg = noex::string("Unknown component type: ")
-                    + type_str + c["type"].GetLineColumnStr();
+                err_msg = noex::concat_cstr("Unknown component type: ",
+                    type_str, type_ptr->GetLineColumnStr().c_str());
                 break;
         }
-        if (!result.ok) return;
+        if (!err_msg.empty()) return;
 
-        if (c.HasMember("validator")) {
+        json_ptr = CheckJsonType(err_msg, c, "validator", JsonType::JSON);
+        if (json_ptr) {
             if (type == COMP_STATIC_TEXT) {
-                result.ok = false;
-                result.msg = "Static text does not support validator."
-                    + c["validator"].GetLineColumnStr();
+                err_msg = "Static text does not support validator."
+                    + json_ptr->GetLineColumnStr();
                 return;
             }
-            CheckJsonType(result, c, "validator", JsonType::JSON);
-            CheckValidator(result, c["validator"]);
-            if (!result.ok) return;
+            CheckValidator(err_msg, *json_ptr);
+            if (!err_msg.empty()) return;
         }
 
         CorrectKey(c, "add_quote", "add_quotes");
-        CheckJsonType(result, c, "add_quotes", JsonType::BOOLEAN);
+        CheckJsonType(err_msg, c, "add_quotes", JsonType::BOOLEAN);
         CorrectKey(c, "empty_message", "placeholder");
-        CheckJsonType(result, c, "placeholder", JsonType::STRING);
-        CheckJsonType(result, c, "id", JsonType::STRING);
-        CheckJsonType(result, c, "tooltip", JsonType::STRING);
+        CheckJsonType(err_msg, c, "placeholder", JsonType::STRING);
+        CheckJsonType(err_msg, c, "id", JsonType::STRING);
+        CheckJsonType(err_msg, c, "tooltip", JsonType::STRING);
 
-        CheckJsonType(result, c, "optional", JsonType::BOOLEAN);
-        CheckJsonType(result, c, "prefix", JsonType::STRING);
-        CheckJsonType(result, c, "suffix", JsonType::STRING);
+        CheckJsonType(err_msg, c, "optional", JsonType::BOOLEAN);
+        CheckJsonType(err_msg, c, "prefix", JsonType::STRING);
+        CheckJsonType(err_msg, c, "suffix", JsonType::STRING);
 
         bool ignore = false;
         CorrectKey(c, "platform", "platforms");
         CorrectKey(c, "platform_array", "platforms");
-        CheckJsonArrayType(result, c, "platforms", JsonType::STRING);
-        if (!result.ok) return;
-        if (c.HasMember("platforms")) {
+        json_ptr = CheckJsonType(err_msg, c, "platforms", JsonType::STRING_ARRAY);
+        if (!err_msg.empty()) return;
+        if (json_ptr) {
             ignore = true;
-            for (tuwjson::Value& v : c["platforms"]) {
+            for (tuwjson::Value& v : *json_ptr) {
                 if (strcmp(v.GetString(), TUW_CONSTANTS_OS) == 0) {
                     ignore = false;
                     break;
@@ -600,19 +575,16 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
         if (c.HasMember("id")) {
             noex::string linecol = c["id"].GetLineColumnStr();
             if (id[0] == '\0') {
-                result.ok = false;
-                result.msg = "\"id\" should NOT be an empty string."
+                err_msg = "\"id\" should NOT be an empty string."
                             + linecol;
             } else if (id[0] == '_') {
-                result.ok = false;
-                result.msg = "\"id\" should NOT start with '_'."
+                err_msg = "\"id\" should NOT start with '_'."
                             + linecol;
             }
             if (!ignore) {
                 for (const noex::string& str : comp_ids) {
                     if (id == str) {
-                        result.ok = false;
-                        result.msg =
+                        err_msg =
                             noex::concat_cstr("Found a duplicated id: \"", id, "\"")
                             + linecol;
                     }
@@ -622,7 +594,7 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
             uint32_t hash = Fnv1Hash32(c["label"].GetString());
             c["id"].SetString("_" + noex::to_string(hash));
         }
-        if (!result.ok) return;
+        if (!err_msg.empty()) return;
 
         if (ignore) {
             comp_ids.emplace_back("");
@@ -634,29 +606,27 @@ void CheckSubDefinition(JsonResult& result, tuwjson::Value& sub_definition,
 
     // Overwrite ["command"] with ["command_'os'"] if exists.
     const char* command_os_key = "command_" TUW_CONSTANTS_OS;
-    if (sub_definition.HasMember(command_os_key)) {
-        CheckJsonType(result, sub_definition, command_os_key, JsonType::STRING);
-        if (!result.ok) return;
-        const char* command_os = sub_definition[command_os_key].GetString();
+    json_ptr = CheckJsonType(err_msg, sub_definition, command_os_key, JsonType::STRING);
+    if (err_msg.empty() && json_ptr) {
+        const char* command_os = json_ptr->GetString();
         sub_definition["command"].SetString(command_os);
     }
 
     // check sub_definition["command"] and convert it to more useful format.
-    CheckJsonType(result, sub_definition, "command", JsonType::STRING, "gui definition", REQUIRED);
-    if (!result.ok) return;
-    CompileCommand(result, sub_definition, comp_ids);
+    CheckJsonType(err_msg, sub_definition, "command", JsonType::STRING, "gui definition", REQUIRED);
+    if (!err_msg.empty()) return;
+    CompileCommand(err_msg, sub_definition, comp_ids);
 }
 
 // vX.Y.Z -> 10000*X + 100 * Y + Z
-static int VersionStringToInt(JsonResult& result, const char* string) noexcept {
-    noex::vector<noex::string> version_strings =
-        SplitString(string, '.');
+static int VersionStringToInt(noex::string& err_msg, const char* string) noexcept {
     int digit = 10000;
     int version_int = 0;
-    for (const noex::string& str : version_strings) {
+    const char* p = string;
+    while (*p != '\0') {
+        noex::string str = SubstrToChar(p, '.');
         if (str.length() == 0 || str.length() > 2) {
-            result.ok = false;
-            result.msg = noex::concat_cstr("Can NOT convert '", string, "' to int.");
+            err_msg = noex::concat_cstr("Can NOT convert '", string, "' to int.");
             return 0;
         }
         if (str.length() == 1) {
@@ -668,71 +638,69 @@ static int VersionStringToInt(JsonResult& result, const char* string) noexcept {
         if (digit == 1)
             break;
         digit /= 100;
+        p += str.size();
+        if (*p != '\0')
+            p++;
     }
     return version_int;
 }
 
-void CheckVersion(JsonResult& result, tuwjson::Value& definition) noexcept {
+void CheckVersion(noex::string& err_msg, tuwjson::Value& definition) noexcept {
+    tuwjson::Value* json_ptr = nullptr;
     CorrectKey(definition, "recommended_version", "recommended");
-    if (definition.HasMember("recommended")) {
-        CheckJsonType(result, definition, "recommended", JsonType::STRING);
-        if (!result.ok) return;
-        int recom_int = VersionStringToInt(result, definition["recommended"].GetString());
+    json_ptr = CheckJsonType(err_msg, definition, "recommended", JsonType::STRING);
+    if (err_msg.empty() && json_ptr) {
+        int recom_int = VersionStringToInt(err_msg, json_ptr->GetString());
         definition["not_recommended"].SetBool(tuw_constants::VERSION_INT != recom_int);
     }
     CorrectKey(definition, "minimum_required_version", "minimum_required");
-    if (definition.HasMember("minimum_required")) {
-        CheckJsonType(result, definition, "minimum_required", JsonType::STRING);
-        if (!result.ok) return;
-        const char* required = definition["minimum_required"].GetString();
-        int required_int = VersionStringToInt(result, required);
+    json_ptr = CheckJsonType(err_msg, definition, "minimum_required", JsonType::STRING);
+    if (err_msg.empty() && json_ptr) {
+        const char* required = json_ptr->GetString();
+        int required_int = VersionStringToInt(err_msg, required);
         if (tuw_constants::VERSION_INT < required_int) {
-            result.ok = false;
-            result.msg = noex::concat_cstr("Version ", required, " is required.");
+            err_msg = noex::concat_cstr("Version ", required, " is required.");
         }
     }
 }
 
-void CheckDefinition(JsonResult& result, tuwjson::Value& definition) noexcept {
+void CheckDefinition(noex::string& err_msg, tuwjson::Value& definition) noexcept {
     if (!definition.HasMember("gui")) {
         // definition["gui"] = definition
         definition.ConvertToObject("gui");
     }
-    CheckJsonArrayType(result, definition, "gui", JsonType::JSON);
-    if (!result.ok) return;
-    tuwjson::Value& gui_json = definition["gui"];
-    if (gui_json.Size() == 0) {
-        result.ok = false;
-        result.msg = "The size of [\"gui\"] should NOT be zero."
-            + gui_json.GetLineColumnStr();
+    tuwjson::Value* gui_json_ptr =
+        CheckJsonType(err_msg, definition, "gui", JsonType::JSON_ARRAY);
+    if (!err_msg.empty()) return;
+    if (gui_json_ptr->Size() == 0) {
+        err_msg = "The size of [\"gui\"] should NOT be zero."
+            + gui_json_ptr->GetLineColumnStr();
     }
 
     int i = 0;
-    for (tuwjson::Value& sub_d : gui_json) {
-        if (!result.ok) return;
-        CheckSubDefinition(result, sub_d, i);
+    for (tuwjson::Value& sub_d : *gui_json_ptr) {
+        if (!err_msg.empty()) return;
+        CheckSubDefinition(err_msg, sub_d, i);
         i++;
     }
 }
 
-void CheckHelpURLs(JsonResult& result, tuwjson::Value& definition) noexcept {
-    if (!definition.HasMember("help")) return;
-    CheckJsonArrayType(result, definition, "help", JsonType::JSON);
-    if (!result.ok) return;
-    for (const tuwjson::Value& h : definition["help"]) {
-        CheckJsonType(result, h, "type", JsonType::STRING, "help document", REQUIRED);
-        CheckJsonType(result, h, "label", JsonType::STRING, "help document", REQUIRED);
-        if (!result.ok) return;
-        tuwjson::Value& help_type = h["type"];
-        const char* type = help_type.GetString();
+void CheckHelpURLs(noex::string& err_msg, tuwjson::Value& definition) noexcept {
+    tuwjson::Value* json_ptr = CheckJsonType(err_msg, definition, "help", JsonType::JSON_ARRAY);
+    if (!err_msg.empty() || !json_ptr) return;
+    for (const tuwjson::Value& h : *json_ptr) {
+        tuwjson::Value* help_type_ptr =
+            CheckJsonType(err_msg, h, "type", JsonType::STRING, "help document", REQUIRED);
+        CheckJsonType(err_msg, h, "label", JsonType::STRING, "help document", REQUIRED);
+        if (!err_msg.empty()) return;
+        const char* type = help_type_ptr->GetString();
         if (strcmp(type, "url") == 0) {
-            CheckJsonType(result, h, "url", JsonType::STRING, "URL type document", REQUIRED);
+            CheckJsonType(err_msg, h, "url", JsonType::STRING, "URL type document", REQUIRED);
         } else if (strcmp(type, "file") == 0) {
-            CheckJsonType(result, h, "path", JsonType::STRING, "file type document", REQUIRED);
+            CheckJsonType(err_msg, h, "path", JsonType::STRING, "file type document", REQUIRED);
         } else {
-            result.ok = false;
-            result.msg = noex::concat_cstr("Unsupported help type: ", type)
-                + help_type.GetLineColumnStr();
+            err_msg = noex::concat_cstr("Unsupported help type: ", type,
+                help_type_ptr->GetLineColumnStr().c_str());
             return;
         }
     }

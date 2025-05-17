@@ -1,22 +1,37 @@
 {
-    "gui": {
-        "window_name": "Picker sample",
-        "command": "copy %img% %out%",
-        "button": "copy",
-        "components": [
-            {
-                "type": "file",
-                "id": "img",
-                "label": "Image file you want to copy",
-                "extension": "BMP and GIF files (*.bmp;*.gif)|*.bmp;*.gif|PNG files (*.png)|*.png",
-                "add_quotes": true
-            },
-            {
-                "type": "folder",
-                "id": "out",
-                "label": "Output path",
-                "add_quotes": true
-            }
-        ]
-    }
+    "gui": [
+        {
+            "window_name": "Picker sample",
+            "command": "copy %img% %out%",
+            "button": "copy",
+            "components": [
+                {
+                    "type": "file",
+                    "id": "img",
+                    "label": "Image file you want to copy",
+                    "extension": "BMP and GIF files (*.bmp;*.gif)|*.bmp;*.gif|PNG files (*.png)|*.png",
+                    "add_quotes": true
+                },
+                {
+                    "type": "folder",
+                    "id": "out",
+                    "label": "Output path",
+                    "add_quotes": true
+                }
+            ]
+        },
+        {
+            "window_name": "Save dialog sample",
+            "command": "echo test > %out%",
+            "components": [
+                {
+                    "type": "file",
+                    "id": "out",
+                    "label": "Output file",
+                    "add_quotes": true,
+                    "use_save_dialog": true
+                }
+            ]
+        }
+    ]
 }

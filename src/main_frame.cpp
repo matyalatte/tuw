@@ -100,9 +100,9 @@ void MainFrame::Initialize(const tuwjson::Value& definition,
     }
 
     if (loaded) {
-        json_utils::JsonResult result = CheckDefinition(m_definition);
-        loaded = result.ok;
-        err = result.msg;
+        noex::string err_msg = CheckDefinition(m_definition);
+        loaded = err_msg.empty();
+        err = err_msg;
     }
 
     if (!loaded)
@@ -210,8 +210,9 @@ void MainFrame::CreateMenu() noexcept {
     // Note: We should reserve the buffer to prevent realloc,
     //       or MenuData* pointers can be broken after using push_back()
     size_t menu_item_count = m_gui_json->Size();
-    if (m_definition.HasMember("help"))
-        menu_item_count += m_definition["help"].Size();
+    tuwjson::Value* help_json_ptr = m_definition.GetMemberPtr("help");
+    if (help_json_ptr)
+        menu_item_count += help_json_ptr->Size();
 
 #ifdef __APPLE__
     // No need the menu for the quit item on macOS.
@@ -231,11 +232,11 @@ void MainFrame::CreateMenu() noexcept {
     item = uiMenuAppendQuitItem(menu);
 
     // put help urls to menu bar
-    if (m_definition.HasMember("help") && m_definition["help"].Size() > 0) {
+    if (help_json_ptr && help_json_ptr->Size() > 0) {
         menu = uiNewMenu("Help");
 
         size_t i = 0;
-        for (const tuwjson::Value& j : m_definition["help"]) {
+        for (const tuwjson::Value& j : *help_json_ptr) {
             item = uiMenuAppendItem(menu, j["label"].GetString());
             uiMenuItemOnClicked(item, OnOpenURL, reinterpret_cast<void*>(i));
             i++;
@@ -441,25 +442,16 @@ bool MainFrame::Validate() noexcept {
 
 // Make command string
 noex::string MainFrame::GetCommand() noexcept {
-    noex::vector<noex::string> cmd_ary;
     tuwjson::Value& sub_definition = m_gui_json->At(m_definition_id);
-    for (tuwjson::Value& c : sub_definition["command_splitted"])
-        cmd_ary.emplace_back(c.GetString());
-    noex::vector<int> cmd_ids;
-    for (tuwjson::Value& c : sub_definition["command_ids"])
-        cmd_ids.emplace_back(c.GetInt());
+    tuwjson::Value& cmd_ary = sub_definition["command_splitted"];
+    tuwjson::Value& cmd_ids = sub_definition["command_ids"];
 
-    noex::vector<noex::string> comp_strings;
-    for (Component* comp : m_components) {
-        comp_strings.emplace_back(comp->GetString());
-    }
-
-    if (noex::get_error_no() != noex::OK)
+    if (cmd_ary.IsEmpty())
         return "";
 
-    noex::string cmd = cmd_ary[0];
-    for (size_t i = 0; i < cmd_ids.size(); i++) {
-        int id = cmd_ids[i];
+    noex::string cmd = cmd_ary[0].GetString();
+    for (size_t i = 0; i < cmd_ids.Size(); i++) {
+        int id = cmd_ids[i].GetInt();
         if (id == CMD_ID_PERCENT) {
             cmd.push_back('%');
         } else if (id == CMD_ID_CURRENT_DIR) {
@@ -471,10 +463,10 @@ noex::string MainFrame::GetCommand() noexcept {
             cmd += home;
             envuFree(home);
         } else {
-            cmd += comp_strings[id];
+            cmd += m_components[id]->GetString();
         }
-        if (i + 1 < cmd_ary.size()) {
-            cmd += cmd_ary[i + 1];
+        if (i + 1 < cmd_ary.Size()) {
+            cmd += cmd_ary[i + 1].GetString();
         }
     }
     return cmd;
@@ -559,23 +551,24 @@ void MainFrame::RunCommand() noexcept {
 }
 
 // read gui_definition.json
-json_utils::JsonResult MainFrame::CheckDefinition(tuwjson::Value& definition) noexcept {
-    json_utils::JsonResult result = JSON_RESULT_OK;
-    json_utils::CheckVersion(result, definition);
-    if (!result.ok) return result;
+noex::string MainFrame::CheckDefinition(tuwjson::Value& definition) noexcept {
+    noex::string err_msg;
+    json_utils::CheckVersion(err_msg, definition);
+    if (!err_msg.empty()) return err_msg;
 
-    if (definition.HasMember("recommended")) {
+    tuwjson::Value* ptr = definition.GetMemberPtr("recommended");
+    if (ptr) {
         if (definition["not_recommended"].GetBool()) {
             PrintFmt("[LoadDefinition] Warning: Version %s is recommended.\n",
-                        definition["recommended"].GetString());
+                        ptr->GetString());
         }
     }
 
-    json_utils::CheckDefinition(result, definition);
-    if (!result.ok) return result;
+    json_utils::CheckDefinition(err_msg, definition);
+    if (!err_msg.empty()) return err_msg;
 
-    json_utils::CheckHelpURLs(result, definition);
-    return result;
+    json_utils::CheckHelpURLs(err_msg, definition);
+    return err_msg;
 }
 
 void MainFrame::UpdateConfig() noexcept {

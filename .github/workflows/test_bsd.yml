@@ -1,0 +1,50 @@
+name: test_bsd
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  test_freebsd:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test in FreeBSD
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: "15.0"
+          prepare: |
+            pkg install -y git bash pkgconf meson ninja gtk3 xorg-vfbserver openbox firefox
+          run: |
+            Xvfb :99 -screen 0 1024x768x24 &
+            XVFB_PID=$!
+            export DISPLAY=:99
+            export BROWSER=firefox
+            openbox &
+            OPENBOX_PID=$!
+            trap 'kill $OPENBOX_PID $XVFB_PID' EXIT
+            sleep 1
+            ./shell_scripts/test.sh
+
+  test_openbsd:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test in OpenBSD
+        uses: vmactions/openbsd-vm@v1
+        with:
+          release: "7.7"
+          prepare: |
+            pkg_add git bash meson gtk+3 xvfb openbox firefox
+          run: |
+            Xvfb :99 -screen 0 1024x768x24 &
+            XVFB_PID=$!
+            export DISPLAY=:99
+            export BROWSER=firefox
+            openbox &
+            OPENBOX_PID=$!
+            trap 'kill $OPENBOX_PID $XVFB_PID' EXIT
+            sleep 1
+            ./shell_scripts/test.sh

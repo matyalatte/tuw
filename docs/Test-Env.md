@@ -13,6 +13,8 @@ CI workflows are executed on the following platforms.
 | Ubuntu20.04 | arm64 | gcc | glibc |
 | Alpine3.16 | x64 | gcc | musl |
 | Alpine3.16 | arm64 | gcc | musl |
+| FreeBSD15.0 | x64 | clang |  |
+| OpenBSD7.7 | x64 | clang |  |
 
 ## Tested Environments
 
@@ -37,5 +39,6 @@ The following platforms have been tested in the past. However, compatibility wit
 | FreeBSD14.2 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | OpenBSD7.4 | x64 | clang | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | NetBSD9.3 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| DragonFlyBSD6.4 | x64 | gcc | | :heavy_check_mark: | :question: | :question: |
 | Haiku R1/beta5 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :x: |
 | OpenIndiana 2024.04 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
