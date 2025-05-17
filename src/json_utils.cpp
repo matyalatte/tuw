@@ -220,31 +220,21 @@ static void CorrectKey(
         j.ReplaceKey(false_key, true_key);
 }
 
-static noex::vector<noex::string>
-SplitString(const char* str, const char delimiter) noexcept {
-    if (!str)
-        return {};
+static noex::string
+SubstrToChar(const char* str, const char delimiter) noexcept {
+    if (!str || !*str)
+        return "";
 
-    noex::vector<noex::string> tokens;
-
-    const char* start = str;
-    while (*start != '\0') {
-        const char* pos = strchr(start, delimiter);
-        if (!pos) {
-            tokens.emplace_back(start);
-            break;
-        }
-        tokens.emplace_back(start, pos - start);
-        start = pos + 1;
-    }
-    return tokens;
+    const char* pos = strchr(str, delimiter);
+    if (!pos)
+        return str;
+    return noex::string(str, pos - str);
 }
 
 // split command by "%" symbol, and calculate which component should be inserted there.
 static void CompileCommand(noex::string& err_msg,
                             tuwjson::Value& sub_definition,
                             const noex::vector<noex::string>& comp_ids) noexcept {
-    noex::vector<noex::string> cmd = SplitString(sub_definition["command"].GetString(), '%');
     noex::vector<noex::string> cmd_ids;
     noex::vector<noex::string> splitted_cmd;
 
@@ -252,7 +242,9 @@ static void CompileCommand(noex::string& err_msg,
     splitted_cmd_json.SetArray();
 
     bool store_ids = false;
-    for (const noex::string& token : cmd) {
+    const char* cmd = sub_definition["command"].GetString();
+    while (*cmd != '\0') {
+        noex::string token = SubstrToChar(cmd, '%');
         if (store_ids) {
             cmd_ids.emplace_back(token);
         } else {
@@ -262,6 +254,9 @@ static void CompileCommand(noex::string& err_msg,
             splitted_cmd_json.MoveAndPush(n);
         }
         store_ids = !store_ids;
+        cmd += token.size();
+        if (*cmd != '\0')
+            cmd++;
     }
     sub_definition["command_splitted"].MoveFrom(splitted_cmd_json);
 
@@ -625,11 +620,11 @@ void CheckSubDefinition(noex::string& err_msg, tuwjson::Value& sub_definition,
 
 // vX.Y.Z -> 10000*X + 100 * Y + Z
 static int VersionStringToInt(noex::string& err_msg, const char* string) noexcept {
-    noex::vector<noex::string> version_strings =
-        SplitString(string, '.');
     int digit = 10000;
     int version_int = 0;
-    for (const noex::string& str : version_strings) {
+    const char* p = string;
+    while (*p != '\0') {
+        noex::string str = SubstrToChar(p, '.');
         if (str.length() == 0 || str.length() > 2) {
             err_msg = noex::concat_cstr("Can NOT convert '", string, "' to int.");
             return 0;
@@ -643,6 +638,9 @@ static int VersionStringToInt(noex::string& err_msg, const char* string) noexcep
         if (digit == 1)
             break;
         digit /= 100;
+        p += str.size();
+        if (*p != '\0')
+            p++;
     }
     return version_int;
 }
