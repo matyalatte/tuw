@@ -16,3 +16,7 @@ indent_size = 2
 
 [*.md]
 trim_trailing_whitespace = false
+
+[subprojects/**]
+indent_style = unset
+indent_size = unset
