@@ -342,7 +342,7 @@ ComboBox::ComboBox(uiBox* box, const tuwjson::Value& j) noexcept
         m_values.push_back(value);
     }
     uiBoxAppend(box, uiControl(combo), 0);
-    uiComboboxSetSelected(combo, json_utils::GetInt(j, "default", 0) % j["items"].Size());
+    uiComboboxSetSelected(combo, json_utils::GetInt(j, "default", 0) % m_values.size());
 
     SetTooltip(uiControl(combo), j);
     m_widget = combo;
@@ -378,7 +378,7 @@ RadioButtons::RadioButtons(uiBox* box, const tuwjson::Value& j) noexcept
         m_values.push_back(value);
     }
     uiBoxAppend(box, uiControl(radio), 0);
-    uiRadioButtonsSetSelected(radio, json_utils::GetInt(j, "default", 0) % j["items"].Size());
+    uiRadioButtonsSetSelected(radio, json_utils::GetInt(j, "default", 0) % m_values.size());
 
     SetTooltip(uiControl(radio), j);
     m_widget = radio;
