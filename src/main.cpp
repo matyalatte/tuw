@@ -54,36 +54,36 @@ bool AskOverwrite(const char *path) noexcept {
 
 noex::string Merge(const noex::string& exe_path, const noex::string& json_path,
                     const noex::string& new_path, const bool force) noexcept {
+    ExeContainer exe;
     tuwjson::Value json;
     noex::string err;
     err = json_utils::LoadJson(json_path, json);
-    if (!err.empty()) return err;
+    if (!err.empty()) goto MERGE_END;
 
     if (!json.IsObject() || json.IsEmpty()) {
         PrintFmt("JSON file loaded but it has no data.\n");
-        return "";
+        goto MERGE_END;
     }
 
     // Check JSON format before embedding
-    tuwjson::Value tmp_json;
-    tmp_json.CopyFrom(json);
-    noex::string err_msg;
-    json_utils::CheckDefinition(err_msg, tmp_json);
-    if (!err_msg.empty())
-        return err_msg;
+    {
+        tuwjson::Value tmp_json;
+        tmp_json.CopyFrom(json);
+        json_utils::CheckDefinition(err, tmp_json);
+    }
+    if (!err.empty()) goto MERGE_END;
 
-    ExeContainer exe;
     err = exe.Read(exe_path);
-    if (!err.empty()) return err;
+    if (!err.empty()) goto MERGE_END;
 
     PrintFmt("Importing a json file... (%s)\n", json_path.c_str());
     exe.SetJson(json);
     if (!force && !AskOverwrite(new_path.c_str())) {
         PrintFmt("The operation has been cancelled.\n");
-        return "";
+        goto MERGE_END;
     }
     err = exe.Write(new_path);
-    if (!err.empty()) return err;
+    if (!err.empty()) goto MERGE_END;
     PrintFmt("Generated an executable. (%s)\n", new_path.c_str());
 #ifndef _WIN32
     // Allow executing file as program.
@@ -92,30 +92,31 @@ noex::string Merge(const noex::string& exe_path, const noex::string& json_path,
           S_IRGRP | S_IXGRP |  // r-x
           S_IROTH | S_IXOTH);  // r-x
 #endif
-    return "";
+MERGE_END:
+    return err;
 }
 
 noex::string Split(const noex::string& exe_path, const noex::string& json_path,
                     const noex::string& new_path, const bool force) noexcept {
     ExeContainer exe;
+    tuwjson::Value json;
     noex::string err = exe.Read(exe_path);
-    if (!err.empty()) return err;
+    if (!err.empty()) goto SPLIT_END;
     if (!exe.HasJson()) {
         PrintFmt("The executable has no json data.\n");
-        return "";
+        goto SPLIT_END;
     }
     PrintFmt("Extracting JSON data from the executable...\n");
-    tuwjson::Value json;
     exe.GetJson(json);
     exe.RemoveJson();
     if (!force && (!AskOverwrite(new_path.c_str()) || !AskOverwrite(json_path.c_str()))) {
         PrintFmt("The operation has been cancelled.\n");
-        return "";
+        goto SPLIT_END;
     }
     err = exe.Write(new_path);
-    if (!err.empty()) return err;
+    if (!err.empty()) goto SPLIT_END;
     err = json_utils::SaveJson(json, json_path);
-    if (!err.empty()) return err;
+    if (!err.empty()) goto SPLIT_END;
     PrintFmt("Generated an executable. (%s)\n", new_path.c_str());
     PrintFmt("Exported a json file. (%s)\n", json_path.c_str());
 #ifndef _WIN32
@@ -125,7 +126,8 @@ noex::string Split(const noex::string& exe_path, const noex::string& json_path,
           S_IRGRP | S_IXGRP |  // r-x
           S_IROTH | S_IXOTH);  // r-x
 #endif
-    return "";
+SPLIT_END:
+    return err;
 }
 
 void PrintUsage() noexcept {
@@ -252,34 +254,36 @@ int main(int argc, char* argv[]) noexcept {
     }
 
     noex::string exe_path = envuStr(envuGetExecutablePath());
+    const char* json_path_cstr = nullptr;
+    noex::string json_path;
+    noex::string new_exe_path;
+    int cmd_int;
+    bool force = false;
+    int ret = 0;
 
     // Launch GUI if no args.
     if (args.size() <= 1) {
-        FreeArgs(args);
-        return main_app();
+        ret = main_app();
+        goto MAIN_END;
     }
 
     // Launch GUI with a JSON path.
     if (noex::string(args[1]).contains('.')) {
-        int ret = main_app(args[1]);
-        FreeArgs(args);
-        return ret;
+        ret = main_app(args[1]);
+        goto MAIN_END;
     }
 
     // Run as a CLI tool
-    const char* cmd_str = args[1];
-    int cmd_int = CmdToInt(cmd_str);
-    if (cmd_int == CMD_UNKNOWN) {
-        PrintUsage();
-        FprintFmt(stderr, "Error: Unknown command detected. (%s)", cmd_str);
-        FreeArgs(args);
-        return 1;
+    {
+        const char* cmd_str = args[1];
+        cmd_int = CmdToInt(cmd_str);
+        if (cmd_int == CMD_UNKNOWN) {
+            PrintUsage();
+            FprintFmt(stderr, "Error: Unknown command detected. (%s)", cmd_str);
+            ret = 1;
+            goto MAIN_END;
+        }
     }
-
-    const char* json_path_cstr = nullptr;
-    noex::string json_path;
-    noex::string new_exe_path;
-    bool force = false;
 
     for (size_t i = 2; i < args.size(); i++) {
         const char* opt_str = args[i];
@@ -287,13 +291,13 @@ int main(int argc, char* argv[]) noexcept {
         if ((opt_int == OPT_JSON || opt_int == OPT_EXE) && args.size() <= i + 1) {
             PrintUsage();
             FprintFmt(stderr, "Error: This option requires a file path. (%s)\n", opt_str);
-            FreeArgs(args);
-            return 1;
+            ret = 1;
+            goto MAIN_END;
         } else if (opt_int == OPT_UNKNOWN) {
             PrintUsage();
             FprintFmt(stderr, "Error: Unknown option detected. (%s)\n", opt_str);
-            FreeArgs(args);
-            return 1;
+            ret = 1;
+            goto MAIN_END;
         } else if (opt_int == OPT_JSON) {
             i++;
             json_path_cstr = args[i];
@@ -321,26 +325,28 @@ int main(int argc, char* argv[]) noexcept {
     if (json_path == exe_path || new_exe_path == exe_path) {
         PrintUsage();
         fprintf(stderr, "Error: Can NOT overwrite the executable itself.\n");
-        FreeArgs(args);
-        return 1;
+        ret = 1;
+        goto MAIN_END;
     }
 
-    noex::string err;
+    {
+        noex::string err;
+        if (cmd_int == CMD_MERGE)
+            err = Merge(exe_path, json_path, new_exe_path, force);
+        else if (cmd_int == CMD_SPLIT)
+            err = Split(exe_path, json_path, new_exe_path, force);
+        else if (cmd_int == CMD_VERSION)
+            PrintFmt("%s\n", tuw_constants::VERSION);
+        else if (cmd_int == CMD_HELP)
+            PrintUsage();
 
-    if (cmd_int == CMD_MERGE)
-        err = Merge(exe_path, json_path, new_exe_path, force);
-    else if (cmd_int == CMD_SPLIT)
-        err = Split(exe_path, json_path, new_exe_path, force);
-    else if (cmd_int == CMD_VERSION)
-        PrintFmt("%s\n", tuw_constants::VERSION);
-    else if (cmd_int == CMD_HELP)
-        PrintUsage();
-
-    if (!err.empty()) {
-        FprintFmt(stderr, "Error: %s\n", err.c_str());
-        FreeArgs(args);
-        return 1;
+        if (!err.empty()) {
+            FprintFmt(stderr, "Error: %s\n", err.c_str());
+            ret = 1;
+        }
     }
+
+MAIN_END:
     FreeArgs(args);
-    return 0;
+    return ret;
 }
