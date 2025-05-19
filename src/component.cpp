@@ -511,27 +511,23 @@ void TextBox::SetConfig(const tuwjson::Value& config) noexcept {
     setConfigForTextBox(config, m_id, m_widget);
 }
 
-static void initSpinbox(uiSpinbox* picker, uiBox* box, const tuwjson::Value& j) noexcept {
+static uiSpinbox* createSpinbox(uiBox* box, const tuwjson::Value& j,
+                                double default_inc, int digits) noexcept {
+    double min = json_utils::GetDouble(j, "min", 0.0);
+    double max = json_utils::GetDouble(j, "max", 100.0);
+    double val = json_utils::GetDouble(j, "default", min);
+    double inc = json_utils::GetDouble(j, "inc", default_inc);
+    bool wrap = json_utils::GetBool(j, "wrap", false);
+    uiSpinbox* picker = uiNewSpinboxDoubleEx(min, max, digits, inc, static_cast<int>(wrap));
+    uiSpinboxSetValueDouble(picker, val);
     uiBoxAppend(box, uiControl(picker), 0);
     SetTooltip(uiControl(picker), j);
+    return picker;
 }
 
 IntPicker::IntPicker(uiBox* box, const tuwjson::Value& j) noexcept
     : StringComponentBase(box, j) {
-    int min = json_utils::GetInt(j, "min", 0);
-    int max = json_utils::GetInt(j, "max", 100);
-    int inc = json_utils::GetInt(j, "inc", 1);
-    int val = json_utils::GetInt(j, "default", min);
-    bool wrap = json_utils::GetBool(j, "wrap", false);
-    uiSpinbox* picker = uiNewSpinboxDoubleEx(
-        static_cast<double>(min),
-        static_cast<double>(max),
-        0,
-        static_cast<double>(inc),
-        static_cast<int>(wrap));
-    uiSpinboxSetValue(picker, val);
-    initSpinbox(picker, box, j);
-    m_widget = picker;
+    m_widget = createSpinbox(box, j, 1.0, 0);
 }
 
 noex::string IntPicker::GetRawString() noexcept {
@@ -556,16 +552,8 @@ void IntPicker::SetConfig(const tuwjson::Value& config) noexcept {
 
 FloatPicker::FloatPicker(uiBox* box, const tuwjson::Value& j) noexcept
     : StringComponentBase(box, j) {
-    double min = json_utils::GetDouble(j, "min", 0.0);
-    double max = json_utils::GetDouble(j, "max", 100.0);
-    double inc = json_utils::GetDouble(j, "inc", 0.1);
     int digits = json_utils::GetInt(j, "digits", 1);
-    double val = json_utils::GetDouble(j, "default", min);
-    bool wrap = json_utils::GetBool(j, "wrap", false);
-    uiSpinbox* picker = uiNewSpinboxDoubleEx(min, max, digits, inc, static_cast<int>(wrap));
-    uiSpinboxSetValueDouble(picker, val);
-    initSpinbox(picker, box, j);
-    m_widget = picker;
+    m_widget = createSpinbox(box, j, 0.1, digits);
 }
 
 noex::string FloatPicker::GetRawString() noexcept {
