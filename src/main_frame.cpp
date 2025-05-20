@@ -556,14 +556,6 @@ noex::string MainFrame::CheckDefinition(tuwjson::Value& definition) noexcept {
     json_utils::CheckVersion(err_msg, definition);
     if (!err_msg.empty()) return err_msg;
 
-    tuwjson::Value* ptr = definition.GetMemberPtr("recommended");
-    if (ptr) {
-        if (definition["not_recommended"].GetBool()) {
-            PrintFmt("[LoadDefinition] Warning: Version %s is recommended.\n",
-                        ptr->GetString());
-        }
-    }
-
     json_utils::CheckDefinition(err_msg, definition);
     if (!err_msg.empty()) return err_msg;
 

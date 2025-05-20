@@ -650,8 +650,10 @@ void CheckVersion(noex::string& err_msg, tuwjson::Value& definition) noexcept {
     CorrectKey(definition, "recommended_version", "recommended");
     json_ptr = CheckJsonType(err_msg, definition, "recommended", JsonType::STRING);
     if (err_msg.empty() && json_ptr) {
-        int recom_int = VersionStringToInt(err_msg, json_ptr->GetString());
-        definition["not_recommended"].SetBool(tuw_constants::VERSION_INT != recom_int);
+        const char* recom_str = json_ptr->GetString();
+        int recom_int = VersionStringToInt(err_msg, recom_str);
+        if (tuw_constants::VERSION_INT != recom_int)
+            PrintFmt("[CheckDefinition] Warning: Version %s is recommended.\n", recom_str);
     }
     CorrectKey(definition, "minimum_required_version", "minimum_required");
     json_ptr = CheckJsonType(err_msg, definition, "minimum_required", JsonType::STRING);
