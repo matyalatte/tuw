@@ -208,11 +208,6 @@ basic_string<charT> basic_string<charT>::to_string(num_type num) noexcept { \
         return basic_string<charT>(); \
     } \
     return basic_string<charT>(buf, num_size); \
-} \
-template <typename charT> \
-basic_string<charT> basic_string<charT>::operator+(num_type num) const noexcept { \
-    basic_string<charT> new_str(*this); \
-    return new_str + basic_string<charT>::to_string(num); \
 }
 
 DEFINE_TO_STRING(int, "d")

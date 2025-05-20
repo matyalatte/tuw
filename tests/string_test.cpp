@@ -167,22 +167,22 @@ TEST(StringTest, PlusTuwstr) {
     expect_tuwstr("testfoo", str3);
 }
 
-TEST(StringTest, PlusInt) {
+TEST(StringTest, ToStringInt) {
     int a = -1;
-    noex::string result = noex::string("test") + a + "bar";
-    EXPECT_STREQ("test-1bar", result.c_str());
+    noex::string result = noex::to_string(a);
+    EXPECT_STREQ("-1", result.c_str());
 }
 
-TEST(StringTest, PlusSizet) {
+TEST(StringTest, ToStringSizet) {
     size_t a = 100;
-    noex::string result = noex::string("test") + a + "bar";
-    EXPECT_STREQ("test100bar", result.c_str());
+    noex::string result = noex::to_string(a);
+    EXPECT_STREQ("100", result.c_str());
 }
 
-TEST(StringTest, PlusUint32) {
+TEST(StringTest, ToStringUint32) {
     uint32_t a = 100;
-    noex::string result = noex::string("test") + a + "bar";
-    EXPECT_STREQ("test100bar", result.c_str());
+    noex::string result = noex::to_string(a);
+    EXPECT_STREQ("100", result.c_str());
 }
 
 TEST(StringTest, CstrPlusTuwstr) {

@@ -532,7 +532,7 @@ void MainFrame::RunCommand() noexcept {
         if (show_last_line)
             err_msg = result.last_line;
         else
-            err_msg = noex::string("Invalid exit code (") + result.exit_code + ")";
+            err_msg = "Invalid exit code: " + noex::to_string(result.exit_code);
         ShowErrorDialogWithLog("RunCommand", err_msg);
         return;
     }
