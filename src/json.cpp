@@ -43,6 +43,16 @@ bool Value::operator==(const Value& val) const noexcept {
     return true;
 }
 
+Value& Value::MoveFrom(Value& val) noexcept {
+    FreeValue();
+    m_type = val.m_type;
+    m_line_count = val.m_line_count;
+    m_column = val.m_column;
+    u = val.u;
+    val.m_type = JSON_TYPE_NULL;
+    return *this;
+}
+
 static noex::string LineColumnToStr(size_t line_count, size_t column) noexcept {
     if (line_count <= 0)
         return "";
@@ -179,6 +189,30 @@ void Value::SetString() noexcept {
     FreeValue();
     m_type = JSON_TYPE_STRING;
     u.m_string = noex::new_ref<noex::string>();
+}
+
+void Value::SetString(const char* val) noexcept {
+    SetString();
+    if (u.m_string)
+        *u.m_string = val;
+}
+
+void Value::SetInt(int val) noexcept {
+    FreeValue();
+    m_type = JSON_TYPE_INT;
+    u.m_int = val;
+}
+
+void Value::SetDouble(double val) noexcept {
+    FreeValue();
+    m_type = JSON_TYPE_DOUBLE;
+    u.m_double = val;
+}
+
+void Value::SetBool(bool val) noexcept {
+    FreeValue();
+    m_type = JSON_TYPE_BOOL;
+    u.m_bool = val;
 }
 
 // Parser
