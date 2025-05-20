@@ -60,7 +60,7 @@ void MainFrame::Initialize(const tuwjson::Value& definition,
 
     bool ignore_external_json = false;
     bool exists_external_json = envuFileExists(json_path.c_str());
-    bool loaded = m_definition.IsObject() && !m_definition.IsEmpty();
+    bool loaded = m_definition.IsObject() && !m_definition.IsEmptyObject();
     noex::string err;
 
     if (!loaded) {
@@ -91,7 +91,7 @@ void MainFrame::Initialize(const tuwjson::Value& definition,
         }
     }
 
-    if (!config.IsObject() || config.IsEmpty()) {
+    if (!config.IsObject() || config.IsEmptyObject()) {
         noex::string cfg_err =
             json_utils::LoadJson("gui_config.json", m_config);
         if (!cfg_err.empty()) {
@@ -110,7 +110,7 @@ void MainFrame::Initialize(const tuwjson::Value& definition,
 
     unsigned definition_id = json_utils::GetInt(m_config, "_mode", 0);
     m_gui_json = &m_definition["gui"];
-    if (definition_id >= m_gui_json->Size())
+    if (definition_id >= m_gui_json->GetArraySize())
         definition_id = 0;
 
     CreateMenu();
@@ -209,18 +209,18 @@ void MainFrame::CreateMenu() noexcept {
 
     // Note: We should reserve the buffer to prevent realloc,
     //       or MenuData* pointers can be broken after using push_back()
-    size_t menu_item_count = m_gui_json->Size();
+    size_t menu_item_count = m_gui_json->GetArraySize();
     tuwjson::Value* help_json_ptr = m_definition.GetMemberPtr("help");
     if (help_json_ptr)
-        menu_item_count += help_json_ptr->Size();
+        menu_item_count += help_json_ptr->GetArraySize();
 
 #ifdef __APPLE__
     // No need the menu for the quit item on macOS.
-    if (m_gui_json->Size() > 1) {
+    if (m_gui_json->GetArraySize() > 1) {
         menu = uiNewMenu("Menu");
 #else
     menu = uiNewMenu("Menu");
-    if (m_gui_json->Size() > 1) {
+    if (m_gui_json->GetArraySize() > 1) {
 #endif  // __APPLE__
         size_t i = 0;
         for (const tuwjson::Value& j : *m_gui_json) {
@@ -232,7 +232,7 @@ void MainFrame::CreateMenu() noexcept {
     item = uiMenuAppendQuitItem(menu);
 
     // put help urls to menu bar
-    if (help_json_ptr && help_json_ptr->Size() > 0) {
+    if (help_json_ptr && help_json_ptr->GetArraySize() > 0) {
         menu = uiNewMenu("Help");
 
         size_t i = 0;
@@ -339,7 +339,7 @@ static void OnClicked(uiButton *sender, void *data) noexcept {
 void MainFrame::UpdatePanel(size_t definition_id) noexcept {
     m_definition_id = definition_id;
     tuwjson::Value& sub_definition = m_gui_json->At(m_definition_id);
-    if (m_gui_json->Size() > 1) {
+    if (m_gui_json->GetArraySize() > 1) {
         const char* label = sub_definition["label"].GetString();
         Log("UpdatePanel", "Label", label);
     }
@@ -365,7 +365,7 @@ void MainFrame::UpdatePanel(size_t definition_id) noexcept {
     // Put new components
     Component* new_comp = nullptr;
     tuwjson::Value& comp_json = sub_definition["components"];
-    if (comp_json.Size() > 0) {
+    if (comp_json.GetArraySize() > 0) {
         for (tuwjson::Value& c : comp_json) {
             uiBox* priv_box = uiNewVerticalBox();
             uiBoxSetSpacing(priv_box, tuw_constants::BOX_SUB_SPACE);
@@ -446,11 +446,11 @@ noex::string MainFrame::GetCommand() noexcept {
     tuwjson::Value& cmd_ary = sub_definition["command_splitted"];
     tuwjson::Value& cmd_ids = sub_definition["command_ids"];
 
-    if (cmd_ary.IsEmpty())
+    if (cmd_ary.IsEmptyArray())
         return "";
 
     noex::string cmd = cmd_ary[0].GetString();
-    for (size_t i = 0; i < cmd_ids.Size(); i++) {
+    for (size_t i = 0; i < cmd_ids.GetArraySize(); i++) {
         int id = cmd_ids[i].GetInt();
         if (id == CMD_ID_PERCENT) {
             cmd.push_back('%');
@@ -465,7 +465,7 @@ noex::string MainFrame::GetCommand() noexcept {
         } else {
             cmd += m_components[id]->GetString();
         }
-        if (i + 1 < cmd_ary.Size()) {
+        if (i + 1 < cmd_ary.GetArraySize()) {
             cmd += cmd_ary[i + 1].GetString();
         }
     }

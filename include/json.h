@@ -120,9 +120,15 @@ class Value {
         return m_type == JSON_TYPE_OBJECT;
     }
     void SetObject() noexcept;
-    Object* GetObject() const noexcept {
+    inline Object* GetObject() const noexcept {
         assert(IsObject());
         return u.m_object;
+    }
+    inline size_t GetObjectSize() const noexcept {
+        return GetObject()->size();
+    }
+    inline bool IsEmptyObject() const noexcept {
+        return GetObjectSize() == 0;
     }
     Value* GetMemberPtr(const char* key) const noexcept;
     inline Value* GetMemberPtr(const noex::string& key) const noexcept {
@@ -152,9 +158,15 @@ class Value {
         return m_type == JSON_TYPE_ARRAY;
     }
     void SetArray() noexcept;
-    Array* GetArray() const noexcept {
+    inline Array* GetArray() const noexcept {
         assert(IsArray());
         return u.m_array;
+    }
+    inline size_t GetArraySize() const noexcept {
+        return GetArray()->size();
+    }
+    inline bool IsEmptyArray() const noexcept {
+        return GetArraySize() == 0;
     }
     Value& At(size_t id) const noexcept {
         assert(IsArray());
@@ -177,10 +189,6 @@ class Value {
     Value* end() const noexcept {
         assert(IsArray());
         return u.m_array->end();
-    }
-    size_t Size() const noexcept;
-    inline bool IsEmpty() const noexcept {
-        return Size() == 0;
     }
     void ConvertToArray() noexcept;
     inline void MoveAndPush(Value& val) noexcept {

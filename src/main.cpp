@@ -60,7 +60,7 @@ noex::string Merge(const noex::string& exe_path, const noex::string& json_path,
     err = json_utils::LoadJson(json_path, json);
     if (!err.empty()) goto MERGE_END;
 
-    if (!json.IsObject() || json.IsEmpty()) {
+    if (!json.IsObject() || json.IsEmptyObject()) {
         PrintFmt("JSON file loaded but it has no data.\n");
         goto MERGE_END;
     }

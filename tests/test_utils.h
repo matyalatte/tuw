@@ -25,11 +25,11 @@ constexpr char JSON_CROSS_PLATFORM[] = "./json/platform.json";
 inline void GetTestJson(tuwjson::Value& json) {
     noex::string err = json_utils::LoadJson(JSON_ALL_KEYS, json);
     EXPECT_TRUE(err.empty());
-    EXPECT_FALSE(json.IsEmpty());
+    EXPECT_FALSE(!json.IsObject() || json.IsEmptyObject());
 }
 
 inline void GetTestJson(tuwjson::Value& json, const char* file) {
     noex::string err = json_utils::LoadJson(file, json);
     EXPECT_TRUE(err.empty());
-    EXPECT_FALSE(json.IsEmpty());
+    EXPECT_FALSE(!json.IsObject() || json.IsEmptyObject());
 }

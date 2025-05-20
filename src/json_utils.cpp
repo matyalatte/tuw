@@ -672,7 +672,7 @@ void CheckDefinition(noex::string& err_msg, tuwjson::Value& definition) noexcept
     tuwjson::Value* gui_json_ptr =
         CheckJsonType(err_msg, definition, "gui", JsonType::JSON_ARRAY);
     if (!err_msg.empty()) return;
-    if (gui_json_ptr->Size() == 0) {
+    if (gui_json_ptr->GetArraySize() == 0) {
         err_msg = "The size of [\"gui\"] should NOT be zero."
             + gui_json_ptr->GetLineColumnStr();
     }

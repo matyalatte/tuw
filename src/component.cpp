@@ -467,7 +467,7 @@ noex::string CheckArray::GetRawString() noexcept {
 void CheckArray::SetConfig(const tuwjson::Value& config) noexcept {
     tuwjson::Value* ptr = config.GetMemberPtr(m_id);
     if (ptr && ptr->IsArray()) {
-        for (size_t i = 0; i < ptr->Size() && i < m_checks.size(); i++) {
+        for (size_t i = 0; i < ptr->GetArraySize() && i < m_checks.size(); i++) {
             tuwjson::Value& v = ptr->At(i);
             if (v.IsBool())
                 uiCheckboxSetChecked(m_checks[i], v.GetBool());

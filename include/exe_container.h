@@ -21,7 +21,7 @@ class ExeContainer {
     noex::string Write(const noex::string& exe_path) noexcept;
 
     bool HasJson() noexcept {
-        return m_json.IsObject() && !m_json.IsEmpty();
+        return m_json.IsObject() && !m_json.IsEmptyObject();
     }
 
     void GetJson(tuwjson::Value& json) noexcept {

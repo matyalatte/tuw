@@ -13,7 +13,7 @@ bool Value::operator==(const Value& val) const noexcept {
     if (m_type != val.m_type)
         return false;
     if (m_type == JSON_TYPE_OBJECT) {
-        if (val.Size() != Size())
+        if (val.GetObjectSize() != GetObjectSize())
             return false;
         for (const Item& item : *val.u.m_object) {
             if (!HasMember(item.key))
@@ -22,9 +22,9 @@ bool Value::operator==(const Value& val) const noexcept {
                 return false;
         }
     } else if (m_type == JSON_TYPE_ARRAY) {
-        if (val.Size() != Size())
+        if (val.GetArraySize() != GetArraySize())
             return false;
-        for (size_t i = 0; i < Size(); i++) {
+        for (size_t i = 0; i < GetArraySize(); i++) {
             if (At(i) != val[i])
                 return false;
         }
@@ -155,15 +155,6 @@ void Value::ConvertToObject(const char* key) noexcept {
     item.val->u.m_object = object;
     item.val->m_type = type;
     u.m_object->push_back(static_cast<Item&&>(item));
-}
-
-size_t Value::Size() const noexcept {
-    assert(m_type == JSON_TYPE_OBJECT || m_type == JSON_TYPE_ARRAY);
-    if (m_type == JSON_TYPE_OBJECT)
-        return u.m_object->size();
-    if (m_type == JSON_TYPE_ARRAY)
-        return u.m_array->size();
-    return 0;
 }
 
 void Value::SetArray() noexcept {
