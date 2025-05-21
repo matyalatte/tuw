@@ -244,7 +244,7 @@ TEST_F(OpenURLTest, OpenUrlWithFilePath) {
     main_frame = new MainFrame(definition, config);
     noex::string msg = main_frame->OpenURLBase(0);
     const char* expected =
-        "Use 'file' type for a path, not 'url' type. (file:///test.txt)";
+        "Use 'file' type for a local path: file:///test.txt";
     EXPECT_STREQ(msg.c_str(), expected);
 }
 
@@ -253,8 +253,7 @@ TEST_F(OpenURLTest, OpenUrlWithFtps) {
     main_frame = new MainFrame(definition, config);
     noex::string msg = main_frame->OpenURLBase(0);
     const char* expected =
-        "Unsupported scheme detected. "
-        "It should be http or https. (ftps)";
+        "URL scheme should be http or https: ftps";
     EXPECT_STREQ(msg.c_str(), expected);
 }
 

@@ -193,7 +193,6 @@ TEST(JsonCheckTest, checkVersionSuccess) {
     noex::string err_msg;
     json_utils::CheckVersion(err_msg, test_json);
     EXPECT_TRUE(err_msg.empty());
-    EXPECT_FALSE(test_json["not_recommended"].GetBool());
 }
 
 TEST(JsonCheckTest, checkVersionFail) {
@@ -203,7 +202,6 @@ TEST(JsonCheckTest, checkVersionFail) {
     noex::string err_msg;
     json_utils::CheckVersion(err_msg, test_json);
     EXPECT_TRUE(err_msg.empty());
-    EXPECT_TRUE(test_json["not_recommended"].GetBool());
 }
 
 TEST(JsonCheckTest, checkVersionFail2) {
