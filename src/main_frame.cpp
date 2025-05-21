@@ -267,11 +267,9 @@ noex::string MainFrame::OpenURLBase(size_t id) noexcept {
             noex::string scheme = url.substr(0, pos);
             // scheme should be http or https
             if (scheme == "file") {
-                return noex::concat_cstr(
-                    "Use 'file' type for a path, not 'url' type. (", url.c_str(), ")");
+                return "Use 'file' type for a local path: " + url;
             } else if (scheme != "https" && scheme != "http") {
-                return noex::concat_cstr("Unsupported scheme detected. "
-                        "It should be http or https. (", scheme.c_str(), ")");
+                return "URL scheme should be http or https: " + scheme;
             }
         } else {
             url = "https://" + url;
@@ -283,7 +281,7 @@ noex::string MainFrame::OpenURLBase(size_t id) noexcept {
         url = envuStr(url_cstr);
 
         if (!exists)
-            return noex::concat_cstr("File does not exist. (", url.c_str(), ")");
+            return "File does not exist: " + url;
     }
 
     Log("OpenURL", url);
