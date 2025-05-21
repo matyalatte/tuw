@@ -49,7 +49,7 @@ bool AskOverwrite(const char *path) noexcept {
     char answer;
     int ret = scanf("%c", &answer);
     fseek(stdin, 0, SEEK_END);
-    return ret == 1 && (answer == "y"[0] || answer == "Y"[0]);
+    return ret == 1 && (answer == 'y' || answer == 'Y');
 }
 
 noex::string Merge(const noex::string& exe_path, const noex::string& json_path,
