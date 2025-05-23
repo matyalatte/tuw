@@ -144,4 +144,7 @@ basic_string<charT> concat_cstr(const charT* str1, const charT* str2) noexcept;
 template <typename charT>
 basic_string<charT> concat_cstr(const charT* str1, const charT* str2, const charT* str3) noexcept;
 
+template <typename charT>
+const charT* find_chr(const charT* str, charT c) noexcept;
+
 }  // namespace noex

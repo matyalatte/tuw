@@ -233,17 +233,33 @@ bool basic_string<charT>::operator==(const basic_string<charT>& str) const noexc
     return streq(c_str(), str.c_str());
 }
 
+// simpler version of strchr and wcschr
+template <typename charT>
+const charT* find_chr(const charT* str, charT c) noexcept {
+    if (!str) return nullptr;
+    while (*str) {
+        if (*str == c)
+            return str;
+        str++;
+    }
+    return nullptr;
+}
+
+template
+const char* find_chr(const char* str, char c) noexcept;
+
+template
+const wchar_t* find_chr(const wchar_t* str, wchar_t c) noexcept;
+
 template <typename charT>
 const size_t basic_string<charT>::npos = static_cast<size_t>(-1);
 
 template <typename charT>
 size_t basic_string<charT>::find(charT c) const noexcept {
     if (empty()) return npos;
-    const charT* p = begin();
-    for (; p < end(); p++) {
-        if (*p == c)
-            return static_cast<size_t>(p - m_str);
-    }
+    const charT* p = find_chr(m_str, c);
+    if (p)
+        return static_cast<size_t>(p - m_str);
     return npos;
 }
 

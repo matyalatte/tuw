@@ -268,7 +268,7 @@ int main(int argc, char* argv[]) noexcept {
     }
 
     // Launch GUI with a JSON path.
-    if (noex::string(args[1]).contains('.')) {
+    if (noex::find_chr(args[1], '.')) {
         ret = main_app(args[1]);
         goto MAIN_END;
     }

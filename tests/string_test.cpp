@@ -253,6 +253,16 @@ TEST(StringTest, EqualToNullReverse) {
 }
 
 // Test find()
+TEST(StringTest, find_chr) {
+    const char* str = "footestfoo";
+    EXPECT_EQ(str, noex::find_chr(str, 'f'));
+    EXPECT_EQ(str + 3, noex::find_chr(str, 't'));
+    EXPECT_EQ(str + 5, noex::find_chr(str, 's'));
+    EXPECT_EQ(nullptr, noex::find_chr(str, 'a'));
+    const char* null = nullptr;
+    EXPECT_EQ(nullptr, noex::find_chr(null, 'a'));
+}
+
 TEST(StringTest, FindChar) {
     noex::string str = "footestfoo";
     EXPECT_EQ(0, str.find('f'));

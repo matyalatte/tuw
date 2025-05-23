@@ -221,11 +221,11 @@ static void CorrectKey(
 }
 
 static noex::string
-SubstrToChar(const char* str, const char delimiter) noexcept {
+SubstrToChar(const char* str, char delimiter) noexcept {
     if (!str || !*str)
         return "";
 
-    const char* pos = strchr(str, delimiter);
+    const char* pos = noex::find_chr(str, delimiter);
     if (!pos)
         return str;
     return noex::string(str, pos - str);
