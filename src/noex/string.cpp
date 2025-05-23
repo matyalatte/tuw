@@ -340,19 +340,15 @@ basic_string<wchar_t> operator+(const wchar_t* str1, const basic_string<wchar_t>
 
 template <typename charT>
 basic_string<charT> concat_cstr(const charT* str1, const charT* str2) noexcept {
-    if (!str1)
-        str1 = reinterpret_cast<const charT*>(dummy);
-    if (!str2)
-        str2 = reinterpret_cast<const charT*>(dummy);
     size_t len1 = get_strlen(str1);
     size_t len2 = get_strlen(str2);
     basic_string<charT> str(len1 + len2);
     charT* data = str.data();
-    if (!data)
-        return str;
-    memcpy(data, str1, len1 * sizeof(charT));
-    data += len1 * sizeof(charT);
-    memcpy(data, str2, len2 * sizeof(charT));
+    if (data) {
+        memcpy(data, str1, len1 * sizeof(charT));
+        data += len1 * sizeof(charT);
+        memcpy(data, str2, len2 * sizeof(charT));
+    }
     return str;
 }
 
@@ -363,24 +359,18 @@ basic_string<wchar_t> concat_cstr(const wchar_t* str1, const wchar_t* str2) noex
 
 template <typename charT>
 basic_string<charT> concat_cstr(const charT* str1, const charT* str2, const charT* str3) noexcept {
-    if (!str1)
-        str1 = reinterpret_cast<const charT*>(dummy);
-    if (!str2)
-        str2 = reinterpret_cast<const charT*>(dummy);
-    if (!str3)
-        str3 = reinterpret_cast<const charT*>(dummy);
     size_t len1 = get_strlen(str1);
     size_t len2 = get_strlen(str2);
     size_t len3 = get_strlen(str3);
     basic_string<charT> str(len1 + len2 + len3);
     charT* data = str.data();
-    if (!data)
-        return str;
-    memcpy(data, str1, len1 * sizeof(charT));
-    data += len1 * sizeof(charT);
-    memcpy(data, str2, len2 * sizeof(charT));
-    data += len2 * sizeof(charT);
-    memcpy(data, str3, len3 * sizeof(charT));
+    if (data) {
+        memcpy(data, str1, len1 * sizeof(charT));
+        data += len1 * sizeof(charT);
+        memcpy(data, str2, len2 * sizeof(charT));
+        data += len2 * sizeof(charT);
+        memcpy(data, str3, len3 * sizeof(charT));
+    }
     return str;
 }
 
