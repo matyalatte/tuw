@@ -369,7 +369,7 @@ void MainFrame::UpdatePanel(size_t definition_id) noexcept {
             uiBoxSetSpacing(priv_box, tuw_constants::BOX_SUB_SPACE);
             new_comp = Component::PutComponent(priv_box, c);
             new_comp->SetConfig(m_config);
-            m_components.emplace_back(new_comp);
+            m_components.push_back(new_comp);
             uiBoxAppend(main_box, uiControl(priv_box), 0);
         }
     }

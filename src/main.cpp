@@ -247,9 +247,9 @@ int main(int argc, char* argv[]) noexcept {
             continue;  // Ignore the PSN
 #endif  // __APPLE__
 #ifdef _WIN32
-        args.emplace_back(toUTF8(argv[i]));
+        args.push_back(toUTF8(argv[i]));
 #else
-        args.emplace_back(argv[i]);
+        args.push_back(argv[i]);
 #endif  // _WIN32
     }
 

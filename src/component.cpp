@@ -221,7 +221,7 @@ void FilterList::MakeFilters(const char* ext) noexcept {
         if (c == '|') {
             *buf = 0;
             if (is_reading_pattern) {
-                patterns.emplace_back(next_str);
+                patterns.push_back(next_str);
                 ui_filters.push_back({
                     name,
                     patterns.size() - first_pattern_id,
@@ -235,7 +235,7 @@ void FilterList::MakeFilters(const char* ext) noexcept {
             next_str = buf + 1;
         } else if (is_reading_pattern && (c == ';')) {
             *buf = 0;
-            patterns.emplace_back(next_str);
+            patterns.push_back(next_str);
             next_str = buf + 1;
         } else {
             // *buf = c;
@@ -245,7 +245,7 @@ void FilterList::MakeFilters(const char* ext) noexcept {
     }
     *buf = 0;
     if (is_reading_pattern) {
-        patterns.emplace_back(next_str);
+        patterns.push_back(next_str);
         ui_filters.push_back({
             name,
             patterns.size() - first_pattern_id,
@@ -253,7 +253,7 @@ void FilterList::MakeFilters(const char* ext) noexcept {
         });
     }
 
-    // Set string pointers here since patterns.emplace_back() can reallocate them.
+    // Set string pointers here since patterns.push_back() can reallocate them.
     const char** ptr = patterns.data();
     for (uiFileDialogParamsFilter& filter : ui_filters) {
         size_t count = filter.patternCount;
