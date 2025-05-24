@@ -625,16 +625,14 @@ static int VersionStringToInt(noex::string& err_msg, const char* string) noexcep
     const char* p = string;
     while (*p != '\0') {
         noex::string str = SubstrToChar(p, '.');
-        if (str.length() == 0 || str.length() > 2) {
+        if (str.empty()|| str.size() > 2) {
             err_msg = noex::concat_cstr("Can NOT convert '", string, "' to int.");
             return 0;
         }
-        if (str.length() == 1) {
-            version_int += digit * (str[0] - 48);
-        } else {  // length() == 2
-            version_int += digit * (str[0] - 48) * 10;
-            version_int += digit * (str[1] - 48);
-        }
+        int num = str[0] - '0';
+        if (str.size() == 2)
+            num = num * 10 + str[1] - '0';
+        version_int += digit * num;
         if (digit == 1)
             break;
         digit /= 100;
