@@ -373,8 +373,10 @@ class Writer {
 
     Error m_err;
 
-    void WriteChar(char c) noexcept;
     void WriteBytes(const char* bytes, size_t size) noexcept;
+    inline void WriteChar(char c) noexcept {
+        WriteBytes(&c, 1);
+    }
     void WriteIndent() noexcept;
     void WriteLinefeed() noexcept;
     void WriteString(const char* str) noexcept;

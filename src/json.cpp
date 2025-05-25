@@ -618,18 +618,6 @@ const char* Parser::GetErrMsg() noexcept {
     return m_err_msg.c_str();
 }
 
-void Writer::WriteChar(char c) noexcept {
-    if (!m_buf)
-        return;
-    if (m_buf_size <= 1) {
-        m_buf = nullptr;
-        return;
-    }
-    *m_buf = c;
-    m_buf++;
-    m_buf_size--;
-}
-
 void Writer::WriteBytes(const char* bytes, size_t size) noexcept {
     if (!m_buf)
         return;
