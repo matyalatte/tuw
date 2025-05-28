@@ -86,7 +86,7 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_end(va);
 
     noex::wstring wbuf = UTF8toUTF16(buf.c_str());
-    fwprintf(out, L"%ls", wbuf.c_str());
+    fwrite(wbuf.data(), sizeof(wchar_t), wbuf.size(), out);
 }
 
 // Enable ANSI escape sequences on the console window.
@@ -196,8 +196,8 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_end(va2);
     noex::string buf = noex::string(n);
     vsnprintf(buf.data(), buf.size() + 1, fmt, va);
-    g_logger.Log(buf.c_str());
-    fprintf(out, "%s", buf.c_str());
+    g_logger.Log(buf.data());
+    fwrite(buf.data(), sizeof(char), buf.size(), out);
     va_end(va);
 }
 #endif

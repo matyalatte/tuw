@@ -28,7 +28,7 @@ int main_app(const char* json_path = nullptr) noexcept {
     memset(&ui_options, 0, sizeof (uiInitOptions));
     err = uiInit(&ui_options);
     if (err != NULL) {
-        fprintf(stderr, "error initializing libui: %s", err);
+        FprintFmt(stderr, "error initializing libui: %s", err);
         uiFreeInitError(err);
         return 1;
     }
@@ -324,7 +324,7 @@ int main(int argc, char* argv[]) noexcept {
 
     if (json_path == exe_path || new_exe_path == exe_path) {
         PrintUsage();
-        fprintf(stderr, "Error: Can NOT overwrite the executable itself.\n");
+        FprintFmt(stderr, "Error: Can NOT overwrite the executable itself.\n");
         ret = 1;
         goto MAIN_END;
     }

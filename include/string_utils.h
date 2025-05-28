@@ -35,5 +35,5 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept;
 
 // Note: PrintFmt() and FprintFmt() only support UTF-8 strings.
 //       Some localized versions of Windows might require ANSItoUTF8()
-//       before printing strings.
+//       before printing redirected strings.
 #define PrintFmt(...) FprintFmt(stdout, __VA_ARGS__)
