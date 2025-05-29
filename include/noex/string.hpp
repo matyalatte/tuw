@@ -61,13 +61,6 @@ class basic_string {
     basic_string operator+(const charT* str) const noexcept;
     basic_string operator+(const basic_string& str) const noexcept;
 
-    // You can append numbers as strings
-    // Note: wstring does not support operator+ for numbers
-    basic_string operator+(int num) const noexcept;
-    basic_string operator+(size_t num) const noexcept;
-    basic_string operator+(uint32_t num) const noexcept;
-    basic_string operator+(double num) const noexcept;
-
     static basic_string to_string(int num) noexcept;
     static basic_string to_string(size_t num) noexcept;
     static basic_string to_string(uint32_t num) noexcept;
@@ -150,5 +143,8 @@ template <typename charT>
 basic_string<charT> concat_cstr(const charT* str1, const charT* str2) noexcept;
 template <typename charT>
 basic_string<charT> concat_cstr(const charT* str1, const charT* str2, const charT* str3) noexcept;
+
+template <typename charT>
+const charT* find_chr(const charT* str, charT c) noexcept;
 
 }  // namespace noex

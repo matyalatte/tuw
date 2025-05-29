@@ -294,6 +294,9 @@ class trivial_vector : public trivial_vector_base {
         push_back_base(&val);
     }
 
+    // Note:
+    //   emplace_back was implemented only for compatibility.
+    //   We should use push_back for trivial classes to minimize binary.
     template <typename... Args>
     void emplace_back(Args&&... args) noexcept {
         reserve(m_size + 1);

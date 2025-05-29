@@ -167,22 +167,22 @@ TEST(StringTest, PlusTuwstr) {
     expect_tuwstr("testfoo", str3);
 }
 
-TEST(StringTest, PlusInt) {
+TEST(StringTest, ToStringInt) {
     int a = -1;
-    noex::string result = noex::string("test") + a + "bar";
-    EXPECT_STREQ("test-1bar", result.c_str());
+    noex::string result = noex::to_string(a);
+    EXPECT_STREQ("-1", result.c_str());
 }
 
-TEST(StringTest, PlusSizet) {
+TEST(StringTest, ToStringSizet) {
     size_t a = 100;
-    noex::string result = noex::string("test") + a + "bar";
-    EXPECT_STREQ("test100bar", result.c_str());
+    noex::string result = noex::to_string(a);
+    EXPECT_STREQ("100", result.c_str());
 }
 
-TEST(StringTest, PlusUint32) {
+TEST(StringTest, ToStringUint32) {
     uint32_t a = 100;
-    noex::string result = noex::string("test") + a + "bar";
-    EXPECT_STREQ("test100bar", result.c_str());
+    noex::string result = noex::to_string(a);
+    EXPECT_STREQ("100", result.c_str());
 }
 
 TEST(StringTest, CstrPlusTuwstr) {
@@ -253,6 +253,16 @@ TEST(StringTest, EqualToNullReverse) {
 }
 
 // Test find()
+TEST(StringTest, find_chr) {
+    const char* str = "footestfoo";
+    EXPECT_EQ(str, noex::find_chr(str, 'f'));
+    EXPECT_EQ(str + 3, noex::find_chr(str, 't'));
+    EXPECT_EQ(str + 5, noex::find_chr(str, 's'));
+    EXPECT_EQ(nullptr, noex::find_chr(str, 'a'));
+    const char* null = nullptr;
+    EXPECT_EQ(nullptr, noex::find_chr(null, 'a'));
+}
+
 TEST(StringTest, FindChar) {
     noex::string str = "footestfoo";
     EXPECT_EQ(0, str.find('f'));

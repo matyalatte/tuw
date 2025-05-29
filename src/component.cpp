@@ -221,7 +221,7 @@ void FilterList::MakeFilters(const char* ext) noexcept {
         if (c == '|') {
             *buf = 0;
             if (is_reading_pattern) {
-                patterns.emplace_back(next_str);
+                patterns.push_back(next_str);
                 ui_filters.push_back({
                     name,
                     patterns.size() - first_pattern_id,
@@ -235,7 +235,7 @@ void FilterList::MakeFilters(const char* ext) noexcept {
             next_str = buf + 1;
         } else if (is_reading_pattern && (c == ';')) {
             *buf = 0;
-            patterns.emplace_back(next_str);
+            patterns.push_back(next_str);
             next_str = buf + 1;
         } else {
             // *buf = c;
@@ -245,7 +245,7 @@ void FilterList::MakeFilters(const char* ext) noexcept {
     }
     *buf = 0;
     if (is_reading_pattern) {
-        patterns.emplace_back(next_str);
+        patterns.push_back(next_str);
         ui_filters.push_back({
             name,
             patterns.size() - first_pattern_id,
@@ -253,7 +253,7 @@ void FilterList::MakeFilters(const char* ext) noexcept {
         });
     }
 
-    // Set string pointers here since patterns.emplace_back() can reallocate them.
+    // Set string pointers here since patterns.push_back() can reallocate them.
     const char** ptr = patterns.data();
     for (uiFileDialogParamsFilter& filter : ui_filters) {
         size_t count = filter.patternCount;
@@ -342,7 +342,7 @@ ComboBox::ComboBox(uiBox* box, const tuwjson::Value& j) noexcept
         m_values.push_back(value);
     }
     uiBoxAppend(box, uiControl(combo), 0);
-    uiComboboxSetSelected(combo, json_utils::GetInt(j, "default", 0) % j["items"].Size());
+    uiComboboxSetSelected(combo, json_utils::GetInt(j, "default", 0) % m_values.size());
 
     SetTooltip(uiControl(combo), j);
     m_widget = combo;
@@ -378,7 +378,7 @@ RadioButtons::RadioButtons(uiBox* box, const tuwjson::Value& j) noexcept
         m_values.push_back(value);
     }
     uiBoxAppend(box, uiControl(radio), 0);
-    uiRadioButtonsSetSelected(radio, json_utils::GetInt(j, "default", 0) % j["items"].Size());
+    uiRadioButtonsSetSelected(radio, json_utils::GetInt(j, "default", 0) % m_values.size());
 
     SetTooltip(uiControl(radio), j);
     m_widget = radio;
@@ -467,7 +467,7 @@ noex::string CheckArray::GetRawString() noexcept {
 void CheckArray::SetConfig(const tuwjson::Value& config) noexcept {
     tuwjson::Value* ptr = config.GetMemberPtr(m_id);
     if (ptr && ptr->IsArray()) {
-        for (size_t i = 0; i < ptr->Size() && i < m_checks.size(); i++) {
+        for (size_t i = 0; i < ptr->GetArraySize() && i < m_checks.size(); i++) {
             tuwjson::Value& v = ptr->At(i);
             if (v.IsBool())
                 uiCheckboxSetChecked(m_checks[i], v.GetBool());
@@ -511,27 +511,23 @@ void TextBox::SetConfig(const tuwjson::Value& config) noexcept {
     setConfigForTextBox(config, m_id, m_widget);
 }
 
-static void initSpinbox(uiSpinbox* picker, uiBox* box, const tuwjson::Value& j) noexcept {
+static uiSpinbox* createSpinbox(uiBox* box, const tuwjson::Value& j,
+                                double default_inc, int digits) noexcept {
+    double min = json_utils::GetDouble(j, "min", 0.0);
+    double max = json_utils::GetDouble(j, "max", 100.0);
+    double val = json_utils::GetDouble(j, "default", min);
+    double inc = json_utils::GetDouble(j, "inc", default_inc);
+    bool wrap = json_utils::GetBool(j, "wrap", false);
+    uiSpinbox* picker = uiNewSpinboxDoubleEx(min, max, digits, inc, static_cast<int>(wrap));
+    uiSpinboxSetValueDouble(picker, val);
     uiBoxAppend(box, uiControl(picker), 0);
     SetTooltip(uiControl(picker), j);
+    return picker;
 }
 
 IntPicker::IntPicker(uiBox* box, const tuwjson::Value& j) noexcept
     : StringComponentBase(box, j) {
-    int min = json_utils::GetInt(j, "min", 0);
-    int max = json_utils::GetInt(j, "max", 100);
-    int inc = json_utils::GetInt(j, "inc", 1);
-    int val = json_utils::GetInt(j, "default", min);
-    bool wrap = json_utils::GetBool(j, "wrap", false);
-    uiSpinbox* picker = uiNewSpinboxDoubleEx(
-        static_cast<double>(min),
-        static_cast<double>(max),
-        0,
-        static_cast<double>(inc),
-        static_cast<int>(wrap));
-    uiSpinboxSetValue(picker, val);
-    initSpinbox(picker, box, j);
-    m_widget = picker;
+    m_widget = createSpinbox(box, j, 1.0, 0);
 }
 
 noex::string IntPicker::GetRawString() noexcept {
@@ -556,16 +552,8 @@ void IntPicker::SetConfig(const tuwjson::Value& config) noexcept {
 
 FloatPicker::FloatPicker(uiBox* box, const tuwjson::Value& j) noexcept
     : StringComponentBase(box, j) {
-    double min = json_utils::GetDouble(j, "min", 0.0);
-    double max = json_utils::GetDouble(j, "max", 100.0);
-    double inc = json_utils::GetDouble(j, "inc", 0.1);
     int digits = json_utils::GetInt(j, "digits", 1);
-    double val = json_utils::GetDouble(j, "default", min);
-    bool wrap = json_utils::GetBool(j, "wrap", false);
-    uiSpinbox* picker = uiNewSpinboxDoubleEx(min, max, digits, inc, static_cast<int>(wrap));
-    uiSpinboxSetValueDouble(picker, val);
-    initSpinbox(picker, box, j);
-    m_widget = picker;
+    m_widget = createSpinbox(box, j, 0.1, digits);
 }
 
 noex::string FloatPicker::GetRawString() noexcept {

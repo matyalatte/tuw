@@ -13,7 +13,7 @@ bool Value::operator==(const Value& val) const noexcept {
     if (m_type != val.m_type)
         return false;
     if (m_type == JSON_TYPE_OBJECT) {
-        if (val.Size() != Size())
+        if (val.GetObjectSize() != GetObjectSize())
             return false;
         for (const Item& item : *val.u.m_object) {
             if (!HasMember(item.key))
@@ -22,9 +22,9 @@ bool Value::operator==(const Value& val) const noexcept {
                 return false;
         }
     } else if (m_type == JSON_TYPE_ARRAY) {
-        if (val.Size() != Size())
+        if (val.GetArraySize() != GetArraySize())
             return false;
-        for (size_t i = 0; i < Size(); i++) {
+        for (size_t i = 0; i < GetArraySize(); i++) {
             if (At(i) != val[i])
                 return false;
         }
@@ -41,6 +41,16 @@ bool Value::operator==(const Value& val) const noexcept {
         return GetBool() == val.GetBool();
     }
     return true;
+}
+
+Value& Value::MoveFrom(Value& val) noexcept {
+    FreeValue();
+    m_type = val.m_type;
+    m_line_count = val.m_line_count;
+    m_column = val.m_column;
+    u = val.u;
+    val.m_type = JSON_TYPE_NULL;
+    return *this;
 }
 
 static noex::string LineColumnToStr(size_t line_count, size_t column) noexcept {
@@ -157,15 +167,6 @@ void Value::ConvertToObject(const char* key) noexcept {
     u.m_object->push_back(static_cast<Item&&>(item));
 }
 
-size_t Value::Size() const noexcept {
-    assert(m_type == JSON_TYPE_OBJECT || m_type == JSON_TYPE_ARRAY);
-    if (m_type == JSON_TYPE_OBJECT)
-        return u.m_object->size();
-    if (m_type == JSON_TYPE_ARRAY)
-        return u.m_array->size();
-    return 0;
-}
-
 void Value::SetArray() noexcept {
     FreeValue();
     m_type = JSON_TYPE_ARRAY;
@@ -188,6 +189,30 @@ void Value::SetString() noexcept {
     FreeValue();
     m_type = JSON_TYPE_STRING;
     u.m_string = noex::new_ref<noex::string>();
+}
+
+void Value::SetString(const char* val) noexcept {
+    SetString();
+    if (u.m_string)
+        *u.m_string = val;
+}
+
+void Value::SetInt(int val) noexcept {
+    FreeValue();
+    m_type = JSON_TYPE_INT;
+    u.m_int = val;
+}
+
+void Value::SetDouble(double val) noexcept {
+    FreeValue();
+    m_type = JSON_TYPE_DOUBLE;
+    u.m_double = val;
+}
+
+void Value::SetBool(bool val) noexcept {
+    FreeValue();
+    m_type = JSON_TYPE_BOOL;
+    u.m_bool = val;
 }
 
 // Parser
@@ -591,18 +616,6 @@ const char* Parser::GetErrMsg() noexcept {
 
     m_err_msg += LineColumnToStr(m_line_count, GetColumn());
     return m_err_msg.c_str();
-}
-
-void Writer::WriteChar(char c) noexcept {
-    if (!m_buf)
-        return;
-    if (m_buf_size <= 1) {
-        m_buf = nullptr;
-        return;
-    }
-    *m_buf = c;
-    m_buf++;
-    m_buf_size--;
 }
 
 void Writer::WriteBytes(const char* bytes, size_t size) noexcept {

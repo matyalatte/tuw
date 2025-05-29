@@ -36,3 +36,19 @@ TEST(StringTest, GetLastLineNull) {
     expect_nullstr(GetLastLine(""));
     expect_nullstr(GetLastLine("\n\n\n\n"));
 }
+
+TEST(StringTest, envuStrNull) {
+    expect_nullstr(envuStr(nullptr));
+}
+
+#ifdef _WIN32
+TEST(StringTest, ANSItoUTF8) {
+    noex::string str = "test";
+    expect_tuwstr("test", ANSItoUTF8(str));
+}
+
+TEST(StringTest, ANSItoUTF8Null) {
+    noex::string nullstr = nullptr;
+    expect_nullstr(ANSItoUTF8(nullstr));
+}
+#endif

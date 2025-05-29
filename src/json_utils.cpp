@@ -221,11 +221,11 @@ static void CorrectKey(
 }
 
 static noex::string
-SubstrToChar(const char* str, const char delimiter) noexcept {
+SubstrToChar(const char* str, char delimiter) noexcept {
     if (!str || !*str)
         return "";
 
-    const char* pos = strchr(str, delimiter);
+    const char* pos = noex::find_chr(str, delimiter);
     if (!pos)
         return str;
     return noex::string(str, pos - str);
@@ -625,16 +625,14 @@ static int VersionStringToInt(noex::string& err_msg, const char* string) noexcep
     const char* p = string;
     while (*p != '\0') {
         noex::string str = SubstrToChar(p, '.');
-        if (str.length() == 0 || str.length() > 2) {
+        if (str.empty()|| str.size() > 2) {
             err_msg = noex::concat_cstr("Can NOT convert '", string, "' to int.");
             return 0;
         }
-        if (str.length() == 1) {
-            version_int += digit * (str[0] - 48);
-        } else {  // length() == 2
-            version_int += digit * (str[0] - 48) * 10;
-            version_int += digit * (str[1] - 48);
-        }
+        int num = str[0] - '0';
+        if (str.size() == 2)
+            num = num * 10 + str[1] - '0';
+        version_int += digit * num;
         if (digit == 1)
             break;
         digit /= 100;
@@ -650,8 +648,10 @@ void CheckVersion(noex::string& err_msg, tuwjson::Value& definition) noexcept {
     CorrectKey(definition, "recommended_version", "recommended");
     json_ptr = CheckJsonType(err_msg, definition, "recommended", JsonType::STRING);
     if (err_msg.empty() && json_ptr) {
-        int recom_int = VersionStringToInt(err_msg, json_ptr->GetString());
-        definition["not_recommended"].SetBool(tuw_constants::VERSION_INT != recom_int);
+        const char* recom_str = json_ptr->GetString();
+        int recom_int = VersionStringToInt(err_msg, recom_str);
+        if (tuw_constants::VERSION_INT != recom_int)
+            PrintFmt("[CheckDefinition] Warning: Version %s is recommended.\n", recom_str);
     }
     CorrectKey(definition, "minimum_required_version", "minimum_required");
     json_ptr = CheckJsonType(err_msg, definition, "minimum_required", JsonType::STRING);
@@ -672,7 +672,7 @@ void CheckDefinition(noex::string& err_msg, tuwjson::Value& definition) noexcept
     tuwjson::Value* gui_json_ptr =
         CheckJsonType(err_msg, definition, "gui", JsonType::JSON_ARRAY);
     if (!err_msg.empty()) return;
-    if (gui_json_ptr->Size() == 0) {
+    if (gui_json_ptr->GetArraySize() == 0) {
         err_msg = "The size of [\"gui\"] should NOT be zero."
             + gui_json_ptr->GetLineColumnStr();
     }

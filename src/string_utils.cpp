@@ -27,8 +27,6 @@ noex::string GetLastLine(const noex::string& str) noexcept {
 }
 
 noex::string envuStr(char *cstr) noexcept {
-    if (cstr == NULL)
-        return "";
     noex::string str = cstr;
     envuFree(cstr);
     return str;
@@ -65,22 +63,16 @@ noex::wstring UTF8toUTF16(const char* str) noexcept {
 //       still use non-UTF encodings for char strings.
 //       So, we have to convert redirected buffers to UTF8 with this function.
 noex::string ANSItoUTF8(const noex::string& str) noexcept {
-    if (str.empty())
-        return "";
-
     int wstr_len = MultiByteToWideChar(CP_ACP, 0,
-        str.data(), static_cast<int>(str.size() + 1), NULL, 0);
-    if (wstr_len == 0)
-        return "";  // Failed to convert
+        str.c_str(), static_cast<int>(str.size() + 1), NULL, 0);
 
     noex::wstring wstr(wstr_len);
-    if (wstr.empty())
-        return "";  // Allocation error
 
     int ret = MultiByteToWideChar(CP_ACP, 0,
-        str.data(), static_cast<int>(str.size() + 1),
+        str.c_str(), static_cast<int>(str.size() + 1),
         wstr.data(), static_cast<int>(wstr.size()));
-    if (ret != wstr_len)
+
+    if (wstr.empty() || ret != wstr_len)
         return "";  // Failed to convert
     return UTF16toUTF8(wstr.data());
 }
@@ -94,7 +86,7 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_end(va);
 
     noex::wstring wbuf = UTF8toUTF16(buf.c_str());
-    fwprintf(out, L"%ls", wbuf.c_str());
+    fwrite(wbuf.data(), sizeof(wchar_t), wbuf.size(), out);
 }
 
 // Enable ANSI escape sequences on the console window.
@@ -204,8 +196,8 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_end(va2);
     noex::string buf = noex::string(n);
     vsnprintf(buf.data(), buf.size() + 1, fmt, va);
-    g_logger.Log(buf.c_str());
-    fprintf(out, "%s", buf.c_str());
+    g_logger.Log(buf.data());
+    fwrite(buf.data(), sizeof(char), buf.size(), out);
     va_end(va);
 }
 #endif

@@ -73,15 +73,7 @@ class Value {
         m_column(val.m_column), u(val.u) {
         val.m_type = JSON_TYPE_NULL;
     }
-    Value& MoveFrom(Value& val) noexcept {
-        FreeValue();
-        m_type = val.m_type;
-        m_line_count = val.m_line_count;
-        m_column = val.m_column;
-        u = val.u;
-        val.m_type = JSON_TYPE_NULL;
-        return *this;
-    }
+    Value& MoveFrom(Value& val) noexcept;
     Value& operator=(Value&& val) noexcept {
         return MoveFrom(val);
     }
@@ -89,11 +81,11 @@ class Value {
         FreeValue();
     }
 
-    Type GetType() const noexcept {
+    inline Type GetType() const noexcept {
         return m_type;
     }
 
-    bool HasOffset() const noexcept {
+    inline bool HasOffset() const noexcept {
         return m_line_count > 0;
     }
     void GetLineColumn(size_t* line_count, size_t* column) const noexcept {
@@ -120,9 +112,15 @@ class Value {
         return m_type == JSON_TYPE_OBJECT;
     }
     void SetObject() noexcept;
-    Object* GetObject() const noexcept {
+    inline Object* GetObject() const noexcept {
         assert(IsObject());
         return u.m_object;
+    }
+    inline size_t GetObjectSize() const noexcept {
+        return GetObject()->size();
+    }
+    inline bool IsEmptyObject() const noexcept {
+        return GetObjectSize() == 0;
     }
     Value* GetMemberPtr(const char* key) const noexcept;
     inline Value* GetMemberPtr(const noex::string& key) const noexcept {
@@ -152,11 +150,17 @@ class Value {
         return m_type == JSON_TYPE_ARRAY;
     }
     void SetArray() noexcept;
-    Array* GetArray() const noexcept {
+    inline Array* GetArray() const noexcept {
         assert(IsArray());
         return u.m_array;
     }
-    Value& At(size_t id) const noexcept {
+    inline size_t GetArraySize() const noexcept {
+        return GetArray()->size();
+    }
+    inline bool IsEmptyArray() const noexcept {
+        return GetArraySize() == 0;
+    }
+    inline Value& At(size_t id) const noexcept {
         assert(IsArray());
         assert(u.m_array->size() > id);
         return u.m_array->at(id);
@@ -178,10 +182,6 @@ class Value {
         assert(IsArray());
         return u.m_array->end();
     }
-    size_t Size() const noexcept;
-    inline bool IsEmpty() const noexcept {
-        return Size() == 0;
-    }
     void ConvertToArray() noexcept;
     inline void MoveAndPush(Value& val) noexcept {
         assert(IsArray());
@@ -193,22 +193,11 @@ class Value {
         return m_type == JSON_TYPE_STRING;
     }
     void SetString() noexcept;
-    void SetString(const char* val) noexcept {
-        SetString();
-        if (u.m_string)
-            *u.m_string = val;
+    void SetString(const char* val) noexcept;
+    inline void SetString(const noex::string& str) noexcept {
+        SetString(str.c_str());
     }
-    void SetString(const noex::string& str) noexcept {
-        SetString();
-        if (u.m_string)
-            *u.m_string = str;
-    }
-    void SetString(noex::string&& str) noexcept {
-        SetString();
-        if (u.m_string)
-            *u.m_string = str;
-    }
-    const char* GetString() const noexcept {
+    inline const char* GetString() const noexcept {
         assert(m_type == JSON_TYPE_STRING);
         return u.m_string->c_str();
     }
@@ -217,12 +206,8 @@ class Value {
     inline bool IsInt() const noexcept {
         return m_type == JSON_TYPE_INT;
     }
-    void SetInt(int val) noexcept {
-        FreeValue();
-        m_type = JSON_TYPE_INT;
-        u.m_int = val;
-    }
-    int GetInt() const noexcept {
+    void SetInt(int val) noexcept;
+    inline int GetInt() const noexcept {
         assert(IsInt());
         return u.m_int;
     }
@@ -231,11 +216,7 @@ class Value {
     inline bool IsDouble() const noexcept {
         return m_type == JSON_TYPE_INT || m_type == JSON_TYPE_DOUBLE;
     }
-    void SetDouble(double val) noexcept {
-        FreeValue();
-        m_type = JSON_TYPE_DOUBLE;
-        u.m_double = val;
-    }
+    void SetDouble(double val) noexcept;
     double GetDouble() const noexcept {
         assert(IsDouble());
         if (IsInt())
@@ -247,12 +228,8 @@ class Value {
     inline bool IsBool() const noexcept {
         return m_type == JSON_TYPE_BOOL;
     }
-    void SetBool(bool val) noexcept {
-        FreeValue();
-        m_type = JSON_TYPE_BOOL;
-        u.m_bool = val;
-    }
-    bool GetBool() const noexcept {
+    void SetBool(bool val) noexcept;
+    inline bool GetBool() const noexcept {
         assert(IsBool());
         return u.m_bool;
     }
@@ -396,8 +373,10 @@ class Writer {
 
     Error m_err;
 
-    void WriteChar(char c) noexcept;
     void WriteBytes(const char* bytes, size_t size) noexcept;
+    inline void WriteChar(char c) noexcept {
+        WriteBytes(&c, 1);
+    }
     void WriteIndent() noexcept;
     void WriteLinefeed() noexcept;
     void WriteString(const char* str) noexcept;
