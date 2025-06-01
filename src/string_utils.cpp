@@ -84,8 +84,8 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     noex::string buf = noex::string(n);
     if (!buf.empty()) {
         vsprintf_s(buf.data(), buf.size() + 1, fmt, va);
-        noex::wstring wbuf = UTF8toUTF16(buf.c_str());
-        fwrite(wbuf.data(), sizeof(wchar_t), wbuf.size(), out);
+        noex::wstring wbuf = UTF8toUTF16(buf.data());
+        fputws(wbuf.c_str(), out);
     }
     va_end(va);
 }
