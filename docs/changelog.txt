@@ -1,3 +1,8 @@
+ver 0.10.2
+- Fixed an issue where Tuw could not find the exe path on Windows 8 or older. (#127)
+- Fixed a segmentation fault that occurred when Tuw encountered a memory allocation error. (#124)
+- Optimized for binary size. (#123)
+
 ver 0.10.1
 - Added "use_save_dialog" to file picker options (#115)
   (You can open a save dialog to select a new file.)
