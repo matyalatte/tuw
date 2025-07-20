@@ -82,11 +82,12 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     va_start(va, fmt);
     size_t n = _vscprintf(fmt, va);
     noex::string buf = noex::string(n);
-    vsprintf_s(buf.data(), buf.size() + 1, fmt, va);
+    if (!buf.empty()) {
+        vsprintf_s(buf.data(), buf.size() + 1, fmt, va);
+        noex::wstring wbuf = UTF8toUTF16(buf.data());
+        fputws(wbuf.c_str(), out);
+    }
     va_end(va);
-
-    noex::wstring wbuf = UTF8toUTF16(buf.c_str());
-    fwrite(wbuf.data(), sizeof(wchar_t), wbuf.size(), out);
 }
 
 // Enable ANSI escape sequences on the console window.
@@ -195,9 +196,11 @@ void FprintFmt(FILE* out, const char* fmt, ...) noexcept {
     size_t n = vsnprintf(NULL, 0, fmt, va2);
     va_end(va2);
     noex::string buf = noex::string(n);
-    vsnprintf(buf.data(), buf.size() + 1, fmt, va);
-    g_logger.Log(buf.data());
-    fwrite(buf.data(), sizeof(char), buf.size(), out);
+    if (!buf.empty()) {
+        vsnprintf(buf.data(), buf.size() + 1, fmt, va);
+        g_logger.Log(buf.data());
+        fwrite(buf.data(), sizeof(char), buf.size(), out);
+    }
     va_end(va);
 }
 #endif
