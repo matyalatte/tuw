@@ -1,15 +1,5 @@
 # Tuw: a tiny GUI wrapper for command-line tools
 
-```text
-  _____
- |_   _|   ___      __
-   | || | | \ \ /\ / /
-   | || |_| |\ V  V /
-   |_| \__,_| \_/\_/
-  Tiny UI wrapper for
-       CLI tools
-```
-
 ![build](https://github.com/matyalatte/tuw/actions/workflows/build_all.yml/badge.svg)
 ![test](https://github.com/matyalatte/tuw/actions/workflows/test.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -55,10 +45,7 @@ There are many [JSON files](../examples/README.md) to learn how to define GUIs.
 
 ## JSON Schema
 
-There is a [schema](../schema/schema.json) for `gui_definition.json`.  
-You can use it to validate definitions while editing files.  
-
-### VSCode
+There is a [schema](../schema/schema.json) for `gui_definition.json`. You can use it to validate definitions while editing files.  
 
 For VSCode, you can add the schema path to `settings.json` (`File > Preferences > Settings > JSON:Schemas > Edit in settings.json`.)  
 
