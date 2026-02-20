@@ -123,30 +123,32 @@ TEST(JsonCheckTest, checkGUIFail6) {
     GetTestJson(test_json);
     test_json["gui"][0]["components"].GetArray()->pop_back();
     CheckGUIError(test_json,
-        "The command requires more components for arguments;"
-        " echo file: __comp1__ & echo folder: __comp2__ & echo combo: __comp3__ &"
-        " echo radio: __comp4__ & echo check: __comp5__ & echo check_array: __comp6__ &"
-        " echo textbox: __comp7__ & echo int: __comp8__ & echo float: __comp???__");
+        "There is undefined id \"double\" in the command. (line: 7, column: 24)");
 }
 
 TEST(JsonCheckTest, checkGUIFail7) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
-    test_json["gui"][0]["components"][1]["id"].SetString("aaa");
+    test_json["gui"][0]["command"].SetString("echo hello");
     CheckGUIError(test_json,
-        "component id \"aaa\" (line: 15, column: 27) is unused in the command;"
-        " echo file: __comp???__ & echo folder: __comp2__ & echo combo: __comp3__"
-        " & echo radio: __comp4__ & echo check: __comp5__ & echo check_array: __comp6__"
-        " & echo textbox: __comp7__ & echo int: __comp8__ & echo float: __comp9__");
+        "component id \"file\" (line: 15, column: 27) is unused in the command."
+        " (line: 7, column: 24)");
 }
 
 TEST(JsonCheckTest, checkGUIFail8) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
-    test_json["gui"][0]["components"][0]["id"].SetString("aaa");
-    test_json["gui"][0]["components"][1]["id"].SetString("aaa");
+    test_json["gui"][0]["components"][0].CopyFrom(test_json["gui"][0]["components"][1]);
     CheckGUIError(test_json,
-        "Found a duplicated id: \"aaa\" (line: 15, column: 27)");
+        "Found a duplicated id: \"file\" (line: 15, column: 27)");
+}
+
+TEST(JsonCheckTest, checkGUIFail9) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    test_json["gui"][0]["components"][1].ReplaceKey("id", "id_");
+    CheckGUIError(test_json,
+        "component requires \"id\" (line: 13, column: 17)");
 }
 
 TEST(JsonCheckTest, checkGUIFailRelaxed) {

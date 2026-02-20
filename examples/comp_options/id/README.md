@@ -22,35 +22,6 @@ You can use the defined ids as variable names in commands.
 }
 ```
 
-## Undefined IDs
-
-> [!warning]
-> Undifined ids are deprecated. Please define an id for each component.
-
-When you put an undefined id in `%*%`, it'll use one of the components that have no id.
-
-```json
-{
-    "command": "echo x: %-% & echo y: %y% & echo z: %foo%",
-    "button": "Echo!",
-    "components": [
-        {
-            "type": "text",
-            "label": "Value of y",
-            "id": "y"
-        },
-        {
-            "type": "text",
-            "label": "Value of x"
-        },
-        {
-            "type": "text",
-            "label": "Value of z"
-        }
-    ]
-}
-```
-
 ## Predefined IDs
 
 There are some predefined ids.  

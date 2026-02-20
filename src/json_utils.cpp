@@ -242,7 +242,9 @@ static void CompileCommand(noex::string& err_msg,
     splitted_cmd_json.SetArray();
 
     bool store_ids = false;
-    const char* cmd = sub_definition["command"].GetString();
+    tuwjson::Value& cmd_json = sub_definition["command"];
+    noex::string cmd_pos = cmd_json.GetLineColumnStr();
+    const char* cmd = cmd_json.GetString();
     while (*cmd != '\0') {
         noex::string token = SubstrToChar(cmd, '%');
         if (store_ids) {
@@ -263,52 +265,32 @@ static void CompileCommand(noex::string& err_msg,
     tuwjson::Value& components = sub_definition["components"];
     tuwjson::Value cmd_int_ids;
     cmd_int_ids.SetArray();
-    noex::string cmd_str;
     int comp_size = static_cast<int>(comp_ids.size());
     int non_id_comp = 0;
     for (int i = 0; i < static_cast<int>(cmd_ids.size()); i++) {
-        cmd_str += splitted_cmd[i];
         const noex::string& id = cmd_ids[i];
         int j;
         if (id == CMD_TOKEN_PERCENT) {
             j = CMD_ID_PERCENT;
-            cmd_str.push_back('%');
         } else if (id == CMD_TOKEN_CURRENT_DIR) {
             j = CMD_ID_CURRENT_DIR;
-            cmd_str += id;
         } else if (id == CMD_TOKEN_HOME_DIR) {
             j = CMD_ID_HOME_DIR;
-            cmd_str += id;
         } else {
             for (j = 0; j < comp_size; j++)
                 if (id == comp_ids[j]) break;
             if (j == comp_size) {
-                while (non_id_comp < comp_size) {
-                    int type_int = components[non_id_comp]["type_int"].GetInt();
-                    if (type_int != COMP_STATIC_TEXT
-                            && type_int != COMP_EMPTY
-                            && comp_ids[non_id_comp].empty())
-                        break;
-                    non_id_comp++;
-                }
-                j = non_id_comp;
-                non_id_comp++;
+                err_msg = noex::concat_cstr(
+                    "There is undefined id \"", id.c_str(), "\" in the command.") + cmd_pos;
+                return;
             }
         }
-        if (j < comp_size) {
-            tuwjson::Value n;
-            n.SetInt(j);
-            cmd_int_ids.MoveAndPush(n);
-        }
-        if (j >= comp_size)
-            cmd_str += "__comp???__";
-        else if (j >= 0)
-            cmd_str += noex::concat_cstr("__comp", noex::to_string(j).c_str(), "__");
+        tuwjson::Value n;
+        n.SetInt(j);
+        cmd_int_ids.MoveAndPush(n);
     }
-    if (cmd_ids.size() < splitted_cmd.size())
-        cmd_str += splitted_cmd.back();
 
-    // Check if the command requires more arguments or ignores some arguments.
+    // Find unused IDs.
     for (int j = 0; j < comp_size; j++) {
         tuwjson::Value& v = components[j];
         int type_int = v["type_int"].GetInt();
@@ -321,25 +303,14 @@ static void CompileCommand(noex::string& err_msg,
                 break;
             }
         if (!found) {
-            if (comp_ids[j].empty() || !v.HasMember("id")) {
-                err_msg = noex::concat_cstr("[\"components\"][", noex::to_string(j).c_str(), "]")
-                    + v.GetLineColumnStr() + " is unused in the command; " + cmd_str;
-            } else {
-                tuwjson::Value& vid = v["id"];
-                err_msg = noex::concat_cstr("component id \"", vid.GetString(), "\"")
-                    + vid.GetLineColumnStr() + " is unused in the command; " + cmd_str;
-            }
+            tuwjson::Value& vid = v["id"];
+            err_msg = noex::concat_cstr("component id \"", vid.GetString(), "\"")
+                    + noex::concat_cstr(
+                        vid.GetLineColumnStr().c_str(),
+                        " is unused in the command.", cmd_pos.c_str());
             return;
         }
     }
-    if (non_id_comp > comp_size) {
-        err_msg =
-            "The command requires more components for arguments; " + cmd_str;
-        return;
-    }
-    tuwjson::Value v;
-    v.SetString(cmd_str);
-    sub_definition["command_str"].MoveFrom(v);
     sub_definition["command_ids"].MoveFrom(cmd_int_ids);
 }
 
@@ -443,14 +414,9 @@ void CheckSubDefinition(noex::string& err_msg, tuwjson::Value& sub_definition,
         const char* type_str = type_ptr->GetString();
         int type = ComptypeToInt(type_str);
 
-        // TODO: throw an error for missing ids.
-        if (type != COMP_STATIC_TEXT && !c.HasMember("id")) {
-            PrintFmt(
-                "[CheckDefinition] DeprecationWarning: "
-                "\"id\" is missing in [\"components\"][%zu]%s."
-                " Support for components without \"id\" will be removed in a future version.\n",
-                comp_ids.size(), c.GetLineColumnStr().c_str());
-        }
+        tuwjson::Value* id_ptr = CheckJsonType(
+            err_msg, c, "id", JsonType::STRING, "component", type == COMP_STATIC_TEXT);
+        if (!err_msg.empty()) return;
 
         c["type_int"].SetInt(type);
         CorrectKey(c, "item", "items");
@@ -549,7 +515,6 @@ void CheckSubDefinition(noex::string& err_msg, tuwjson::Value& sub_definition,
         CheckJsonType(err_msg, c, "add_quotes", JsonType::BOOLEAN);
         CorrectKey(c, "empty_message", "placeholder");
         CheckJsonType(err_msg, c, "placeholder", JsonType::STRING);
-        CheckJsonType(err_msg, c, "id", JsonType::STRING);
         CheckJsonType(err_msg, c, "tooltip", JsonType::STRING);
 
         CheckJsonType(err_msg, c, "optional", JsonType::BOOLEAN);
@@ -571,15 +536,21 @@ void CheckSubDefinition(noex::string& err_msg, tuwjson::Value& sub_definition,
             }
         }
 
-        const char* id = GetString(c, "id", "");
-        if (c.HasMember("id")) {
-            noex::string linecol = c["id"].GetLineColumnStr();
+        if (id_ptr != nullptr) {
+            const char* id = id_ptr->GetString();
+            noex::string linecol = id_ptr->GetLineColumnStr();
             if (id[0] == '\0') {
                 err_msg = "\"id\" should NOT be an empty string."
                             + linecol;
             } else if (id[0] == '_') {
                 err_msg = "\"id\" should NOT start with '_'."
                             + linecol;
+            }
+            if (type == COMP_STATIC_TEXT) {
+                id_ptr->SetString("");
+                PrintFmt(
+                    "[CheckDefinition] Warning: static text should not have ID. %s\n",
+                    linecol.c_str());
             }
             if (!ignore) {
                 for (const noex::string& str : comp_ids) {
@@ -590,17 +561,16 @@ void CheckSubDefinition(noex::string& err_msg, tuwjson::Value& sub_definition,
                     }
                 }
             }
-        } else {
-            uint32_t hash = Fnv1Hash32(c["label"].GetString());
-            c["id"].SetString("_" + noex::to_string(hash));
         }
         if (!err_msg.empty()) return;
 
         if (ignore) {
             comp_ids.emplace_back("");
             c["type_int"].SetInt(COMP_EMPTY);
+        } else if (type == COMP_STATIC_TEXT) {
+            comp_ids.emplace_back("");
         } else {
-            comp_ids.emplace_back(id);
+            comp_ids.emplace_back(id_ptr->GetString());
         }
     }
 
@@ -608,8 +578,8 @@ void CheckSubDefinition(noex::string& err_msg, tuwjson::Value& sub_definition,
     const char* command_os_key = "command_" TUW_CONSTANTS_OS;
     json_ptr = CheckJsonType(err_msg, sub_definition, command_os_key, JsonType::STRING);
     if (err_msg.empty() && json_ptr) {
-        const char* command_os = json_ptr->GetString();
-        sub_definition["command"].SetString(command_os);
+        // Note: CopyFrom() can overwrite m_line_count and m_column for error messages.
+        sub_definition["command"].CopyFrom(*json_ptr);
     }
 
     // check sub_definition["command"] and convert it to more useful format.

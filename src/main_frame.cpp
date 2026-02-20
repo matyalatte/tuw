@@ -341,7 +341,7 @@ void MainFrame::UpdatePanel(size_t definition_id) noexcept {
         const char* label = sub_definition["label"].GetString();
         Log("UpdatePanel", "Label", label);
     }
-    const char* cmd_str = sub_definition["command_str"].GetString();
+    const char* cmd_str = sub_definition["command"].GetString();
     Log("UpdatePanel", "Command", cmd_str);
     const char* window_name = json_utils::GetString(sub_definition,
                                                     "window_name", tuw_constants::TOOL_NAME);
