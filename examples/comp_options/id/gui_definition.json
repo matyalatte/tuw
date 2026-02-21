@@ -18,26 +18,6 @@
             ]
         },
         {
-            "label": "Undefined IDs",
-            "command": "echo x: %-% & echo y: %y% & echo z: %foo%",
-            "button": "Echo!",
-            "components": [
-                {
-                    "type": "text",
-                    "label": "Value of y",
-                    "id": "y"
-                },
-                {
-                    "type": "text",
-                    "label": "Value of x"
-                },
-                {
-                    "type": "text",
-                    "label": "Value of z"
-                }
-            ]
-        },
-        {
             "label": "Reserved IDs",
             "command": "echo percent: %% & echo cwd: %__CWD__% & echo home: %__HOME__%",
             "button": "Echo!",
