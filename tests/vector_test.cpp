@@ -145,3 +145,40 @@ TEST(VectorTest, Move) {
     EXPECT_EQ(4, vec2[3]);
     EXPECT_EQ(noex::OK, noex::get_error_no());
 }
+
+TEST(VectorTest, TrivialAt) {
+    noex::vector<int> vec;
+    int a;
+    a = vec.at(0);
+    EXPECT_EQ(noex::VEC_BOUNDARY_ERROR, noex::get_error_no());
+    noex::clear_error_no();
+    vec.push_back(1);
+    vec.push_back(2);
+    vec.push_back(3);
+    vec.push_back(4);
+    a = vec.at(4);
+    EXPECT_EQ(noex::VEC_BOUNDARY_ERROR, noex::get_error_no());
+    noex::clear_error_no();
+    a = vec.at(-1);
+    EXPECT_EQ(noex::VEC_BOUNDARY_ERROR, noex::get_error_no());
+    noex::clear_error_no();
+}
+
+TEST(VectorTest, NonTrivialAt) {
+    noex::vector<noex::vector<int>> vec;
+    noex::vector<int>& a = vec.at(0);
+    EXPECT_EQ(noex::VEC_BOUNDARY_ERROR, noex::get_error_no());
+    noex::clear_error_no();
+
+    noex::vector<int> vec2;
+    noex::vector<int> vec3;
+    vec.push_back(vec2);
+    vec.push_back(vec3);
+    EXPECT_EQ(2, vec.size());
+    noex::vector<int>& b = vec.at(2);
+    EXPECT_EQ(noex::VEC_BOUNDARY_ERROR, noex::get_error_no());
+    noex::clear_error_no();
+    noex::vector<int>& c = vec.at(-1);
+    EXPECT_EQ(noex::VEC_BOUNDARY_ERROR, noex::get_error_no());
+    noex::clear_error_no();
+}
