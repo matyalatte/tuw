@@ -45,6 +45,7 @@ namespace json_utils {
 
 // Max binary size for JSON files.
 #define JSON_SIZE_MAX 128 * 1024
+#define JSON_SIZE_MAX_STR "128KB"
 
 // Returns an empty string if succeed. An error message otherwise.
 noex::string LoadJson(const noex::string& file, tuwjson::Value& json) noexcept;

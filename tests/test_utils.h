@@ -17,6 +17,7 @@ constexpr char JSON_ALL_KEYS[] = "./json/gui_definition.json";
 
 // you need to copy the json folder to build dir.
 constexpr char JSON_BROKEN[] = "./json/broken.json";
+constexpr char JSON_LARGE[] = "./json/large.json";
 constexpr char JSON_CONFIG_ASCII[] = "./json/config_ascii.json";
 constexpr char JSON_CONFIG_UTF[] = "./json/config_utf.json";
 constexpr char JSON_RELAXED[] = "./json/relaxed.jsonc";
