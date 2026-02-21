@@ -81,6 +81,20 @@ TEST(JsonCheckTest, checkGUISuccess4) {
     EXPECT_TRUE(err_msg.empty());
 }
 
+TEST(JsonCheckTest, checkGUISuccessStaticDuplicated) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    test_json["gui"][0]["components"][0]["id"].SetString("what");
+    tuwjson::Value static_text;
+    static_text.CopyFrom(test_json["gui"][0]["components"][0]);
+    test_json["gui"][0]["components"].MoveAndPush(static_text);
+    static_text.CopyFrom(test_json["gui"][0]["components"][0]);
+    test_json["gui"][0]["components"].MoveAndPush(static_text);
+    noex::string err_msg;
+    json_utils::CheckDefinition(err_msg, test_json);
+    EXPECT_TRUE(err_msg.empty());
+}
+
 TEST(JsonCheckTest, checkGUISuccessRelaxed) {
     tuwjson::Value test_json;
     noex::string err = json_utils::LoadJson(JSON_RELAXED, test_json);
@@ -165,6 +179,48 @@ TEST(JsonCheckTest, checkGUIFail9) {
         "component requires \"id\" (line: 13, column: 17)");
 }
 
+TEST(JsonCheckTest, checkGUIFailEmptyID) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    test_json["gui"][0]["components"][1]["id"].SetString("");
+    CheckGUIError(test_json,
+        "\"id\" should NOT be an empty string. (line: 15, column: 27)");
+}
+
+TEST(JsonCheckTest, checkGUIFailReservedID) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    test_json["gui"][0]["components"][1]["id"].SetString("_id");
+    CheckGUIError(test_json,
+        "\"id\" should NOT start with '_'. (line: 15, column: 27)");
+}
+
+TEST(JsonCheckTest, checkGUIFailUnknownType) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    test_json["gui"][0]["components"][0]["type"].SetString("what");
+    CheckGUIError(test_json,
+        "Unknown component type: what (line: 10, column: 29)");
+}
+
+TEST(JsonCheckTest, checkGUIFailUnknownCodepage) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    EXPECT_STREQ("default", test_json["gui"][2]["codepage"].GetString());
+    test_json["gui"][2]["codepage"].SetString("what");
+    CheckGUIError(test_json,
+        "Unknown codepage: what (line: 271, column: 25)");
+}
+
+TEST(JsonCheckTest, checkGUIFailNegativeDigits) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    EXPECT_EQ(2, test_json["gui"][1]["components"][9]["digits"].GetInt());
+    test_json["gui"][1]["components"][9]["digits"].SetInt(-1);
+    CheckGUIError(test_json,
+        "\"digits\" should be a non-negative integer. (line: 252, column: 31)");
+}
+
 TEST(JsonCheckTest, checkGUIFailRelaxed) {
     tuwjson::Value test_json;
     noex::string err = json_utils::LoadJson(JSON_RELAXED, test_json);
@@ -200,6 +256,13 @@ TEST(JsonCheckTest, checkHelpFail2) {
     GetTestJson(test_json);
     test_json["help"][0]["label"].SetInt(3);
     CheckHelpError(test_json, "\"label\" should be a string (line: 283, column: 22)");
+}
+
+TEST(JsonCheckTest, checkHelpFailUnknownType) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    test_json["help"][0]["type"].SetString("what");
+    CheckHelpError(test_json, "Unsupported help type: what (line: 282, column: 21)");
 }
 
 TEST(JsonCheckTest, checkVersionSuccess) {

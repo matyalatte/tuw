@@ -390,7 +390,8 @@ void CheckSubDefinition(noex::string& err_msg, tuwjson::Value& sub_definition,
         const char* codepage = json_ptr->GetString();
         if (strcmp(codepage, "utf8") != 0 && strcmp(codepage, "utf-8") != 0 &&
                 strcmp(codepage, "default") != 0) {
-            err_msg = noex::concat_cstr("Unknown codepage: ", codepage);
+            err_msg = noex::concat_cstr(
+                "Unknown codepage: ", codepage, json_ptr->GetLineColumnStr().c_str());
             return;
         }
     }
@@ -415,6 +416,11 @@ void CheckSubDefinition(noex::string& err_msg, tuwjson::Value& sub_definition,
         // convert ["type"] from string to enum.
         const char* type_str = type_ptr->GetString();
         int type = ComptypeToInt(type_str);
+        if (type == COMP_UNKNOWN) {
+            err_msg = noex::concat_cstr("Unknown component type: ",
+                type_str, type_ptr->GetLineColumnStr().c_str());
+            return;
+        }
 
         tuwjson::Value* id_ptr = CheckJsonType(
             err_msg, c, "id", JsonType::STRING, "component", type == COMP_STATIC_TEXT);
@@ -495,10 +501,6 @@ void CheckSubDefinition(noex::string& err_msg, tuwjson::Value& sub_definition,
                 }
                 CheckJsonType(err_msg, c, "wrap", JsonType::BOOLEAN);
                 break;
-            case COMP_UNKNOWN:
-                err_msg = noex::concat_cstr("Unknown component type: ",
-                    type_str, type_ptr->GetLineColumnStr().c_str());
-                break;
         }
         if (!err_msg.empty()) return;
 
@@ -548,23 +550,23 @@ void CheckSubDefinition(noex::string& err_msg, tuwjson::Value& sub_definition,
                 err_msg = "\"id\" should NOT start with '_'."
                             + linecol;
             }
+            if (!err_msg.empty()) return;
             if (type == COMP_STATIC_TEXT) {
                 id_ptr->SetString("");
                 PrintFmt(
                     "[CheckDefinition] Warning: static text should not have ID. %s\n",
                     linecol.c_str());
-            }
-            if (!ignore) {
+            } else if (!ignore) {
                 for (const noex::string& str : comp_ids) {
                     if (id == str) {
                         err_msg =
                             noex::concat_cstr("Found a duplicated id: \"", id, "\"")
                             + linecol;
+                        return;
                     }
                 }
             }
         }
-        if (!err_msg.empty()) return;
 
         if (ignore) {
             comp_ids.emplace_back("");

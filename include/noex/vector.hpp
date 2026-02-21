@@ -313,7 +313,12 @@ class trivial_vector : public trivial_vector_base {
     }
 
     T& at(size_t id) const noexcept {
-        return *static_cast<T*>(at_base(id));
+        T* ptr = static_cast<T*>(at_base(id));
+        if (ptr == nullptr) {
+            static T dummy{};
+            return dummy;
+        }
+        return *ptr;
     }
 
     T& operator[](size_t id) const noexcept {
