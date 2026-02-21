@@ -19,6 +19,20 @@ TEST(JsonCheckTest, LoadJsonFail2) {
     EXPECT_STREQ(expected, err.c_str());
 }
 
+TEST(JsonCheckTest, LoadJsonFailLarge) {
+    // Generate a large .json file.
+    FILE* f = FileOpen(JSON_LARGE, FILE_MODE_WRITE);
+    ASSERT_NE(f, nullptr);
+    for (int i = 0; i < JSON_SIZE_MAX; i++)
+        fwrite(" ", 1, 1, f);
+    fclose(f);
+    tuwjson::Value test_json;
+    noex::string err = json_utils::LoadJson(JSON_LARGE, test_json);
+    const char* expected =
+        "JSON file should be smaller than " JSON_SIZE_MAX_STR ".";
+    EXPECT_STREQ(expected, err.c_str());
+}
+
 TEST(JsonCheckTest, LoadJsonWithComments) {
     // Check if json parser supports c-style comments and trailing commas.
     tuwjson::Value test_json;
