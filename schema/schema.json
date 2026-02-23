@@ -10,6 +10,7 @@
       "recommended_version": { "$ref": "#/definitions/types/version" },
       "minimum_required": { "$ref": "#/definitions/types/version" },
       "minimum_required_version": { "$ref": "#/definitions/types/version" },
+      "legacy_renderer": { "type": "boolean" },
       "gui": { "$ref": "#/definitions/types/gui_array" },
       "help": { "$ref": "#/definitions/types/help_array" }
     }
@@ -23,6 +24,7 @@
           "recommended_version": { "$ref": "#/definitions/types/version" },
           "minimum_required": { "$ref": "#/definitions/types/version" },
           "minimum_required_version": { "$ref": "#/definitions/types/version" },
+          "legacy_renderer": { "type": "boolean" },
           "help": { "$ref": "#/definitions/types/help_array" }
         }
       }

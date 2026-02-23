@@ -27,7 +27,7 @@ void MainFrame::Initialize(const tuwjson::Value& definition,
     PrintFmt(tuw_constants::LOGO);
 
     m_grid = NULL;
-    m_menu_item = NULL;
+    m_menu_safe_mode = NULL;
     noex::string exe_path = envuStr(envuGetExecutablePath());
 
     m_definition.CopyFrom(definition);
@@ -202,6 +202,16 @@ static void OnOpenURL(uiMenuItem *item, uiWindow *w, void *data) noexcept {
     UNUSED(w);
 }
 
+#ifdef _WIN32
+static void OnUpdateRenderer(uiMenuItem *item, uiWindow *w, void *data) noexcept {
+    int checked = uiMenuItemChecked(item);
+    uiWindowsSetUseLegacyRenderer(checked);
+    g_main_frame->UpdatePanel(g_main_frame->GetDefinitionID());
+    UNUSED(w);
+    UNUSED(data);
+}
+#endif
+
 void MainFrame::CreateMenu() noexcept {
     g_main_frame = this;
     uiMenuItem* item;
@@ -243,7 +253,15 @@ void MainFrame::CreateMenu() noexcept {
         }
     }
     menu = uiNewMenu("Debug");
-    m_menu_item = uiMenuAppendCheckItem(menu, "Safe Mode");
+    m_menu_safe_mode = uiMenuAppendCheckItem(menu, "Safe Mode");
+#ifdef _WIN32
+    item = uiMenuAppendCheckItem(menu, "Use Legacy Renderer");
+    if (json_utils::GetBool(m_definition, "legacy_renderer", false)) {
+        uiWindowsSetUseLegacyRenderer(1);
+        uiMenuItemSetChecked(item, 1);
+    }
+    uiMenuItemOnClicked(item, OnUpdateRenderer, NULL);
+#endif
 }
 
 static bool IsValidURL(const noex::string &url) noexcept {
