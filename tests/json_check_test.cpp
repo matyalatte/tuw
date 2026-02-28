@@ -115,7 +115,7 @@ TEST(JsonCheckTest, checkGUIFail) {
     tuwjson::Value test_json;
     GetTestJson(test_json);
     test_json.ReplaceKey("gui", "g");
-    CheckGUIError(test_json, "gui definition requires \"components\"");
+    CheckGUIError(test_json, "gui definition requires \"components\" (line: 1, column: 1)");
 }
 
 TEST(JsonCheckTest, checkGUIFail2) {
@@ -344,4 +344,18 @@ TEST(JsonCheckTest, checkGUIMinMax) {
     test_json["gui"][1]["components"][9]["min"].SetDouble(2);
     CheckGUIError(test_json,
         "\"max\" should be greater than \"min\". (line: 251, column: 28)");
+}
+
+TEST(JsonCheckTest, checkHelpWithoutGUI) {
+    tuwjson::Value test_json;
+    GetTestJson(test_json);
+    test_json.ReplaceKey("gui", "gui_");
+    test_json["command"].SetString("echo hello");
+    test_json["components"].SetArray();
+
+    noex::string err_msg;
+    json_utils::CheckDefinition(err_msg, test_json);
+    EXPECT_TRUE(err_msg.empty());
+    EXPECT_TRUE(test_json.HasMember("help"));
+    EXPECT_TRUE(test_json.HasMember("legacy_renderer"));
 }
