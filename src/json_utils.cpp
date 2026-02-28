@@ -636,6 +636,7 @@ void CheckVersion(noex::string& err_msg, tuwjson::Value& definition) noexcept {
 }
 
 void CheckDefinition(noex::string& err_msg, tuwjson::Value& definition) noexcept {
+    CheckJsonType(err_msg, definition, "legacy_renderer", JsonType::BOOLEAN);
     if (!definition.HasMember("gui")) {
         // definition["gui"] = definition
         definition.ConvertToObject("gui");

@@ -28,7 +28,7 @@ class MainFrame {
     noex::vector<Component*> m_components;
     uiGrid* m_grid;
     uiButton* m_run_button;
-    uiMenuItem* m_menu_item;
+    uiMenuItem* m_menu_safe_mode;
 
     void CreateFrame() noexcept;
     void CreateMenu() noexcept;
@@ -100,7 +100,10 @@ class MainFrame {
     #endif
     }
     int IsSafeMode() noexcept {
-        return uiMenuItemChecked(m_menu_item);
+        return uiMenuItemChecked(m_menu_safe_mode);
+    }
+    size_t GetDefinitionID() noexcept {
+        return m_definition_id;
     }
 };
 

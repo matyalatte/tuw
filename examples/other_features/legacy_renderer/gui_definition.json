@@ -1,0 +1,13 @@
+{
+    "legacy_renderer": true,
+    "gui": {
+        "command": "echo %entry%",
+        "components": [
+            {
+                "type": "text",
+                "id": "entry",
+                "label": "The legacy renderer uses colorless emojis. 🙂👏"
+            }
+        ]
+    }
+}

@@ -8,7 +8,7 @@
             "components": [
                 {
                     "type": "static_text",
-                    "label": "All components with their required keys."
+                    "label": "All components with their required keys.🙂"
                 },
                 {
                     "type": "file",
@@ -288,7 +288,8 @@
             "label": "open gui_definition.json",
             "path": "gui_definition.json"
         }
-    ],  // Trailing comma
+    ],
+    "legacy_renderer": false, // Trailing comma
 }
 // Single-line comment
 /*
