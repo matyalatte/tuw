@@ -57,10 +57,7 @@ noex::string LoadJson(const noex::string& file, tuwjson::Value& json) noexcept {
     fclose(fp);
     if (size >= JSON_SIZE_MAX - 1)
         return "JSON file should be smaller than " JSON_SIZE_MAX_STR ".";
-    else if (size > 0)
-        buffer[size] = 0;
-    else
-        buffer[0] = 0;
+    buffer[size] = 0;
 
     tuwjson::Parser parser;
     parser.ParseJson(buffer, &json);
