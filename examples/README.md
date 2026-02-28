@@ -52,6 +52,7 @@ There are more features you can use.
 -   [Alternate Spellings](./other_features/alternate_spellings/): Tuw supports multiple spellings for some JSON keys and values.
 -   [Skip Success Dialog](./other_features/skip_dialog/): You can skip the success dialog.
 -   [UTF-8 Outputs on Windows](./other_features/codepage/): Tuw requires an option when using UTF-8 outputs on Windows.
+-   [Legacy Renderer on Windows](./other_features/legacy_renderer/): You can use GDI-besed renderer on Windows.
 
 ![help](https://github.com/matyalatte/tuw/assets/69258547/e408a179-6f9f-4769-ab3d-57f87d392a4f)  
 
