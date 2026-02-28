@@ -639,7 +639,11 @@ void CheckDefinition(noex::string& err_msg, tuwjson::Value& definition) noexcept
     CheckJsonType(err_msg, definition, "legacy_renderer", JsonType::BOOLEAN);
     if (!definition.HasMember("gui")) {
         // definition["gui"] = definition
-        definition.ConvertToObject("gui");
+        tuwjson::Value def;
+        def.CopyFrom(definition);
+        tuwjson::Value& gui = definition["gui"];
+        gui.SetArray();
+        gui.MoveAndPush(def);
     }
     tuwjson::Value* gui_json_ptr =
         CheckJsonType(err_msg, definition, "gui", JsonType::JSON_ARRAY);
