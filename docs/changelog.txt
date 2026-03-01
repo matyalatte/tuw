@@ -1,3 +1,11 @@
+ver 0.11.0
+- All components (except "static_text") now require an "id". (#131)
+- Static controls (most component labels) now render colored emojis on Windows. (#136)
+- Added an error message for large JSON files. (#132)
+- Fixed a bug where tuw ignored help documents when the "gui" key was missing. (#137)
+- Fixed a bug where the error message for unknown codepages did not include line and column numbers. (#133)
+- Various code quality improvements. (#133, #134)
+
 ver 0.10.2
 - Fixed an issue where Tuw could not find the exe path on Windows 8 or older. (#127)
 - Fixed a segmentation fault that occurred when Tuw encountered a memory allocation error. (#124)
