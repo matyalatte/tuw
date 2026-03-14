@@ -11,10 +11,9 @@ env:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       tag: ${{ steps.check-tag.outputs.tag }}
-      wx_version: ${{ steps.wx-version.outputs.version }}
     steps:
 
       - name: Check tag
