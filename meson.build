@@ -149,6 +149,22 @@ if tuw_OS != 'windows'
     endif
 endif
 
+# Check if size_t is uint32_t or not
+type_test = '''
+#include <type_traits>
+#include <cstddef>
+#include <cstdint>
+
+int main() {
+    static_assert(std::is_same<size_t, uint32_t>::value, "size_t is not uint32_t");
+    return 0;
+}
+'''
+size_t_is_uint32 = meson.get_compiler('cpp').compiles(type_test, name : 'size_t == uint32_t')
+if size_t_is_uint32
+    tuw_cpp_args += ['-DSIZE_T_IS_UINT32_T']
+endif
+
 libui_dep = dependency('libui', fallback : ['libui', 'libui_dep'])
 subprocess_dep = dependency('subprocess', fallback : ['subprocess', 'subprocess_dep'])
 env_utils_dep = dependency('env_utils', fallback : ['env_utils', 'env_utils_dep'])

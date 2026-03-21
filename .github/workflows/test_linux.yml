@@ -17,3 +17,12 @@ jobs:
       - name: Test with docker
         run: |
           docker build --build-arg TEST=true -t tuw_test -f docker/${{ matrix.os }}.dockerfile ./
+
+  test_linux_armv7:
+    timeout-minutes: 20
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test with docker
+        run: |
+          docker buildx build --platform linux/arm/v7 --build-arg TEST=true -t tuw_test -f docker/ubuntu.dockerfile ./

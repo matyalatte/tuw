@@ -212,7 +212,9 @@ basic_string<charT> basic_string<charT>::to_string(num_type num) noexcept { \
 
 DEFINE_TO_STRING(int, "d")
 DEFINE_TO_STRING(size_t, "zu")
+#ifndef SIZE_T_IS_UINT32_T
 DEFINE_TO_STRING(uint32_t, PRIu32)
+#endif
 DEFINE_TO_STRING(double, "lf")
 
 inline bool streq(const char* str1, const char* str2) noexcept {

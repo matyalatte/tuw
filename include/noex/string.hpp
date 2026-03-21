@@ -2,8 +2,18 @@
 
 #include <wchar.h>
 #include <cinttypes>
+#include <type_traits>
 
 #include "noex/error.hpp"
+
+// When size_t is uint32_t, we remove functions for uint32_t.
+#ifdef SIZE_T_IS_UINT32_T
+static_assert(std::is_same<size_t, uint32_t>::value,
+    "Error: SIZE_T_IS_UINT32_T is defined but size_t is not uint32_t.");
+#else
+static_assert(!std::is_same<size_t, uint32_t>::value,
+    "Error: SIZE_T_IS_UINT32_T is not defined but size_t is uint32_t.");
+#endif
 
 namespace noex {
 
@@ -63,7 +73,9 @@ class basic_string {
 
     static basic_string to_string(int num) noexcept;
     static basic_string to_string(size_t num) noexcept;
+#ifndef SIZE_T_IS_UINT32_T
     static basic_string to_string(uint32_t num) noexcept;
+#endif
     static basic_string to_string(double num) noexcept;
 
     bool operator==(const charT* str) const noexcept;
