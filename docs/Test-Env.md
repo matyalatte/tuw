@@ -6,9 +6,9 @@ CI workflows are executed on the following platforms.
 
 | OS | Arch | Compiler | libc |
 | :--: | :--: | :--: | :--: |
-| Windows10 | x64 | msvc |  |
-| Windows10 | arm64 | msvc |  |
-| macOS14 | arm64 | clang |  |
+| Windows11 | x64 | msvc |  |
+| Windows11 | arm64 | msvc |  |
+| macOS15 | arm64 | clang |  |
 | Ubuntu20.04 | x64 | gcc | glibc |
 | Ubuntu20.04 | arm64 | gcc | glibc |
 | Ubuntu20.04 | armv7 | gcc | glibc |
@@ -28,8 +28,11 @@ The following platforms have been tested in the past. However, compatibility wit
 | OS | Arch | Compiler | libc | Build | Manual Test | CI Test |
 | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | Windows11 | x64 | msvc |  | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| Windows10 | x64 | msvc | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| Windows10 | arm64 | msvc | | :heavy_check_mark: | :question: | :heavy_check_mark: |
 | Windows10 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | Windows8 | x64 |  |  | :question: | :heavy_check_mark: | :question: |
+| macOS14 | arm64 | clang |  | :heavy_check_mark: | :question: | :heavy_check_mark: |
 | macOS11 | x64 | clang |  | :heavy_check_mark: | :question: | :heavy_check_mark: |
 | macOS10.15 | x64 | clang |  | :heavy_check_mark: | :heavy_check_mark: | :question: |
 | macOS10.12 | x64 |  |  | :question: | :heavy_check_mark: | :question: |
@@ -37,8 +40,8 @@ The following platforms have been tested in the past. However, compatibility wit
 | Fedora32 | x64 |  | glibc | :question: | :heavy_check_mark: | :question: |
 | ZorinOS17 | x64 |  | glibc | :question: | :heavy_check_mark: | :question: |
 | Alpine3.18 | x64 |  | musl | :question: | :heavy_check_mark: | :question: |
-| Alpine3.23 | x86 |  | musl | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| Alpine3.23 | armv7 |  | musl | :heavy_check_mark: | :question: | :heavy_check_mark: |
+| Alpine3.23 | x86 | gcc | musl | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| Alpine3.23 | armv7 | gcc | musl | :heavy_check_mark: | :question: | :heavy_check_mark: |
 | FreeBSD14.2 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | OpenBSD7.4 | x64 | clang | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | NetBSD9.3 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |

@@ -2,7 +2,7 @@
 
 ## Requirements
 
--   Build tools (e.g. `build-essential` for Ubuntu)
+-   C++11 compiler
 -   GTK+ 3.10 or later (e.g. `libgtk-3-dev` for Ubuntu)
 -   Ninja
 -   [Meson](https://github.com/mesonbuild/meson) (**0.58** or later)

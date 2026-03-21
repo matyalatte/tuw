@@ -34,16 +34,16 @@ Select a version you want to use.
 
 ## 8. Wait until it finishes the workflow
 
-It'll take about 10 minutes.  
+It takes about 5 minutes.  
 <img src=https://user-images.githubusercontent.com/69258547/154955296-cf3db44b-5fec-4674-91f3-4ddc3c1a4042.png width=500>
 
 ## 9. Go to release page
 
-Github will upload a zip file on the release page.  
+Github uploads a zip file on the release page.  
 <img src=https://user-images.githubusercontent.com/69258547/154955299-11814f01-7ef6-4466-885b-de55315098bf.png width=500>
 
 ## 10. Download zip
 
-Download `Tuw*.zip` or `*.tar.xz`.  
+Download `Tuw*.zip` or `Tuw*.tar.xz`.  
 
 <img src=https://user-images.githubusercontent.com/69258547/154955303-45705ac4-cf93-4b93-bf7f-cf82537d6c71.png width=500>

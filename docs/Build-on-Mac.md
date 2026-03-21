@@ -2,7 +2,7 @@
 
 ## Requirements
 
--   Xcode
+-   C++11 compiler
 -   Ninja
 -   [Meson](https://github.com/mesonbuild/meson) (**0.58** or later)
 -   Shell scripts in [`./Tuw/shell_scripts`](../shell_scripts)
