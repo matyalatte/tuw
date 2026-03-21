@@ -12,7 +12,8 @@
 # Notes:
 #   -You can use buildx for cross compiling
 #    sudo apt install -y qemu-user-static binfmt-support
-#    docker buildx build --platform linux/arm64 -t tuw_ubuntu -f docker/ubuntu.dockerfile ./
+#    docker buildx build --platform linux/arm64 -t tuw_ubuntu_arm64 -f docker/ubuntu.dockerfile ./
+#    docker buildx build --platform linux/arm/v7 -t tuw_ubuntu_arm32 -f docker/ubuntu.dockerfile ./
 #
 #   -You can run test.sh with build-arg
 #    docker build --build-arg TEST=true -t tuw_ubuntu -f docker/ubuntu.dockerfile ./
@@ -28,7 +29,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
             ca-certificates build-essential \
-            libgtk-3-dev git python3-pip && \
+            libgtk-3-dev git ninja-build python3-pip && \
     if [ "$TEST" = "true" ]; then \
         apt-get install -y --no-install-recommends dbus-x11 xdg-utils xvfb firefox; \
     fi && \
@@ -36,7 +37,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install meson
-RUN pip3 install meson==1.3.1 ninja==1.11.1
+RUN pip3 install meson==1.3.1
 
 # Clone the repo
 COPY . /Tuw

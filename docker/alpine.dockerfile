@@ -12,7 +12,8 @@
 # Notes:
 #   -You can use buildx for cross compiling
 #    sudo apt install -y qemu-user-static binfmt-support
-#    docker buildx build --platform linux/arm64 -t tuw_alpine_arm -f docker/alpine.dockerfile ./
+#    docker buildx build --platform linux/arm64 -t tuw_alpine_arm64 -f docker/alpine.dockerfile ./
+#    docker buildx build --platform linux/arm/v7 -t tuw_alpine_arm32 -f docker/alpine.dockerfile ./
 #
 #   -You can run test.sh with build-arg
 #    docker build --build-arg TEST=true -t tuw_alpine -f docker/alpine.dockerfile ./
@@ -27,7 +28,7 @@ ARG TEST=false
 RUN apk update && \
     apk add --no-cache \
         alpine-sdk linux-headers bash gtk+3.0-dev \
-        py3-pip python3 ttf-freefont && \
+        ninja py3-pip python3 ttf-freefont && \
     if [ "$TEST" = "true" ]; then \
         apk add --no-cache dbus-x11 xdg-utils xorg-server xvfb firefox; \
     fi
@@ -36,7 +37,7 @@ RUN apk update && \
 # "Native Windows wider or taller than * pixels are not supported"
 
 # Install meson
-RUN pip3 install meson==1.3.1 ninja==1.11.1
+RUN pip3 install meson==1.3.1
 
 # Clone the repo
 COPY . /Tuw

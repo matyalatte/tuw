@@ -11,6 +11,7 @@ CI workflows are executed on the following platforms.
 | macOS14 | arm64 | clang |  |
 | Ubuntu20.04 | x64 | gcc | glibc |
 | Ubuntu20.04 | arm64 | gcc | glibc |
+| Ubuntu20.04 | armv7 | gcc | glibc |
 | Alpine3.16 | x64 | gcc | musl |
 | Alpine3.16 | arm64 | gcc | musl |
 | FreeBSD15.0 | x64 | clang |  |
@@ -36,6 +37,8 @@ The following platforms have been tested in the past. However, compatibility wit
 | Fedora32 | x64 |  | glibc | :question: | :heavy_check_mark: | :question: |
 | ZorinOS17 | x64 |  | glibc | :question: | :heavy_check_mark: | :question: |
 | Alpine3.18 | x64 |  | musl | :question: | :heavy_check_mark: | :question: |
+| Alpine3.23 | x86 |  | musl | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| Alpine3.23 | armv7 |  | musl | :heavy_check_mark: | :question: | :heavy_check_mark: |
 | FreeBSD14.2 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | OpenBSD7.4 | x64 | clang | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | NetBSD9.3 | x64 | gcc | | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
