@@ -5,7 +5,7 @@ The workflow is the same as Linux.
 
 ## Requirements
 
--   C++ compiler
+-   C++11 compiler
 -   GTK+ 3.10 or later
 -   Ninja
 -   [Meson](https://github.com/mesonbuild/meson) (**0.58** or later)
